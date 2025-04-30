@@ -2,8 +2,8 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'My App',
-  description: 'Just plain CSS app',
+  title: 'THAI LOTTERY AGENT',
+  description: '',
 };
 
 export default function RootLayout({ children }) {
