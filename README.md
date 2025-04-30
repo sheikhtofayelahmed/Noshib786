@@ -16,9 +16,7 @@ A simple number game system designed for Thai lottery agents. Built with modern 
 
 ## ⚙️ Project Setup
 
-### 1. Initialize Project
-```bash
-npx create-next-app@latest
 
 
-live: https://thai-lottery-agent.vercel.app/
+[Link ](https://thai-lottery-agent.vercel.app/)
+
