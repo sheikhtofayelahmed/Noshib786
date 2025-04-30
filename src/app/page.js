@@ -1,7 +1,7 @@
 export default function HomePage() {
   return (
     <main className="p-6 max-w-3xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold">🎮 Thai Agent Lottery - Number Game</h1>
+      <h1 className="text-3xl font-bold">🎮 Thai Lottery Agent - Number Game</h1>
 
       <section>
         <h2 className="text-xl font-semibold mb-2">🧱 Tech Stack</h2>
