@@ -26,16 +26,89 @@ export default function PlayerInput() {
     localStorage.setItem("currentPlayerData", JSON.stringify(currentPlayerData));
   };
 
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    const validPattern = /^\d{0,3}(=\d{0,2}){0,2}$/;
-    if (value === "" || validPattern.test(value)) {
-      setCurrentInput(value);
-      setError("");
-    } else {
-      setError("Format: 123=10=20 only. Max 3 digits before =");
+
+
+
+
+
+
+
+
+
+
+const handleInputChange = (e) => {
+  const value = e.target.value;
+
+  // Allow only digits and equals signs in typing
+  if (!/^[\d=]*$/.test(value)) {
+    return; // Ignore invalid characters
+  }
+
+  const parts = value.split("=");
+  const firstPart = parts[0];
+  const firstLength = firstPart.length;
+  const equalsCount = (value.match(/=/g) || []).length;
+
+  // If first part is not all digits, block
+  if (!/^\d*$/.test(firstPart)) {
+    return;
+  }
+
+  // Check rules based on first part length
+  if (firstLength === 1) {
+    // 1-digit: only allow 1 '=' and 1 number after
+    if (equalsCount > 1 || parts.length > 2) {
+      return; // Block extra '=' or sections
     }
-  };
+    if (parts.length === 2 && parts[1] && !/^\d*$/.test(parts[1])) {
+      return; // Block non-numbers after '='
+    }
+  } else if (firstLength === 2 || firstLength === 3) {
+    // 2–3 digit: allow up to 2 '=' and numbers after each
+    if (equalsCount > 2 || parts.length > 3) {
+      return; // Block extra '=' or sections
+    }
+    for (let i = 1; i < parts.length; i++) {
+      if (parts[i] && !/^\d*$/.test(parts[i])) {
+        return; // Block non-numbers after '='
+      }
+    }
+  } else if (firstLength > 3) {
+    return; // Block more than 3 digits at start
+  }
+
+  // If passed all checks, update state
+  setCurrentInput(value);
+  setError("");
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
