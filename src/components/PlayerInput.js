@@ -93,26 +93,109 @@ export default function PlayerInput() {
     printPlayerData(newPlayer); // Print the player data
   };
 
-  const saveToDatabase = (player) => {
-    // This function simulates saving to the database.
-    // You can replace it with an API call to your backend.
-    console.log("Saving to database: ", player);
+  const saveToDatabase = async (player) => {
+    try {
+      const response = await fetch('/api/playerInput', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(player),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        console.log('Saved to MongoDB:', data);
+      } else {
+        console.error('Failed to save:', data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   const printPlayerData = (player) => {
     const printWindow = window.open('', '_blank');
-    printWindow.document.write('<html><head><title>Player Data</title></head><body>');
-    printWindow.document.write('<h2>Player: ' + player.name + '</h2>');
-    printWindow.document.write('<p>Time: ' + player.time + '</p>');
-    printWindow.document.write('<ul>');
-    player.data.forEach(entry => {
-      printWindow.document.write('<li>#' + entry.serial + ' → ' + entry.input + '</li>');
-    });
-    printWindow.document.write('</ul>');
-    printWindow.document.write('</body></html>');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Player Data</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 20px;
+              background-color: #f9f9f9;
+            }
+            .container {
+              background-color: #fff;
+              padding: 20px;
+              border-radius: 8px;
+              box-shadow: 0 0 10px rgba(0,0,0,0.1);
+              max-width: 800px;
+              margin: auto;
+            }
+            h2 {
+              text-align: center;
+              color: #333;
+            }
+            p {
+              text-align: center;
+              color: #555;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+            th, td {
+              border: 1px solid #ccc;
+              padding: 10px;
+              text-align: center;
+            }
+            th {
+              background-color: #007bff;
+              color: #fff;
+            }
+            tr:nth-child(even) {
+              background-color: #f2f2f2;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>Player: ${player.name}</h2>
+            <p>Time: ${player.time}</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Serial</th>
+                  <th>Part 1</th>
+                  <th>Part 2</th>
+                  <th>Part 3</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${player.data.map(entry => {
+                  const [part1, part2, part3] = entry.input.split('=');
+                  return `<tr>
+                    <td>${entry.serial}</td>
+                    <td>${part1}</td>
+                    <td>${part2}</td>
+                    <td>${part3}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </body>
+      </html>
+    `);
     printWindow.document.close();
     printWindow.print();
   };
+  
+  
 
   const handleDelete = (id) => {
     const updatedEntries = entries.filter((entry) => entry.id !== id);
@@ -168,24 +251,43 @@ export default function PlayerInput() {
       </form>
 
       {entries.length > 0 && (
-        <div style={styles.entriesBox}>
-          <h3 style={styles.entriesTitle}>Current Entries</h3>
-          <ul style={styles.entryList}>
-            {entries.map((entry) => (
-              <li key={entry.id} style={styles.entryItem}>
-                <strong>#{entry.serial}</strong> → {entry.input}
-                <br />
+  <div style={styles.entriesBox}>
+    <h3 style={styles.entriesTitle}>Current Entries</h3>
+    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <thead>
+        <tr>
+          <th style={styles.tableHeader}>Serial</th>
+          <th style={styles.tableHeader}>Part 1</th>
+          <th style={styles.tableHeader}>Part 2</th>
+          <th style={styles.tableHeader}>Part 3</th>
+          <th style={styles.tableHeader}>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {entries.map((entry) => {
+          const [part1, part2, part3] = entry.input.split('=');
+          return (
+            <tr key={entry.id}>
+              <td style={styles.tableCell}>{entry.serial}</td>
+              <td style={styles.tableCell}>{part1}</td>
+              <td style={styles.tableCell}>{part2}</td>
+              <td style={styles.tableCell}>{part3}</td>
+              <td style={styles.tableCell}>
                 <button onClick={() => handleEdit(entry.id)} style={styles.editButton}>
                   Edit
-                </button>{" "}
+                </button>{' '}
                 <button onClick={() => handleDelete(entry.id)} style={styles.deleteButton}>
                   Delete
                 </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+)}
+
 
       {players.length > 0 && (
         <div style={styles.entriesBox}>
@@ -299,4 +401,15 @@ const styles = {
     fontSize: "0.8rem",
     cursor: "pointer",
   },
+  tableHeader: {
+    border: '1px solid #ccc',
+    padding: '8px',
+    backgroundColor: '#f5f5f5',
+  },
+  tableCell: {
+    border: '1px solid #ccc',
+    padding: '8px',
+    textAlign: 'center',
+  },
+  
 }; 
