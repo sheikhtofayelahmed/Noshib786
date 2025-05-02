@@ -161,7 +161,7 @@ export default function PlayerInput() {
   return (
     <div style={styles.wrapper}>
       <form onSubmit={handleSubmit} style={styles.form}>
-        <label style={styles.label}>Your Name:</label>
+        <label style={styles.label}>Player Name:</label>
         <input
           type="text"
           value={name}
@@ -290,34 +290,42 @@ const styles = {
   label: {
     display: "block",
     marginBottom: "0.4rem",
-    fontWeight: "bold",
+    fontWeight: "600",  // Light and modern
     textAlign: "left",
+    color: "#333",  // Dark gray for better readability
+    fontSize: "1rem",
   },
   input: {
     width: "100%",
-    padding: "0.5rem",
+    padding: "0.8rem",
     fontSize: "1rem",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    marginBottom: "0.7rem",
+    border: "1px solid #ccc",  // Soft border
+    borderRadius: "8px",  // Rounded corners for modern look
+    marginBottom: "1rem",  // More space between form elements
+    outline: "none",  // Remove default outline
   },
   error: {
     color: "red",
     fontSize: "0.85rem",
     marginBottom: "0.5rem",
+    fontWeight: "bold",
   },
   button: {
     width: "33%",
-    padding: "0.5rem",
-    backgroundColor: "#28a745",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "1rem",
+    padding: "0.8rem",
+    backgroundColor: "#28a745",  // Classic green for button
+    color: "#fff",  // White text
+    border: "none",  // No border for a clean look
+    borderRadius: "50px",  // Fully rounded corners for the button
+    fontSize: "1.1rem",  // Slightly larger font for readability
     cursor: "pointer",
-    marginBottom: "0.5rem",
-    
+    marginBottom: "1rem",
+    fontWeight: "bold",  // Bold text to emphasize the button
+    textTransform: "uppercase",  // Uppercase for emphasis
   },
+
+
+  
   printButton: {
     backgroundColor: "#17a2b8",
     color: "#fff",
