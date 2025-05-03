@@ -89,17 +89,36 @@ export default function PlayerInput() {
     const updatedEntries = entries.map(entry =>
       entry.id === id ? { ...entry, input: editValue } : entry
     );
-    setEntries(updatedEntries);  // Save the updated entry to the state
-    setEditId(null);  // Exit edit mode
-    setEditValue("");  // Reset the edit value
+    setEntries(updatedEntries);
+  
+    // Also update the players array (first player in the list)
+    const updatedPlayers = players.map((player, index) => {
+      if (index === 0) {
+        return {
+          ...player,
+          data: updatedEntries,
+        };
+      }
+      return player;
+    });
+    setPlayers(updatedPlayers);
+  
+    setEditId(null);
+    setEditValue("");
   };
+  
 
   const handleDelete = (id) => {
-    console.log("Deleting entry with ID:", id); // Log the ID of the entry being deleted
-    const updatedEntries = entries.filter(entry => entry.id !== id); // Only remove the targeted entry
-    console.log("Updated entries after delete:", updatedEntries); // Log the updated list of entries
-    setEntries(updatedEntries); // Update the state to remove the entry
-};
+    const updatedEntries = entries.filter(entry => entry.id !== id);
+    setEntries(updatedEntries);
+  
+    const updatedPlayers = players.map(player => ({
+      ...player,
+      data: player.data.filter(entry => entry.id !== id),
+    }));
+    setPlayers(updatedPlayers);
+  };
+  
 
   const handlePrint = (player) => {
     const printWindow = window.open("", "_blank");
