@@ -4,180 +4,105 @@ import { useState, useEffect } from "react";
 
 export default function PlayerInput() {
   const [name, setName] = useState("");
-  const [nameLocked, setNameLocked] = useState(false);
-  const [currentInput, setCurrentInput] = useState("");
+  const [inputs, setInputs] = useState(Array(10).fill(""));
   const [entries, setEntries] = useState([]);
   const [players, setPlayers] = useState([]);
   const [error, setError] = useState("");
   const [editId, setEditId] = useState(null);
+  const [editValue, setEditValue] = useState("");
 
   useEffect(() => {
     const storedData = localStorage.getItem("currentPlayerData");
     if (storedData) {
-      const parsedData = JSON.parse(storedData);
-      setEntries(parsedData.entries);
-      setName(parsedData.name);
-      setNameLocked(true);
+      const parsed = JSON.parse(storedData);
+      setName(parsed.name);
+      const filledInputs = parsed.entries.map(e => e.input);
+      setInputs([...filledInputs, ...Array(10 - filledInputs.length).fill("")]);
     }
   }, []);
 
-  const saveToLocalStorage = () => {
-    const currentPlayerData = { name, entries };
-    localStorage.setItem("currentPlayerData", JSON.stringify(currentPlayerData));
+  const handleInputChange = (index, value) => {
+    if (!/^[\d=]*$/.test(value)) return;
+    const parts = value.split("=");
+    const first = parts[0];
+    const equalsCount = (value.match(/=/g) || []).length;
+
+    if (!/^\d*$/.test(first)) return;
+    if (first.length > 3) return;
+    if ((first.length === 1 && equalsCount > 1) || (first.length >= 2 && equalsCount > 2)) return;
+    if (parts.slice(1).some(p => p && !/^\d*$/.test(p))) return;
+
+    const updated = [...inputs];
+    updated[index] = value;
+    setInputs(updated);
   };
 
+  const handleSavePlayer = async () => {
+    setError("");
 
-
-
-
-
-
-
-
-
-
-const handleInputChange = (e) => {
-  const value = e.target.value;
-
-  // Allow only digits and equals signs in typing
-  if (!/^[\d=]*$/.test(value)) {
-    return; // Ignore invalid characters
-  }
-
-  const parts = value.split("=");
-  const firstPart = parts[0];
-  const firstLength = firstPart.length;
-  const equalsCount = (value.match(/=/g) || []).length;
-
-  // If first part is not all digits, block
-  if (!/^\d*$/.test(firstPart)) {
-    return;
-  }
-
-  // Check rules based on first part length
-  if (firstLength === 1) {
-    // 1-digit: only allow 1 '=' and 1 number after
-    if (equalsCount > 1 || parts.length > 2) {
-      return; // Block extra '=' or sections
-    }
-    if (parts.length === 2 && parts[1] && !/^\d*$/.test(parts[1])) {
-      return; // Block non-numbers after '='
-    }
-  } else if (firstLength === 2 || firstLength === 3) {
-    // 2–3 digit: allow up to 2 '=' and numbers after each
-    if (equalsCount > 2 || parts.length > 3) {
-      return; // Block extra '=' or sections
-    }
-    for (let i = 1; i < parts.length; i++) {
-      if (parts[i] && !/^\d*$/.test(parts[i])) {
-        return; // Block non-numbers after '='
-      }
-    }
-  } else if (firstLength > 3) {
-    return; // Block more than 3 digits at start
-  }
-
-  // If passed all checks, update state
-  setCurrentInput(value);
-  setError("");
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!/^\d{1,3}=\d{1,2}=\d{1,2}$/.test(currentInput)) {
-      setError("Please enter in correct format: 123=10=10");
-    } else {
-      if (editId !== null) {
-        setEntries(entries.map(entry => entry.id === editId ? { ...entry, input: currentInput } : entry));
-        setEditId(null);
-      } else {
-        const newEntry = {
-          id: Date.now(),
-          serial: entries.length + 1,
-          input: currentInput,
-        };
-        setEntries([newEntry, ...entries]);
-        if (!nameLocked) setNameLocked(true);
-      }
-      setCurrentInput("");
-      setError("");
-      saveToLocalStorage();
-    }
-  };
-
-  const handleSavePlayer = () => {
     if (!name.trim()) {
       setError("Please enter your name");
       return;
     }
-    if (entries.length === 0) {
-      setError("No inputs to save");
+
+    const validInputs = inputs.filter(input => input.trim() !== "");
+    if (validInputs.length === 0) {
+      setError("Please fill at least one entry");
       return;
     }
-    const newPlayer = {
-      name,
-      time: new Date().toLocaleString(),
-      data: entries,
-    };
-    setPlayers([...players, newPlayer]);
-    setName("");
-    setEntries([]);
-    setCurrentInput("");
-    setError("");
-    setEditId(null);
-    setNameLocked(false);
-    localStorage.removeItem("currentPlayerData");
-    saveToDatabase(newPlayer);
-  };
 
-  const saveToDatabase = async (player) => {
+    const newEntries = validInputs.map((input, idx) => ({
+      id: Date.now() + idx,
+      serial: idx + 1,
+      input,
+    }));
+
+    setEntries(newEntries);
+    setPlayers([{ name, time: new Date().toLocaleString(), data: newEntries }, ...players]);
+    setName("");
+    setInputs(Array(10).fill(""));
+    localStorage.removeItem("currentPlayerData");
+
     try {
-      const response = await fetch('/api/playerInput', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(player),
+      const res = await fetch("/api/playerInput", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, time: new Date().toLocaleString(), data: newEntries }),
       });
-      const data = await response.json();
-      if (response.ok) {
-        console.log('Saved to MongoDB:', data);
-      } else {
-        console.error('Failed to save:', data);
-      }
-    } catch (error) {
-      console.error('Error:', error);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to save");
+      console.log("Saved to MongoDB:", data);
+    } catch (err) {
+      console.error("Error:", err);
     }
   };
 
-  const printPlayerData = (player) => {
-    const printWindow = window.open('', '_blank');
+  const handleEdit = (id) => {
+    setEditId(id);
+    const entry = entries.find(e => e.id === id);  // Find entry based on the correct id
+    if (entry) {
+      setEditValue(entry.input);  // Only set value if entry is found
+    }
+  };
+
+  const handleSaveEdit = (id) => {
+    const updatedEntries = entries.map(entry =>
+      entry.id === id ? { ...entry, input: editValue } : entry
+    );
+    setEntries(updatedEntries);  // Save the updated entry to the state
+    setEditId(null);  // Exit edit mode
+    setEditValue("");  // Reset the edit value
+  };
+
+  const handleDelete = (id) => {
+    console.log("Deleting entry with ID:", id); // Log the ID of the entry being deleted
+    const updatedEntries = entries.filter(entry => entry.id !== id); // Only remove the targeted entry
+    console.log("Updated entries after delete:", updatedEntries); // Log the updated list of entries
+    setEntries(updatedEntries); // Update the state to remove the entry
+};
+
+  const handlePrint = (player) => {
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(`
       <html>
         <head>
@@ -199,13 +124,12 @@ const handleInputChange = (e) => {
             <p>Time: ${player.time}</p>
             <table>
               <thead>
-                <tr><th>Serial</th><th>Part 1</th><th>Part 2</th><th>Part 3</th></tr>
+                <tr><th>Serial</th><th>Input</th></tr>
               </thead>
               <tbody>
-                ${player.data.map(entry => {
-                  const [part1, part2, part3] = entry.input.split('=');
-                  return `<tr><td>${entry.serial}</td><td>${part1}</td><td>${part2}</td><td>${part3}</td></tr>`;
-                }).join('')}
+                ${player.data.map(entry => `
+                  <tr><td>${entry.serial}</td><td>${entry.input}</td></tr>
+                `).join("")}
               </tbody>
             </table>
           </div>
@@ -216,24 +140,9 @@ const handleInputChange = (e) => {
     printWindow.print();
   };
 
-  const handleDelete = (id) => {
-    const updatedEntries = entries.filter((entry) => entry.id !== id);
-    setEntries(updatedEntries);
-    if (updatedEntries.length === 0) setNameLocked(false);
-    saveToLocalStorage();
-  };
-
-  const handleEdit = (id) => {
-    const entry = entries.find((e) => e.id === id);
-    if (entry) {
-      setCurrentInput(entry.input);
-      setEditId(id);
-    }
-  };
-
   return (
     <div style={styles.wrapper}>
-      <form onSubmit={handleSubmit} style={styles.form}>
+      <div style={styles.form}>
         <label style={styles.label}>Player Name:</label>
         <input
           type="text"
@@ -241,102 +150,81 @@ const handleInputChange = (e) => {
           onChange={(e) => setName(e.target.value)}
           placeholder="Name"
           style={styles.input}
-          disabled={nameLocked}
         />
-        <label style={styles.label}>Enter Play:</label>
-        <input
-          type="text"
-          value={currentInput}
-          onChange={handleInputChange}
-          placeholder="123=10=10"
-          style={styles.input}
-          inputMode="numeric"
-        />
+
+        <label style={styles.label}>Enter Plays (10 rows):</label>
+        {inputs.map((input, idx) => (
+          <div key={idx} style={styles.inputRow}>
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => handleInputChange(idx, e.target.value)}
+              placeholder={`Entry ${idx + 1}`}
+              style={styles.input}
+            />
+          </div>
+        ))}
+
         {error && <p style={styles.error}>{error}</p>}
-        <button type="submit" style={styles.button}>
-          {editId !== null ? "Update Entry" : "Add Entry"}
-        </button>
+
         <button
           type="button"
           onClick={handleSavePlayer}
-          style={{ ...styles.button, backgroundColor: "#007bff", marginTop: "0.5rem" }}
+          style={{ ...styles.button, backgroundColor: "#28a745" }}
         >
           Complete
         </button>
-      </form>
-
-      {entries.length > 0 && (
-        <div style={styles.entriesBox}>
-          <h3 style={styles.entriesTitle}>Current Entries</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={styles.tableHeader}>Part 1</th>
-                <th style={styles.tableHeader}>Part 2</th>
-                <th style={styles.tableHeader}>Part 3</th>
-                <th style={styles.tableHeader}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.slice().sort((a, b) => a.serial - b.serial).map((entry) => {
-                const [part1, part2, part3] = entry.input.split('=');
-                return (
-                  <tr key={entry.id}>
-                    <td style={styles.tableCell}>{part1}</td>
-                    <td style={styles.tableCell}>{part2}</td>
-                    <td style={styles.tableCell}>{part3}</td>
-                    <td style={styles.tableCell}>
-                      <button onClick={() => handleEdit(entry.id)} style={styles.editButton}>Edit</button>
-                      <button onClick={() => handleDelete(entry.id)} style={styles.deleteButton}>Delete</button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      </div>
 
       {players.length > 0 && (
         <div style={styles.entriesBox}>
-          <h3 style={styles.entriesTitle}>Agent Summary</h3>
+          <h3 style={styles.entriesTitle}>Player Summary</h3>
           {players.map((player, index) => (
             <div key={index} style={{ marginBottom: '1rem' }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-  <div>
-    <h4 style={{ margin: "0" }}>Player Name: {player.name}</h4>
-    <p style={{ margin: "0" }}>Time: {player.time}</p>
-    <p style={{ margin: "0" }}>Total Entries: {player.data.length}</p>
-  </div>
-  <button
-    onClick={() => printPlayerData(player)}
-    style={styles.printButton}
-  >
-    Print
-  </button>
-</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <h4 style={{ margin: "0" }}>Player Name: {player.name}</h4>
+                  <p style={{ margin: "0" }}>Time: {player.time}</p>
+                  <p style={{ margin: "0" }}>Total Entries: {player.data.length}</p>
+                </div>
+                <button onClick={() => handlePrint(player)} style={styles.printButton}>Print</button>
+              </div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr>
-                    <th style={styles.tableHeader}>Part 1</th>
-                    <th style={styles.tableHeader}>Part 2</th>
-                    <th style={styles.tableHeader}>Part 3</th>
+                    <th style={styles.tableHeader}>Serial</th>
+                    <th style={styles.tableHeader}>Input</th>
+                    <th style={styles.tableHeader}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {player.data.map((entry) => {
-                    const [part1, part2, part3] = entry.input.split('=');
-                    return (
-                      <tr key={entry.id}>
-                        <td style={styles.tableCell}>{part1}</td>
-                        <td style={styles.tableCell}>{part2}</td>
-                        <td style={styles.tableCell}>{part3}</td>
-                      </tr>
-                    );
-                  })}
+                  {player.data.map(entry => (
+                    <tr key={entry.id}>
+                      <td style={styles.tableCell}>{entry.serial}</td>
+                      <td style={styles.tableCell}>
+                        {editId === entry.id ? (
+                          <input
+                            type="text"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            style={styles.input}
+                          />
+                        ) : (
+                          entry.input
+                        )}
+                      </td>
+                      <td style={styles.tableCell}>
+                        {editId === entry.id ? (
+                          <button onClick={() => handleSaveEdit(entry.id)} style={styles.saveButton}>Save</button>
+                        ) : (
+                          <button onClick={() => handleEdit(entry.id)} style={styles.editButton}>Edit</button>
+                        )}
+                        <button onClick={() => handleDelete(entry.id)} style={styles.deleteButton}>Delete</button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
-             
             </div>
           ))}
         </div>
@@ -345,127 +233,20 @@ const handleInputChange = (e) => {
   );
 }
 
-
 const styles = {
-  wrapper: {
-    padding: "1rem",
-    maxWidth: "600px",
-    margin: "auto",
-    fontFamily: "Arial, sans-serif",
-  },
-  form: {
-    backgroundColor: "#fff",
-    borderRadius: "10px",
-    padding: "1rem",
-    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-    textAlign: "center",
-  },
-  label: {
-    display: "block",
-    marginBottom: "0.4rem",
-    fontWeight: "600",  // Light and modern
-    textAlign: "left",
-    color: "#333",  // Dark gray for better readability
-    fontSize: "1rem",
-  },
-  input: {
-    width: "100%",
-    padding: "0.8rem",
-    fontSize: "1rem",
-    border: "1px solid #ccc",  // Soft border
-    borderRadius: "8px",  // Rounded corners for modern look
-    marginBottom: "1rem",  // More space between form elements
-    outline: "none",  // Remove default outline
-  },
-  error: {
-    color: "red",
-    fontSize: "0.85rem",
-    marginBottom: "0.5rem",
-    fontWeight: "bold",
-  },
-  button: {
-    width: "33%",
-    padding: "0.8rem",
-    backgroundColor: "#28a745",  // Classic green for button
-    color: "#fff",  // White text
-    border: "none",  // No border for a clean look
-    borderRadius: "50px",  // Fully rounded corners for the button
-    fontSize: "1.1rem",  // Slightly larger font for readability
-    cursor: "pointer",
-    marginBottom: "1rem",
-    fontWeight: "bold",  // Bold text to emphasize the button
-    textTransform: "uppercase",  // Uppercase for emphasis
-  },
-
-
-  
-  printButton: {
-    backgroundColor: "#17a2b8",
-    color: "#fff",
-    border: "none",
-    padding: "0.4rem 0.8rem",
-    borderRadius: "4px",
-    fontSize: "0.85rem",
-    cursor: "pointer",
-  },
-  
-  
-  editButton: {
-    backgroundColor: "#007bff",
-    color: "#fff",
-    border: "none",
-    padding: "0.3rem 0.6rem",
-    borderRadius: "4px",
-    fontSize: "0.85rem",
-    cursor: "pointer",
-    marginRight: "0.3rem",
-  },
-  deleteButton: {
-    backgroundColor: "#dc3545",
-    color: "#fff",
-    border: "none",
-    padding: "0.3rem 0.6rem",
-    borderRadius: "4px",
-    fontSize: "0.85rem",
-    cursor: "pointer",
-  },
-  entriesBox: {
-    marginTop: "1.5rem",
-    padding: "1rem",
-    backgroundColor: "#f9f9f9",
-    borderRadius: "8px",
-    boxShadow: "0 0 8px rgba(0,0,0,0.05)",
-  },
-  entriesTitle: {
-    marginBottom: "0.8rem",
-    fontWeight: "bold",
-    fontSize: "1.2rem",
-    color: "#333",
-    textAlign: "center",
-  },
-  entryList: {
-    listStyle: "none",
-    padding: 0,
-    margin: 0,
-  },
-  entryItem: {
-    backgroundColor: "#fff",
-    padding: "0.6rem",
-    marginBottom: "0.5rem",
-    border: "1px solid #ddd",
-    borderRadius: "6px",
-    fontSize: "0.95rem",
-  },
-  tableHeader: {
-    border: "1px solid #ccc",
-    padding: "8px",
-    backgroundColor: "#f0f0f0",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  tableCell: {
-    border: "1px solid #ccc",
-    padding: "8px",
-    textAlign: "center",
-  },
+  wrapper: { padding: "20px", fontFamily: "sans-serif" },
+  form: { maxWidth: "400px", margin: "0 auto", padding: "20px", border: "1px solid #ccc", borderRadius: "8px" },
+  label: { display: "block", marginBottom: "5px", fontWeight: "bold" },
+  input: { width: "calc(100% - 80px)", padding: "8px", marginBottom: "10px", borderRadius: "4px", border: "1px solid #ccc" },
+  inputRow: { display: "flex", marginBottom: "10px", alignItems: "center" },
+  button: { width: "100%", padding: "10px", border: "none", borderRadius: "4px", color: "#fff", fontWeight: "bold", cursor: "pointer" },
+  error: { color: "red", marginBottom: "10px" },
+  entriesBox: { marginTop: "30px" },
+  entriesTitle: { fontSize: "1.2rem", fontWeight: "bold" },
+  tableHeader: { textAlign: "left", padding: "8px", backgroundColor: "#007bff", color: "#fff" },
+  tableCell: { padding: "8px", borderBottom: "1px solid #ddd" },
+  editButton: { backgroundColor: "#ff9e00", color: "#fff", padding: "5px", border: "none", cursor: "pointer" },
+  saveButton: { backgroundColor: "#28a745", color: "#fff", padding: "5px", border: "none", cursor: "pointer" },
+  deleteButton: { backgroundColor: "#e74c3c", color: "#fff", padding: "5px", border: "none", cursor: "pointer" },
+  printButton: { backgroundColor: "#3498db", color: "#fff", padding: "5px", border: "none", cursor: "pointer" },
 };
