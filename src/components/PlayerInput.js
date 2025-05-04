@@ -23,15 +23,6 @@ export default function PlayerInput() {
 
   const handleInputChange = (index, value) => {
     if (!/^[\d=]*$/.test(value)) return;
-    const parts = value.split("=");
-    const first = parts[0];
-    const equalsCount = (value.match(/=/g) || []).length;
-
-    if (!/^\d*$/.test(first)) return;
-    if (first.length > 3) return;
-    if ((first.length === 1 && equalsCount > 1) || (first.length >= 2 && equalsCount > 2)) return;
-    if (parts.slice(1).some(p => p && !/^\d*$/.test(p))) return;
-
     const updated = [...inputs];
     updated[index] = value;
     setInputs(updated);
@@ -62,26 +53,13 @@ export default function PlayerInput() {
     setName("");
     setInputs(Array(10).fill(""));
     localStorage.removeItem("currentPlayerData");
-
-    try {
-      const res = await fetch("/api/playerInput", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, time: new Date().toLocaleString(), data: newEntries }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to save");
-      console.log("Saved to MongoDB:", data);
-    } catch (err) {
-      console.error("Error:", err);
-    }
   };
 
   const handleEdit = (id) => {
     setEditId(id);
-    const entry = entries.find(e => e.id === id);  // Find entry based on the correct id
+    const entry = entries.find(e => e.id === id);
     if (entry) {
-      setEditValue(entry.input);  // Only set value if entry is found
+      setEditValue(entry.input);
     }
   };
 
@@ -90,35 +68,24 @@ export default function PlayerInput() {
       entry.id === id ? { ...entry, input: editValue } : entry
     );
     setEntries(updatedEntries);
-  
-    // Also update the players array (first player in the list)
-    const updatedPlayers = players.map((player, index) => {
+    setPlayers(players.map((player, index) => {
       if (index === 0) {
-        return {
-          ...player,
-          data: updatedEntries,
-        };
+        return { ...player, data: updatedEntries };
       }
       return player;
-    });
-    setPlayers(updatedPlayers);
-  
+    }));
     setEditId(null);
     setEditValue("");
   };
-  
 
   const handleDelete = (id) => {
     const updatedEntries = entries.filter(entry => entry.id !== id);
     setEntries(updatedEntries);
-  
-    const updatedPlayers = players.map(player => ({
+    setPlayers(players.map(player => ({
       ...player,
       data: player.data.filter(entry => entry.id !== id),
-    }));
-    setPlayers(updatedPlayers);
+    })));
   };
-  
 
   const handlePrint = (player) => {
     const printWindow = window.open("", "_blank");
@@ -127,14 +94,13 @@ export default function PlayerInput() {
         <head>
           <title>Player Data</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
-            .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
-            h2 { text-align: center; color: #333; }
-            p { text-align: center; color: #555; }
+            body { font-family: Arial, sans-serif; background-color: #111; color: #fff; }
+            .container { background-color: #222; padding: 20px; border-radius: 10px; }
+            h2 { color: #ffd700; text-align: center; }
             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
-            th { background-color: #007bff; color: #fff; }
-            tr:nth-child(even) { background-color: #f2f2f2; }
+            th, td { border: 1px solid #555; padding: 10px; text-align: center; }
+            th { background-color: #333; color: #ffd700; }
+            tr:nth-child(even) { background-color: #444; }
           </style>
         </head>
         <body>
@@ -146,9 +112,7 @@ export default function PlayerInput() {
                 <tr><th>Serial</th><th>Input</th></tr>
               </thead>
               <tbody>
-                ${player.data.map(entry => `
-                  <tr><td>${entry.serial}</td><td>${entry.input}</td></tr>
-                `).join("")}
+                ${player.data.map(entry => `<tr><td>${entry.serial}</td><td>${entry.input}</td></tr>`).join("")}
               </tbody>
             </table>
           </div>
@@ -159,113 +123,129 @@ export default function PlayerInput() {
     printWindow.print();
   };
 
+  const handleAddInputs = () => {
+    setInputs([...inputs, ...Array(10).fill("")]);
+  };
+
   return (
-    <div style={styles.wrapper}>
-      <div style={styles.form}>
-        <label style={styles.label}>Player Name:</label>
+    <div className="min-h-screen bg-gradient-to-br from-black via-red-900 to-black text-white p-6 font-mono">
+      <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-xl shadow-2xl p-6">
+        <h1 className="text-4xl font-bold text-center mb-6 text-yellow-400 animate-pulse">
+          🎰 Player Input 🎰
+        </h1>
+
+        <label className="block font-semibold mb-2 text-yellow-300">Player Name:</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Name"
-          style={styles.input}
+          placeholder="Your Name"
+          className="w-full p-3 mb-4 rounded bg-black border-2 border-yellow-400 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
         />
 
-        <label style={styles.label}>Enter Plays (10 rows):</label>
+        <label className="block font-semibold mb-2 text-yellow-300">Enter Plays:</label>
         {inputs.map((input, idx) => (
-          <div key={idx} style={styles.inputRow}>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => handleInputChange(idx, e.target.value)}
-              placeholder={`Entry ${idx + 1}`}
-              style={styles.input}
-            />
-          </div>
+          <input
+            key={idx}
+            type="text"
+            value={input}
+            onChange={(e) => handleInputChange(idx, e.target.value)}
+            placeholder={`Entry ${idx + 1}`}
+            className="w-full p-2 mb-2 rounded bg-black border-2 border-yellow-400 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          />
         ))}
 
-        {error && <p style={styles.error}>{error}</p>}
+        {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
 
-        <button
-          type="button"
-          onClick={handleSavePlayer}
-          style={{ ...styles.button, backgroundColor: "#28a745" }}
-        >
-          Complete
-        </button>
-      </div>
-
-      {players.length > 0 && (
-        <div style={styles.entriesBox}>
-          <h3 style={styles.entriesTitle}>Player Summary</h3>
-          {players.map((player, index) => (
-            <div key={index} style={{ marginBottom: '1rem' }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <h4 style={{ margin: "0" }}>Player Name: {player.name}</h4>
-                  <p style={{ margin: "0" }}>Time: {player.time}</p>
-                  <p style={{ margin: "0" }}>Total Entries: {player.data.length}</p>
-                </div>
-                <button onClick={() => handlePrint(player)} style={styles.printButton}>Print</button>
-              </div>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr>
-                    <th style={styles.tableHeader}>Serial</th>
-                    <th style={styles.tableHeader}>Input</th>
-                    <th style={styles.tableHeader}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {player.data.map(entry => (
-                    <tr key={entry.id}>
-                      <td style={styles.tableCell}>{entry.serial}</td>
-                      <td style={styles.tableCell}>
-                        {editId === entry.id ? (
-                          <input
-                            type="text"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            style={styles.input}
-                          />
-                        ) : (
-                          entry.input
-                        )}
-                      </td>
-                      <td style={styles.tableCell}>
-                        {editId === entry.id ? (
-                          <button onClick={() => handleSaveEdit(entry.id)} style={styles.saveButton}>Save</button>
-                        ) : (
-                          <button onClick={() => handleEdit(entry.id)} style={styles.editButton}>Edit</button>
-                        )}
-                        <button onClick={() => handleDelete(entry.id)} style={styles.deleteButton}>Delete</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
+        <div className="flex flex-wrap mt-4 gap-2">
+          <button
+            onClick={handleSavePlayer}
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded shadow"
+          >
+            🎲 Complete
+          </button>
+          <button
+            onClick={handleAddInputs}
+            className="bg-green-500 hover:bg-green-600 text-black font-bold py-2 px-4 rounded shadow"
+          >
+            ➕ Add More
+          </button>
         </div>
-      )}
+
+        {players.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-2xl font-bold text-yellow-400 mb-4">🎉 Player Summary 🎉</h3>
+            {players.map((player, index) => (
+              <div key={index} className="mb-6 bg-gray-800 bg-opacity-80 p-4 rounded-xl">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h4 className="text-xl font-semibold">{player.name}</h4>
+                    <p className="text-gray-300">Time: {player.time}</p>
+                    <p className="text-gray-300">Total Entries: {player.data.length}</p>
+                  </div>
+                  <button
+                    onClick={() => handlePrint(player)}
+                    className="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded shadow"
+                  >
+                    🖨️ Print
+                  </button>
+                </div>
+                <table className="w-full table-auto border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="border p-2 text-center bg-yellow-600 text-black">#</th>
+                      <th className="border p-2 text-center bg-yellow-600 text-black">Input</th>
+                      <th className="border p-2 text-center bg-yellow-600 text-black">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {player.data.map(entry => (
+                      <tr key={entry.id} className="odd:bg-gray-700 even:bg-gray-800">
+                        <td className="border p-2 text-center">{entry.serial}</td>
+                        <td className="border p-2 text-center">
+                          {editId === entry.id ? (
+                            <input
+                              type="text"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              className="w-full p-1 rounded bg-black border-2 border-yellow-400 text-white"
+                            />
+                          ) : (
+                            entry.input
+                          )}
+                        </td>
+                        <td className="border p-2 text-center space-x-2">
+                          {editId === entry.id ? (
+                            <button
+                              onClick={() => handleSaveEdit(entry.id)}
+                              className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
+                            >
+                              💾 Save
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleEdit(entry.id)}
+                              className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded"
+                            >
+                              ✏️ Edit
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDelete(entry.id)}
+                            className="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded"
+                          >
+                            🗑️ Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
-
-const styles = {
-  wrapper: { padding: "20px", fontFamily: "sans-serif" },
-  form: { maxWidth: "400px", margin: "0 auto", padding: "20px", border: "1px solid #ccc", borderRadius: "8px" },
-  label: { display: "block", marginBottom: "5px", fontWeight: "bold" },
-  input: { width: "calc(100% - 80px)", padding: "8px", marginBottom: "10px", borderRadius: "4px", border: "1px solid #ccc" },
-  inputRow: { display: "flex", marginBottom: "10px", alignItems: "center" },
-  button: { width: "100%", padding: "10px", border: "none", borderRadius: "4px", color: "#fff", fontWeight: "bold", cursor: "pointer" },
-  error: { color: "red", marginBottom: "10px" },
-  entriesBox: { marginTop: "30px" },
-  entriesTitle: { fontSize: "1.2rem", fontWeight: "bold" },
-  tableHeader: { textAlign: "left", padding: "8px", backgroundColor: "#007bff", color: "#fff" },
-  tableCell: { padding: "8px", borderBottom: "1px solid #ddd" },
-  editButton: { backgroundColor: "#ff9e00", color: "#fff", padding: "5px", border: "none", cursor: "pointer" },
-  saveButton: { backgroundColor: "#28a745", color: "#fff", padding: "5px", border: "none", cursor: "pointer" },
-  deleteButton: { backgroundColor: "#e74c3c", color: "#fff", padding: "5px", border: "none", cursor: "pointer" },
-  printButton: { backgroundColor: "#3498db", color: "#fff", padding: "5px", border: "none", cursor: "pointer" },
-};
