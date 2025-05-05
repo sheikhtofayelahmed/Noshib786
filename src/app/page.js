@@ -1,25 +1,30 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import AdminPage from './admin/page';
-import AgentPage from './agent/page';
+import NumberChart from '@/components/NumberChart';
+import PlayerInput from '@/components/PlayerInput';
 
 export default function HomePage() {
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState('');
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const storedRole = localStorage.getItem('role');
-    if (storedRole === 'admin' || storedRole === 'agent') {
-      setRole(storedRole);
+    if (!storedRole) {
+      router.push('/login');  // 🚀 auto-redirect
     } else {
-      setRole('unknown');
+      setRole(storedRole);
     }
-  }, []);
+    setLoading(false);
+  }, [router]);
 
-  if (role === null) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-yellow-400">
-        <p>Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-black text-yellow-400">
+        <p className="animate-pulse">Loading...</p>
       </div>
     );
   }
@@ -29,13 +34,15 @@ export default function HomePage() {
   }
 
   if (role === 'agent') {
-    return <AgentPage />;
+    return (
+      <div className="min-h-screen bg-black text-white p-6">
+        <h1 className="text-4xl font-bold text-center text-yellow-400 mb-4">🎲 Agent Dashboard 🎲</h1>
+        <NumberChart />
+        <PlayerInput />
+      </div>
+    );
   }
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-red-400">
-      <p className="mb-4">Invalid or missing role. Please log in again.</p>
-      <a href="/login" className="underline text-yellow-400">Go to Login</a>
-    </div>
-  );
+  // fallback (should never hit, but safe to have)
+  return null;
 }
