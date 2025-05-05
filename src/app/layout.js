@@ -1,5 +1,5 @@
 // src/app/layout.js
-import './globals.css';
+import '/src/globals.css';
 
 export const metadata = {
   title: 'THAI LOTTERY AGENT',
