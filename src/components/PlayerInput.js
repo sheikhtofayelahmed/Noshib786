@@ -10,7 +10,7 @@ export default function PlayerInput() {
   const [error, setError] = useState("");
   const [editId, setEditId] = useState(null);
   const [editValue, setEditValue] = useState("");
-
+  const [submittedPlayers, setSubmittedPlayers] = useState([]);
   useEffect(() => {
     const storedData = localStorage.getItem("currentPlayerData");
     if (storedData) {
@@ -86,7 +86,47 @@ export default function PlayerInput() {
       data: player.data.filter(entry => entry.id !== id),
     })));
   };
-
+  const handleSubmitAndPrint = async (player) => {
+    // Check if already submitted
+    if (submittedPlayers.includes(player.name)) {
+      handlePrint(player);
+      return;
+    }
+    const parsedData = player.data.map(entry => {
+      const [number, straight, rumbo] = entry.input.split('=');
+      return {
+        number,
+        straight: parseInt(straight, 10),
+        rumbo: rumbo ? parseInt(rumbo, 10) : 0,
+      };
+    });
+    
+    const payload = {
+      agentId: localStorage.getItem("agentId"),
+      name: player.name,
+      time: player.time,
+      data: parsedData,
+    };
+    try {
+      const response = await fetch('/api/savePlayer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+  
+      if (response.ok) {
+        alert('✅ Player data submitted to database!');
+        setSubmittedPlayers([...submittedPlayers, player.name]); // mark as submitted
+      } else {
+        const errorData = await response.json();
+        alert(`❌ Failed to submit: ${errorData.message}`);
+      }
+    } catch (error) {
+      console.error('Error submitting to database:', error);
+      alert('❌ An error occurred while submitting.');
+    }
+  };
+  
   const handlePrint = (player) => {
     const printWindow = window.open("", "_blank");
     printWindow.document.write(`
@@ -94,25 +134,74 @@ export default function PlayerInput() {
         <head>
           <title>Player Data</title>
           <style>
-            body { font-family: Arial, sans-serif; background-color: #111; color: #fff; }
-            .container { background-color: #222; padding: 20px; border-radius: 10px; }
-            h2 { color: #ffd700; text-align: center; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #555; padding: 10px; text-align: center; }
-            th { background-color: #333; color: #ffd700; }
-            tr:nth-child(even) { background-color: #444; }
+            body {
+              font-family: Arial, sans-serif;
+              background: radial-gradient(circle, #111 0%, #000 100%);
+              color: #ffd700;
+              margin: 0;
+              padding: 20px;
+            }
+            .container {
+              background-color: rgba(34, 34, 34, 0.95);
+              padding: 30px;
+              border-radius: 15px;
+              box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+              max-width: 700px;
+              margin: auto;
+            }
+            h2 {
+              color: #ffd700;
+              text-align: center;
+              font-size: 2.5rem;
+              margin-bottom: 10px;
+              text-shadow: 0 0 10px red;
+            }
+            p {
+              text-align: center;
+              color: #ccc;
+              margin-bottom: 20px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+            th, td {
+              border: 1px solid #555;
+              padding: 12px;
+              text-align: center;
+            }
+            th {
+              background: linear-gradient(45deg, #ff0000, #cc0000);
+              color: #fff;
+              font-size: 1.1rem;
+            }
+            tr:nth-child(even) {
+              background-color: #333;
+            }
+            tr:nth-child(odd) {
+              background-color: #222;
+            }
           </style>
         </head>
         <body>
           <div class="container">
-            <h2>Player: ${player.name}</h2>
-            <p>Time: ${player.time}</p>
+            <h2>🎰 Player: ${player.name} 🎰</h2>
+            <p>🕒 Time: ${player.time}</p>
             <table>
               <thead>
-                <tr><th>Serial</th><th>Input</th></tr>
+                <tr>
+                  <th>Serial</th>
+                  <th>Input</th>
+                </tr>
               </thead>
               <tbody>
-                ${player.data.map(entry => `<tr><td>${entry.serial}</td><td>${entry.input}</td></tr>`).join("")}
+                ${player.data
+                  .map(
+                    (entry) =>
+                      `<tr><td>${entry.serial}</td><td>${entry.input}</td></tr>`
+                  )
+                  .join("")}
               </tbody>
             </table>
           </div>
@@ -122,6 +211,7 @@ export default function PlayerInput() {
     printWindow.document.close();
     printWindow.print();
   };
+  
 
   const handleAddInputs = () => {
     setInputs([...inputs, ...Array(10).fill("")]);
@@ -184,11 +274,13 @@ export default function PlayerInput() {
                     <p className="text-gray-300">Total Entries: {player.data.length}</p>
                   </div>
                   <button
-                    onClick={() => handlePrint(player)}
-                    className="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded shadow"
-                  >
-                    🖨️ Print
-                  </button>
+  onClick={() => handleSubmitAndPrint(player)}
+  className={`mt-4 ${submittedPlayers.includes(player.name) ? 'bg-purple-500 hover:bg-purple-600' : 'bg-blue-500 hover:bg-blue-600'} text-white py-2 px-4 rounded shadow`}
+>
+  {submittedPlayers.includes(player.name) ? '🖨️ Print' : '🚀 Submit to Database'}
+</button>
+
+
                 </div>
                 <table className="w-full table-auto border-collapse">
                   <thead>
@@ -241,6 +333,8 @@ export default function PlayerInput() {
                     ))}
                   </tbody>
                 </table>
+               
+
               </div>
             ))}
           </div>
