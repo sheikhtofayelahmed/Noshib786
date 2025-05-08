@@ -9,37 +9,37 @@ import PlayerInput from '@/components/PlayerInput';
 import Link from 'next/link';
 import Win from '@/components/Win';
 export default function HomePage() {
-  const [role, setRole] = useState('');
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  // const [role, setRole] = useState('');
+  // const [loading, setLoading] = useState(true);
+  // const router = useRouter();
 
-  const handleLogout = () => {
-    localStorage.removeItem('role');
-    router.push('/login');
-  };
-  useEffect(() => {
-    const storedRole = localStorage.getItem('role');
-    if (!storedRole) {
-      router.push('/login');  // 🚀 auto-redirect
-    } else {
-      setRole(storedRole);
-    }
-    setLoading(false);
-  }, [router]);
+  // const handleLogout = () => {
+  //   localStorage.removeItem('role');
+  //   router.push('/login');
+  // };
+  // useEffect(() => {
+  //   const storedRole = localStorage.getItem('role');
+  //   if (!storedRole) {
+  //     router.push('/login');  // 🚀 auto-redirect
+  //   } else {
+  //     setRole(storedRole);
+  //   }
+  //   setLoading(false);
+  // }, [router]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-yellow-400">
-        <p className="animate-pulse">Loading...</p>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-black text-yellow-400">
+  //       <p className="animate-pulse">Loading...</p>
+  //     </div>
+  //   );
+  // }
 
   // if (role === 'admin') {
   //   return <AdminPage />;
   // }
 
-  if (role === 'agent') {
+  // if (role === 'agent') {
     return (
       <div className="min-h-screen bg-black text-white p-6">
        <nav className="bg-gray-900 bg-opacity-80 border-b border-yellow-500 shadow-lg">
@@ -68,7 +68,7 @@ export default function HomePage() {
     </div>
 
     <button
-      onClick={handleLogout}
+      // onClick={handleLogout}
       className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded shadow transition duration-200"
     >
       🚪 Logout
@@ -87,5 +87,5 @@ export default function HomePage() {
   }
 
   // fallback (should never hit, but safe to have)
-  return null;
-}
+  // return null;
+// }
