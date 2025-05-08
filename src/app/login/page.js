@@ -24,7 +24,7 @@ export default function LoginPage() {
     
     
     if (id === agentId && pass === agentPass) {
-      localStorage.setItem('role', 'agent');
+      // localStorage.setItem('role', 'agent');
       router.push('/');
     } else {
       setError('Invalid credentials');
