@@ -12,17 +12,20 @@ export default function LoginPage() {
   const handleLogin = (e) => {
     e.preventDefault();
 
-    const adminId = process.env.NEXT_PUBLIC_ADMIN_ID;
-    const adminPass = process.env.NEXT_PUBLIC_ADMIN_PASS;
+    // const adminId = process.env.NEXT_PUBLIC_ADMIN_ID;
+    // const adminPass = process.env.NEXT_PUBLIC_ADMIN_PASS;
     const agentId = process.env.NEXT_PUBLIC_AGENT_ID;
     const agentPass = process.env.NEXT_PUBLIC_AGENT_PASS;
 
-    if (id === adminId && pass === adminPass) {
-      localStorage.setItem('role', 'admin');
-      router.push('/admin');
-    } else if (id === agentId && pass === agentPass) {
+    // if (id === adminId && pass === adminPass) {
+    //   localStorage.setItem('role', 'admin');
+    //   router.push('/admin');
+    // } else 
+    
+    
+    if (id === agentId && pass === agentPass) {
       localStorage.setItem('role', 'agent');
-      router.push('/agent');
+      router.push('/');
     } else {
       setError('Invalid credentials');
     }

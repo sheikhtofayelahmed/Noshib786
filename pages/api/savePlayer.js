@@ -23,8 +23,8 @@ export default async function handler(req, res) {
       .map(entry => {
         const [number, straight, rumbo] = entry.input.split('=');
         // Skip invalid entries that don't follow the proper format
-        if (!number || !straight || !rumbo) return null;
-
+        console.log(rumbo)
+        if (!number || !straight) return null;
         return {
           number,
           straight: parseInt(straight, 10) || 0,

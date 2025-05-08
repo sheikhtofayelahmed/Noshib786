@@ -29,6 +29,11 @@ export default function PlayerInput() {
     setInputs(updated);
   };
 
+  
+  
+  
+  
+
   const handleSavePlayer = () => {
     setError("");
     if (!name.trim()) return setError("Please enter your name");
