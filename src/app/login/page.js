@@ -1,31 +1,26 @@
+// src/app/login/page.js
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAgent } from '../../context/AgentContext';
 
-export default function LoginPage() {
+const LoginPage = () => {
   const [id, setId] = useState('');
   const [pass, setPass] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
+  const { login } = useAgent();
 
   const handleLogin = (e) => {
     e.preventDefault();
 
-    // const adminId = process.env.NEXT_PUBLIC_ADMIN_ID;
-    // const adminPass = process.env.NEXT_PUBLIC_ADMIN_PASS;
     const agentId = process.env.NEXT_PUBLIC_AGENT_ID;
     const agentPass = process.env.NEXT_PUBLIC_AGENT_PASS;
 
-    // if (id === adminId && pass === adminPass) {
-    //   localStorage.setItem('role', 'admin');
-    //   router.push('/admin');
-    // } else 
-    
-    
     if (id === agentId && pass === agentPass) {
-      // localStorage.setItem('role', 'agent');
-      router.push('/');
+      login(id);  // Set agentId in context and localStorage
+      router.push('/');  // Redirect to dashboard after login
     } else {
       setError('Invalid credentials');
     }
@@ -33,10 +28,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-black via-red-900 to-black text-white p-4">
-      <form
-        onSubmit={handleLogin}
-        className="bg-gray-900 bg-opacity-90 p-8 rounded-xl shadow-2xl w-full max-w-sm"
-      >
+      <form onSubmit={handleLogin} className="bg-gray-900 bg-opacity-90 p-8 rounded-xl shadow-2xl w-full max-w-sm">
         <h2 className="text-4xl font-bold text-center mb-6 text-yellow-400 animate-pulse">
           🎰 Login 🎰
         </h2>
@@ -67,4 +59,6 @@ export default function LoginPage() {
       </form>
     </div>
   );
-}
+};
+
+export default LoginPage;

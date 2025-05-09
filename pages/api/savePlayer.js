@@ -7,49 +7,44 @@ export default async function handler(req, res) {
   }
 
   const { agentId, name, time, data } = req.body;
-
+console.log(agentId, name, time, data )
   // Validate incoming payload
-  if (!agentId || !name || !time || !Array.isArray(data)) {
-    return res.status(400).json({ message: 'Invalid payload' });
+  if (!agentId || !name || !time || !Array.isArray(data) || data.length === 0) {
+    return res.status(400).json({ message: 'Invalid payload, missing or malformed data' });
   }
 
   try {
     // Connect to the MongoDB client
     const client = await clientPromise;
-    const db = client.db("thai-agent-lottery");  // You can specify the database name here
+    const db = client.db('thai-agent-lottery');  // Specify the database name
 
-    // Prepare the entries (same format as before)
+    // Ensure the entries are saved as is, without splitting
     const entries = data
-      .map(entry => {
-        const [number, straight, rumbo] = entry.input.split('=');
-        // Skip invalid entries that don't follow the proper format
-        console.log(rumbo)
-        if (!number || !straight) return null;
-        return {
-          number,
-          straight: parseInt(straight, 10) || 0,
-          rumbo: parseInt(rumbo, 10) || 0,
-        };
-      })
-      .filter(entry => entry !== null);  // Remove null entries
+      .map(entry => ({
+        input: entry.input.trim(), // Trim to remove extra spaces
+      }))
+      .filter(entry => entry.input.length > 0);  // Remove any empty entries
 
-    // If no valid entries, return an error response
+    // If no valid entries, return an error
     if (entries.length === 0) {
       return res.status(400).json({ message: 'No valid entries to save' });
     }
 
-    // Insert player data along with the entries in a single document
+    // Insert the player data along with the entries into the collection
     const playerResult = await db.collection('playersInput').insertOne({
       agentId,
       name,
-      time: new Date(time), // Ensure time is in valid Date format
-      entries, // Embed entries inside the player document
+      time: new Date(time),  // Convert the time to a proper Date object
+      entries,  // Embed entries inside the player document
     });
 
     // Send success response
-    res.status(200).json({ message: 'Player and entries saved successfully', playerId: playerResult.insertedId });
+    return res.status(200).json({
+      message: 'Player and entries saved successfully',
+      playerId: playerResult.insertedId,
+    });
   } catch (error) {
     console.error('Database error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ message: 'Internal server error' });
   }
 }

@@ -1,15 +1,13 @@
 // src/app/layout.js
-import '/src/globals.css';
-
-export const metadata = {
-  title: 'THAI LOTTERY AGENT',
-  description: '',
-};
+import 'src/globals.css';
+import { AgentProvider } from 'src/context/AgentContext'; // Adjust path as necessary
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <AgentProvider>
+      <html lang="en">
+        <body className="bg-black text-white">{children}</body>
+      </html>
+    </AgentProvider>
   );
 }
