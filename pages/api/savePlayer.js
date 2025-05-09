@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const { agentId, name, time, data } = req.body;
 console.log(agentId, name, time, data )
   // Validate incoming payload
-  if (!agentId || !name || !time || !Array.isArray(data) || data.length === 0) {
+  if (!agentId || !time || !Array.isArray(data) || data.length === 0) {
     return res.status(400).json({ message: 'Invalid payload, missing or malformed data' });
   }
 

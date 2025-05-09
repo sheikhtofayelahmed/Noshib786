@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useAgent } from 'src/context/AgentContext';  // Import the hook
+import { useAgent } from 'src/context/AgentContext';
 
 export default function PlayerInput() {
   const [name, setName] = useState("");
   const [inputs, setInputs] = useState(Array(20).fill(""));
   const [errors, setErrors] = useState(Array(20).fill(false));
   const [players, setPlayers] = useState([]);
-  const [submittedPlayers, setSubmittedPlayers] = useState([]); // Correctly defined here
+  const [submittedPlayers, setSubmittedPlayers] = useState([]);
   const { agentId } = useAgent();
+
   const handleInputChange = (index, value) => {
     setInputs(inputs.map((inp, i) => (i === index ? value : inp)));
     setErrors(errors.map((err, i) => (i === index ? false : err)));
@@ -76,35 +77,31 @@ export default function PlayerInput() {
   };
 
   const handleEdit = (playerIdx, entryIdx) => {
-    setPlayers(
-      players.map((player, i) =>
-        i === playerIdx
-          ? {
-              ...player,
-              data: player.data.map((entry, j) =>
-                j === entryIdx ? { ...entry, isEditing: true } : entry
-              ),
-            }
-          : player
-      )
-    );
+    setPlayers(players.map((player, i) =>
+      i === playerIdx
+        ? {
+            ...player,
+            data: player.data.map((entry, j) =>
+              j === entryIdx ? { ...entry, isEditing: true } : entry
+            ),
+          }
+        : player
+    ));
   };
 
   const handleEditChange = (playerIdx, entryIdx, value) => {
-    setPlayers(
-      players.map((player, i) =>
-        i === playerIdx
-          ? {
-              ...player,
-              data: player.data.map((entry, j) =>
-                j === entryIdx
-                  ? { ...entry, editValue: value, editError: false }
-                  : entry
-              ),
-            }
-          : player
-      )
-    );
+    setPlayers(players.map((player, i) =>
+      i === playerIdx
+        ? {
+            ...player,
+            data: player.data.map((entry, j) =>
+              j === entryIdx
+                ? { ...entry, editValue: value, editError: false }
+                : entry
+            ),
+          }
+        : player
+    ));
   };
 
   const handleSaveEdit = (playerIdx, entryIdx) => {
@@ -112,63 +109,55 @@ export default function PlayerInput() {
     const isValid = validateEntry(entry.editValue);
 
     if (!isValid) {
-      setPlayers(
-        players.map((player, i) =>
-          i === playerIdx
-            ? {
-                ...player,
-                data: player.data.map((e, j) =>
-                  j === entryIdx ? { ...e, editError: true } : e
-                ),
-              }
-            : player
-        )
-      );
-      return;
-    }
-
-    setPlayers(
-      players.map((player, i) =>
+      setPlayers(players.map((player, i) =>
         i === playerIdx
           ? {
               ...player,
               data: player.data.map((e, j) =>
-                j === entryIdx
-                  ? {
-                      ...e,
-                      input: e.editValue,
-                      isEditing: false,
-                      editError: false,
-                    }
-                  : e
+                j === entryIdx ? { ...e, editError: true } : e
               ),
             }
           : player
-      )
-    );
+      ));
+      return;
+    }
+
+    setPlayers(players.map((player, i) =>
+      i === playerIdx
+        ? {
+            ...player,
+            data: player.data.map((e, j) =>
+              j === entryIdx
+                ? {
+                    ...e,
+                    input: e.editValue,
+                    isEditing: false,
+                    editError: false,
+                  }
+                : e
+            ),
+          }
+        : player
+    ));
   };
 
   const handleDelete = (playerIdx, entryIdx) => {
-    setPlayers(
-      players.map((player, i) =>
-        i === playerIdx
-          ? {
-              ...player,
-              data: player.data.filter((_, j) => j !== entryIdx),
-            }
-          : player
-      )
-    );
+    setPlayers(players.map((player, i) =>
+      i === playerIdx
+        ? {
+            ...player,
+            data: player.data.filter((_, j) => j !== entryIdx),
+          }
+        : player
+    ));
   };
-console.log(agentId)
+
   const handleSubmitAndPrint = async (player) => {
-    const parsedData = player.data.map(entry => ({
-      input: entry.input,
-    }));
+    const parsedData = player.data.map(entry => ({ input: entry.input }));
 
     const payload = {
       voucher: player.voucher,
-      agentId:agentId,
+      agentId: agentId,
       name: player.name || "",
       time: player.time,
       data: parsedData,
@@ -183,9 +172,7 @@ console.log(agentId)
 
       if (res.ok) {
         alert('✅ Player data submitted to database!');
-        setSubmittedPlayers(prev => [...prev, player.name]); // Update the state correctly
-
-        // Call the handlePrint function after a successful submission
+        setSubmittedPlayers(prev => [...prev, player.name]);
         handlePrint(player);
       } else {
         const err = await res.json();
@@ -254,9 +241,11 @@ console.log(agentId)
             key={i}
             type="text"
             value={input}
-            onChange={e => handleInputChange(i, e.target.value)}
+            onChange={(e) => handleInputChange(i, e.target.value)}
             placeholder={`Entry ${i + 1}`}
-            className="w-full p-2 mb-2 rounded bg-black border-2 border-yellow-400 text-white"
+            className={`w-full p-2 mb-2 rounded bg-black border-2 text-white ${
+              errors[i] ? "border-red-500 bg-red-900" : "border-yellow-400"
+            }`}
           />
         ))}
 
@@ -308,17 +297,24 @@ console.log(agentId)
                     </tr>
                   </thead>
                   <tbody>
-                    {player.data.map(entry => (
+                    {player.data.map((entry, entryIdx) => (
                       <tr key={entry.id} className="odd:bg-gray-700 even:bg-gray-800">
                         <td className="border p-2">{entry.serial}</td>
                         <td className="border p-2">
                           {entry.isEditing ? (
-                            <input
-                              type="text"
-                              value={entry.editValue}
-                              onChange={(e) => handleEditChange(idx, entry.id, e.target.value)}
-                              className="w-full p-1 bg-black border-2 border-yellow-400 text-white"
-                            />
+                            <div>
+                              <input
+                                type="text"
+                                value={entry.editValue}
+                                onChange={(e) => handleEditChange(idx, entryIdx, e.target.value)}
+                                className={`w-full p-1 bg-black border-2 text-white ${
+                                  entry.editError ? 'border-red-500' : 'border-yellow-400'
+                                }`}
+                              />
+                              {entry.editError && (
+                                <p className="text-red-400 text-xs mt-1">Invalid entry format.</p>
+                              )}
+                            </div>
                           ) : (
                             entry.input
                           )}
@@ -326,21 +322,21 @@ console.log(agentId)
                         <td className="border p-2 space-x-2">
                           {entry.isEditing ? (
                             <button
-                              onClick={() => handleSaveEdit(idx, entry.id)}
+                              onClick={() => handleSaveEdit(idx, entryIdx)}
                               className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
                             >
                               💾 Save
                             </button>
                           ) : (
                             <button
-                              onClick={() => handleEdit(idx, entry.id)}
+                              onClick={() => handleEdit(idx, entryIdx)}
                               className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded"
                             >
                               ✏️ Edit
                             </button>
                           )}
                           <button
-                            onClick={() => handleDelete(idx, entry.id)}
+                            onClick={() => handleDelete(idx, entryIdx)}
                             className="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded"
                           >
                             🗑️ Delete
