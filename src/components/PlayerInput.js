@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAgent } from 'src/context/AgentContext';
 
 export default function PlayerInput() {
@@ -9,34 +9,62 @@ export default function PlayerInput() {
   const [errors, setErrors] = useState(Array(20).fill(false));
   const [players, setPlayers] = useState([]);
   const [submittedPlayers, setSubmittedPlayers] = useState([]);
+  const [amountPlayed, setAmountPlayed]=useState({})
   const { agentId } = useAgent();
+// At the top of your component
+useEffect(() => {
+  let total1D = 0, total2D = 0, total3D = 0;
+
+  players.forEach(player => {
+    player.data.forEach(entry => {
+      const parts = entry.input.split('=');
+      const num = parts[0];
+      const amounts = parts.slice(1).map(Number).filter(n => !isNaN(n));
+
+      if (/^\d$/.test(num)) {
+        total1D += amounts.reduce((a, b) => a + b, 0);
+      } else if (/^\d{2}$/.test(num)) {
+        total2D += amounts.reduce((a, b) => a + b, 0);
+      } else if (/^\d{3}$/.test(num)) {
+        total3D += amounts.reduce((a, b) => a + b, 0);
+      }
+    });
+  });
+
+  setAmountPlayed({ OneD: total1D, TwoD: total2D, ThreeD: total3D });
+}, [players]);  // ✅ Run when players changes
 
   const handleInputChange = (index, value) => {
     setInputs(inputs.map((inp, i) => (i === index ? value : inp)));
     setErrors(errors.map((err, i) => (i === index ? false : err)));
   };
 
+
   const validateEntry = (input) => {
-    if (!input) return true;
+    if (!input) return true; // allow empty
     if (!/^[\d=]+$/.test(input)) return false;
     if (input.startsWith("=")) return false;
-
+  
     const parts = input.split("=");
     const first = parts[0];
-
+  
     if (/^\d$/.test(first)) {
+      // 1-digit number
       return parts.length === 2 && parts[1].length > 0;
     } else if (/^\d{2,3}$/.test(first)) {
+      // Reject if first is '000'
+      if (first === "000") return false;
+      // 2 or 3-digit number
       return (
         parts.length >= 2 &&
         parts.length <= 3 &&
         parts.slice(1).every((p) => p.length > 0)
       );
     }
-
+  
     return false;
   };
-
+  
   const handleSavePlayer = () => {
     const newErrors = inputs.map((input) => !validateEntry(input));
 
@@ -55,7 +83,7 @@ export default function PlayerInput() {
       editValue: input,
       editError: false,
     }));
-
+console.log(newEntries)
     const voucherNumber = `VOUCHER-${Date.now()}`;
 
     const newPlayer = {
@@ -153,14 +181,37 @@ export default function PlayerInput() {
   };
 
   const handleSubmitAndPrint = async (player) => {
+    if (submittedPlayers.includes(player.name)) {
+      // Already submitted ➔ Only print
+      handlePrint(player);
+      return;
+    }
     const parsedData = player.data.map(entry => ({ input: entry.input }));
+    let total1D = 0, total2D = 0, total3D = 0;
 
+    player.data.forEach(entry => {
+      const parts = entry.input.split('=');
+      const num = parts[0];
+      const amounts = parts.slice(1).map(Number).filter(n => !isNaN(n));
+  
+      const sum = amounts.reduce((a, b) => a + b, 0);
+  
+      if (/^\d$/.test(num)) {
+        total1D += sum;
+      } else if (/^\d{2}$/.test(num)) {
+        total2D += sum;
+      } else if (/^\d{3}$/.test(num)) {
+        total3D += sum;
+      }
+    });
+  
     const payload = {
       voucher: player.voucher,
       agentId: agentId,
       name: player.name || "",
       time: player.time,
       data: parsedData,
+      amountPlayed: { OneD: total1D, TwoD: total2D, ThreeD: total3D },
     };
 
     try {
@@ -198,6 +249,26 @@ export default function PlayerInput() {
             th, td { border: 1px solid #555; padding: 10px; text-align: center; }
             th { background: #cc0000; color: #fff; }
             tr:nth-child(even) { background: #333; }
+            .totals {
+  margin-top: 1rem; /* mt-4 */
+  color: #ffd700; /* text-yellow-300 */
+}
+
+.totals-heading {
+  font-size: 1.125rem; /* text-lg */
+  font-weight: bold; /* font-bold */
+  margin-bottom: 0.5rem; /* mb-2 */
+}
+
+.totals-list {
+  list-style-type: disc; /* list-disc */
+  padding-left: 1.5rem; /* list-inside approximation */
+}
+
+.totals-list li {
+  margin-bottom: 0.25rem; /* space-y-1 */
+}
+
           </style>
         </head>
         <body>
@@ -213,6 +284,17 @@ export default function PlayerInput() {
                 ${player.data.map(e => `<tr><td>${e.serial}</td><td>${e.input}</td></tr>`).join("")}
               </tbody>
             </table>
+         <div class="totals">
+  <h4 class="totals-heading">🔢 Totals:</h4>
+  <ul class="totals-list">
+  <li>🎯 3D Total: ${amountPlayed.ThreeD} ➔ After 40% (-): ${(amountPlayed.ThreeD * 0.6).toFixed(2)}</li>
+  <li>🎯 2D Total: ${amountPlayed.TwoD} ➔ After 20% (-): ${(amountPlayed.TwoD * 0.8).toFixed(2)}</li>
+  <li>🎯 1D Total: ${amountPlayed.OneD}</li>
+</>
+
+  </ul>
+</div>
+
           </div>
         </body>
       </html>
@@ -287,6 +369,7 @@ export default function PlayerInput() {
                   >
                     {submittedPlayers.includes(player.name) ? '🖨️ Print' : '🚀 Submit'}
                   </button>
+                  
                 </div>
                 <table className="w-full mt-4 border-collapse">
                   <thead>
@@ -320,32 +403,56 @@ export default function PlayerInput() {
                           )}
                         </td>
                         <td className="border p-2 space-x-2">
-                          {entry.isEditing ? (
-                            <button
-                              onClick={() => handleSaveEdit(idx, entryIdx)}
-                              className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
-                            >
-                              💾 Save
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleEdit(idx, entryIdx)}
-                              className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded"
-                            >
-                              ✏️ Edit
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleDelete(idx, entryIdx)}
-                            className="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded"
-                          >
-                            🗑️ Delete
-                          </button>
-                        </td>
+  {!submittedPlayers.includes(player.name) && (
+    <>
+      {entry.isEditing ? (
+        <button
+          onClick={() => handleSaveEdit(idx, entryIdx)}
+          className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
+        >
+          💾 Save
+        </button>
+      ) : (
+        <button
+          onClick={() => handleEdit(idx, entryIdx)}
+          className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded"
+        >
+          ✏️ Edit
+        </button>
+      )}
+      <button
+        onClick={() => handleDelete(idx, entryIdx)}
+        className="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded"
+      >
+        🗑️ Delete
+      </button>
+    </>
+  )}
+</td>
+
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                {/* Totals Calculation */}
+                <div className="mt-4 text-yellow-300">
+  <h4 className="text-lg font-bold mb-2">🔢 Totals:</h4>
+  <ul className="list-disc list-inside space-y-1">
+    <li>
+      🎯 3D Total: <span className="font-mono text-green-400">{amountPlayed.ThreeD}</span> ➔ After 40% (-): 
+      <span className="font-mono text-green-400"> {(amountPlayed.ThreeD * 0.6).toFixed(2)}</span>
+    </li>
+    <li>
+      🎯 2D Total: <span className="font-mono text-green-400">{amountPlayed.TwoD}</span> ➔ After 20% (-): 
+      <span className="font-mono text-green-400"> {(amountPlayed.TwoD * 0.8).toFixed(2)}</span>
+    </li>
+    <li>
+      🎯 1D Total: <span className="font-mono text-green-400">{amountPlayed.OneD}</span> 
+    </li>
+  </ul>
+</div>
+
+
               </div>
             ))}
           </div>
