@@ -1,163 +1,162 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function PlayerInput() {
   const [name, setName] = useState("");
-  const [inputs, setInputs] = useState(Array(10).fill(""));
-  const [entries, setEntries] = useState([]);
+  const [inputs, setInputs] = useState(Array(20).fill(""));
+  const [errors, setErrors] = useState(Array(20).fill(false));
   const [players, setPlayers] = useState([]);
-  const [error, setError] = useState("");
-  const [editId, setEditId] = useState(null);
-  const [editValue, setEditValue] = useState("");
-  const [submittedPlayers, setSubmittedPlayers] = useState([]);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("currentPlayerData");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setName(parsed.name);
-      const filled = parsed.entries.map(e => e.input);
-      setInputs([...filled, ...Array(10 - filled.length).fill("")]);
-    }
-  }, []);
 
   const handleInputChange = (index, value) => {
-    if (!/^[\d=]*$/.test(value)) return;
-    const updated = [...inputs];
-    updated[index] = value;
-    setInputs(updated);
+    setInputs(inputs.map((inp, i) => (i === index ? value : inp)));
+    setErrors(errors.map((err, i) => (i === index ? false : err)));
   };
 
-  
-  
-  
-  
+  const validateEntry = (input) => {
+    if (!input) return true;
+    if (!/^[\d=]+$/.test(input)) return false;
+    if (input.startsWith("=")) return false;
+
+    const parts = input.split("=");
+    const first = parts[0];
+
+    if (/^\d$/.test(first)) {
+      return parts.length === 2 && parts[1].length > 0;
+    } else if (/^\d{2,3}$/.test(first)) {
+      return (
+        parts.length >= 2 &&
+        parts.length <= 3 &&
+        parts.slice(1).every((p) => p.length > 0)
+      );
+    }
+
+    return false;
+  };
 
   const handleSavePlayer = () => {
-    setError("");
-    if (!name.trim()) return setError("Please enter your name");
+    const newErrors = inputs.map((input) => !validateEntry(input));
 
-    const valid = inputs.filter(i => i.trim() !== "");
-    if (valid.length === 0) return setError("Please fill at least one entry");
+    if (newErrors.includes(true)) {
+      setErrors(newErrors);
+      return;
+    }
 
-    const newEntries = valid.map((input, i) => ({
+    const validEntries = inputs.filter((i) => i.trim() !== "");
+
+    const newEntries = validEntries.map((input, i) => ({
       id: Date.now() + i,
       serial: i + 1,
       input,
+      isEditing: false,
+      editValue: input,
+      editError: false,
     }));
+
+    const voucherNumber = `VOUCHER-${Date.now()}`;
 
     const newPlayer = {
       name,
       time: new Date().toLocaleString(),
+      voucher: voucherNumber,
       data: newEntries,
     };
 
-    setEntries(newEntries);
     setPlayers([newPlayer, ...players]);
     setName("");
-    setInputs(Array(10).fill(""));
-    localStorage.removeItem("currentPlayerData");
-  };
-
-  const handleEdit = (id) => {
-    setEditId(id);
-    const entry = entries.find(e => e.id === id);
-    if (entry) setEditValue(entry.input);
-  };
-
-  const handleSaveEdit = (id) => {
-    const updated = entries.map(e => (e.id === id ? { ...e, input: editValue } : e));
-    setEntries(updated);
-    setPlayers(players.map((p, idx) => idx === 0 ? { ...p, data: updated } : p));
-    setEditId(null);
-    setEditValue("");
-  };
-
-  const handleDelete = (id) => {
-    const updated = entries.filter(e => e.id !== id);
-    setEntries(updated);
-    setPlayers(players.map(p => ({
-      ...p,
-      data: p.data.filter(e => e.id !== id),
-    })));
-  };
-
-  const handleSubmitAndPrint = async (player) => {
-    if (submittedPlayers.includes(player.name)) {
-      handlePrint(player);
-      return;
-    }
-
-    const parsedData = player.data.map(entry => ({
-      input: entry.input,
-    }));
-
-    const payload = {
-      agentId: localStorage.getItem("agentId") || "testAgent",
-      name: player.name,
-      time: player.time,
-      data: parsedData,
-    };
-
-    try {
-      const res = await fetch('/api/savePlayer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        alert('✅ Player data submitted to database!');
-        setSubmittedPlayers([...submittedPlayers, player.name]);
-      } else {
-        const err = await res.json();
-        alert(`❌ Failed to submit: ${err.message}`);
-      }
-    } catch (err) {
-      console.error('Submit error:', err);
-      alert('❌ An error occurred while submitting.');
-    }
-  };
-
-  const handlePrint = (player) => {
-    const win = window.open("", "_blank");
-    win.document.write(`
-      <html>
-        <head>
-          <title>Player Data</title>
-          <style>
-            body { font-family: Arial; background: #000; color: #ffd700; padding: 20px; }
-            .container { background: #222; padding: 20px; border-radius: 10px; }
-            h2 { text-align: center; }
-            table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-            th, td { border: 1px solid #555; padding: 10px; text-align: center; }
-            th { background: #cc0000; color: #fff; }
-            tr:nth-child(even) { background: #333; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h2>🎰 ${player.name}</h2>
-            <p>🕒 ${player.time}</p>
-            <table>
-              <thead>
-                <tr><th>#</th><th>Input</th></tr>
-              </thead>
-              <tbody>
-                ${player.data.map(e => `<tr><td>${e.serial}</td><td>${e.input}</td></tr>`).join("")}
-              </tbody>
-            </table>
-          </div>
-        </body>
-      </html>
-    `);
-    win.document.close();
-    win.print();
+    setInputs(Array(20).fill(""));
+    setErrors(Array(20).fill(false));
   };
 
   const handleAddInputs = () => {
-    setInputs([...inputs, ...Array(10).fill("")]);
+    setInputs([...inputs, ...Array(20).fill("")]);
+    setErrors([...errors, ...Array(20).fill(false)]);
+  };
+
+  const handleEdit = (playerIdx, entryIdx) => {
+    setPlayers(
+      players.map((player, i) =>
+        i === playerIdx
+          ? {
+              ...player,
+              data: player.data.map((entry, j) =>
+                j === entryIdx ? { ...entry, isEditing: true } : entry
+              ),
+            }
+          : player
+      )
+    );
+  };
+
+  const handleEditChange = (playerIdx, entryIdx, value) => {
+    setPlayers(
+      players.map((player, i) =>
+        i === playerIdx
+          ? {
+              ...player,
+              data: player.data.map((entry, j) =>
+                j === entryIdx
+                  ? { ...entry, editValue: value, editError: false }
+                  : entry
+              ),
+            }
+          : player
+      )
+    );
+  };
+
+  const handleSaveEdit = (playerIdx, entryIdx) => {
+    const entry = players[playerIdx].data[entryIdx];
+    const isValid = validateEntry(entry.editValue);
+
+    if (!isValid) {
+      setPlayers(
+        players.map((player, i) =>
+          i === playerIdx
+            ? {
+                ...player,
+                data: player.data.map((e, j) =>
+                  j === entryIdx ? { ...e, editError: true } : e
+                ),
+              }
+            : player
+        )
+      );
+      return;
+    }
+
+    setPlayers(
+      players.map((player, i) =>
+        i === playerIdx
+          ? {
+              ...player,
+              data: player.data.map((e, j) =>
+                j === entryIdx
+                  ? {
+                      ...e,
+                      input: e.editValue,
+                      isEditing: false,
+                      editError: false,
+                    }
+                  : e
+              ),
+            }
+          : player
+      )
+    );
+  };
+
+  const handleDelete = (playerIdx, entryIdx) => {
+    setPlayers(
+      players.map((player, i) =>
+        i === playerIdx
+          ? {
+              ...player,
+              data: player.data.filter((_, j) => j !== entryIdx),
+            }
+          : player
+      )
+    );
   };
 
   return (
@@ -165,11 +164,11 @@ export default function PlayerInput() {
       <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-xl shadow-2xl p-6">
         <h1 className="text-4xl font-bold text-center mb-6 text-yellow-400">🎰 Player Input 🎰</h1>
 
-        <label className="block mb-2 text-yellow-300">Player Name:</label>
+        <label className="block mb-2 text-yellow-300">Player Name (optional):</label>
         <input
           type="text"
           value={name}
-          onChange={e => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value)}
           placeholder="Your Name"
           className="w-full p-3 mb-4 rounded bg-black border-2 border-yellow-400 text-white"
         />
@@ -180,13 +179,13 @@ export default function PlayerInput() {
             key={i}
             type="text"
             value={input}
-            onChange={e => handleInputChange(i, e.target.value)}
+            onChange={(e) => handleInputChange(i, e.target.value)}
             placeholder={`Entry ${i + 1}`}
-            className="w-full p-2 mb-2 rounded bg-black border-2 border-yellow-400 text-white"
+            className={`w-full p-2 mb-2 rounded bg-black border-2 text-white ${
+              errors[i] ? "border-red-500 bg-red-900" : "border-yellow-400"
+            }`}
           />
         ))}
-
-        {error && <p className="text-red-400">{error}</p>}
 
         <div className="flex flex-wrap gap-2 mt-4">
           <button
@@ -199,7 +198,7 @@ export default function PlayerInput() {
             onClick={handleAddInputs}
             className="bg-green-500 hover:bg-green-600 text-black font-bold py-2 px-4 rounded"
           >
-            ➕ Add More
+            ➕ Add More (20)
           </button>
         </div>
 
@@ -208,23 +207,10 @@ export default function PlayerInput() {
             <h3 className="text-2xl text-yellow-400 mb-4">🎉 Player Summary 🎉</h3>
             {players.map((player, idx) => (
               <div key={idx} className="mb-6 bg-gray-800 p-4 rounded">
-                <div className="flex justify-between">
-                  <div>
-                    <h4 className="text-xl">{player.name}</h4>
-                    <p>Time: {player.time}</p>
-                    <p>Entries: {player.data.length}</p>
-                  </div>
-                  <button
-                    onClick={() => handleSubmitAndPrint(player)}
-                    className={`py-2 px-4 rounded ${
-                      submittedPlayers.includes(player.name)
-                        ? 'bg-purple-500 hover:bg-purple-600'
-                        : 'bg-blue-500 hover:bg-blue-600'
-                    }`}
-                  >
-                    {submittedPlayers.includes(player.name) ? '🖨️ Print' : '🚀 Submit'}
-                  </button>
-                </div>
+                <h4 className="text-xl">{player.name || "Unnamed Player"}</h4>
+                <p>🕒 {player.time}</p>
+                <p>🎟️ Voucher: {player.voucher}</p>
+                <p>Entries: {player.data.length}</p>
                 <table className="w-full mt-4 border-collapse">
                   <thead>
                     <tr>
@@ -234,42 +220,46 @@ export default function PlayerInput() {
                     </tr>
                   </thead>
                   <tbody>
-                    {player.data.map(entry => (
+                    {player.data.map((entry, entryIdx) => (
                       <tr key={entry.id} className="odd:bg-gray-700 even:bg-gray-800">
                         <td className="border p-2">{entry.serial}</td>
                         <td className="border p-2">
-                          {editId === entry.id ? (
+                          {entry.isEditing ? (
                             <input
                               type="text"
-                              value={editValue}
-                              onChange={e => setEditValue(e.target.value)}
-                              className="w-full p-1 bg-black border-2 border-yellow-400 text-white"
+                              value={entry.editValue}
+                              onChange={(e) =>
+                                handleEditChange(idx, entryIdx, e.target.value)
+                              }
+                              className={`w-full p-1 rounded bg-black border-2 text-white ${
+                                entry.editError ? "border-red-500 bg-red-900" : "border-yellow-400"
+                              }`}
                             />
                           ) : (
                             entry.input
                           )}
                         </td>
                         <td className="border p-2 space-x-2">
-                          {editId === entry.id ? (
+                          {entry.isEditing ? (
                             <button
-                              onClick={() => handleSaveEdit(entry.id)}
-                              className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
+                              onClick={() => handleSaveEdit(idx, entryIdx)}
+                              className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded"
                             >
-                              💾 Save
+                              Save
                             </button>
                           ) : (
                             <button
-                              onClick={() => handleEdit(entry.id)}
-                              className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded"
+                              onClick={() => handleEdit(idx, entryIdx)}
+                              className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded"
                             >
-                              ✏️ Edit
+                              Edit
                             </button>
                           )}
                           <button
-                            onClick={() => handleDelete(entry.id)}
-                            className="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded"
+                            onClick={() => handleDelete(idx, entryIdx)}
+                            className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
                           >
-                            🗑️ Delete
+                            Delete
                           </button>
                         </td>
                       </tr>
