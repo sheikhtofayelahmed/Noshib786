@@ -211,8 +211,9 @@ console.log(newEntries)
       name: player.name || "",
       time: player.time,
       data: parsedData,
-      amountPlayed: { OneD: total1D, TwoD: total2D, ThreeD: total3D },
+      amountPlayed: { OneD: total1D , TwoD: total2D , ThreeD: total3D },
     };
+    console.log("payload.amountPlayed")
 
     try {
       const res = await fetch('/api/savePlayer', {
@@ -268,7 +269,35 @@ console.log(newEntries)
 .totals-list li {
   margin-bottom: 0.25rem; /* space-y-1 */
 }
+.totals-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-family: Arial;
+    background-color: #111;
+    color: #ffd700;
+  }
 
+  .totals-table th,
+  .totals-table td {
+    border: 1px solid #555;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .totals-table thead th {
+    background: #cc0000;
+    color: #fff;
+  }
+
+  .totals-table tbody tr:nth-child(even) {
+    background-color: #222;
+  }
+
+  .totals-table tbody tr:last-child th {
+    background-color: #333;
+    font-size: 1.1em;
+  }
           </style>
         </head>
         <body>
@@ -285,14 +314,50 @@ console.log(newEntries)
               </tbody>
             </table>
          <div class="totals">
-  <h4 class="totals-heading">🔢 Totals:</h4>
-  <ul class="totals-list">
-  <li>🎯 3D Total: ${amountPlayed.ThreeD} ➔ After 40% (-): ${(amountPlayed.ThreeD * 0.6).toFixed(2)}</li>
-  <li>🎯 2D Total: ${amountPlayed.TwoD} ➔ After 20% (-): ${(amountPlayed.TwoD * 0.8).toFixed(2)}</li>
-  <li>🎯 1D Total: ${amountPlayed.OneD}</li>
-</>
+ <table class="totals-table">
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Amount</th>
+      <th>After Deduction</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>🎯 3D Total</td>
+      <td>${amountPlayed.ThreeD}</td>
+      <td>${(amountPlayed.ThreeD * 0.6).toFixed(2)}</td>
+    </tr>
+    <tr>
+      <td>🎯 2D Total</td>
+      <td>${amountPlayed.TwoD}</td>
+      <td>${(amountPlayed.TwoD * 0.8).toFixed(2)}</td>
+    </tr>
+    <tr>
+      <td>🎯 1D Total</td>
+      <td>${amountPlayed.OneD}</td>
+      <td>${amountPlayed.OneD.toFixed(2)}</td>
+    </tr>
+    <tr>
+      <th>🔢 Grand Total</th>
+      <th>
+        ${(
+          amountPlayed.ThreeD +
+          amountPlayed.TwoD +
+          amountPlayed.OneD
+        ).toFixed(2)}
+      </th>
+      <th>
+        ${(
+          amountPlayed.ThreeD * 0.6 +
+          amountPlayed.TwoD * 0.8 +
+          amountPlayed.OneD
+        ).toFixed(2)}
+      </th>
+    </tr>
+  </tbody>
+</table>
 
-  </ul>
 </div>
 
           </div>
@@ -436,20 +501,43 @@ console.log(newEntries)
                 </table>
                 {/* Totals Calculation */}
                 <div className="mt-4 text-yellow-300">
-  <h4 className="text-lg font-bold mb-2">🔢 Totals:</h4>
-  <ul className="list-disc list-inside space-y-1">
-    <li>
-      🎯 3D Total: <span className="font-mono text-green-400">{amountPlayed.ThreeD}</span> ➔ After 40% (-): 
-      <span className="font-mono text-green-400"> {(amountPlayed.ThreeD * 0.6).toFixed(2)}</span>
-    </li>
-    <li>
-      🎯 2D Total: <span className="font-mono text-green-400">{amountPlayed.TwoD}</span> ➔ After 20% (-): 
-      <span className="font-mono text-green-400"> {(amountPlayed.TwoD * 0.8).toFixed(2)}</span>
-    </li>
-    <li>
-      🎯 1D Total: <span className="font-mono text-green-400">{amountPlayed.OneD}</span> 
-    </li>
-  </ul>
+
+  <table className="w-full border-collapse mt-4 text-yellow-300 font-mono text-sm">
+  <thead>
+    <tr className="bg-red-700 text-white">
+      <th className="border border-gray-600 px-4 py-2">Category</th>
+      <th className="border border-gray-600 px-4 py-2">Amount</th>
+      <th className="border border-gray-600 px-4 py-2">After Deduction</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr className="bg-gray-800">
+      <td className="border border-gray-600 px-4 py-2">🎯 3D Total</td>
+      <td className="border border-gray-600 px-4 py-2 text-green-400">{amountPlayed.ThreeD}</td>
+      <td className="border border-gray-600 px-4 py-2 text-green-400">{(amountPlayed.ThreeD * 0.6).toFixed(2)}</td>
+    </tr>
+    <tr>
+      <td className="border border-gray-600 px-4 py-2">🎯 2D Total</td>
+      <td className="border border-gray-600 px-4 py-2 text-green-400">{amountPlayed.TwoD}</td>
+      <td className="border border-gray-600 px-4 py-2 text-green-400">{(amountPlayed.TwoD * 0.8).toFixed(2)}</td>
+    </tr>
+    <tr className="bg-gray-800">
+      <td className="border border-gray-600 px-4 py-2">🎯 1D Total</td>
+      <td className="border border-gray-600 px-4 py-2 text-green-400">{amountPlayed.OneD}</td>
+      <td className="border border-gray-600 px-4 py-2 text-green-400">{amountPlayed.OneD.toFixed(2)}</td>
+    </tr>
+    <tr className="bg-gray-900 font-bold text-lg">
+      <td className="border border-gray-600 px-4 py-2">🔢 Grand Total</td>
+      <td className="border border-gray-600 px-4 py-2 text-yellow-300">
+        {(amountPlayed.ThreeD + amountPlayed.TwoD + amountPlayed.OneD).toFixed(2)}
+      </td>
+      <td className="border border-gray-600 px-4 py-2 text-yellow-300">
+        {(amountPlayed.ThreeD * 0.6 + amountPlayed.TwoD * 0.8 + amountPlayed.OneD).toFixed(2)}
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 </div>
 
 

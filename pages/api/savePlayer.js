@@ -6,8 +6,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { agentId, name, time, data } = req.body;
-console.log(agentId, name, time, data )
+  const { agentId, name, time, data, amountPlayed } = req.body;
+console.log(data )
   // Validate incoming payload
   if (!agentId || !time || !Array.isArray(data) || data.length === 0) {
     return res.status(400).json({ message: 'Invalid payload, missing or malformed data' });
@@ -36,6 +36,7 @@ console.log(agentId, name, time, data )
       name,
       time: new Date(time),  // Convert the time to a proper Date object
       entries,  // Embed entries inside the player document
+      amountPlayed,
     });
 
     // Send success response

@@ -30,10 +30,10 @@ const DashboardPage = () => {
 
         <div className="flex justify-between items-center px-6 py-4">
           <div className="flex items-center space-x-8">
-            <a href="/agent/reports" className="hover:text-pink-400 hover:underline text-lg font-semibold transition duration-200">
+            <a href="/reports" className="hover:text-pink-400 hover:underline text-lg font-semibold transition duration-200">
               📊 Reports
             </a>
-            <a href="/agent/game" className="hover:text-pink-400 hover:underline text-lg font-semibold transition duration-200">
+            <a href="/game" className="hover:text-pink-400 hover:underline text-lg font-semibold transition duration-200">
               🎮 Game
             </a>
           </div>
