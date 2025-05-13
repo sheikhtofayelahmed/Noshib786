@@ -1,4 +1,5 @@
 'use client'
+import Navigation from '@/components/Navigation';
 import { AgentProvider, useAgent } from '@/context/AgentContext';
 import { useEffect, useState } from 'react';
 
@@ -50,31 +51,13 @@ const fetchPlayersByAgentId = async (agentId) => {
 
     
     <div className="p-4 text-white">
-        <nav className="bg-gray-900 bg-opacity-80 border-b border-yellow-500 shadow-lg">
-        <div className="flex justify-center items-center py-3 border-b border-yellow-500">
-          <span className="text-3xl font-extrabold text-yellow-400 tracking-wide drop-shadow-lg hover:animate-pulse cursor-default">
-            🎯 Thai Lottery Agent (ID: {agentId || ""})
-          </span>
-        </div>
+       
+<Navigation
 
-        <div className="flex justify-between items-center px-6 py-4">
-          <div className="flex items-center space-x-8">
-            <a href="/reports" className="hover:text-pink-400 hover:underline text-lg font-semibold transition duration-200">
-              📊 Reports
-            </a>
-            <a href="/game" className="hover:text-pink-400 hover:underline text-lg font-semibold transition duration-200">
-              🎮 Game
-            </a>
-          </div>
 
-          <button
-            onClick={logout}
-            className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded shadow transition duration-200"
-          >
-            🚪 Logout
-          </button>
-        </div>
-      </nav>
+></Navigation>
+
+
     {loading && <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>}
 
 {!loading && fetched && players.length === 0 && (
@@ -93,6 +76,9 @@ const fetchPlayersByAgentId = async (agentId) => {
             // const amountPlayed = calculateAmounts(player.entries);
 
             return (
+
+
+                
               <div key={idx} className="mb-6 bg-gray-800 p-4 rounded">
                 <div className="flex justify-between">
                   <div>
