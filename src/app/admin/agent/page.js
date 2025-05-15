@@ -1,8 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function AdminAgentPage() {
+  const router = useRouter();
+
   const [agents, setAgents] = useState([]);
   const [loadingAgents, setLoadingAgents] = useState(false);
   const [error, setError] = useState('');
@@ -95,32 +98,7 @@ export default function AdminAgentPage() {
     }
   };
 
-  const fetchGames = async (agentId) => {
-    setSelectedAgentId(agentId);
-    setLoadingGames(true);
-    setGames([]);
-    setError('');
-
-    try {
-      const res = await fetch('/api/getPlayersByAgentId', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agentId }),
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        setGames(data.players || []);
-      } else {
-        setError(data.message || 'Failed to fetch games');
-      }
-    } catch {
-      setError('Failed to fetch games');
-    } finally {
-      setLoadingGames(false);
-    }
-  };
-
+ 
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black to-red-900 min-h-screen">
       <h1 className="text-4xl mb-6 text-yellow-400 font-bold">🎰 Admin Agent Management</h1>
@@ -131,6 +109,14 @@ export default function AdminAgentPage() {
         className="bg-black bg-opacity-70 p-6 rounded-lg shadow-lg max-w-md mb-10"
       >
         <h2 className="text-2xl font-bold mb-4 text-yellow-400">➕ Add New Agent</h2>
+        <input
+          type="text"
+          placeholder="Agent Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
+          disabled={adding}
+        />
         <input
           type="text"
           placeholder="Agent ID"
@@ -147,14 +133,7 @@ export default function AdminAgentPage() {
           className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
           disabled={adding}
         />
-        <input
-          type="text"
-          placeholder="Agent Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
-          disabled={adding}
-        />
+       
         <button
           type="submit"
           disabled={adding}
@@ -196,7 +175,7 @@ export default function AdminAgentPage() {
                   </td>
                   <td className="border border-yellow-400 p-2 space-x-2">
                     <button
-                      onClick={() => fetchGames(agentId)}
+                      onClick={() => router.push(`/agent-games/${agentId}`)}
                       className="px-3 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
                     >
                       View Games
@@ -224,27 +203,7 @@ export default function AdminAgentPage() {
         )}
       </section>
 
-      {/* Games Section */}
-      {selectedAgentId && (
-        <section className="mt-10">
-          <h2 className="text-2xl font-bold mb-4 text-yellow-400">
-            🎮 Games for Agent: <span className="text-yellow-300">{selectedAgentId}</span>
-          </h2>
-          {loadingGames ? (
-            <p className="text-yellow-300">Loading games...</p>
-          ) : games.length === 0 ? (
-            <p className="text-pink-400 font-bold">No games found for this agent.</p>
-          ) : (
-            games.map((player, idx) => (
-              <div key={idx} className="mb-6 bg-gray-800 p-4 rounded border border-yellow-400">
-                <p><span className="font-bold">Player ID:</span> {player.playerId || 'N/A'}</p>
-                <p><span className="font-bold">Input:</span> {player.input || 'N/A'}</p>
-                <p><span className="font-bold">Time:</span> {new Date(player.time).toLocaleString()}</p>
-              </div>
-            ))
-          )}
-        </section>
-      )}
+     
     </div>
   );
 }
