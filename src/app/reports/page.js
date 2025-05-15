@@ -44,6 +44,17 @@ const fetchPlayersByAgentId = async (agentId) => {
     }
   }, [agentId]);
 
+const totalAmounts = players.reduce(
+  (acc, player) => {
+    acc.ThreeD += player.amountPlayed.ThreeD;
+    acc.TwoD += player.amountPlayed.TwoD;
+    acc.OneD += player.amountPlayed.OneD;
+    return acc;
+  },
+  { ThreeD: 0, TwoD: 0, OneD: 0 }
+);
+
+const grandTotal = totalAmounts.ThreeD + totalAmounts.TwoD + totalAmounts.OneD;
 
   return (
      <AgentProvider>
@@ -70,6 +81,36 @@ const fetchPlayersByAgentId = async (agentId) => {
 
 {!loading && players.length > 0 && (
         <div className="mt-8">
+        <div className="mb-8">
+  <h3 className="text-2xl text-green-400 mb-4">📊 All Players Total Summary</h3>
+  <table className="w-full border-collapse font-mono text-sm">
+    <thead>
+      <tr className="bg-green-800 text-white">
+        <th className="border px-4 py-2">Category</th>
+        <th className="border px-4 py-2">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="bg-gray-800">
+        <td className="border px-4 py-2">🎯 3D Total</td>
+        <td className="border px-4 py-2 text-green-400">{totalAmounts.ThreeD.toFixed(2)}</td>
+      </tr>
+      <tr>
+        <td className="border px-4 py-2">🎯 2D Total</td>
+        <td className="border px-4 py-2 text-green-400">{totalAmounts.TwoD.toFixed(2)}</td>
+      </tr>
+      <tr className="bg-gray-800">
+        <td className="border px-4 py-2">🎯 1D Total</td>
+        <td className="border px-4 py-2 text-green-400">{totalAmounts.OneD.toFixed(2)}</td>
+      </tr>
+      <tr className="bg-gray-900 font-bold text-lg">
+        <td className="border px-4 py-2">🔢 Grand Total</td>
+        <td className="border px-4 py-2 text-yellow-300">{grandTotal.toFixed(2)}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
           <h3 className="text-2xl text-yellow-400 mb-4">🎉 Player Summary 🎉</h3>
 
           {players.map((player, idx) => {
