@@ -6,10 +6,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { agentId, name, time, data, amountPlayed } = req.body;
+  const { voucher, agentId, name, time, data, amountPlayed } = req.body;
 console.log(data )
   // Validate incoming payload
-  if (!agentId || !time || !Array.isArray(data) || data.length === 0) {
+  if (!voucher || !agentId || !time || !Array.isArray(data) || data.length === 0) {
     return res.status(400).json({ message: 'Invalid payload, missing or malformed data' });
   }
 
@@ -32,6 +32,7 @@ console.log(data )
 
     // Insert the player data along with the entries into the collection
     const playerResult = await db.collection('playersInput').insertOne({
+      voucher,
       agentId,
       name,
       time: new Date(time),  // Convert the time to a proper Date object

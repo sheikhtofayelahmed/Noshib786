@@ -83,13 +83,14 @@ useEffect(() => {
       editValue: input,
       editError: false,
     }));
-console.log(newEntries)
-    const voucherNumber = `VOUCHER-${Date.now()}`;
+// console.log(newEntries)
+    // const voucherNumber = `VC-${agentId}-${new Date(player.time).getTime().toString().slice(-5)}`
 
+const time=new Date().toLocaleString()
     const newPlayer = {
       name,
       time: new Date().toLocaleString(),
-      voucher: voucherNumber,
+      voucher: `VC-${agentId}-${new Date(time).getTime().toString().slice(-5)}`,
       data: newEntries,
     };
 
@@ -420,7 +421,8 @@ console.log(newEntries)
               <div key={idx} className="mb-6 bg-gray-800 p-4 rounded">
                 <div className="flex justify-between">
                   <div>
-                    <h4 className="text-xl">{player.name}</h4>
+                    <h4>Voucher: {player.voucher}</h4>
+                    <h3 className="text-xl">Player name: {player.name}</h3>
                     <p>Time: {player.time}</p>
                     <p>Entries: {player.data.length}</p>
                   </div>

@@ -124,6 +124,7 @@ const grandTotal = totalAmounts.ThreeD + totalAmounts.TwoD + totalAmounts.OneD;
                 <div className="flex justify-between">
                   <div>
                     <h4 className="text-xl">{player.name}</h4>
+                    <p>Voucher: {player.voucher|| ""} </p>
                     <p>Time: {new Date(player.time).toLocaleString()}</p>
                     <p>Entries: {player.entries.length}</p>
                   </div>
