@@ -1,37 +1,48 @@
-// src/context/AgentContext.js
+// src/context/AgentContext.js (or wherever you keep this)
 "use client";
-
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 const AgentContext = createContext();
 
-export const useAgent = () => {
-  return useContext(AgentContext);
-};
-
-export const AgentProvider = ({ children }) => {
+export function AgentProvider({ children }) {
   const [agentId, setAgentId] = useState(null);
+  const [loginError, setLoginError] = useState("");
 
-  useEffect(() => {
-    const savedAgentId = localStorage.getItem("agentId");
-    if (savedAgentId) {
-      setAgentId(savedAgentId);
+  const login = async (agentIdInput, password) => {
+    setLoginError(""); // clear previous error
+    try {
+      const res = await fetch("/api/agent-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agentId: agentIdInput, password }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        setLoginError(errorData.error || "Login failed");
+        return false;
+      }
+
+      const data = await res.json();
+      setAgentId(data.agentId); // store agentId on successful login
+      return true;
+    } catch (error) {
+      setLoginError("Network error, please try again.");
+      return false;
     }
-  }, []);
-
-  const login = (id) => {
-    setAgentId(id);
-    localStorage.setItem("agentId", id); // Save agentId in localStorage
   };
 
   const logout = () => {
     setAgentId(null);
-    localStorage.removeItem("agentId"); // Remove agentId from localStorage
+    setLoginError("");
+    // Optional: clear tokens/localStorage here
   };
 
   return (
-    <AgentContext.Provider value={{ agentId, login, logout }}>
+    <AgentContext.Provider value={{ agentId, login, logout, loginError }}>
       {children}
     </AgentContext.Provider>
   );
-};
+}
+
+export const useAgent = () => useContext(AgentContext);

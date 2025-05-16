@@ -1,6 +1,6 @@
 // src/app/layout.js
-import 'src/globals.css';
-import { AgentProvider } from 'src/context/AgentContext'; // Adjust path as necessary
+import "src/globals.css";
+import { AgentProvider } from "src/context/AgentContext"; // Adjust path as necessary
 
 export default function RootLayout({ children }) {
   return (
