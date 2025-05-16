@@ -4,197 +4,183 @@ import { AgentProvider, useAgent } from '@/context/AgentContext';
 import { useEffect, useState } from 'react';
 
 const Reports = () => {
-    const [loading, setLoading] = useState(true);      // NEW
-const [fetched, setFetched] = useState(false);     // NEW
-  const { agentId, logout } = useAgent(); // ✅ Move this inside the component
+  const [loading, setLoading] = useState(true);
+  const [fetched, setFetched] = useState(false);
+  const { agentId, logout } = useAgent();
 
   const [players, setPlayers] = useState([]);
 
-const fetchPlayersByAgentId = async (agentId) => {
-  setLoading(true);
-  setFetched(false);
+  const fetchPlayersByAgentId = async (agentId) => {
+    setLoading(true);
+    setFetched(false);
 
-  try {
-    const res = await fetch('/api/getPlayersByAgentId', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ agentId }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setPlayers(data.players);
-    } else {
-      console.error(data.message);
+    try {
+      const res = await fetch('/api/getPlayersByAgentId', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPlayers(data.players);
+      } else {
+        console.error(data.message);
+        setPlayers([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch:', error);
       setPlayers([]);
+    } finally {
+      setLoading(false);
+      setFetched(true);
     }
-  } catch (error) {
-    console.error('Failed to fetch:', error);
-    setPlayers([]);
-  } finally {
-    setLoading(false);
-    setFetched(true);
-  }
-};
-
+  };
 
   useEffect(() => {
-
     if (agentId) {
       fetchPlayersByAgentId(agentId);
     }
   }, [agentId]);
 
-const totalAmounts = players.reduce(
-  (acc, player) => {
-    acc.ThreeD += player.amountPlayed.ThreeD;
-    acc.TwoD += player.amountPlayed.TwoD;
-    acc.OneD += player.amountPlayed.OneD;
-    return acc;
-  },
-  { ThreeD: 0, TwoD: 0, OneD: 0 }
-);
+  const totalAmounts = players.reduce(
+    (acc, player) => {
+      acc.ThreeD += player.amountPlayed.ThreeD;
+      acc.TwoD += player.amountPlayed.TwoD;
+      acc.OneD += player.amountPlayed.OneD;
+      return acc;
+    },
+    { ThreeD: 0, TwoD: 0, OneD: 0 }
+  );
 
-const grandTotal = totalAmounts.ThreeD + totalAmounts.TwoD + totalAmounts.OneD;
+  const grandTotal = totalAmounts.ThreeD + totalAmounts.TwoD + totalAmounts.OneD;
 
   return (
-     <AgentProvider>
+    <AgentProvider>
+      <div className="min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
+        <Navigation />
 
+        {loading && <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>}
 
-    
-    <div className="p-4 text-white">
-       
-<Navigation
+        {!loading && fetched && players.length === 0 && (
+          <div className="flex items-center justify-center h-[60vh]">
+            <p className="text-pink-400 text-3xl font-bold text-center">
+              😕 No player data found for this agent.
+            </p>
+          </div>
+        )}
 
+        {!loading && players.length > 0 && (
+          <div className="mt-8">
+            <div className="mb-8 max-w-4xl mx-auto">
+              <h3 className="text-2xl text-green-400 mb-4 font-semibold">📊 All Players Total Summary</h3>
+              <table className="w-full border-collapse font-mono text-sm rounded overflow-hidden shadow-lg">
+                <thead>
+                  <tr className="bg-green-800 text-white">
+                    <th className="border px-4 py-2 text-left">Category</th>
+                    <th className="border px-4 py-2 text-left">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="bg-gray-800">
+                    <td className="border px-4 py-2">🎯 3D Total</td>
+                    <td className="border px-4 py-2 text-green-400">{totalAmounts.ThreeD.toFixed(2)}</td>
+                  </tr>
+                  <tr className="bg-gray-900">
+                    <td className="border px-4 py-2">🎯 2D Total</td>
+                    <td className="border px-4 py-2 text-green-400">{totalAmounts.TwoD.toFixed(2)}</td>
+                  </tr>
+                  <tr className="bg-gray-800">
+                    <td className="border px-4 py-2">🎯 1D Total</td>
+                    <td className="border px-4 py-2 text-green-400">{totalAmounts.OneD.toFixed(2)}</td>
+                  </tr>
+                  <tr className="bg-gray-900 font-bold text-lg">
+                    <td className="border px-4 py-2">🔢 Grand Total</td>
+                    <td className="border px-4 py-2 text-yellow-300">{grandTotal.toFixed(2)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-></Navigation>
+            <h3 className="text-2xl text-yellow-400 mb-6 font-semibold text-center">🎉 Player Summary 🎉</h3>
 
-
-    {loading && <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>}
-
-{!loading && fetched && players.length === 0 && (
-  <div className="flex items-center justify-center h-[60vh]">
-    <p className="text-pink-400 text-3xl font-bold text-center">
-      😕 No player data found for this agent.
-    </p>
-  </div>
-)}
-
-{!loading && players.length > 0 && (
-        <div className="mt-8">
-        <div className="mb-8">
-  <h3 className="text-2xl text-green-400 mb-4">📊 All Players Total Summary</h3>
-  <table className="w-full border-collapse font-mono text-sm">
-    <thead>
-      <tr className="bg-green-800 text-white">
-        <th className="border px-4 py-2">Category</th>
-        <th className="border px-4 py-2">Amount</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr className="bg-gray-800">
-        <td className="border px-4 py-2">🎯 3D Total</td>
-        <td className="border px-4 py-2 text-green-400">{totalAmounts.ThreeD.toFixed(2)}</td>
-      </tr>
-      <tr>
-        <td className="border px-4 py-2">🎯 2D Total</td>
-        <td className="border px-4 py-2 text-green-400">{totalAmounts.TwoD.toFixed(2)}</td>
-      </tr>
-      <tr className="bg-gray-800">
-        <td className="border px-4 py-2">🎯 1D Total</td>
-        <td className="border px-4 py-2 text-green-400">{totalAmounts.OneD.toFixed(2)}</td>
-      </tr>
-      <tr className="bg-gray-900 font-bold text-lg">
-        <td className="border px-4 py-2">🔢 Grand Total</td>
-        <td className="border px-4 py-2 text-yellow-300">{grandTotal.toFixed(2)}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-          <h3 className="text-2xl text-yellow-400 mb-4">🎉 Player Summary 🎉</h3>
-
-          {players.map((player, idx) => {
-            // const amountPlayed = calculateAmounts(player.entries);
-
-            return (
-
-
-                
-              <div key={idx} className="mb-6 bg-gray-800 p-4 rounded">
-                <div className="flex justify-between">
-                  <div>
-                    <h4 className="text-xl">{player.name}</h4>
-                    <p>Voucher: {player.voucher|| ""} </p>
-                    <p>Time: {new Date(player.time).toLocaleString()}</p>
-                    <p>Entries: {player.entries.length}</p>
+            <div className="space-y-6 max-w-4xl mx-auto max-h-[60vh] overflow-y-auto pr-2">
+              {players.map((player, idx) => (
+                <div
+                  key={idx}
+                  className="bg-gray-800 rounded-lg shadow p-5 border border-yellow-500 hover:shadow-yellow-500 transition-shadow"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h4 className="text-xl font-bold mb-1">{player.name}</h4>
+                      <p className="text-yellow-300">
+                        Voucher: <span className="font-mono">{player.voucher || ''}</span>
+                      </p>
+                      <p className="text-gray-400 text-sm">Time: {new Date(player.time).toLocaleString()}</p>
+                      <p className="text-gray-400 text-sm">Entries: {player.entries.length}</p>
+                    </div>
+                    <button
+                      onClick={() => window.print()}
+                      className="py-2 px-4 rounded bg-purple-600 hover:bg-purple-700 transition text-white font-semibold"
+                      title="Print Player Info"
+                    >
+                      🖨️ Print
+                    </button>
                   </div>
-                  <button
-                    onClick={() => window.print()}
-                    className="py-2 px-4 rounded bg-purple-500 hover:bg-purple-600"
-                  >
-                    🖨️ Print
-                  </button>
-                </div>
 
-                <table className="w-full mt-4 border-collapse">
-                  <thead>
-                    <tr>
-                      <th className="border bg-yellow-600 text-black">#</th>
-                      <th className="border bg-yellow-600 text-black">Input</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {player.entries.map((entry, entryIdx) => (
-                      <tr key={entryIdx} className="odd:bg-gray-700 even:bg-gray-800">
-                        <td className="border p-2">{entryIdx + 1}</td>
-                        <td className="border p-2">{entry.input}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {/* Totals */}
-                <div className="mt-4 text-yellow-300">
-                  <table className="w-full border-collapse mt-4 font-mono text-sm">
+                  <table className="w-full border-collapse text-sm font-mono rounded overflow-hidden">
                     <thead>
-                      <tr className="bg-red-700 text-white">
-                        <th className="border px-4 py-2">Category</th>
-                        <th className="border px-4 py-2">Amount</th>
+                      <tr className="bg-yellow-600 text-black">
+                        <th className="border px-3 py-2 text-left">#</th>
+                        <th className="border px-3 py-2 text-left">Input</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr className="bg-gray-800">
-                        <td className="border px-4 py-2">🎯 3D Total</td>
-                        <td className="border px-4 py-2 text-green-400">{player.amountPlayed.ThreeD}</td>
-                        
-                      </tr>
-                      <tr>
-                        <td className="border px-4 py-2">🎯 2D Total</td>
-                        <td className="border px-4 py-2 text-green-400">{player.amountPlayed.TwoD}</td>
-                        
-                      </tr>
-                      <tr className="bg-gray-800">
-                        <td className="border px-4 py-2">🎯 1D Total</td>
-                        <td className="border px-4 py-2 text-green-400">{player.amountPlayed.OneD}</td>
-                       
-                      </tr>
-                      <tr className="bg-gray-900 font-bold text-lg">
-                        <td className="border px-4 py-2">🔢 Grand Total</td>
-                        <td className="border px-4 py-2 text-yellow-300">
-                          {(player.amountPlayed.ThreeD + player.amountPlayed.TwoD + player.amountPlayed.OneD).toFixed(2)}
-                        </td>
-                       
-                      </tr>
+                      {player.entries.map((entry, entryIdx) => (
+                        <tr key={entryIdx} className={entryIdx % 2 === 0 ? 'bg-gray-700' : 'bg-gray-800'}>
+                          <td className="border px-3 py-2">{entryIdx + 1}</td>
+                          <td className="border px-3 py-2">{entry.input}</td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
+
+                  <div className="mt-4 text-yellow-300">
+                    <table className="w-full border-collapse mt-4 font-mono text-sm rounded overflow-hidden shadow-md">
+                      <thead>
+                        <tr className="bg-red-700 text-white">
+                          <th className="border px-4 py-2 text-left">Category</th>
+                          <th className="border px-4 py-2 text-left">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="bg-gray-800">
+                          <td className="border px-4 py-2">🎯 3D Total</td>
+                          <td className="border px-4 py-2 text-green-400">{player.amountPlayed.ThreeD}</td>
+                        </tr>
+                        <tr className="bg-gray-900">
+                          <td className="border px-4 py-2">🎯 2D Total</td>
+                          <td className="border px-4 py-2 text-green-400">{player.amountPlayed.TwoD}</td>
+                        </tr>
+                        <tr className="bg-gray-800">
+                          <td className="border px-4 py-2">🎯 1D Total</td>
+                          <td className="border px-4 py-2 text-green-400">{player.amountPlayed.OneD}</td>
+                        </tr>
+                        <tr className="bg-gray-900 font-bold text-lg">
+                          <td className="border px-4 py-2">🔢 Grand Total</td>
+                          <td className="border px-4 py-2 text-yellow-300">
+                            {(player.amountPlayed.ThreeD + player.amountPlayed.TwoD + player.amountPlayed.OneD).toFixed(2)}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-     </AgentProvider>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </AgentProvider>
   );
 };
 

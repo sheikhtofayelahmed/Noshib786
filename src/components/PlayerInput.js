@@ -11,6 +11,7 @@ export default function PlayerInput() {
   const [submittedPlayers, setSubmittedPlayers] = useState([]);
   const [amountPlayed, setAmountPlayed]=useState({})
   const { agentId } = useAgent();
+  
 // At the top of your component
 useEffect(() => {
   let total1D = 0, total2D = 0, total3D = 0;
@@ -181,193 +182,384 @@ const time=new Date().toLocaleString()
     ));
   };
 
-  const handleSubmitAndPrint = async (player) => {
-    if (submittedPlayers.includes(player.name)) {
-      // Already submitted ➔ Only print
-      handlePrint(player);
-      return;
+  // const handleSubmitAndPrint = async (player) => {
+  //   if (submittedPlayers.includes(player.name)) {
+  //     // Already submitted ➔ Only print
+  //     handlePrint(player);
+  //     return;
+  //   }
+  //   const parsedData = player.data.map(entry => ({ input: entry.input }));
+  //   let total1D = 0, total2D = 0, total3D = 0;
+
+  //   player.data.forEach(entry => {
+  //     const parts = entry.input.split('=');
+  //     const num = parts[0];
+  //     const amounts = parts.slice(1).map(Number).filter(n => !isNaN(n));
+  
+  //     const sum = amounts.reduce((a, b) => a + b, 0);
+  
+  //     if (/^\d$/.test(num)) {
+  //       total1D += sum;
+  //     } else if (/^\d{2}$/.test(num)) {
+  //       total2D += sum;
+  //     } else if (/^\d{3}$/.test(num)) {
+  //       total3D += sum;
+  //     }
+  //   });
+  
+  //   const payload = {
+  //     voucher: player.voucher,
+  //     agentId: agentId,
+  //     name: player.name || "",
+  //     time: player.time,
+  //     data: parsedData,
+  //     amountPlayed: { OneD: total1D , TwoD: total2D , ThreeD: total3D },
+  //   };
+  //   console.log("payload.amountPlayed")
+
+  //   try {
+  //     const res = await fetch('/api/savePlayer', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(payload),
+  //     });
+
+  //     if (res.ok) {
+  //       alert('✅ Player data submitted to database!');
+  //       setSubmittedPlayers(prev => [...prev, player.name]);
+  //       handlePrint(player);
+  //     } else {
+  //       const err = await res.json();
+  //       alert(`❌ Failed to submit: ${err.message}`);
+  //     }
+  //   } catch (err) {
+  //     console.error('Submit error:', err);
+  //     alert('❌ An error occurred while submitting.');
+  //   }
+  // };
+const handleSubmitAndPrint = async (player) => {
+  // Prevent re-submission if already submitted
+  if (submittedPlayers.includes(player.name)) {
+    // Already submitted ➔ Only print
+    handlePrint(player);
+    return;
+  }
+
+  // Defensive: Make sure data exists
+  const dataEntries = player.data || player.entries || [];
+  
+  const parsedData = dataEntries.map(entry => ({ input: entry.input }));
+
+  let total1D = 0, total2D = 0, total3D = 0;
+
+  dataEntries.forEach(entry => {
+    const parts = entry.input.split('=');
+    const num = parts[0];
+    const amounts = parts.slice(1).map(Number).filter(n => !isNaN(n));
+
+    const sum = amounts.reduce((a, b) => a + b, 0);
+
+    if (/^\d$/.test(num)) {
+      total1D += sum;
+    } else if (/^\d{2}$/.test(num)) {
+      total2D += sum;
+    } else if (/^\d{3}$/.test(num)) {
+      total3D += sum;
     }
-    const parsedData = player.data.map(entry => ({ input: entry.input }));
-    let total1D = 0, total2D = 0, total3D = 0;
+  });
 
-    player.data.forEach(entry => {
-      const parts = entry.input.split('=');
-      const num = parts[0];
-      const amounts = parts.slice(1).map(Number).filter(n => !isNaN(n));
-  
-      const sum = amounts.reduce((a, b) => a + b, 0);
-  
-      if (/^\d$/.test(num)) {
-        total1D += sum;
-      } else if (/^\d{2}$/.test(num)) {
-        total2D += sum;
-      } else if (/^\d{3}$/.test(num)) {
-        total3D += sum;
-      }
-    });
-  
-    const payload = {
-      voucher: player.voucher,
-      agentId: agentId,
-      name: player.name || "",
-      time: player.time,
-      data: parsedData,
-      amountPlayed: { OneD: total1D , TwoD: total2D , ThreeD: total3D },
-    };
-    console.log("payload.amountPlayed")
-
-    try {
-      const res = await fetch('/api/savePlayer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        alert('✅ Player data submitted to database!');
-        setSubmittedPlayers(prev => [...prev, player.name]);
-        handlePrint(player);
-      } else {
-        const err = await res.json();
-        alert(`❌ Failed to submit: ${err.message}`);
-      }
-    } catch (err) {
-      console.error('Submit error:', err);
-      alert('❌ An error occurred while submitting.');
-    }
+  const payload = {
+    voucher: player.voucher,
+    agentId: agentId,  // Make sure agentId is in scope here
+    name: player.name || "",
+    time: player.time,
+    data: parsedData,
+    amountPlayed: { OneD: total1D, TwoD: total2D, ThreeD: total3D },
   };
 
-  const handlePrint = (player) => {
-    const win = window.open("", "_blank");
-    win.document.write(`
-      <html>
-        <head>
-          <title>Player Data</title>
-          <style>
-            body { font-family: Arial; background: #000; color: #ffd700; padding: 20px; }
-            .container { background: #222; padding: 20px; border-radius: 10px; }
-            h2 { text-align: center; }
-            table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-            th, td { border: 1px solid #555; padding: 10px; text-align: center; }
-            th { background: #cc0000; color: #fff; }
-            tr:nth-child(even) { background: #333; }
-            .totals {
-  margin-top: 1rem; /* mt-4 */
-  color: #ffd700; /* text-yellow-300 */
-}
+  try {
+    const res = await fetch('/api/savePlayer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
-.totals-heading {
-  font-size: 1.125rem; /* text-lg */
-  font-weight: bold; /* font-bold */
-  margin-bottom: 0.5rem; /* mb-2 */
-}
-
-.totals-list {
-  list-style-type: disc; /* list-disc */
-  padding-left: 1.5rem; /* list-inside approximation */
-}
-
-.totals-list li {
-  margin-bottom: 0.25rem; /* space-y-1 */
-}
-.totals-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    font-family: Arial;
-    background-color: #111;
-    color: #ffd700;
+    if (res.ok) {
+      alert('✅ Player data submitted to database!');
+      setSubmittedPlayers(prev => [...prev, player.name]);
+      handlePrint(player);
+    } else {
+      const err = await res.json();
+      alert(`❌ Failed to submit: ${err.message}`);
+      // Do NOT add player.name to submittedPlayers here, so retry allowed
+    }
+  } catch (err) {
+    console.error('Submit error:', err);
+    alert('❌ An error occurred while submitting.');
+    // Do NOT add player.name here either
   }
+};
 
-  .totals-table th,
-  .totals-table td {
-    border: 1px solid #555;
-    padding: 10px;
-    text-align: center;
-  }
+//   const handlePrint = (player) => {
+//     const win = window.open("", "_blank");
+//     win.document.write(`
+//       <html>
+//         <head>
+//           <title>Player Data</title>
+//           <style>
+//             body { font-family: Arial; background: #000; color: #ffd700; padding: 20px; }
+//             .container { background: #222; padding: 20px; border-radius: 10px; }
+//             h2 { text-align: center; }
+//             table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+//             th, td { border: 1px solid #555; padding: 10px; text-align: center; }
+//             th { background: #cc0000; color: #fff; }
+//             tr:nth-child(even) { background: #333; }
+//             .totals {
+//   margin-top: 1rem; /* mt-4 */
+//   color: #ffd700; /* text-yellow-300 */
+// }
 
-  .totals-table thead th {
-    background: #cc0000;
-    color: #fff;
-  }
+// .totals-heading {
+//   font-size: 1.125rem; /* text-lg */
+//   font-weight: bold; /* font-bold */
+//   margin-bottom: 0.5rem; /* mb-2 */
+// }
 
-  .totals-table tbody tr:nth-child(even) {
-    background-color: #222;
-  }
+// .totals-list {
+//   list-style-type: disc; /* list-disc */
+//   padding-left: 1.5rem; /* list-inside approximation */
+// }
 
-  .totals-table tbody tr:last-child th {
-    background-color: #333;
-    font-size: 1.1em;
-  }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h2>🎰 ${player.voucher}</h2>
-            <h2>🎰 ${player.name}</h2>
-            <p>🕒 ${player.time}</p>
-            <table>
+// .totals-list li {
+//   margin-bottom: 0.25rem; /* space-y-1 */
+// }
+// .totals-table {
+//     width: 100%;
+//     border-collapse: collapse;
+//     margin-top: 20px;
+//     font-family: Arial;
+//     background-color: #111;
+//     color: #ffd700;
+//   }
+
+//   .totals-table th,
+//   .totals-table td {
+//     border: 1px solid #555;
+//     padding: 10px;
+//     text-align: center;
+//   }
+
+//   .totals-table thead th {
+//     background: #cc0000;
+//     color: #fff;
+//   }
+
+//   .totals-table tbody tr:nth-child(even) {
+//     background-color: #222;
+//   }
+
+//   .totals-table tbody tr:last-child th {
+//     background-color: #333;
+//     font-size: 1.1em;
+//   }
+//           </style>
+//         </head>
+//         <body>
+//           <div class="container">
+//             <h2>🎰 ${player.voucher}</h2>
+//             <h2>🎰 ${player.name}</h2>
+//             <p>🕒 ${player.time}</p>
+//             <table>
+//               <thead>
+//                 <tr><th>#</th><th>Input</th></tr>
+//               </thead>
+//               <tbody>
+//                 ${player.data.map(e => `<tr><td>${e.serial}</td><td>${e.input}</td></tr>`).join("")}
+//               </tbody>
+//             </table>
+//          <div class="totals">
+//  <table class="totals-table">
+//   <thead>
+//     <tr>
+//       <th>Category</th>
+//       <th>Amount</th>
+//       <th>After Deduction</th>
+//     </tr>
+//   </thead>
+//   <tbody>
+//     <tr>
+//       <td>🎯 3D Total</td>
+//       <td>${amountPlayed.ThreeD}</td>
+//       <td>${(amountPlayed.ThreeD * 0.6).toFixed(2)}</td>
+//     </tr>
+//     <tr>
+//       <td>🎯 2D Total</td>
+//       <td>${amountPlayed.TwoD}</td>
+//       <td>${(amountPlayed.TwoD * 0.8).toFixed(2)}</td>
+//     </tr>
+//     <tr>
+//       <td>🎯 1D Total</td>
+//       <td>${amountPlayed.OneD}</td>
+//       <td>${amountPlayed.OneD.toFixed(2)}</td>
+//     </tr>
+//     <tr>
+//       <th>🔢 Grand Total</th>
+//       <th>
+//         ${(
+//           amountPlayed.ThreeD +
+//           amountPlayed.TwoD +
+//           amountPlayed.OneD
+//         ).toFixed(2)}
+//       </th>
+//       <th>
+//         ${(
+//           amountPlayed.ThreeD * 0.6 +
+//           amountPlayed.TwoD * 0.8 +
+//           amountPlayed.OneD
+//         ).toFixed(2)}
+//       </th>
+//     </tr>
+//   </tbody>
+// </table>
+
+// </div>
+
+//           </div>
+//         </body>
+//       </html>
+//     `);
+//     win.document.close();
+//     win.print();
+//   };
+const handlePrint = (player) => {
+  const amountPlayed = player.amountPlayed || { OneD: 0, TwoD: 0, ThreeD: 0 }; // make sure amountPlayed exists
+
+  const win = window.open("", "_blank");
+  win.document.write(`
+    <html>
+      <head>
+        <title>Player Data</title>
+        <style>
+          body { font-family: Arial; background: #000; color: #ffd700; padding: 20px; }
+          .container { background: #222; padding: 20px; border-radius: 10px; }
+          h2 { text-align: center; }
+          table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+          th, td { border: 1px solid #555; padding: 10px; text-align: center; }
+          th { background: #cc0000; color: #fff; }
+          tr:nth-child(even) { background: #333; }
+          
+          .totals {
+            margin-top: 1rem; /* mt-4 */
+            color: #ffd700; /* text-yellow-300 */
+          }
+          
+          .totals-heading {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: bold; /* font-bold */
+            margin-bottom: 0.5rem; /* mb-2 */
+          }
+          
+          .totals-list {
+            list-style-type: disc; /* list-disc */
+            padding-left: 1.5rem; /* list-inside approximation */
+          }
+          
+          .totals-list li {
+            margin-bottom: 0.25rem; /* space-y-1 */
+          }
+          
+          .totals-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-family: Arial;
+            background-color: #111;
+            color: #ffd700;
+          }
+          
+          .totals-table th,
+          .totals-table td {
+            border: 1px solid #555;
+            padding: 10px;
+            text-align: center;
+          }
+          
+          .totals-table thead th {
+            background: #cc0000;
+            color: #fff;
+          }
+          
+          .totals-table tbody tr:nth-child(even) {
+            background-color: #222;
+          }
+          
+          .totals-table tbody tr:last-child th {
+            background-color: #333;
+            font-size: 1.1em;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h2>🎰 ${player.voucher || ""}</h2>
+          <h2>🎰 ${player.name || ""}</h2>
+          <p>🕒 ${new Date(player.time).toLocaleString()}</p>
+          <table>
+            <thead>
+              <tr><th>#</th><th>Input</th></tr>
+            </thead>
+            <tbody>
+              ${player.data.map(e => `<tr><td>${e.serial}</td><td>${e.input}</td></tr>`).join("")}
+            </tbody>
+          </table>
+          <div class="totals">
+            <table class="totals-table">
               <thead>
-                <tr><th>#</th><th>Input</th></tr>
+                <tr>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>After Deduction</th>
+                </tr>
               </thead>
               <tbody>
-                ${player.data.map(e => `<tr><td>${e.serial}</td><td>${e.input}</td></tr>`).join("")}
+                <tr>
+                  <td>🎯 3D Total</td>
+                  <td>${amountPlayed.ThreeD}</td>
+                  <td>${(amountPlayed.ThreeD * 0.6).toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td>🎯 2D Total</td>
+                  <td>${amountPlayed.TwoD}</td>
+                  <td>${(amountPlayed.TwoD * 0.8).toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td>🎯 1D Total</td>
+                  <td>${amountPlayed.OneD}</td>
+                  <td>${amountPlayed.OneD.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <th>🔢 Grand Total</th>
+                  <th>
+                    ${(amountPlayed.ThreeD + amountPlayed.TwoD + amountPlayed.OneD).toFixed(2)}
+                  </th>
+                  <th>
+                    ${(
+                      amountPlayed.ThreeD * 0.6 +
+                      amountPlayed.TwoD * 0.8 +
+                      amountPlayed.OneD
+                    ).toFixed(2)}
+                  </th>
+                </tr>
               </tbody>
             </table>
-         <div class="totals">
- <table class="totals-table">
-  <thead>
-    <tr>
-      <th>Category</th>
-      <th>Amount</th>
-      <th>After Deduction</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>🎯 3D Total</td>
-      <td>${amountPlayed.ThreeD}</td>
-      <td>${(amountPlayed.ThreeD * 0.6).toFixed(2)}</td>
-    </tr>
-    <tr>
-      <td>🎯 2D Total</td>
-      <td>${amountPlayed.TwoD}</td>
-      <td>${(amountPlayed.TwoD * 0.8).toFixed(2)}</td>
-    </tr>
-    <tr>
-      <td>🎯 1D Total</td>
-      <td>${amountPlayed.OneD}</td>
-      <td>${amountPlayed.OneD.toFixed(2)}</td>
-    </tr>
-    <tr>
-      <th>🔢 Grand Total</th>
-      <th>
-        ${(
-          amountPlayed.ThreeD +
-          amountPlayed.TwoD +
-          amountPlayed.OneD
-        ).toFixed(2)}
-      </th>
-      <th>
-        ${(
-          amountPlayed.ThreeD * 0.6 +
-          amountPlayed.TwoD * 0.8 +
-          amountPlayed.OneD
-        ).toFixed(2)}
-      </th>
-    </tr>
-  </tbody>
-</table>
-
-</div>
-
           </div>
-        </body>
-      </html>
-    `);
-    win.document.close();
-    win.print();
-  };
+        </div>
+      </body>
+    </html>
+  `);
+  win.document.close();
+  win.print();
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-red-900 to-black text-white p-6">
@@ -414,131 +606,130 @@ const time=new Date().toLocaleString()
           </button>
         </div>
 
-        {players.length > 0 && (
-          <div className="mt-8">
-            <h3 className="text-2xl text-yellow-400 mb-4">🎉 Player Summary 🎉</h3>
-            {players.map((player, idx) => (
-              <div key={idx} className="mb-6 bg-gray-800 p-4 rounded">
-                <div className="flex justify-between">
-                  <div>
-                    <h4>Voucher: {player.voucher}</h4>
-                    <h3 className="text-xl">Player name: {player.name}</h3>
-                    <p>Time: {player.time}</p>
-                    <p>Entries: {player.data.length}</p>
-                  </div>
-                  <button
-                    onClick={() => handleSubmitAndPrint(player)}
-                    className={`py-2 px-4 rounded ${
-                      submittedPlayers.includes(player.name)
-                        ? 'bg-purple-500 hover:bg-purple-600'
-                        : 'bg-blue-500 hover:bg-blue-600'
-                    }`}
-                  >
-                    {submittedPlayers.includes(player.name) ? '🖨️ Print' : '🚀 Submit'}
-                  </button>
-                  
-                </div>
-                <table className="w-full mt-4 border-collapse">
-                  <thead>
-                    <tr>
-                      <th className="border bg-yellow-600 text-black">#</th>
-                      <th className="border bg-yellow-600 text-black">Input</th>
-                      <th className="border bg-yellow-600 text-black">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {player.data.map((entry, entryIdx) => (
-                      <tr key={entry.id} className="odd:bg-gray-700 even:bg-gray-800">
-                        <td className="border p-2">{entry.serial}</td>
-                        <td className="border p-2">
-                          {entry.isEditing ? (
-                            <div>
-                              <input
-                                type="text"
-                                value={entry.editValue}
-                                onChange={(e) => handleEditChange(idx, entryIdx, e.target.value)}
-                                className={`w-full p-1 bg-black border-2 text-white ${
-                                  entry.editError ? 'border-red-500' : 'border-yellow-400'
-                                }`}
-                              />
-                              {entry.editError && (
-                                <p className="text-red-400 text-xs mt-1">Invalid entry format.</p>
-                              )}
-                            </div>
-                          ) : (
-                            entry.input
-                          )}
-                        </td>
-                        <td className="border p-2 space-x-2">
-  {!submittedPlayers.includes(player.name) && (
-    <>
-      {entry.isEditing ? (
-        <button
-          onClick={() => handleSaveEdit(idx, entryIdx)}
-          className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
-        >
-          💾 Save
-        </button>
-      ) : (
-        <button
-          onClick={() => handleEdit(idx, entryIdx)}
-          className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded"
-        >
-          ✏️ Edit
-        </button>
-      )}
-      <button
-        onClick={() => handleDelete(idx, entryIdx)}
-        className="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded"
-      >
-        🗑️ Delete
-      </button>
-    </>
-  )}
-</td>
+       {players.length > 0 && (
+  <div className="mt-8 max-w-4xl mx-auto space-y-6">
+    <h3 className="text-2xl text-yellow-400 mb-4 font-semibold text-center">🎉 Player Summary 🎉</h3>
+    {players.map((player, idx) => (
+      <div key={idx} className="mb-6 bg-gray-800 p-5 rounded-lg border border-yellow-500 shadow hover:shadow-yellow-500 transition-shadow">
+        <div className="flex justify-between items-start">
+          <div>
+            <h4 className="text-xl font-bold mb-1">Player name: {player.name}</h4>
+            <p className="text-yellow-300 mb-1">Voucher: <span className="font-mono">{player.voucher || 'N/A'}</span></p>
+            <p className="text-gray-400 text-sm mb-1">Time: {new Date(player.time).toLocaleString()}</p>
+            <p className="text-gray-400 text-sm">Entries: {player.data.length}</p>
+          </div>
+          <button
+            onClick={() => handleSubmitAndPrint(player)}
+            className={`py-2 px-4 rounded font-semibold text-white transition ${
+              submittedPlayers.includes(player.name)
+                ? 'bg-purple-600 hover:bg-purple-700'
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
+          >
+            {submittedPlayers.includes(player.name) ? '🖨️ Print' : '🚀 Submit'}
+          </button>
+        </div>
 
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {/* Totals Calculation */}
-                <div className="mt-4 text-yellow-300">
+        <table className="w-full mt-4 border-collapse font-mono text-sm">
+          <thead>
+            <tr className="bg-yellow-600 text-black">
+              <th className="border px-3 py-2 text-left">#</th>
+              <th className="border px-3 py-2 text-left">Input</th>
+              <th className="border px-3 py-2 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {player.data.map((entry, entryIdx) => (
+              <tr key={entry.id} className={entryIdx % 2 === 0 ? 'bg-gray-700' : 'bg-gray-800'}>
+                <td className="border px-3 py-2">{entry.serial}</td>
+                <td className="border px-3 py-2">
+                  {entry.isEditing ? (
+                    <div>
+                      <input
+                        type="text"
+                        value={entry.editValue}
+                        onChange={(e) => handleEditChange(idx, entryIdx, e.target.value)}
+                        className={`w-full p-1 bg-black border-2 text-white rounded ${
+                          entry.editError ? 'border-red-500' : 'border-yellow-400'
+                        }`}
+                      />
+                      {entry.editError && (
+                        <p className="text-red-400 text-xs mt-1">Invalid entry format.</p>
+                      )}
+                    </div>
+                  ) : (
+                    entry.input
+                  )}
+                </td>
+                <td className="border px-3 py-2 space-x-2">
+                  {!submittedPlayers.includes(player.name) && (
+                    <>
+                      {entry.isEditing ? (
+                        <button
+                          onClick={() => handleSaveEdit(idx, entryIdx)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded transition"
+                        >
+                          💾 Save
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleEdit(idx, entryIdx)}
+                          className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded transition"
+                        >
+                          ✏️ Edit
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDelete(idx, entryIdx)}
+                        className="bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded transition"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-  <table className="w-full border-collapse mt-4 text-yellow-300 font-mono text-sm">
-  <thead>
-    <tr className="bg-red-700 text-white">
-      <th className="border border-gray-600 px-4 py-2">Category</th>
-      <th className="border border-gray-600 px-4 py-2">Amount</th>
-      <th className="border border-gray-600 px-4 py-2">After Deduction</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr className="bg-gray-800">
-      <td className="border border-gray-600 px-4 py-2">🎯 3D Total</td>
-      <td className="border border-gray-600 px-4 py-2 text-green-400">{amountPlayed.ThreeD}</td>
-      <td className="border border-gray-600 px-4 py-2 text-green-400">{(amountPlayed.ThreeD * 0.6).toFixed(2)}</td>
-    </tr>
-    <tr>
-      <td className="border border-gray-600 px-4 py-2">🎯 2D Total</td>
-      <td className="border border-gray-600 px-4 py-2 text-green-400">{amountPlayed.TwoD}</td>
-      <td className="border border-gray-600 px-4 py-2 text-green-400">{(amountPlayed.TwoD * 0.8).toFixed(2)}</td>
-    </tr>
-    <tr className="bg-gray-800">
-      <td className="border border-gray-600 px-4 py-2">🎯 1D Total</td>
-      <td className="border border-gray-600 px-4 py-2 text-green-400">{amountPlayed.OneD}</td>
-      <td className="border border-gray-600 px-4 py-2 text-green-400">{amountPlayed.OneD.toFixed(2)}</td>
-    </tr>
-    <tr className="bg-gray-900 font-bold text-lg">
-      <td className="border border-gray-600 px-4 py-2">🔢 Grand Total</td>
-      <td className="border border-gray-600 px-4 py-2 text-yellow-300">
-        {(amountPlayed.ThreeD + amountPlayed.TwoD + amountPlayed.OneD).toFixed(2)}
-      </td>
-      <td className="border border-gray-600 px-4 py-2 text-yellow-300">
-        {(amountPlayed.ThreeD * 0.6 + amountPlayed.TwoD * 0.8 + amountPlayed.OneD).toFixed(2)}
-      </td>
-    </tr>
-  </tbody>
-</table>
+        {/* Totals Calculation */}
+        <div className="mt-6">
+          <table className="w-full border-collapse font-mono text-sm text-yellow-300">
+            <thead>
+              <tr className="bg-red-700 text-white">
+                <th className="border border-gray-600 px-4 py-2 text-left">Category</th>
+                <th className="border border-gray-600 px-4 py-2 text-left">Amount</th>
+                <th className="border border-gray-600 px-4 py-2 text-left">After Deduction</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="bg-gray-800">
+                <td className="border border-gray-600 px-4 py-2">🎯 3D Total</td>
+                <td className="border border-gray-600 px-4 py-2 text-green-400">{amountPlayed.ThreeD}</td>
+                <td className="border border-gray-600 px-4 py-2 text-green-400">{(amountPlayed.ThreeD * 0.6).toFixed(2)}</td>
+              </tr>
+              <tr className="bg-gray-900">
+                <td className="border border-gray-600 px-4 py-2">🎯 2D Total</td>
+                <td className="border border-gray-600 px-4 py-2 text-green-400">{amountPlayed.TwoD}</td>
+                <td className="border border-gray-600 px-4 py-2 text-green-400">{(amountPlayed.TwoD * 0.8).toFixed(2)}</td>
+              </tr>
+              <tr className="bg-gray-800">
+                <td className="border border-gray-600 px-4 py-2">🎯 1D Total</td>
+                <td className="border border-gray-600 px-4 py-2 text-green-400">{amountPlayed.OneD}</td>
+                <td className="border border-gray-600 px-4 py-2 text-green-400">{amountPlayed.OneD.toFixed(2)}</td>
+              </tr>
+              <tr className="bg-gray-900 font-bold text-lg">
+                <td className="border border-gray-600 px-4 py-2">🔢 Grand Total</td>
+                <td className="border border-gray-600 px-4 py-2 text-yellow-300">
+                  {(amountPlayed.ThreeD + amountPlayed.TwoD + amountPlayed.OneD).toFixed(2)}
+                </td>
+                <td className="border border-gray-600 px-4 py-2 text-yellow-300">
+                  {(amountPlayed.ThreeD * 0.6 + amountPlayed.TwoD * 0.8 + amountPlayed.OneD).toFixed(2)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
 </div>
 
@@ -549,5 +740,12 @@ const time=new Date().toLocaleString()
         )}
       </div>
     </div>
+
+
+
+
+
+
+
   );
 }

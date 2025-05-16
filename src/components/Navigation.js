@@ -1,29 +1,42 @@
-'use client';
-import React from 'react';
-import { useAgent } from '@/context/AgentContext';
-
+"use client";
+import React from "react";
+import { useAgent } from "@/context/AgentContext";
+import Link from "next/link";
 const Navigation = () => {
   const { agentId, logout } = useAgent();
 
   return (
     <nav className="bg-gray-900 bg-opacity-80 border-b border-yellow-500 shadow-lg">
       <div className="flex justify-center items-center py-3 border-b border-yellow-500">
-        <span className="text-3xl font-extrabold text-yellow-400 tracking-wide drop-shadow-lg hover:animate-pulse cursor-default">
-          🎯 Thai Lottery Agent (ID: {agentId || ""})
-        </span>
+        {agentId && (
+          <span className="text-3xl font-extrabold text-yellow-400 tracking-wide drop-shadow-lg hover:animate-pulse cursor-default">
+            🎯 Thai Lottery Agent (ID: {agentId})
+          </span>
+        )}
       </div>
 
       <div className="flex justify-between items-center px-6 py-4">
         <div className="flex items-center space-x-8">
-          <a href="/" className="hover:text-pink-400 hover:underline text-lg font-semibold transition duration-200">
+          <Link
+            href="/"
+            className="hover:text-pink-400 hover:underline text-lg font-semibold transition duration-200"
+          >
             🏠 Home
-          </a>
-          <a href="/reports" className="hover:text-pink-400 hover:underline text-lg font-semibold transition duration-200">
+          </Link>
+
+          <Link
+            href="/reports"
+            className="hover:text-pink-400 hover:underline text-lg font-semibold transition duration-200"
+          >
             📊 Reports
-          </a>
-          <a href="/game" className="hover:text-pink-400 hover:underline text-lg font-semibold transition duration-200">
+          </Link>
+
+          <Link
+            href="/game"
+            className="hover:text-pink-400 hover:underline text-lg font-semibold transition duration-200"
+          >
             🎮 Game
-          </a>
+          </Link>
         </div>
 
         <button
