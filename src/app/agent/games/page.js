@@ -1,7 +1,7 @@
-'use client'
-import Navigation from '@/components/Navigation';
-import { AgentProvider, useAgent } from '@/context/AgentContext';
-import { useEffect, useState } from 'react';
+"use client";
+// import Navigation from "@/components/Navigation";
+import { AgentProvider, useAgent } from "@/context/AgentContext";
+import { useEffect, useState } from "react";
 
 const Reports = () => {
   const [loading, setLoading] = useState(true);
@@ -10,25 +10,57 @@ const Reports = () => {
 
   const [players, setPlayers] = useState([]);
 
+  //   const fetchPlayersByAgentId = async (agentId) => {
+  //     setLoading(true);
+  //     setFetched(false);
+
+  //     try {
+  //       const res = await fetch("/api/getPlayersByAgentId", {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({ agentId }),
+  //       });
+  //       const data = await res.json();
+  //       if (res.ok) {
+  //         setPlayers(data.players);
+  //       } else {
+  //         console.error(data.message);
+  //         setPlayers([]);
+  //       }
+  //     } catch (error) {
+  //       console.error("Failed to fetch:", error);
+  //       setPlayers([]);
+  //     } finally {
+  //       setLoading(false);
+  //       setFetched(true);
+  //     }
+  //   };
   const fetchPlayersByAgentId = async (agentId) => {
     setLoading(true);
     setFetched(false);
 
     try {
-      const res = await fetch('/api/getPlayersByAgentId', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/getPlayersByAgentId", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agentId }),
       });
+
       const data = await res.json();
+
       if (res.ok) {
-        setPlayers(data.players);
+        if (data.players && data.players.length > 0) {
+          setPlayers(data.players);
+        } else {
+          console.warn("No players found for this agent.");
+          setPlayers([]);
+        }
       } else {
-        console.error(data.message);
+        console.error(data.message || "Failed to fetch players.");
         setPlayers([]);
       }
     } catch (error) {
-      console.error('Failed to fetch:', error);
+      console.error("Failed to fetch:", error);
       setPlayers([]);
     } finally {
       setLoading(false);
@@ -52,14 +84,18 @@ const Reports = () => {
     { ThreeD: 0, TwoD: 0, OneD: 0 }
   );
 
-  const grandTotal = totalAmounts.ThreeD + totalAmounts.TwoD + totalAmounts.OneD;
+  const grandTotal =
+    totalAmounts.ThreeD + totalAmounts.TwoD + totalAmounts.OneD;
+  if (loading) return <p>Loading...</p>;
+  if (fetched && players.length === 0)
+    return <p>No players found for this agent.</p>;
 
   return (
     <AgentProvider>
       <div className="min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
-        <Navigation />
-
-        {loading && <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>}
+        {loading && (
+          <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>
+        )}
 
         {!loading && fetched && players.length === 0 && (
           <div className="flex items-center justify-center h-[60vh]">
@@ -72,7 +108,9 @@ const Reports = () => {
         {!loading && players.length > 0 && (
           <div className="mt-8">
             <div className="mb-8 max-w-4xl mx-auto">
-              <h3 className="text-2xl text-green-400 mb-4 font-semibold">📊 All Players Total Summary</h3>
+              <h3 className="text-2xl text-green-400 mb-4 font-semibold">
+                📊 All Players Total Summary
+              </h3>
               <table className="w-full border-collapse font-mono text-sm rounded overflow-hidden shadow-lg">
                 <thead>
                   <tr className="bg-green-800 text-white">
@@ -83,25 +121,35 @@ const Reports = () => {
                 <tbody>
                   <tr className="bg-gray-800">
                     <td className="border px-4 py-2">🎯 3D Total</td>
-                    <td className="border px-4 py-2 text-green-400">{totalAmounts.ThreeD.toFixed(2)}</td>
+                    <td className="border px-4 py-2 text-green-400">
+                      {totalAmounts.ThreeD.toFixed(2)}
+                    </td>
                   </tr>
                   <tr className="bg-gray-900">
                     <td className="border px-4 py-2">🎯 2D Total</td>
-                    <td className="border px-4 py-2 text-green-400">{totalAmounts.TwoD.toFixed(2)}</td>
+                    <td className="border px-4 py-2 text-green-400">
+                      {totalAmounts.TwoD.toFixed(2)}
+                    </td>
                   </tr>
                   <tr className="bg-gray-800">
                     <td className="border px-4 py-2">🎯 1D Total</td>
-                    <td className="border px-4 py-2 text-green-400">{totalAmounts.OneD.toFixed(2)}</td>
+                    <td className="border px-4 py-2 text-green-400">
+                      {totalAmounts.OneD.toFixed(2)}
+                    </td>
                   </tr>
                   <tr className="bg-gray-900 font-bold text-lg">
                     <td className="border px-4 py-2">🔢 Grand Total</td>
-                    <td className="border px-4 py-2 text-yellow-300">{grandTotal.toFixed(2)}</td>
+                    <td className="border px-4 py-2 text-yellow-300">
+                      {grandTotal.toFixed(2)}
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <h3 className="text-2xl text-yellow-400 mb-6 font-semibold text-center">🎉 Player Summary 🎉</h3>
+            <h3 className="text-2xl text-yellow-400 mb-6 font-semibold text-center">
+              🎉 Player Summary 🎉
+            </h3>
 
             <div className="space-y-6 max-w-4xl mx-auto max-h-[60vh] overflow-y-auto pr-2">
               {players.map((player, idx) => (
@@ -113,10 +161,17 @@ const Reports = () => {
                     <div>
                       <h4 className="text-xl font-bold mb-1">{player.name}</h4>
                       <p className="text-yellow-300">
-                        Voucher: <span className="font-mono">{player.voucher || ''}</span>
+                        Voucher:{" "}
+                        <span className="font-mono">
+                          {player.voucher || ""}
+                        </span>
                       </p>
-                      <p className="text-gray-400 text-sm">Time: {new Date(player.time).toLocaleString()}</p>
-                      <p className="text-gray-400 text-sm">Entries: {player.entries.length}</p>
+                      <p className="text-gray-400 text-sm">
+                        Time: {new Date(player.time).toLocaleString()}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Entries: {player.entries.length}
+                      </p>
                     </div>
                     <button
                       onClick={() => window.print()}
@@ -136,7 +191,12 @@ const Reports = () => {
                     </thead>
                     <tbody>
                       {player.entries.map((entry, entryIdx) => (
-                        <tr key={entryIdx} className={entryIdx % 2 === 0 ? 'bg-gray-700' : 'bg-gray-800'}>
+                        <tr
+                          key={entryIdx}
+                          className={
+                            entryIdx % 2 === 0 ? "bg-gray-700" : "bg-gray-800"
+                          }
+                        >
                           <td className="border px-3 py-2">{entryIdx + 1}</td>
                           <td className="border px-3 py-2">{entry.input}</td>
                         </tr>
@@ -148,27 +208,39 @@ const Reports = () => {
                     <table className="w-full border-collapse mt-4 font-mono text-sm rounded overflow-hidden shadow-md">
                       <thead>
                         <tr className="bg-red-700 text-white">
-                          <th className="border px-4 py-2 text-left">Category</th>
+                          <th className="border px-4 py-2 text-left">
+                            Category
+                          </th>
                           <th className="border px-4 py-2 text-left">Amount</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr className="bg-gray-800">
                           <td className="border px-4 py-2">🎯 3D Total</td>
-                          <td className="border px-4 py-2 text-green-400">{player.amountPlayed.ThreeD}</td>
+                          <td className="border px-4 py-2 text-green-400">
+                            {player.amountPlayed.ThreeD}
+                          </td>
                         </tr>
                         <tr className="bg-gray-900">
                           <td className="border px-4 py-2">🎯 2D Total</td>
-                          <td className="border px-4 py-2 text-green-400">{player.amountPlayed.TwoD}</td>
+                          <td className="border px-4 py-2 text-green-400">
+                            {player.amountPlayed.TwoD}
+                          </td>
                         </tr>
                         <tr className="bg-gray-800">
                           <td className="border px-4 py-2">🎯 1D Total</td>
-                          <td className="border px-4 py-2 text-green-400">{player.amountPlayed.OneD}</td>
+                          <td className="border px-4 py-2 text-green-400">
+                            {player.amountPlayed.OneD}
+                          </td>
                         </tr>
                         <tr className="bg-gray-900 font-bold text-lg">
                           <td className="border px-4 py-2">🔢 Grand Total</td>
                           <td className="border px-4 py-2 text-yellow-300">
-                            {(player.amountPlayed.ThreeD + player.amountPlayed.TwoD + player.amountPlayed.OneD).toFixed(2)}
+                            {(
+                              player.amountPlayed.ThreeD +
+                              player.amountPlayed.TwoD +
+                              player.amountPlayed.OneD
+                            ).toFixed(2)}
                           </td>
                         </tr>
                       </tbody>

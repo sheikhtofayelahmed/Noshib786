@@ -1,3 +1,4 @@
+// src/app/agent/login/page.js
 "use client";
 
 import { useState } from "react";
@@ -11,7 +12,7 @@ export default function AgentLogin() {
   const router = useRouter();
 
   const handleLogin = async () => {
-    if (!agentIdInput || !password) return; // basic client check
+    if (!agentIdInput || !password) return;
     const success = await login(agentIdInput, password);
     if (success) router.push("/");
   };

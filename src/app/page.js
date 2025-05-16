@@ -15,7 +15,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!agentId) router.push("/login");
+    if (!agentId) router.push("/agent/login");
   }, [agentId, router]);
 
   if (!agentId) return null;

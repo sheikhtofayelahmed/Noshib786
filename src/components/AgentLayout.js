@@ -8,8 +8,8 @@ import { Menu, X } from "lucide-react";
 
 const navItems = [
   { name: "Home", path: "/" },
-  { name: "Reports", path: "/reports" },
-  { name: "Account", path: "/Account" },
+  { name: "Games", path: "/agent/games" },
+  { name: "Accounts", path: "/agent/accounts" },
 ];
 
 export default function AgentLayout({ children }) {
@@ -21,7 +21,7 @@ export default function AgentLayout({ children }) {
   const logoutAgent = () => {
     document.cookie = "agent-auth=; Max-Age=0; path=/";
     localStorage.removeItem("agent-auth");
-    window.location.href = "/login";
+    window.location.href = "/agent/login";
   };
 
   return (
