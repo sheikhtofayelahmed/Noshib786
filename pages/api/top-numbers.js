@@ -22,7 +22,7 @@ export default async function handler(req, res) {
           number: { $arrayElemAt: ["$splitInput", 0] },
           amounts: {
             $map: {
-              input: { $slice: ["$splitInput", 1, 10] }, // supports 1 or 2 amounts
+              input: { $slice: ["$splitInput", 1, 10] },
               as: "amt",
               in: { $toInt: "$$amt" },
             },
@@ -41,11 +41,11 @@ export default async function handler(req, res) {
         },
       },
       { $sort: { totalPlayed: -1 } },
-      { $limit: 3 }, // Top most played number
+      { $limit: 3 },
     ]);
 
     const result = await cursor.toArray();
-    res.status(200).json(result[0] || { message: "No data found" });
+    res.status(200).json(result); // ✅ FIXED: Return the array
   } catch (error) {
     console.error("Error analyzing top number:", error);
     res.status(500).json({ error: "Internal Server Error" });

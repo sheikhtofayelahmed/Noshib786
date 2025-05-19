@@ -9,7 +9,7 @@ export default function AdminGameControl() {
   const [gameDate, setGameDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [topPlayedNumber, setTopPlayedNumber] = useState(null);
+  const [topPlayedNumbers, setTopPlayedNumbers] = useState([]);
 
   // Fetch initial game status and winning numbers
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function AdminGameControl() {
       try {
         const res = await fetch("/api/top-numbers"); // Replace with your actual endpoint
         const data = await res.json();
-        setTopPlayedNumber(data);
+        setTopPlayedNumbers(data);
       } catch (err) {
         console.error("Failed to fetch top number:", err);
       }
@@ -101,7 +101,7 @@ export default function AdminGameControl() {
       console.error("Move error:", error);
     }
   };
-
+  console.log("g", topPlayedNumbers);
   return (
     <div className="max-w-xl mx-auto mt-6 bg-gray-900 bg-opacity-90 p-6 rounded-lg ring-2 ring-red-500 text-white">
       <h2 className="text-2xl font-bold mb-4 text-yellow-400">
@@ -120,16 +120,41 @@ export default function AdminGameControl() {
           {isGameOn ? "ON" : "OFF"}
         </button>
       </div>
-      {topPlayedNumber && (
-        <div className="mb-4 p-4 rounded bg-black bg-opacity-40 border border-yellow-500">
-          <div className="text-lg font-bold text-yellow-400">
-            🔥 Most Played Number
-          </div>
-          <div className="text-2xl font-extrabold font-mono bg-gradient-to-r from-yellow-400 via-pink-500 to-red-500 text-transparent bg-clip-text tracking-widest animate-pulse mt-1">
-            Number:{topPlayedNumber._id} , Amount: {topPlayedNumber.totalPlayed}
-          </div>
+
+      <div className="mb-6 p-4 rounded bg-black bg-opacity-40 border border-yellow-500">
+        <div className="text-lg font-bold text-yellow-400 mb-3">
+          🔥 Most Played Numbers
         </div>
-      )}
+        <table className="w-full table-auto border border-gray-600 text-white font-mono">
+          <thead>
+            <tr className="bg-gray-800 text-yellow-300">
+              <th className="px-4 py-2 border border-gray-600 text-left">
+                Number
+              </th>
+              <th className="px-4 py-2 border border-gray-600 text-left">
+                Total Amount
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {topPlayedNumbers &&
+              topPlayedNumbers.map((item, index) => (
+                <tr
+                  key={index}
+                  className="bg-gray-900 hover:bg-gray-800 transition"
+                >
+                  <td className="px-4 py-2 border border-gray-600 text-xl font-bold text-yellow-400">
+                    {item._id}
+                  </td>
+                  <td className="px-4 py-2 border border-gray-600 text-xl font-bold text-pink-400">
+                    {item.totalPlayed}
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+
       {/* Winning Numbers */}
       <div className="mb-4">
         <label className="block mb-1 font-semibold">

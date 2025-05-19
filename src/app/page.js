@@ -1,7 +1,7 @@
 // app/dashboard/page.js
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAgent } from "@/context/AgentContext";
 
@@ -13,17 +13,32 @@ import NumberChart from "@/components/NumberChart";
 export default function DashboardPage() {
   const { agentId } = useAgent();
   const router = useRouter();
+  const [isGameOn, setIsGameOn] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!agentId) router.push("/agent/login");
   }, [agentId, router]);
 
   if (!agentId) return null;
+  useEffect(() => {
+    const fetchGameStatus = async () => {
+      try {
+        const res = await fetch("/api/game-status");
+        const data = await res.json();
+        setIsGameOn(data.isGameOn);
+      } catch (error) {
+        console.error("Failed to fetch game status:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchGameStatus();
+  }, []);
   return (
     <AgentLayout>
-      <Win straightWin="456" singleWin="7" />
-      <PlayerInput />
+      {!isGameOn ? <Win /> : <PlayerInput />}
       <NumberChart />
     </AgentLayout>
   );

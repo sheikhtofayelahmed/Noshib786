@@ -1,10 +1,10 @@
-// components/AgentLayout.js
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import Breadcrumb from "./Breadcrumb"; // adjust path if needed
 
 const navItems = [
   { name: "Home", path: "/" },
@@ -81,8 +81,11 @@ export default function AgentLayout({ children }) {
         />
       )}
 
-      {/* Main content */}
-      <main className="flex-1 p-6">{children}</main>
+      {/* Main Content */}
+      <main className="flex-1 p-6">
+        <Breadcrumb />
+        {children}
+      </main>
     </div>
   );
 }
