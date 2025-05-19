@@ -18,7 +18,7 @@ export default function LoginPage() {
     });
     setLoading(false);
     if (res.ok) {
-      router.push("/admin/agent");
+      router.push("/admin/game-control");
     } else {
       const data = await res.json();
       setError(data.error || "Login failed");

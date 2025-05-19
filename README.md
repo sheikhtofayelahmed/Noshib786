@@ -108,4 +108,4 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 * **"Casino-inspired, high-contrast, dark-to-red gradient theme with yellow highlights and interactive elements."**
 
 ---
-
+**cookie is set to 1 hour. the security system will developed next**

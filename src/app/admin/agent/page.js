@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AdminAgentPage() {
   const router = useRouter();
 
   const [agents, setAgents] = useState([]);
   const [loadingAgents, setLoadingAgents] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const [agentId, setAgentId] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [agentId, setAgentId] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [adding, setAdding] = useState(false);
 
   const [selectedAgentId, setSelectedAgentId] = useState(null);
@@ -25,17 +25,17 @@ export default function AdminAgentPage() {
 
   const fetchAgents = async () => {
     setLoadingAgents(true);
-    setError('');
+    setError("");
     try {
-      const res = await fetch('/api/getAgents');
+      const res = await fetch("/api/getAgents");
       const data = await res.json();
       if (res.ok) {
         setAgents(data.agents);
       } else {
-        setError(data.message || 'Failed to fetch agents');
+        setError(data.message || "Failed to fetch agents");
       }
     } catch {
-      setError('Failed to fetch agents');
+      setError("Failed to fetch agents");
     } finally {
       setLoadingAgents(false);
     }
@@ -44,42 +44,42 @@ export default function AdminAgentPage() {
   const handleAddAgent = async (e) => {
     e.preventDefault();
     if (!agentId || !password || !name) {
-      setError('Please fill all fields');
+      setError("Please fill all fields");
       return;
     }
 
     setAdding(true);
-    setError('');
+    setError("");
 
     try {
-      const res = await fetch('/api/addAgent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/addAgent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agentId, password, name }),
       });
       const data = await res.json();
 
       if (res.ok) {
         await fetchAgents();
-        setAgentId('');
-        setPassword('');
-        setName('');
+        setAgentId("");
+        setPassword("");
+        setName("");
       } else {
-        setError(data.message || 'Failed to add agent');
+        setError(data.message || "Failed to add agent");
       }
     } catch {
-      setError('Failed to add agent');
+      setError("Failed to add agent");
     } finally {
       setAdding(false);
     }
   };
 
   const toggleActive = async (agentId, currentActive) => {
-    setError('');
+    setError("");
     try {
-      const res = await fetch('/api/toggleAgentActive', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/toggleAgentActive", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agentId, active: !currentActive }),
       });
       const data = await res.json();
@@ -91,24 +91,27 @@ export default function AdminAgentPage() {
           setAgents((prev) => prev.filter((a) => a.agentId !== agentId));
         }
       } else {
-        setError(data.message || 'Failed to update agent status');
+        setError(data.message || "Failed to update agent status");
       }
     } catch {
-      setError('Failed to update agent status');
+      setError("Failed to update agent status");
     }
   };
 
- 
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black to-red-900 min-h-screen">
-      <h1 className="text-4xl mb-6 text-yellow-400 font-bold">🎰 Admin Agent Management</h1>
+      <h1 className="text-4xl mb-6 text-yellow-400 font-bold">
+        🎰 Admin Agent Management
+      </h1>
 
       {/* Add Agent Form */}
       <form
         onSubmit={handleAddAgent}
         className="bg-black bg-opacity-70 p-6 rounded-lg shadow-lg max-w-md mb-10"
       >
-        <h2 className="text-2xl font-bold mb-4 text-yellow-400">➕ Add New Agent</h2>
+        <h2 className="text-2xl font-bold mb-4 text-yellow-400">
+          ➕ Add New Agent
+        </h2>
         <input
           type="text"
           placeholder="Agent Name"
@@ -133,20 +136,22 @@ export default function AdminAgentPage() {
           className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
           disabled={adding}
         />
-       
+
         <button
           type="submit"
           disabled={adding}
           className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded transition"
         >
-          {adding ? 'Adding...' : 'Add Agent'}
+          {adding ? "Adding..." : "Add Agent"}
         </button>
         {error && <p className="mt-2 text-red-400">{error}</p>}
       </form>
 
       {/* Agent List */}
       <section>
-        <h2 className="text-2xl font-bold mb-4 text-yellow-400">🧑‍💼 Agents List</h2>
+        <h2 className="text-2xl font-bold mb-4 text-yellow-400">
+          🧑‍💼 Agents List
+        </h2>
         {loadingAgents ? (
           <p className="text-yellow-300">Loading agents...</p>
         ) : (
@@ -175,6 +180,12 @@ export default function AdminAgentPage() {
                   </td>
                   <td className="border border-yellow-400 p-2 space-x-2">
                     <button
+                      onClick={() => router.push(`/agent-accounts/${agentId}`)}
+                      className="px-3 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                    >
+                      View Accounts
+                    </button>
+                    <button
                       onClick={() => router.push(`/agent-games/${agentId}`)}
                       className="px-3 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
                     >
@@ -183,17 +194,22 @@ export default function AdminAgentPage() {
                     <button
                       onClick={() => toggleActive(agentId, active)}
                       className={`px-3 py-1 rounded ${
-                        active ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
+                        active
+                          ? "bg-red-600 hover:bg-red-700"
+                          : "bg-green-600 hover:bg-green-700"
                       } text-white font-semibold`}
                     >
-                      {active ? 'Make Inactive' : 'Make Active'}
+                      {active ? "Make Inactive" : "Make Active"}
                     </button>
                   </td>
                 </tr>
               ))}
               {agents.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center p-4 text-pink-400 font-bold">
+                  <td
+                    colSpan={5}
+                    className="text-center p-4 text-pink-400 font-bold"
+                  >
                     No agents found.
                   </td>
                 </tr>
@@ -202,8 +218,6 @@ export default function AdminAgentPage() {
           </table>
         )}
       </section>
-
-     
     </div>
   );
 }

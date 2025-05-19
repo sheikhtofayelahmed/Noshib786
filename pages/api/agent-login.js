@@ -1,5 +1,7 @@
 import clientPromise from "lib/mongodb"; // your MongoDB connection utility
 
+import { serialize } from "cookie";
+
 export default async function handler(req, res) {
   try {
     const { agentId, password } = req.body; // get data from POST body
@@ -19,7 +21,14 @@ export default async function handler(req, res) {
     if (password !== agent.password) {
       return res.status(401).json({ error: "Invalid password" });
     }
+    const cookie = serialize("agent-auth", agentId, {
+      httpOnly: true,
+      path: "/",
+      maxAge: 60 * 60 * 1, // 1 hours
+      secure: process.env.NODE_ENV === "production",
+    });
 
+    res.setHeader("Set-Cookie", cookie);
     // Success: return agent info without password
     return res.status(200).json({
       agentId: agent.agentId,
