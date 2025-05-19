@@ -101,7 +101,7 @@ export default function AdminGameControl() {
       console.error("Move error:", error);
     }
   };
-  console.log("g", topPlayedNumbers);
+
   return (
     <div className="max-w-xl mx-auto mt-6 bg-gray-900 bg-opacity-90 p-6 rounded-lg ring-2 ring-red-500 text-white">
       <h2 className="text-2xl font-bold mb-4 text-yellow-400">

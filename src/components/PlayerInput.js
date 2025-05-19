@@ -587,8 +587,8 @@ export default function PlayerInput() {
   };
 
   return (
-    <div className="min-h-screen  text-white p-6">
-      <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-xl shadow-2xl p-6">
+    <div className="min-h-screen  text-white p-6 ">
+      <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-red-500 shadow-2xl p-6">
         <h1 className="text-4xl font-bold text-center mb-6 text-yellow-400">
           🎰 Player Input 🎰
         </h1>
