@@ -11,7 +11,54 @@ export default function PlayerInput() {
   const [submittedPlayers, setSubmittedPlayers] = useState([]);
   const [amountPlayed, setAmountPlayed] = useState({});
   const { agentId } = useAgent();
+  const [targetTime, setTargetTime] = useState(null);
+  const [timeLeft, setTimeLeft] = useState("");
+  const [error, setError] = useState("");
+  const [isGameOn, setIsGameOn] = useState(null);
+  useEffect(() => {
+    const fetchTarget = async () => {
+      try {
+        const res = await fetch("/api/game-status");
+        if (!res.ok) throw new Error("Failed to fetch game status");
+        const data = await res.json();
+        if (data.isGameOn) {
+          setIsGameOn(true);
+        }
+        if (data.targetDateTime) {
+          setTargetTime(new Date(data.targetDateTime));
+        } else {
+          setError("No countdown date set.");
+        }
+      } catch (err) {
+        setError(err.message);
+      }
+    };
 
+    fetchTarget();
+  }, []);
+
+  useEffect(() => {
+    if (!targetTime) return;
+
+    const interval = setInterval(() => {
+      const now = new Date();
+      const diff = targetTime - now;
+
+      if (diff <= 0) {
+        setTimeLeft("The game has ended!");
+        clearInterval(interval);
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [targetTime]);
   // At the top of your component
   useEffect(() => {
     let total1D = 0,
@@ -196,62 +243,19 @@ export default function PlayerInput() {
     );
   };
 
-  // const handleSubmitAndPrint = async (player) => {
-  //   if (submittedPlayers.includes(player.name)) {
-  //     // Already submitted ➔ Only print
-  //     handlePrint(player);
-  //     return;
-  //   }
-  //   const parsedData = player.data.map(entry => ({ input: entry.input }));
-  //   let total1D = 0, total2D = 0, total3D = 0;
-
-  //   player.data.forEach(entry => {
-  //     const parts = entry.input.split('=');
-  //     const num = parts[0];
-  //     const amounts = parts.slice(1).map(Number).filter(n => !isNaN(n));
-
-  //     const sum = amounts.reduce((a, b) => a + b, 0);
-
-  //     if (/^\d$/.test(num)) {
-  //       total1D += sum;
-  //     } else if (/^\d{2}$/.test(num)) {
-  //       total2D += sum;
-  //     } else if (/^\d{3}$/.test(num)) {
-  //       total3D += sum;
-  //     }
-  //   });
-
-  //   const payload = {
-  //     voucher: player.voucher,
-  //     agentId: agentId,
-  //     name: player.name || "",
-  //     time: player.time,
-  //     data: parsedData,
-  //     amountPlayed: { OneD: total1D , TwoD: total2D , ThreeD: total3D },
-  //   };
-  //   console.log("payload.amountPlayed")
-
-  //   try {
-  //     const res = await fetch('/api/savePlayer', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify(payload),
-  //     });
-
-  //     if (res.ok) {
-  //       alert('✅ Player data submitted to database!');
-  //       setSubmittedPlayers(prev => [...prev, player.name]);
-  //       handlePrint(player);
-  //     } else {
-  //       const err = await res.json();
-  //       alert(`❌ Failed to submit: ${err.message}`);
-  //     }
-  //   } catch (err) {
-  //     console.error('Submit error:', err);
-  //     alert('❌ An error occurred while submitting.');
-  //   }
-  // };
   const handleSubmitAndPrint = async (player) => {
+    try {
+      const statusRes = await fetch("/api/game-status");
+      const statusData = await statusRes.json();
+
+      if (!statusData.isGameOn) {
+        alert("⛔ The game has ended. Submissions are now closed.");
+        return;
+      }
+    } catch (err) {
+      alert("⚠️ Failed to verify game status. Please try again.");
+      return;
+    }
     // Prevent re-submission if already submitted
     if (submittedPlayers.includes(player.name)) {
       // Already submitted ➔ Only print
@@ -319,137 +323,6 @@ export default function PlayerInput() {
     }
   };
 
-  //   const handlePrint = (player) => {
-  //     const win = window.open("", "_blank");
-  //     win.document.write(`
-  //       <html>
-  //         <head>
-  //           <title>Player Data</title>
-  //           <style>
-  //             body { font-family: Arial; background: #000; color: #ffd700; padding: 20px; }
-  //             .container { background: #222; padding: 20px; border-radius: 10px; }
-  //             h2 { text-align: center; }
-  //             table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-  //             th, td { border: 1px solid #555; padding: 10px; text-align: center; }
-  //             th { background: #cc0000; color: #fff; }
-  //             tr:nth-child(even) { background: #333; }
-  //             .totals {
-  //   margin-top: 1rem; /* mt-4 */
-  //   color: #ffd700; /* text-yellow-300 */
-  // }
-
-  // .totals-heading {
-  //   font-size: 1.125rem; /* text-lg */
-  //   font-weight: bold; /* font-bold */
-  //   margin-bottom: 0.5rem; /* mb-2 */
-  // }
-
-  // .totals-list {
-  //   list-style-type: disc; /* list-disc */
-  //   padding-left: 1.5rem; /* list-inside approximation */
-  // }
-
-  // .totals-list li {
-  //   margin-bottom: 0.25rem; /* space-y-1 */
-  // }
-  // .totals-table {
-  //     width: 100%;
-  //     border-collapse: collapse;
-  //     margin-top: 20px;
-  //     font-family: Arial;
-  //     background-color: #111;
-  //     color: #ffd700;
-  //   }
-
-  //   .totals-table th,
-  //   .totals-table td {
-  //     border: 1px solid #555;
-  //     padding: 10px;
-  //     text-align: center;
-  //   }
-
-  //   .totals-table thead th {
-  //     background: #cc0000;
-  //     color: #fff;
-  //   }
-
-  //   .totals-table tbody tr:nth-child(even) {
-  //     background-color: #222;
-  //   }
-
-  //   .totals-table tbody tr:last-child th {
-  //     background-color: #333;
-  //     font-size: 1.1em;
-  //   }
-  //           </style>
-  //         </head>
-  //         <body>
-  //           <div class="container">
-  //             <h2>🎰 ${player.voucher}</h2>
-  //             <h2>🎰 ${player.name}</h2>
-  //             <p>🕒 ${player.time}</p>
-  //             <table>
-  //               <thead>
-  //                 <tr><th>#</th><th>Input</th></tr>
-  //               </thead>
-  //               <tbody>
-  //                 ${player.data.map(e => `<tr><td>${e.serial}</td><td>${e.input}</td></tr>`).join("")}
-  //               </tbody>
-  //             </table>
-  //          <div class="totals">
-  //  <table class="totals-table">
-  //   <thead>
-  //     <tr>
-  //       <th>Category</th>
-  //       <th>Amount</th>
-  //       <th>After Deduction</th>
-  //     </tr>
-  //   </thead>
-  //   <tbody>
-  //     <tr>
-  //       <td>🎯 3D Total</td>
-  //       <td>${amountPlayed.ThreeD}</td>
-  //       <td>${(amountPlayed.ThreeD * 0.6).toFixed(2)}</td>
-  //     </tr>
-  //     <tr>
-  //       <td>🎯 2D Total</td>
-  //       <td>${amountPlayed.TwoD}</td>
-  //       <td>${(amountPlayed.TwoD * 0.8).toFixed(2)}</td>
-  //     </tr>
-  //     <tr>
-  //       <td>🎯 1D Total</td>
-  //       <td>${amountPlayed.OneD}</td>
-  //       <td>${amountPlayed.OneD.toFixed(2)}</td>
-  //     </tr>
-  //     <tr>
-  //       <th>🔢 Grand Total</th>
-  //       <th>
-  //         ${(
-  //           amountPlayed.ThreeD +
-  //           amountPlayed.TwoD +
-  //           amountPlayed.OneD
-  //         ).toFixed(2)}
-  //       </th>
-  //       <th>
-  //         ${(
-  //           amountPlayed.ThreeD * 0.6 +
-  //           amountPlayed.TwoD * 0.8 +
-  //           amountPlayed.OneD
-  //         ).toFixed(2)}
-  //       </th>
-  //     </tr>
-  //   </tbody>
-  // </table>
-
-  // </div>
-
-  //           </div>
-  //         </body>
-  //       </html>
-  //     `);
-  //     win.document.close();
-  //     win.print();
-  //   };
   const handlePrint = (player) => {
     const amountPlayed = player.amountPlayed || { OneD: 0, TwoD: 0, ThreeD: 0 }; // make sure amountPlayed exists
 
@@ -592,6 +465,9 @@ export default function PlayerInput() {
 
   return (
     <div className="min-h-screen  text-white p-6 ">
+      <div className="p-4 bg-gray-900 rounded text-yellow-400 font-mono text-xl text-center">
+        ⏳ Time Remaining: <span className="font-bold">{timeLeft}</span>
+      </div>
       <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-red-500 shadow-2xl p-6">
         <h1 className="text-4xl font-bold text-center mb-6 text-yellow-400">
           🎰 Player Input 🎰

@@ -10,7 +10,9 @@ export default function AdminGameControl() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [topPlayedNumbers, setTopPlayedNumbers] = useState([]);
+  const [targetDateTime, setTargetDateTime] = useState("");
 
+  const [countdown, setCountdown] = useState(null);
   // Fetch initial game status and winning numbers
   useEffect(() => {
     const fetchStatus = async () => {
@@ -55,6 +57,35 @@ export default function AdminGameControl() {
       setIsGameOn(data.isGameOn);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleCountdown = async () => {
+    if (!targetDateTime) {
+      setError("Please select a valid date and time.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/game-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetDateTime }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.message || "Failed to submit date and time.");
+      } else {
+        alert("Game start date & time updated successfully!");
+      }
+    } catch (err) {
+      setError("An error occurred while submitting.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -118,6 +149,29 @@ export default function AdminGameControl() {
           onClick={toggleGameStatus}
         >
           {isGameOn ? "ON" : "OFF"}
+        </button>
+      </div>
+      <div className="mb-4 flex items-center justify-between">
+        {/* Left side: label and input stacked */}
+        <div className="flex flex-col">
+          <label className="block mb-1 font-semibold text-yellow-400">
+            🗓️ Game Start Date & Time
+          </label>
+          <input
+            type="datetime-local"
+            value={targetDateTime}
+            onChange={(e) => setTargetDateTime(e.target.value)}
+            className="w-60 px-4 py-2 rounded bg-gray-800 border border-gray-500 text-white focus:outline-none"
+          />
+        </div>
+
+        {/* Right side: smaller button */}
+        <button
+          onClick={handleCountdown}
+          disabled={loading}
+          className="ml-4 bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-3 py-1 rounded shadow whitespace-nowrap text-sm"
+        >
+          {loading ? "Saving..." : "Save"}
         </button>
       </div>
 
