@@ -459,64 +459,68 @@ export default function PlayerInput() {
       <head>
         <title>Player Data</title>
         <style>
-          body { font-family: Arial; background: #000; color: #ffd700; padding: 20px; }
-          .container { background: #222; padding: 20px; border-radius: 10px; }
-          h2 { text-align: center; }
-          table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-          th, td { border: 1px solid #555; padding: 10px; text-align: center; }
-          th { background: #cc0000; color: #fff; }
-          tr:nth-child(even) { background: #333; }
-          
-          .totals {
-            margin-top: 1rem; /* mt-4 */
-            color: #ffd700; /* text-yellow-300 */
-          }
-          
-          .totals-heading {
-            font-size: 1.125rem; /* text-lg */
-            font-weight: bold; /* font-bold */
-            margin-bottom: 0.5rem; /* mb-2 */
-          }
-          
-          .totals-list {
-            list-style-type: disc; /* list-disc */
-            padding-left: 1.5rem; /* list-inside approximation */
-          }
-          
-          .totals-list li {
-            margin-bottom: 0.25rem; /* space-y-1 */
-          }
-          
-          .totals-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            font-family: Arial;
-            background-color: #111;
-            color: #ffd700;
-          }
-          
-          .totals-table th,
-          .totals-table td {
-            border: 1px solid #555;
-            padding: 10px;
-            text-align: center;
-          }
-          
-          .totals-table thead th {
-            background: #cc0000;
-            color: #fff;
-          }
-          
-          .totals-table tbody tr:nth-child(even) {
-            background-color: #222;
-          }
-          
-          .totals-table tbody tr:last-child th {
-            background-color: #333;
-            font-size: 1.1em;
-          }
-        </style>
+        @page {
+          size: 80mm 40mm;
+          margin: 0;
+        }
+
+        body {
+          font-family: Arial, sans-serif;
+          font-size: 10px;
+          background: #fff;
+          color: #000;
+          padding: 4px;
+          margin: 0;
+        }
+
+        .container {
+          width: 100%;
+        }
+
+        h2 {
+          font-size: 12px;
+          margin: 2px 0;
+          text-align: center;
+        }
+
+        p {
+          font-size: 10px;
+          text-align: center;
+          margin: 2px 0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 4px;
+        }
+
+        th, td {
+          border: 1px solid #000;
+          padding: 2px;
+          text-align: center;
+          font-size: 9px;
+        }
+
+        .totals-table {
+          margin-top: 4px;
+        }
+
+        .totals-table th {
+          background: #000;
+          color: #fff;
+          font-size: 9px;
+        }
+
+        .totals-table td {
+          font-size: 9px;
+        }
+
+        .grand-total {
+          font-weight: bold;
+          background: #eee;
+        }
+      </style>
       </head>
       <body>
         <div class="container">

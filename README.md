@@ -121,3 +121,4 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 **create voucher for agent**
 **time countdown**
 **game account summary for each game and yearly game**
+**reload issue on agent game**

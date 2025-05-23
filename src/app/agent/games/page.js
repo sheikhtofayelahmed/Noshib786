@@ -153,19 +153,18 @@ const Reports = () => {
 
             <div className="space-y-6 max-w-4xl mx-auto max-h-[60vh] overflow-y-auto pr-2">
               {players.map((player, idx) => (
-                <div
-                  key={idx}
-                  className="bg-gray-800 rounded-lg shadow p-5 border border-yellow-500 hover:shadow-yellow-500 transition-shadow"
-                >
+                <div key={idx} className="bg-gray-800 rounded-lg shadow p-5">
+                  {/* Top Flex Row */}
+                  {/* Voucher (center) */}
+                  <div className="flex-1 text-center">
+                    <p className="text-yellow-300 font-bold text-xl font-mono">
+                      🎫 {player.voucher || "N/A"}
+                    </p>
+                  </div>
                   <div className="flex justify-between items-start mb-4">
+                    {/* Player Info */}
                     <div>
                       <h4 className="text-xl font-bold mb-1">{player.name}</h4>
-                      <p className="text-yellow-300">
-                        Voucher:{" "}
-                        <span className="font-mono">
-                          {player.voucher || ""}
-                        </span>
-                      </p>
                       <p className="text-gray-400 text-sm">
                         Time: {new Date(player.time).toLocaleString()}
                       </p>
@@ -173,15 +172,20 @@ const Reports = () => {
                         Entries: {player.entries.length}
                       </p>
                     </div>
-                    <button
-                      onClick={() => window.print()}
-                      className="py-2 px-4 rounded bg-purple-600 hover:bg-purple-700 transition text-white font-semibold"
-                      title="Print Player Info"
-                    >
-                      🖨️ Print
-                    </button>
+
+                    {/* Print Button */}
+                    <div>
+                      <button
+                        onClick={() => window.print()}
+                        className="py-2 px-4 rounded bg-purple-600 hover:bg-purple-700 transition"
+                        title="Print Player Info"
+                      >
+                        🖨️ Print
+                      </button>
+                    </div>
                   </div>
 
+                  {/* Entries Table */}
                   <table className="w-full border-collapse text-sm font-mono rounded overflow-hidden">
                     <thead>
                       <tr className="bg-yellow-600 text-black">
@@ -204,6 +208,7 @@ const Reports = () => {
                     </tbody>
                   </table>
 
+                  {/* Totals Table */}
                   <div className="mt-4 text-yellow-300">
                     <table className="w-full border-collapse mt-4 font-mono text-sm rounded overflow-hidden shadow-md">
                       <thead>

@@ -15,9 +15,17 @@ export default function AdminAgentPage() {
   const [name, setName] = useState("");
   const [adding, setAdding] = useState(false);
 
-  const [selectedAgentId, setSelectedAgentId] = useState(null);
-  const [games, setGames] = useState([]);
-  const [loadingGames, setLoadingGames] = useState(false);
+  const [percentages, setPercentages] = useState({
+    threeD: 0,
+    twoD: 0,
+    oneD: 0,
+    str: 0,
+    rumble: 0,
+    down: 0,
+    single: 0,
+  });
+  const [editingAgent, setEditingAgent] = useState(null);
+  const [showPercentageModal, setShowPercentageModal] = useState(false);
 
   useEffect(() => {
     fetchAgents();
@@ -39,6 +47,23 @@ export default function AdminAgentPage() {
     } finally {
       setLoadingAgents(false);
     }
+  };
+
+  // When clicking % button, open modal and load agent percentages
+  const handleEditClick = (agent) => {
+    setEditingAgent(agent);
+    setPercentages(
+      agent.percentage || {
+        threeD: 0,
+        twoD: 0,
+        oneD: 0,
+        str: 0,
+        rumble: 0,
+        down: 0,
+        single: 0,
+      }
+    );
+    setShowPercentageModal(true);
   };
 
   const handleAddAgent = async (e) => {
@@ -95,6 +120,34 @@ export default function AdminAgentPage() {
       }
     } catch {
       setError("Failed to update agent status");
+    }
+  };
+
+  const savePercentages = async () => {
+    setError("");
+    try {
+      const res = await fetch("/api/updateAgentPercentages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          agentId: editingAgent.agentId,
+          percentage: percentages,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Percentages updated successfully!");
+        setShowPercentageModal(false);
+        setEditingAgent(null);
+        fetchAgents(); // Refresh the list
+      } else {
+        setError(data.message || "Failed to update percentages");
+      }
+    } catch (err) {
+      console.error("Error updating percentages:", err);
+      setError("Failed to update percentages");
     }
   };
 
@@ -166,7 +219,17 @@ export default function AdminAgentPage() {
               </tr>
             </thead>
             <tbody>
-              {agents.map(({ agentId, name, password, active }) => (
+              {agents.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="text-center p-4 text-pink-400 font-bold"
+                  >
+                    No agents found.
+                  </td>
+                </tr>
+              )}
+              {agents.map(({ agentId, name, password, active, percentage }) => (
                 <tr key={agentId} className="odd:bg-gray-800 even:bg-gray-900">
                   <td className="border border-yellow-400 p-2">{agentId}</td>
                   <td className="border border-yellow-400 p-2">{name}</td>
@@ -192,6 +255,14 @@ export default function AdminAgentPage() {
                       View Games
                     </button>
                     <button
+                      onClick={() =>
+                        handleEditClick({ agentId, name, percentage })
+                      }
+                      className="px-3 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                    >
+                      %
+                    </button>
+                    <button
                       onClick={() => toggleActive(agentId, active)}
                       className={`px-3 py-1 rounded ${
                         active
@@ -204,20 +275,56 @@ export default function AdminAgentPage() {
                   </td>
                 </tr>
               ))}
-              {agents.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="text-center p-4 text-pink-400 font-bold"
-                  >
-                    No agents found.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         )}
       </section>
+
+      {/* Percentage Edit Modal */}
+      {showPercentageModal && editingAgent && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <div className="bg-gray-900 p-6 rounded-lg text-white w-[90%] max-w-md">
+            <h2 className="text-xl font-bold mb-4 text-yellow-400">
+              Edit Percentages for {editingAgent.name}
+            </h2>
+
+            {Object.entries(percentages).map(([key, value]) => (
+              <div key={key} className="mb-3">
+                <label className="block capitalize text-sm">{key}</label>
+                <input
+                  type="number"
+                  className="w-full p-2 bg-black border border-yellow-400 rounded text-yellow-300"
+                  value={value}
+                  onChange={(e) =>
+                    setPercentages((prev) => ({
+                      ...prev,
+                      [key]: parseFloat(e.target.value) || 0,
+                    }))
+                  }
+                />
+              </div>
+            ))}
+
+            <div className="flex justify-end space-x-2 mt-4">
+              <button
+                onClick={() => {
+                  setShowPercentageModal(false);
+                  setEditingAgent(null);
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={savePercentages}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
