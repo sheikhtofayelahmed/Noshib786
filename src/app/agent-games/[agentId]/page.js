@@ -179,31 +179,27 @@ export default function AgentGames() {
             </div>
 
             <h3 className="text-2xl text-yellow-400 font-semibold mb-6">
-              🎉 Player Summaryssss 🎉
+              🎉 Player Summary 🎉
             </h3>
             <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
               {players.map((player, idx) => (
                 <div key={idx} className="bg-gray-800 rounded-lg shadow p-5">
-                  {/* Voucher (centered) */}
-                  <div className="text-center mb-4">
-                    <p className="text-yellow-300 font-bold text-lg font-mono">
-                      🎫 {player.vouche || "N/A"}
-                    </p>
-                  </div>
-
-                  {/* Player Info */}
-                  <div className="mb-4">
-                    <h4 className="text-xl font-bold mb-1">{player.name}</h4>
-                    <p className="text-gray-400 text-sm">
-                      Time: {new Date(player.time).toLocaleString()}
-                    </p>
-                    <p className="text-gray-400 text-sm">
-                      Entries: {player.entries.length}
-                    </p>
-                  </div>
-
-                  {/* Print Button */}
-                  <div className="text-right">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h4 className="text-xl font-bold mb-1">{player.name}</h4>
+                      <p className="text-yellow-300">
+                        Voucher:{" "}
+                        <span className="font-mono">
+                          {player.voucher || "N/A"}
+                        </span>
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Time: {new Date(player.time).toLocaleString()}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Entries: {player.entries.length}
+                      </p>
+                    </div>
                     <button
                       onClick={() => window.print()}
                       className="py-2 px-4 rounded bg-purple-600 hover:bg-purple-700 transition"
@@ -211,6 +207,71 @@ export default function AgentGames() {
                     >
                       🖨️ Print
                     </button>
+                  </div>
+
+                  <table className="w-full border-collapse text-sm font-mono rounded overflow-hidden">
+                    <thead>
+                      <tr className="bg-yellow-600 text-black">
+                        <th className="border px-3 py-2 text-left">#</th>
+                        <th className="border px-3 py-2 text-left">Input</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {player.entries.map((entry, i) => (
+                        <tr
+                          key={i}
+                          className={
+                            i % 2 === 0 ? "bg-gray-700" : "bg-gray-800"
+                          }
+                        >
+                          <td className="border px-3 py-2">{i + 1}</td>
+                          <td className="border px-3 py-2">{entry.input}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <div className="mt-4">
+                    <table className="w-full border-collapse font-mono text-sm rounded overflow-hidden">
+                      <thead>
+                        <tr className="bg-red-700 text-white">
+                          <th className="border px-4 py-2 text-left">
+                            Category
+                          </th>
+                          <th className="border px-4 py-2 text-left">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="bg-gray-800">
+                          <td className="border px-4 py-2">🎯 3D Total</td>
+                          <td className="border px-4 py-2 text-green-400">
+                            {player.amountPlayed?.ThreeD || 0}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="border px-4 py-2">🎯 2D Total</td>
+                          <td className="border px-4 py-2 text-green-400">
+                            {player.amountPlayed?.TwoD || 0}
+                          </td>
+                        </tr>
+                        <tr className="bg-gray-800">
+                          <td className="border px-4 py-2">🎯 1D Total</td>
+                          <td className="border px-4 py-2 text-green-400">
+                            {player.amountPlayed?.OneD || 0}
+                          </td>
+                        </tr>
+                        <tr className="bg-gray-900 font-bold text-lg">
+                          <td className="border px-4 py-2">🔢 Grand Total</td>
+                          <td className="border px-4 py-2 text-yellow-300">
+                            {(
+                              (player.amountPlayed?.ThreeD || 0) +
+                              (player.amountPlayed?.TwoD || 0) +
+                              (player.amountPlayed?.OneD || 0)
+                            ).toFixed(2)}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               ))}
