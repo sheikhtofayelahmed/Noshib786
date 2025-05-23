@@ -38,7 +38,7 @@ export default function DashboardPage() {
   }, []);
   return (
     <AgentLayout>
-      {!isGameOn ? <Win /> : <PlayerInput />}
+      {isGameOn && <PlayerInput />}
       <NumberChart />
     </AgentLayout>
   );

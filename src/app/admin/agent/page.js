@@ -214,7 +214,6 @@ export default function AdminAgentPage() {
                 <th className="border border-yellow-400 p-2">Agent ID</th>
                 <th className="border border-yellow-400 p-2">Name</th>
                 <th className="border border-yellow-400 p-2">Password</th>
-                <th className="border border-yellow-400 p-2">Status</th>
                 <th className="border border-yellow-400 p-2">Actions</th>
               </tr>
             </thead>
@@ -234,25 +233,19 @@ export default function AdminAgentPage() {
                   <td className="border border-yellow-400 p-2">{agentId}</td>
                   <td className="border border-yellow-400 p-2">{name}</td>
                   <td className="border border-yellow-400 p-2">{password}</td>
-                  <td className="border border-yellow-400 p-2">
-                    {active ? (
-                      <span className="text-green-400 font-bold">Active</span>
-                    ) : (
-                      <span className="text-red-500 font-bold">Inactive</span>
-                    )}
-                  </td>
+
                   <td className="border border-yellow-400 p-2 space-x-2">
                     <button
                       onClick={() => router.push(`/agent-accounts/${agentId}`)}
                       className="px-3 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
                     >
-                      View Accounts
+                      💰
                     </button>
                     <button
                       onClick={() => router.push(`/agent-games/${agentId}`)}
                       className="px-3 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
                     >
-                      View Games
+                      🎰
                     </button>
                     <button
                       onClick={() =>
@@ -270,7 +263,7 @@ export default function AdminAgentPage() {
                           : "bg-green-600 hover:bg-green-700"
                       } text-white font-semibold`}
                     >
-                      {active ? "Make Inactive" : "Make Active"}
+                      {active && "🗑️"}
                     </button>
                   </td>
                 </tr>

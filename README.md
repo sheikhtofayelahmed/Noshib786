@@ -109,9 +109,9 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 
 **cookie is set to 1 hour. the security system will developed next**
 **80,40 mm printing size**
-**voucher should be replaced on name, voucher number should be on the middle**
+<!-- **voucher should be replaced on name, voucher number should be on the middle** -->
 **discount should be shown based on customer or agentId on the agent game**
-**game account: remove**
+<!-- **game account: remove** -->
 **when multiple entry it block the submit button**
 **win should be move to games part, winning number should be highlighted based on straight, rumbo or both, single, down with winning multiple bonus**
 **games should be moved to accounts**
