@@ -149,7 +149,7 @@ export default function AgentAccounts() {
   //                   🎯 3D Total
   //                 </h3>
   //                 <p className="text-3xl font-bold">
-  //                   {totalAmounts.ThreeD.toFixed(2)}
+  //                   {totalAmounts.ThreeD.toFixed(0)}
   //                 </p>
   //               </div>
   //               <div className="bg-gray-800 p-6 rounded-lg shadow hover:shadow-green-400 transition-shadow">
@@ -157,7 +157,7 @@ export default function AgentAccounts() {
   //                   🎯 2D Total
   //                 </h3>
   //                 <p className="text-3xl font-bold">
-  //                   {totalAmounts.TwoD.toFixed(2)}
+  //                   {totalAmounts.TwoD.toFixed(0)}
   //                 </p>
   //               </div>
   //               <div className="bg-gray-800 p-6 rounded-lg shadow hover:shadow-green-400 transition-shadow">
@@ -165,7 +165,7 @@ export default function AgentAccounts() {
   //                   🎯 1D Total
   //                 </h3>
   //                 <p className="text-3xl font-bold">
-  //                   {totalAmounts.OneD.toFixed(2)}
+  //                   {totalAmounts.OneD.toFixed(0)}
   //                 </p>
   //               </div>
   //               <div className="bg-yellow-600 p-6 rounded-lg shadow-lg">
@@ -173,7 +173,7 @@ export default function AgentAccounts() {
   //                   🔢 Grand Total
   //                 </h3>
   //                 <p className="text-3xl font-bold text-black">
-  //                   {grandTotal.toFixed(2)}
+  //                   {grandTotal.toFixed(0)}
   //                 </p>
   //               </div>
   //             </div>
@@ -267,7 +267,7 @@ export default function AgentAccounts() {
   //                               (player.amountPlayed?.ThreeD || 0) +
   //                               (player.amountPlayed?.TwoD || 0) +
   //                               (player.amountPlayed?.OneD || 0)
-  //                             ).toFixed(2)}
+  //                             ).toFixed(0)}
   //                           </td>
   //                         </tr>
   //                       </tbody>

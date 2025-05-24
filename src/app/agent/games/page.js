@@ -37,13 +37,19 @@ const Reports = () => {
     const fetchAgent = async () => {
       try {
         const res = await fetch(`/api/getAgentById?agentId=${agentId}`);
-        if (!res.ok) throw new Error("Failed to fetch agent data");
+
+        // Check status and log for debug
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Response not OK:", res.status, text);
+          throw new Error("Failed to fetch agent data");
+        }
 
         const data = await res.json();
         setAgent(data.agent);
         console.log("Fetched agent:", data.agent.percentage);
       } catch (error) {
-        console.error("Error fetching agent:", error);
+        console.error("Error fetching agent:", error.message);
       }
     };
 
@@ -99,6 +105,7 @@ const Reports = () => {
       fetchPlayersByAgentId(agentId);
     }
   }, [agentId]);
+
   useEffect(() => {
     if (!agentId || !threeUp || !downGame) return;
 
@@ -121,6 +128,7 @@ const Reports = () => {
 
     fetchWins();
   }, [agentId, threeUp, downGame]);
+
   const totalAmounts = players.reduce(
     (acc, player) => {
       acc.ThreeD += player.amountPlayed.ThreeD;
@@ -260,13 +268,13 @@ const Reports = () => {
                         Total
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {totalAmounts.ThreeD.toFixed(2)}
+                        {totalAmounts.ThreeD.toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {totalAmounts.TwoD.toFixed(2)}
+                        {totalAmounts.TwoD.toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {totalAmounts.OneD.toFixed(2)}
+                        {totalAmounts.OneD.toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
                         {totalWins.STR3D}
@@ -287,25 +295,25 @@ const Reports = () => {
                         % / -
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {agent.percentage.threeD || 0}
+                        {agent?.percentage?.threeD || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {agent.percentage.twoD || 0}
+                        {agent?.percentage?.twoD || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {agent.percentage.oneD || 0}
+                        {agent?.percentage?.oneD || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {agent.percentage.str || 0}
+                        {agent?.percentage?.str || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {agent.percentage.rumble || 0}
+                        {agent?.percentage?.rumble || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {agent.percentage.down || 0}
+                        {agent?.percentage?.down || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {agent.percentage.single || 0}
+                        {agent?.percentage?.single || 0}
                       </td>
                     </tr>
 
@@ -314,25 +322,25 @@ const Reports = () => {
                         After Deduction
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {(totalAmounts.ThreeD * 0.6).toFixed(2)}
+                        {(totalAmounts.ThreeD * 0.6).toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {(totalAmounts.TwoD * 0.8).toFixed(2)}
+                        {(totalAmounts.TwoD * 0.8).toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {totalAmounts.OneD.toFixed(2)}
+                        {totalAmounts.OneD.toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {totalAmounts.OneD.toFixed(2)}
+                        {totalAmounts.OneD.toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {totalAmounts.OneD.toFixed(2)}
+                        {totalAmounts.OneD.toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {totalAmounts.OneD.toFixed(2)}
+                        {totalAmounts.OneD.toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {totalAmounts.OneD.toFixed(2)}
+                        {totalAmounts.OneD.toFixed(0)}
                       </td>
                     </tr>
 
@@ -341,49 +349,49 @@ const Reports = () => {
                         🔢 Grand Total
                       </td>
                       <td className="border border-gray-700 px-4 py-2">
-                        {grandTotal.toFixed(2)}
+                        {grandTotal.toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2">
                         {(
                           totalAmounts.ThreeD * 0.6 +
                           totalAmounts.TwoD * 0.8 +
                           totalAmounts.OneD
-                        ).toFixed(2)}
+                        ).toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2">
                         {(
                           totalAmounts.ThreeD * 0.6 +
                           totalAmounts.TwoD * 0.8 +
                           totalAmounts.OneD
-                        ).toFixed(2)}
+                        ).toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2">
                         {(
                           totalAmounts.ThreeD * 0.6 +
                           totalAmounts.TwoD * 0.8 +
                           totalAmounts.OneD
-                        ).toFixed(2)}
+                        ).toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2">
                         {(
                           totalAmounts.ThreeD * 0.6 +
                           totalAmounts.TwoD * 0.8 +
                           totalAmounts.OneD
-                        ).toFixed(2)}
+                        ).toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2">
                         {(
                           totalAmounts.ThreeD * 0.6 +
                           totalAmounts.TwoD * 0.8 +
                           totalAmounts.OneD
-                        ).toFixed(2)}
+                        ).toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2">
                         {(
                           totalAmounts.ThreeD * 0.6 +
                           totalAmounts.TwoD * 0.8 +
                           totalAmounts.OneD
-                        ).toFixed(2)}
+                        ).toFixed(0)}
                       </td>
                     </tr>
                   </tbody>
@@ -486,7 +494,7 @@ const Reports = () => {
                                   player.amountPlayed.ThreeD +
                                   player.amountPlayed.TwoD +
                                   player.amountPlayed.OneD
-                                ).toFixed(2)}
+                                ).toFixed(0)}
                               </td>
                             </tr>
                           </tbody>

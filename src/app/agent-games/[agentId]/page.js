@@ -15,36 +15,82 @@ const navItems = [
 export default function AgentGames() {
   const { agentId } = useParams();
   const pathname = usePathname();
+  const [fetched, setFetched] = useState(false);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isGameOn, setIsGameOn] = useState(null);
   const [players, setPlayers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [fetched, setFetched] = useState(false);
+  const [threeUp, setThreeUp] = useState("XXX");
+  const [downGame, setDownGame] = useState("X");
+  const [date, setDate] = useState("---");
+  const [totalWins, setTotalWins] = useState({});
+  const [agent, setAgent] = useState({});
   const [error, setError] = useState("");
-
   const logoutAdmin = () => {
     document.cookie = "admin-auth=; Max-Age=0; path=/";
     localStorage.removeItem("admin-auth");
     window.location.href = "/admin/login";
   };
 
-  const fetchGames = async (agentId) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/win-status");
+        const data = await res.json();
+        setThreeUp(data.threeUp);
+        setDownGame(data.downGame);
+        setDate(data.date);
+      } catch (error) {
+        console.error("Error fetching winning numbers:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    console.log("agentId in useEffect:", agentId);
+    if (!agentId) return;
+
+    const fetchAgent = async () => {
+      try {
+        const res = await fetch(`/api/getAgentById?agentId=${agentId}`);
+        if (!res.ok) throw new Error("Failed to fetch agent data");
+
+        const data = await res.json();
+        setAgent(data.agent);
+        console.log("Fetched agent:", data.agent.percentage);
+      } catch (error) {
+        console.error("Error fetching agent:", error);
+      }
+    };
+
+    fetchAgent();
+  }, [agentId]);
+
+  const fetchPlayersByAgentId = async (agentId) => {
     setLoading(true);
-    setError("");
+    setFetched(false);
+
     try {
       const res = await fetch("/api/getPlayersByAgentId", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agentId }),
       });
+
       const data = await res.json();
+
       if (res.ok) {
         setPlayers(data.players || []);
       } else {
-        setError(data.message || "Failed to fetch games");
+        console.error(data.message || "Failed to fetch players.");
+        setPlayers([]);
       }
-    } catch {
-      setError("Failed to fetch games");
+    } catch (error) {
+      console.error("Failed to fetch:", error);
+      setPlayers([]);
     } finally {
       setLoading(false);
       setFetched(true);
@@ -52,14 +98,54 @@ export default function AgentGames() {
   };
 
   useEffect(() => {
-    if (agentId) fetchGames(agentId);
+    const fetchGameStatus = async () => {
+      try {
+        const res = await fetch("/api/game-status");
+        const data = await res.json();
+        setIsGameOn(data.isGameOn);
+      } catch (error) {
+        console.error("Failed to fetch game status:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGameStatus();
+  }, []);
+
+  useEffect(() => {
+    if (agentId) {
+      fetchPlayersByAgentId(agentId);
+    }
   }, [agentId]);
+  useEffect(() => {
+    if (!agentId || !threeUp || !downGame) return;
+
+    async function fetchWins() {
+      try {
+        const res = await fetch("/api/getWinningPlays", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agentId, threeUp, downGame }),
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch wins");
+
+        const data = await res.json();
+        setTotalWins(data.totalWins);
+      } catch (err) {
+        setError(err.message);
+      }
+    }
+
+    fetchWins();
+  }, [agentId, threeUp, downGame]);
 
   const totalAmounts = players.reduce(
     (acc, player) => {
-      acc.ThreeD += player.amountPlayed?.ThreeD || 0;
-      acc.TwoD += player.amountPlayed?.TwoD || 0;
-      acc.OneD += player.amountPlayed?.OneD || 0;
+      acc.ThreeD += player.amountPlayed.ThreeD;
+      acc.TwoD += player.amountPlayed.TwoD;
+      acc.OneD += player.amountPlayed.OneD;
       return acc;
     },
     { ThreeD: 0, TwoD: 0, OneD: 0 }
@@ -67,7 +153,53 @@ export default function AgentGames() {
 
   const grandTotal =
     totalAmounts.ThreeD + totalAmounts.TwoD + totalAmounts.OneD;
+  const getPermutations = (str) => {
+    if (str.length <= 1) return [str];
+    let perms = [];
+    for (let i = 0; i < str.length; i++) {
+      const char = str[i];
+      const remaining = str.slice(0, i) + str.slice(i + 1);
+      for (const perm of getPermutations(remaining)) {
+        perms.push(char + perm);
+      }
+    }
+    return [...new Set(perms)];
+  };
+  const isWinningInput = (input) => {
+    const parts = input.split("=");
+    const number = parts[0];
+    const amounts = parts.slice(1).map(Number);
+    const permutations = getPermutations(threeUp);
+    const reversedDown = downGame.split("").reverse().join("");
+    const sumOfDigits = threeUp
+      .split("")
+      .reduce((sum, d) => sum + parseInt(d), 0);
+    const lastDigitOfSum = sumOfDigits % 10;
 
+    if (number.length === 3) {
+      if (number === threeUp) return true;
+      if (permutations.includes(number)) {
+        return amounts.length >= 2; // Rumble condition (like STR=50=60)
+      }
+    }
+
+    if (number.length === 2) {
+      if (number === downGame) return true;
+      if (number === reversedDown) {
+        return amounts.length >= 2; // Rumble condition for downGame
+      }
+    }
+
+    if (number.length === 1) {
+      return parseInt(number) === lastDigitOfSum;
+    }
+
+    return false;
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (fetched && players.length === 0)
+    return <p>No players found for this agent.</p>;
   return (
     <div className="min-h-screen font-mono bg-gradient-to-br from-black to-red-900 text-white flex flex-col md:flex-row">
       {/* Mobile Header */}
@@ -142,57 +274,225 @@ export default function AgentGames() {
         )}
 
         {!loading && players.length > 0 && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-gray-800 p-6 rounded-lg shadow hover:shadow-yellow-500 transition-shadow">
-                <h3 className="text-green-400 font-semibold mb-2">
-                  🎯 3D Total
-                </h3>
-                <p className="text-3xl font-bold">
-                  {totalAmounts.ThreeD.toFixed(2)}
-                </p>
-              </div>
-              <div className="bg-gray-800 p-6 rounded-lg shadow hover:shadow-green-400 transition-shadow">
-                <h3 className="text-green-400 font-semibold mb-2">
-                  🎯 2D Total
-                </h3>
-                <p className="text-3xl font-bold">
-                  {totalAmounts.TwoD.toFixed(2)}
-                </p>
-              </div>
-              <div className="bg-gray-800 p-6 rounded-lg shadow hover:shadow-green-400 transition-shadow">
-                <h3 className="text-green-400 font-semibold mb-2">
-                  🎯 1D Total
-                </h3>
-                <p className="text-3xl font-bold">
-                  {totalAmounts.OneD.toFixed(2)}
-                </p>
-              </div>
-              <div className="bg-yellow-600 p-6 rounded-lg shadow-lg">
-                <h3 className="font-semibold mb-2 text-black">
-                  🔢 Grand Total
-                </h3>
-                <p className="text-3xl font-bold text-black">
-                  {grandTotal.toFixed(2)}
-                </p>
+          <div className="mt-8">
+            <div className="mt-8 mb-8 max-w-4xl mx-auto">
+              <div className="my-4 bg-gray-900 bg-opacity-80 rounded-lg shadow-md ring-2 ring-yellow-500 p-6 text-center">
+                <h2 className="text-3xl font-bold text-yellow-400 mb-6 animate-pulse">
+                  📊 Game & Player Summary
+                </h2>
+
+                <table className="w-full border-collapse font-mono text-sm rounded-lg overflow-hidden shadow-lg">
+                  <tbody>
+                    <tr className="bg-black border border-yellow-700">
+                      <td
+                        colSpan="2"
+                        className="px-6 py-4 text-4xl font-extrabold text-yellow-500 tracking-widest"
+                      >
+                        {agent?.name}
+                      </td>
+
+                      <td
+                        colSpan="2"
+                        className="px-6 py-4 text-xl font-bold text-white"
+                      >
+                        {date}
+                      </td>
+                      <td
+                        colSpan="2"
+                        className="px-6 py-4 text-4xl font-extrabold text-yellow-500 tracking-widest"
+                      >
+                        {threeUp}
+                      </td>
+                      <td
+                        colSpan="2"
+                        className="px-6 py-4 text-4xl font-extrabold text-pink-500 tracking-widest"
+                      >
+                        {downGame}
+                      </td>
+                    </tr>
+
+                    {/* All Players Total Summary Section */}
+
+                    <tr className="bg-green-800 text-white text-lg">
+                      <th className="border border-gray-700 px-4 py-3 text-left">
+                        Category
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        🎯 3D
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        🎯 2D
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        🎯 1D
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        STR
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        RUMBLE
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        DOWN
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        SINGLE
+                      </th>
+                    </tr>
+
+                    <tr className="bg-gray-800 text-green-400">
+                      <td className="border border-gray-700 px-4 py-2 font-semibold">
+                        Total
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalAmounts.ThreeD.toFixed(0)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalAmounts.TwoD.toFixed(0)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalAmounts.OneD.toFixed(0)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalWins.STR3D}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalWins.RUMBLE3D}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalWins.DOWN}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalWins.SINGLE}
+                      </td>
+                    </tr>
+
+                    <tr className="bg-gray-800 text-green-400">
+                      <td className="border border-gray-700 px-4 py-2 font-semibold">
+                        % / -
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent?.percentage?.threeD || 0}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent?.percentage?.twoD || 0}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent?.percentage?.oneD || 0}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent?.percentage?.str || 0}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent?.percentage?.rumble || 0}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent?.percentage?.down || 0}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent?.percentage?.single || 0}
+                      </td>
+                    </tr>
+
+                    <tr className="bg-gray-700 text-green-400">
+                      <td className="border border-gray-700 px-4 py-2 font-semibold">
+                        After Deduction
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalAmounts.ThreeD - agent?.percentage?.threeD}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalAmounts.TwoD - agent?.percentage?.twoD}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalAmounts.OneD - agent?.percentage?.oneD}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalWins.STR3D * agent?.percentage?.str}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalWins.RUMBLE3D * agent?.percentage?.rumble}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalWins.DOWN * agent?.percentage?.down}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalWins.SINGLE * agent?.percentage?.single}
+                      </td>
+                    </tr>
+
+                    <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
+                      <td className="border border-gray-700 px-4 py-2">
+                        🔢 Grand Total
+                      </td>
+                      <td
+                        colSpan={4}
+                        className="border border-gray-700 px-4 py-2"
+                      >
+                        Game{" "}
+                        {Math.floor(
+                          totalAmounts.ThreeD -
+                            (agent?.percentage?.threeD || 0) +
+                            (totalAmounts.TwoD -
+                              (agent?.percentage?.twoD || 0)) +
+                            (totalAmounts.OneD - (agent?.percentage?.oneD || 0))
+                        )}
+                      </td>
+
+                      <td
+                        colSpan={4}
+                        className="border border-gray-700 px-4 py-2"
+                      >
+                        Win{" "}
+                        {Math.floor(
+                          totalWins.STR3D * (agent?.percentage?.str || 0) +
+                            totalWins.RUMBLE3D *
+                              (agent?.percentage?.rumble || 0) +
+                            totalWins.DOWN * (agent?.percentage?.down || 0) +
+                            totalWins.SINGLE * (agent?.percentage?.single || 0)
+                        )}
+                      </td>
+                    </tr>
+
+                    <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
+                      <td className="border border-gray-700 px-4 py-2">
+                        Final{" "}
+                        {Math.floor(
+                          totalAmounts.ThreeD -
+                            (agent?.percentage?.threeD || 0) +
+                            (totalAmounts.TwoD -
+                              (agent?.percentage?.twoD || 0)) +
+                            (totalAmounts.OneD - (agent?.percentage?.oneD || 0))
+                        ) -
+                          Math.floor(
+                            totalWins.STR3D * (agent?.percentage?.str || 0) +
+                              totalWins.RUMBLE3D *
+                                (agent?.percentage?.rumble || 0) +
+                              totalWins.DOWN * (agent?.percentage?.down || 0) +
+                              totalWins.SINGLE *
+                                (agent?.percentage?.single || 0)
+                          )}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 
-            <h3 className="text-2xl text-yellow-400 font-semibold mb-6">
+            <h3 className="text-2xl text-yellow-400 mb-6 font-semibold text-center">
               🎉 Player Summary 🎉
             </h3>
-            <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+
+            <div className="space-y-6 max-w-4xl mx-auto max-h-[60vh] overflow-y-auto pr-2">
               {players.map((player, idx) => (
                 <div key={idx} className="bg-gray-800 rounded-lg shadow p-5">
+                  <p className="text-yellow-300 font-bold text-xl text-center">
+                    🎫 {player.voucher || "N/A"}
+                  </p>
                   <div className="flex justify-between items-start mb-4">
+                    {/* Player Info */}
                     <div>
                       <h4 className="text-xl font-bold mb-1">{player.name}</h4>
-                      <p className="text-yellow-300">
-                        Voucher:{" "}
-                        <span className="font-mono">
-                          {player.voucher || "N/A"}
-                        </span>
-                      </p>
                       <p className="text-gray-400 text-sm">
                         Time: {new Date(player.time).toLocaleString()}
                       </p>
@@ -200,16 +500,19 @@ export default function AgentGames() {
                         Entries: {player.entries.length}
                       </p>
                     </div>
-                    <button
-                      onClick={() => window.print()}
-                      className="py-2 px-4 rounded bg-purple-600 hover:bg-purple-700 transition"
-                      title="Print Player Info"
-                    >
-                      🖨️ Print
-                    </button>
-                  </div>
 
-                  <table className="w-full border-collapse text-sm font-mono rounded overflow-hidden">
+                    {/* Print Button */}
+                    <div>
+                      <button
+                        onClick={() => window.print()}
+                        className="py-2 px-4 rounded bg-purple-600 hover:bg-purple-700 transition"
+                        title="Print Player Info"
+                      >
+                        🖨️ Print
+                      </button>
+                    </div>
+                  </div>
+                  <table className="w-full border-collapse text-sm font-mono mt-4">
                     <thead>
                       <tr className="bg-yellow-600 text-black">
                         <th className="border px-3 py-2 text-left">#</th>
@@ -217,66 +520,72 @@ export default function AgentGames() {
                       </tr>
                     </thead>
                     <tbody>
-                      {player.entries.map((entry, i) => (
-                        <tr
-                          key={i}
-                          className={
-                            i % 2 === 0 ? "bg-gray-700" : "bg-gray-800"
-                          }
-                        >
-                          <td className="border px-3 py-2">{i + 1}</td>
-                          <td className="border px-3 py-2">{entry.input}</td>
-                        </tr>
-                      ))}
+                      {player.entries.map((entry, entryIdx) => {
+                        const isWinning = isWinningInput(entry.input);
+                        return (
+                          <tr
+                            key={entryIdx}
+                            className={`${
+                              entryIdx % 2 === 0 ? "bg-gray-700" : "bg-gray-800"
+                            } ${isWinning ? "winning-animation" : ""}`}
+                          >
+                            <td className="border px-3 py-2">{entryIdx + 1}</td>
+                            <td className="border px-3 py-2">{entry.input}</td>
+                          </tr>
+                        );
+                      })}{" "}
+                      <div className="mt-4 text-yellow-300">
+                        <table className="w-full border-collapse mt-4 font-mono text-sm rounded overflow-hidden shadow-md">
+                          <thead>
+                            <tr className="bg-red-700 text-white">
+                              <th className="border px-4 py-2 text-left">
+                                Category
+                              </th>
+                              <th className="border px-4 py-2 text-left">
+                                Amount
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="bg-gray-800">
+                              <td className="border px-4 py-2">🎯 3D Total</td>
+                              <td className="border px-4 py-2 text-green-400">
+                                {player.amountPlayed.ThreeD}
+                              </td>
+                            </tr>
+                            <tr className="bg-gray-900">
+                              <td className="border px-4 py-2">🎯 2D Total</td>
+                              <td className="border px-4 py-2 text-green-400">
+                                {player.amountPlayed.TwoD}
+                              </td>
+                            </tr>
+                            <tr className="bg-gray-800">
+                              <td className="border px-4 py-2">🎯 1D Total</td>
+                              <td className="border px-4 py-2 text-green-400">
+                                {player.amountPlayed.OneD}
+                              </td>
+                            </tr>
+                            <tr className="bg-gray-900 font-bold text-lg">
+                              <td className="border px-4 py-2">
+                                🔢 Grand Total
+                              </td>
+                              <td className="border px-4 py-2 text-yellow-300">
+                                {(
+                                  player.amountPlayed.ThreeD +
+                                  player.amountPlayed.TwoD +
+                                  player.amountPlayed.OneD
+                                ).toFixed(0)}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </tbody>
                   </table>
-
-                  <div className="mt-4">
-                    <table className="w-full border-collapse font-mono text-sm rounded overflow-hidden">
-                      <thead>
-                        <tr className="bg-red-700 text-white">
-                          <th className="border px-4 py-2 text-left">
-                            Category
-                          </th>
-                          <th className="border px-4 py-2 text-left">Amount</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="bg-gray-800">
-                          <td className="border px-4 py-2">🎯 3D Total</td>
-                          <td className="border px-4 py-2 text-green-400">
-                            {player.amountPlayed?.ThreeD || 0}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="border px-4 py-2">🎯 2D Total</td>
-                          <td className="border px-4 py-2 text-green-400">
-                            {player.amountPlayed?.TwoD || 0}
-                          </td>
-                        </tr>
-                        <tr className="bg-gray-800">
-                          <td className="border px-4 py-2">🎯 1D Total</td>
-                          <td className="border px-4 py-2 text-green-400">
-                            {player.amountPlayed?.OneD || 0}
-                          </td>
-                        </tr>
-                        <tr className="bg-gray-900 font-bold text-lg">
-                          <td className="border px-4 py-2">🔢 Grand Total</td>
-                          <td className="border px-4 py-2 text-yellow-300">
-                            {(
-                              (player.amountPlayed?.ThreeD || 0) +
-                              (player.amountPlayed?.TwoD || 0) +
-                              (player.amountPlayed?.OneD || 0)
-                            ).toFixed(2)}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
                 </div>
               ))}
             </div>
-          </>
+          </div>
         )}
       </main>
     </div>

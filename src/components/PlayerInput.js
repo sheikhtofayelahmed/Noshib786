@@ -423,17 +423,17 @@ export default function PlayerInput() {
                 <tr>
                   <td>🎯 3D Total</td>
                   <td>${amountPlayed.ThreeD}</td>
-                  <td>${(amountPlayed.ThreeD * 0.6).toFixed(2)}</td>
+                  <td>${(amountPlayed.ThreeD * 0.6).toFixed(0)}</td>
                 </tr>
                 <tr>
                   <td>🎯 2D Total</td>
                   <td>${amountPlayed.TwoD}</td>
-                  <td>${(amountPlayed.TwoD * 0.8).toFixed(2)}</td>
+                  <td>${(amountPlayed.TwoD * 0.8).toFixed(0)}</td>
                 </tr>
                 <tr>
                   <td>🎯 1D Total</td>
                   <td>${amountPlayed.OneD}</td>
-                  <td>${amountPlayed.OneD.toFixed(2)}</td>
+                  <td>${amountPlayed.OneD.toFixed(0)}</td>
                 </tr>
                 <tr>
                   <th>🔢 Grand Total</th>
@@ -442,14 +442,14 @@ export default function PlayerInput() {
                       amountPlayed.ThreeD +
                       amountPlayed.TwoD +
                       amountPlayed.OneD
-                    ).toFixed(2)}
+                    ).toFixed(0)}
                   </th>
                   <th>
                     ${(
                       amountPlayed.ThreeD * 0.6 +
                       amountPlayed.TwoD * 0.8 +
                       amountPlayed.OneD
-                    ).toFixed(2)}
+                    ).toFixed(0)}
                   </th>
                 </tr>
               </tbody>
@@ -660,7 +660,7 @@ export default function PlayerInput() {
                           {amountPlayed.ThreeD}
                         </td>
                         <td className="border border-gray-600 px-4 py-2 text-green-400">
-                          {(amountPlayed.ThreeD * 0.6).toFixed(2)}
+                          {(amountPlayed.ThreeD * 0.6).toFixed(0)}
                         </td>
                       </tr>
                       <tr className="bg-gray-900">
@@ -671,7 +671,7 @@ export default function PlayerInput() {
                           {amountPlayed.TwoD}
                         </td>
                         <td className="border border-gray-600 px-4 py-2 text-green-400">
-                          {(amountPlayed.TwoD * 0.8).toFixed(2)}
+                          {(amountPlayed.TwoD * 0.8).toFixed(0)}
                         </td>
                       </tr>
                       <tr className="bg-gray-800">
@@ -682,7 +682,7 @@ export default function PlayerInput() {
                           {amountPlayed.OneD}
                         </td>
                         <td className="border border-gray-600 px-4 py-2 text-green-400">
-                          {amountPlayed.OneD.toFixed(2)}
+                          {amountPlayed.OneD.toFixed(0)}
                         </td>
                       </tr>
                       <tr className="bg-gray-900 font-bold text-lg">
@@ -694,14 +694,14 @@ export default function PlayerInput() {
                             amountPlayed.ThreeD +
                             amountPlayed.TwoD +
                             amountPlayed.OneD
-                          ).toFixed(2)}
+                          ).toFixed(0)}
                         </td>
                         <td className="border border-gray-600 px-4 py-2 text-yellow-300">
                           {(
                             amountPlayed.ThreeD * 0.6 +
                             amountPlayed.TwoD * 0.8 +
                             amountPlayed.OneD
-                          ).toFixed(2)}
+                          ).toFixed(0)}
                         </td>
                       </tr>
                     </tbody>
