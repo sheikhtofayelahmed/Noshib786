@@ -11,7 +11,9 @@ const Reports = () => {
   const [threeUp, setThreeUp] = useState("XXX");
   const [downGame, setDownGame] = useState("X");
   const [date, setDate] = useState("---");
-
+  const [totalWins, setTotalWins] = useState({});
+  const [agent, setAgent] = useState({});
+  const [error, setError] = useState("");
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -27,6 +29,26 @@ const Reports = () => {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    console.log("agentId in useEffect:", agentId);
+    if (!agentId) return;
+
+    const fetchAgent = async () => {
+      try {
+        const res = await fetch(`/api/getAgentById?agentId=${agentId}`);
+        if (!res.ok) throw new Error("Failed to fetch agent data");
+
+        const data = await res.json();
+        setAgent(data.agent);
+        console.log("Fetched agent:", data.agent.percentage);
+      } catch (error) {
+        console.error("Error fetching agent:", error);
+      }
+    };
+
+    fetchAgent();
+  }, [agentId]);
 
   const fetchPlayersByAgentId = async (agentId) => {
     setLoading(true);
@@ -77,7 +99,28 @@ const Reports = () => {
       fetchPlayersByAgentId(agentId);
     }
   }, [agentId]);
+  useEffect(() => {
+    if (!agentId || !threeUp || !downGame) return;
 
+    async function fetchWins() {
+      try {
+        const res = await fetch("/api/getWinningPlays", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agentId, threeUp, downGame }),
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch wins");
+
+        const data = await res.json();
+        setTotalWins(data.totalWins);
+      } catch (err) {
+        setError(err.message);
+      }
+    }
+
+    fetchWins();
+  }, [agentId, threeUp, downGame]);
   const totalAmounts = players.reduce(
     (acc, player) => {
       acc.ThreeD += player.amountPlayed.ThreeD;
@@ -161,120 +204,179 @@ const Reports = () => {
                 </h2>
 
                 <table className="w-full border-collapse font-mono text-sm rounded-lg overflow-hidden shadow-lg">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-red-600 to-yellow-600 text-white text-lg">
-                      <th className="border border-gray-700 px-4 py-3 text-left w-1/3">
-                        Category
-                      </th>
-                      <th className="border border-gray-700 px-4 py-3 text-left w-1/3">
-                        Details / Amount
-                      </th>
-                      <th className="border border-gray-700 px-4 py-3 text-left w-1/3">
-                        Remarks / After Deduction
-                      </th>
-                    </tr>
-                  </thead>
                   <tbody>
-                    {/* Winning Numbers Section */}
-                    <tr className="bg-gray-800 text-yellow-300">
-                      <td className="border border-gray-700 px-4 py-3 font-semibold">
-                        🏆 Winning Date
-                      </td>
-                      <td className="border border-gray-700 px-4 py-3">
-                        <span className="bg-gradient-to-r from-yellow-400 to-red-500 text-transparent bg-clip-text font-bold text-lg">
-                          {date}
-                        </span>
-                      </td>
-                      <td className="border border-gray-700 px-4 py-3"></td>{" "}
-                      {/* Empty for alignment */}
-                    </tr>
-                    <tr className="bg-gray-700 text-yellow-300">
-                      <td className="border border-gray-700 px-4 py-3 font-semibold">
-                        🎯 3UP Winning
-                      </td>
-                      <td className="border border-gray-700 px-4 py-3">
-                        <span className="text-4xl font-extrabold tracking-widest text-yellow-500">
-                          {threeUp}
-                        </span>
-                      </td>
-                      <td className="border border-gray-700 px-4 py-3">
-                        <span className="text-sm text-gray-400">
-                          (Latest Draw)
-                        </span>
-                      </td>
-                    </tr>
-                    <tr className="bg-gray-800 text-yellow-300">
-                      <td className="border border-gray-700 px-4 py-3 font-semibold">
-                        💥 DOWN Winning
-                      </td>
-                      <td className="border border-gray-700 px-4 py-3">
-                        <span className="text-4xl font-extrabold tracking-widest text-pink-500">
-                          {downGame}
-                        </span>
-                      </td>
-                      <td className="border border-gray-700 px-4 py-3">
-                        <span className="text-sm text-gray-400">
-                          (Latest Draw)
-                        </span>
-                      </td>
-                    </tr>
-
-                    {/* Separator Row */}
-                    <tr className="bg-gray-600">
+                    <tr className="bg-black border border-yellow-700">
                       <td
-                        className="border border-gray-700 px-4 py-1"
-                        colSpan="3"
-                      ></td>
+                        colSpan="2"
+                        className="px-6 py-4 text-4xl font-extrabold text-yellow-500 tracking-widest"
+                      >
+                        {threeUp}
+                      </td>
+                      <td
+                        colSpan="4"
+                        className="px-6 py-4 text-xl font-bold text-white"
+                      >
+                        {date}
+                      </td>
+                      <td
+                        colSpan="2"
+                        className="px-6 py-4 text-4xl font-extrabold text-pink-500 tracking-widest"
+                      >
+                        {downGame}
+                      </td>
                     </tr>
 
                     {/* All Players Total Summary Section */}
+
                     <tr className="bg-green-800 text-white text-lg">
-                      <th
-                        className="border border-gray-700 px-4 py-3 text-left"
-                        colSpan="3"
-                      >
-                        📊 All Players Total Summary
+                      <th className="border border-gray-700 px-4 py-3 text-left">
+                        Category
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        🎯 3D
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        🎯 2D
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        🎯 1D
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        STR
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        RUMBLE
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        DOWN
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-center">
+                        SINGLE
                       </th>
                     </tr>
-                    <tr className="bg-gray-800">
-                      <td className="border border-gray-700 px-4 py-2">
-                        🎯 3D Total
+
+                    <tr className="bg-gray-800 text-green-400">
+                      <td className="border border-gray-700 px-4 py-2 font-semibold">
+                        Total
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-green-400">
+                      <td className="border border-gray-700 px-4 py-2 text-center">
                         {totalAmounts.ThreeD.toFixed(2)}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-green-400">
-                        {(totalAmounts.ThreeD * 0.6).toFixed(2)}
-                      </td>
-                    </tr>
-                    <tr className="bg-gray-700">
-                      <td className="border border-gray-700 px-4 py-2">
-                        🎯 2D Total
-                      </td>
-                      <td className="border border-gray-700 px-4 py-2 text-green-400">
+                      <td className="border border-gray-700 px-4 py-2 text-center">
                         {totalAmounts.TwoD.toFixed(2)}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-green-400">
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalAmounts.OneD.toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalWins.STR3D}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalWins.RUMBLE3D}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalWins.DOWN}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalWins.SINGLE}
+                      </td>
+                    </tr>
+
+                    <tr className="bg-gray-800 text-green-400">
+                      <td className="border border-gray-700 px-4 py-2 font-semibold">
+                        % / -
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent.percentage.threeD || 0}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent.percentage.twoD || 0}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent.percentage.oneD || 0}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent.percentage.str || 0}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent.percentage.rumble || 0}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent.percentage.down || 0}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {agent.percentage.single || 0}
+                      </td>
+                    </tr>
+
+                    <tr className="bg-gray-700 text-green-400">
+                      <td className="border border-gray-700 px-4 py-2 font-semibold">
+                        After Deduction
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {(totalAmounts.ThreeD * 0.6).toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
                         {(totalAmounts.TwoD * 0.8).toFixed(2)}
                       </td>
-                    </tr>
-                    <tr className="bg-gray-800">
-                      <td className="border border-gray-700 px-4 py-2">
-                        🎯 1D Total
-                      </td>
-                      <td className="border border-gray-700 px-4 py-2 text-green-400">
+                      <td className="border border-gray-700 px-4 py-2 text-center">
                         {totalAmounts.OneD.toFixed(2)}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-green-400">
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalAmounts.OneD.toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalAmounts.OneD.toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
+                        {totalAmounts.OneD.toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center">
                         {totalAmounts.OneD.toFixed(2)}
                       </td>
                     </tr>
+
                     <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
                       <td className="border border-gray-700 px-4 py-2">
                         🔢 Grand Total
                       </td>
                       <td className="border border-gray-700 px-4 py-2">
                         {grandTotal.toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2">
+                        {(
+                          totalAmounts.ThreeD * 0.6 +
+                          totalAmounts.TwoD * 0.8 +
+                          totalAmounts.OneD
+                        ).toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2">
+                        {(
+                          totalAmounts.ThreeD * 0.6 +
+                          totalAmounts.TwoD * 0.8 +
+                          totalAmounts.OneD
+                        ).toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2">
+                        {(
+                          totalAmounts.ThreeD * 0.6 +
+                          totalAmounts.TwoD * 0.8 +
+                          totalAmounts.OneD
+                        ).toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2">
+                        {(
+                          totalAmounts.ThreeD * 0.6 +
+                          totalAmounts.TwoD * 0.8 +
+                          totalAmounts.OneD
+                        ).toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2">
+                        {(
+                          totalAmounts.ThreeD * 0.6 +
+                          totalAmounts.TwoD * 0.8 +
+                          totalAmounts.OneD
+                        ).toFixed(2)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2">
                         {(

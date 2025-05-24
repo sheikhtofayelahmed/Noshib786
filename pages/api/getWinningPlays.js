@@ -135,7 +135,28 @@ export default async function handler(req, res) {
       }
     }
 
-    res.status(200).json(results);
+    const totalWins = {
+      STR3D: 0,
+      RUMBLE3D: 0,
+      SINGLE: 0,
+      DOWN: 0,
+    };
+
+    for (const entry of results) {
+      for (const win of entry.wins) {
+        if (win.type === "STR2D" || win.type === "RUMBLE2D") {
+          totalWins.DOWN += win.amount;
+        } else if (totalWins.hasOwnProperty(win.type)) {
+          totalWins[win.type] += win.amount;
+        }
+      }
+    }
+
+    res.status(200).json({
+      agentId,
+      totalWins,
+      results,
+    });
   } catch (err) {
     console.error("Error in winning analysis:", err);
     res.status(500).json({ error: "Internal Server Error" });
