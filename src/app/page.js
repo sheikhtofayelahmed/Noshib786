@@ -24,7 +24,6 @@ export default function DashboardPage() {
   return (
     <AgentLayout>
       <PlayerInput />
-      <WinningResults></WinningResults>
     </AgentLayout>
   );
 }

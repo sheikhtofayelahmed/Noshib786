@@ -90,14 +90,48 @@ const Reports = () => {
 
   const grandTotal =
     totalAmounts.ThreeD + totalAmounts.TwoD + totalAmounts.OneD;
-
+  const getPermutations = (str) => {
+    if (str.length <= 1) return [str];
+    let perms = [];
+    for (let i = 0; i < str.length; i++) {
+      const char = str[i];
+      const remaining = str.slice(0, i) + str.slice(i + 1);
+      for (const perm of getPermutations(remaining)) {
+        perms.push(char + perm);
+      }
+    }
+    return [...new Set(perms)];
+  };
   const isWinningInput = (input) => {
-    const parsed = input.split("=");
-    const number = parsed[0];
-    return (
-      (number.length === 3 && number === threeUp) ||
-      (number.length === 2 && number === downGame)
-    );
+    const parts = input.split("=");
+    const number = parts[0];
+    const amounts = parts.slice(1).map(Number);
+    const permutations = getPermutations(threeUp);
+    const reversedDown = downGame.split("").reverse().join("");
+    const sumOfDigits = threeUp
+      .split("")
+      .reduce((sum, d) => sum + parseInt(d), 0);
+    const lastDigitOfSum = sumOfDigits % 10;
+
+    if (number.length === 3) {
+      if (number === threeUp) return true;
+      if (permutations.includes(number)) {
+        return amounts.length >= 2; // Rumble condition (like STR=50=60)
+      }
+    }
+
+    if (number.length === 2) {
+      if (number === downGame) return true;
+      if (number === reversedDown) {
+        return amounts.length >= 2; // Rumble condition for downGame
+      }
+    }
+
+    if (number.length === 1) {
+      return parseInt(number) === lastDigitOfSum;
+    }
+
+    return false;
   };
 
   if (loading) return <p>Loading...</p>;
@@ -120,78 +154,139 @@ const Reports = () => {
         )}
         {!loading && players.length > 0 && (
           <div className="mt-8">
-            <div className="my-4 mx-auto max-w-3xl bg-gray-900 bg-opacity-80 rounded-sm shadow-md ring-2 ring-yellow-500 p-4 text-center">
-              <h2 className="text-xl font-bold text-yellow-400 mb-4 animate-pulse">
-                🏆 Latest Winning Numbers
-              </h2>
+            <div className="mt-8 mb-8 max-w-4xl mx-auto">
+              <div className="my-4 bg-gray-900 bg-opacity-80 rounded-lg shadow-md ring-2 ring-yellow-500 p-6 text-center">
+                <h2 className="text-3xl font-bold text-yellow-400 mb-6 animate-pulse">
+                  📊 Game & Player Summary
+                </h2>
 
-              <div className="flex flex-col sm:flex-row justify-around items-center gap-6">
-                {/* 3UP Game */}
-                <div className="bg-gradient-to-br from-yellow-500 to-red-500 text-black rounded-lg px-6 py-4 shadow-lg w-64">
-                  <h3 className="text-xl font-bold mb-2">🎯 3UP Game</h3>
-                  <p className="text-4xl font-extrabold tracking-widest">
-                    {threeUp}
-                  </p>
-                </div>
+                <table className="w-full border-collapse font-mono text-sm rounded-lg overflow-hidden shadow-lg">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-red-600 to-yellow-600 text-white text-lg">
+                      <th className="border border-gray-700 px-4 py-3 text-left w-1/3">
+                        Category
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-left w-1/3">
+                        Details / Amount
+                      </th>
+                      <th className="border border-gray-700 px-4 py-3 text-left w-1/3">
+                        Remarks / After Deduction
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* Winning Numbers Section */}
+                    <tr className="bg-gray-800 text-yellow-300">
+                      <td className="border border-gray-700 px-4 py-3 font-semibold">
+                        🏆 Winning Date
+                      </td>
+                      <td className="border border-gray-700 px-4 py-3">
+                        <span className="bg-gradient-to-r from-yellow-400 to-red-500 text-transparent bg-clip-text font-bold text-lg">
+                          {date}
+                        </span>
+                      </td>
+                      <td className="border border-gray-700 px-4 py-3"></td>{" "}
+                      {/* Empty for alignment */}
+                    </tr>
+                    <tr className="bg-gray-700 text-yellow-300">
+                      <td className="border border-gray-700 px-4 py-3 font-semibold">
+                        🎯 3UP Winning
+                      </td>
+                      <td className="border border-gray-700 px-4 py-3">
+                        <span className="text-4xl font-extrabold tracking-widest text-yellow-500">
+                          {threeUp}
+                        </span>
+                      </td>
+                      <td className="border border-gray-700 px-4 py-3">
+                        <span className="text-sm text-gray-400">
+                          (Latest Draw)
+                        </span>
+                      </td>
+                    </tr>
+                    <tr className="bg-gray-800 text-yellow-300">
+                      <td className="border border-gray-700 px-4 py-3 font-semibold">
+                        💥 DOWN Winning
+                      </td>
+                      <td className="border border-gray-700 px-4 py-3">
+                        <span className="text-4xl font-extrabold tracking-widest text-pink-500">
+                          {downGame}
+                        </span>
+                      </td>
+                      <td className="border border-gray-700 px-4 py-3">
+                        <span className="text-sm text-gray-400">
+                          (Latest Draw)
+                        </span>
+                      </td>
+                    </tr>
 
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-yellow-400 text-xl animate-pulse">
-                    🗓️
-                  </span>
-                  <span className="font-semibold text-gray-200">Date:</span>
-                  <span className="bg-gradient-to-r from-yellow-400 to-red-500 text-transparent bg-clip-text font-bold text-lg">
-                    {date}
-                  </span>
-                </div>
+                    {/* Separator Row */}
+                    <tr className="bg-gray-600">
+                      <td
+                        className="border border-gray-700 px-4 py-1"
+                        colSpan="3"
+                      ></td>
+                    </tr>
 
-                {/* DOWN Game */}
-                <div className="bg-gradient-to-br from-pink-500 to-red-500 text-black rounded-lg px-6 py-4 shadow-lg w-64">
-                  <h3 className="text-xl font-bold mb-2">💥 DOWN Game</h3>
-                  <p className="text-4xl font-extrabold tracking-widest">
-                    {downGame}
-                  </p>
-                </div>
+                    {/* All Players Total Summary Section */}
+                    <tr className="bg-green-800 text-white text-lg">
+                      <th
+                        className="border border-gray-700 px-4 py-3 text-left"
+                        colSpan="3"
+                      >
+                        📊 All Players Total Summary
+                      </th>
+                    </tr>
+                    <tr className="bg-gray-800">
+                      <td className="border border-gray-700 px-4 py-2">
+                        🎯 3D Total
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-green-400">
+                        {totalAmounts.ThreeD.toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-green-400">
+                        {(totalAmounts.ThreeD * 0.6).toFixed(2)}
+                      </td>
+                    </tr>
+                    <tr className="bg-gray-700">
+                      <td className="border border-gray-700 px-4 py-2">
+                        🎯 2D Total
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-green-400">
+                        {totalAmounts.TwoD.toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-green-400">
+                        {(totalAmounts.TwoD * 0.8).toFixed(2)}
+                      </td>
+                    </tr>
+                    <tr className="bg-gray-800">
+                      <td className="border border-gray-700 px-4 py-2">
+                        🎯 1D Total
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-green-400">
+                        {totalAmounts.OneD.toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-green-400">
+                        {totalAmounts.OneD.toFixed(2)}
+                      </td>
+                    </tr>
+                    <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
+                      <td className="border border-gray-700 px-4 py-2">
+                        🔢 Grand Total
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2">
+                        {grandTotal.toFixed(2)}
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2">
+                        {(
+                          totalAmounts.ThreeD * 0.6 +
+                          totalAmounts.TwoD * 0.8 +
+                          totalAmounts.OneD
+                        ).toFixed(2)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-            </div>
-            <div className="mb-8 max-w-4xl mx-auto">
-              <h3 className="text-2xl text-green-400 mb-4 font-semibold">
-                📊 All Players Total Summary
-              </h3>
-
-              <table className="w-full border-collapse font-mono text-sm rounded overflow-hidden shadow-lg">
-                <thead>
-                  <tr className="bg-green-800 text-white">
-                    <th className="border px-4 py-2 text-left">Category</th>
-                    <th className="border px-4 py-2 text-left">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="bg-gray-800">
-                    <td className="border px-4 py-2">🎯 3D Total</td>
-                    <td className="border px-4 py-2 text-green-400">
-                      {totalAmounts.ThreeD.toFixed(2)}
-                    </td>
-                  </tr>
-                  <tr className="bg-gray-900">
-                    <td className="border px-4 py-2">🎯 2D Total</td>
-                    <td className="border px-4 py-2 text-green-400">
-                      {totalAmounts.TwoD.toFixed(2)}
-                    </td>
-                  </tr>
-                  <tr className="bg-gray-800">
-                    <td className="border px-4 py-2">🎯 1D Total</td>
-                    <td className="border px-4 py-2 text-green-400">
-                      {totalAmounts.OneD.toFixed(2)}
-                    </td>
-                  </tr>
-                  <tr className="bg-gray-900 font-bold text-lg">
-                    <td className="border px-4 py-2">🔢 Grand Total</td>
-                    <td className="border px-4 py-2 text-yellow-300">
-                      {grandTotal.toFixed(2)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
 
             <h3 className="text-2xl text-yellow-400 mb-6 font-semibold text-center">
@@ -242,7 +337,7 @@ const Reports = () => {
                             key={entryIdx}
                             className={`${
                               entryIdx % 2 === 0 ? "bg-gray-700" : "bg-gray-800"
-                            } ${isWinning ? "bg-green-600 text-white" : ""}`}
+                            } ${isWinning ? "winning-animation" : ""}`}
                           >
                             <td className="border px-3 py-2">{entryIdx + 1}</td>
                             <td className="border px-3 py-2">{entry.input}</td>
