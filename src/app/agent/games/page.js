@@ -1,12 +1,11 @@
 "use client";
-// import Navigation from "@/components/Navigation";
 import { AgentProvider, useAgent } from "@/context/AgentContext";
 import { useEffect, useState } from "react";
 
 const Reports = () => {
   const [loading, setLoading] = useState(true);
   const [fetched, setFetched] = useState(false);
-  const { agentId, logout } = useAgent();
+  const { agentId } = useAgent();
   const [isGameOn, setIsGameOn] = useState(null);
   const [players, setPlayers] = useState([]);
   const [threeUp, setThreeUp] = useState("XXX");
@@ -28,6 +27,7 @@ const Reports = () => {
 
     fetchData();
   }, []);
+
   const fetchPlayersByAgentId = async (agentId) => {
     setLoading(true);
     setFetched(false);
@@ -42,12 +42,7 @@ const Reports = () => {
       const data = await res.json();
 
       if (res.ok) {
-        if (data.players && data.players.length > 0) {
-          setPlayers(data.players);
-        } else {
-          console.warn("No players found for this agent.");
-          setPlayers([]);
-        }
+        setPlayers(data.players || []);
       } else {
         console.error(data.message || "Failed to fetch players.");
         setPlayers([]);
@@ -60,6 +55,7 @@ const Reports = () => {
       setFetched(true);
     }
   };
+
   useEffect(() => {
     const fetchGameStatus = async () => {
       try {
@@ -75,6 +71,7 @@ const Reports = () => {
 
     fetchGameStatus();
   }, []);
+
   useEffect(() => {
     if (agentId) {
       fetchPlayersByAgentId(agentId);
@@ -93,6 +90,16 @@ const Reports = () => {
 
   const grandTotal =
     totalAmounts.ThreeD + totalAmounts.TwoD + totalAmounts.OneD;
+
+  const isWinningInput = (input) => {
+    const parsed = input.split("=");
+    const number = parsed[0];
+    return (
+      (number.length === 3 && number === threeUp) ||
+      (number.length === 2 && number === downGame)
+    );
+  };
+
   if (loading) return <p>Loading...</p>;
   if (fetched && players.length === 0)
     return <p>No players found for this agent.</p>;
@@ -111,7 +118,6 @@ const Reports = () => {
             </p>
           </div>
         )}
-
         {!loading && players.length > 0 && (
           <div className="mt-8">
             <div className="my-4 mx-auto max-w-3xl bg-gray-900 bg-opacity-80 rounded-sm shadow-md ring-2 ring-yellow-500 p-4 text-center">
@@ -195,13 +201,9 @@ const Reports = () => {
             <div className="space-y-6 max-w-4xl mx-auto max-h-[60vh] overflow-y-auto pr-2">
               {players.map((player, idx) => (
                 <div key={idx} className="bg-gray-800 rounded-lg shadow p-5">
-                  {/* Top Flex Row */}
-                  {/* Voucher (center) */}
-                  <div className="flex-1 text-center">
-                    <p className="text-yellow-300 font-bold text-xl font-mono">
-                      🎫 {player.voucher || "N/A"}
-                    </p>
-                  </div>
+                  <p className="text-yellow-300 font-bold text-xl text-center">
+                    🎫 {player.voucher || "N/A"}
+                  </p>
                   <div className="flex justify-between items-start mb-4">
                     {/* Player Info */}
                     <div>
@@ -225,9 +227,7 @@ const Reports = () => {
                       </button>
                     </div>
                   </div>
-
-                  {/* Entries Table */}
-                  <table className="w-full border-collapse text-sm font-mono rounded overflow-hidden">
+                  <table className="w-full border-collapse text-sm font-mono mt-4">
                     <thead>
                       <tr className="bg-yellow-600 text-black">
                         <th className="border px-3 py-2 text-left">#</th>
@@ -235,63 +235,68 @@ const Reports = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {player.entries.map((entry, entryIdx) => (
-                        <tr
-                          key={entryIdx}
-                          className={
-                            entryIdx % 2 === 0 ? "bg-gray-700" : "bg-gray-800"
-                          }
-                        >
-                          <td className="border px-3 py-2">{entryIdx + 1}</td>
-                          <td className="border px-3 py-2">{entry.input}</td>
-                        </tr>
-                      ))}
+                      {player.entries.map((entry, entryIdx) => {
+                        const isWinning = isWinningInput(entry.input);
+                        return (
+                          <tr
+                            key={entryIdx}
+                            className={`${
+                              entryIdx % 2 === 0 ? "bg-gray-700" : "bg-gray-800"
+                            } ${isWinning ? "bg-green-600 text-white" : ""}`}
+                          >
+                            <td className="border px-3 py-2">{entryIdx + 1}</td>
+                            <td className="border px-3 py-2">{entry.input}</td>
+                          </tr>
+                        );
+                      })}{" "}
+                      <div className="mt-4 text-yellow-300">
+                        <table className="w-full border-collapse mt-4 font-mono text-sm rounded overflow-hidden shadow-md">
+                          <thead>
+                            <tr className="bg-red-700 text-white">
+                              <th className="border px-4 py-2 text-left">
+                                Category
+                              </th>
+                              <th className="border px-4 py-2 text-left">
+                                Amount
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="bg-gray-800">
+                              <td className="border px-4 py-2">🎯 3D Total</td>
+                              <td className="border px-4 py-2 text-green-400">
+                                {player.amountPlayed.ThreeD}
+                              </td>
+                            </tr>
+                            <tr className="bg-gray-900">
+                              <td className="border px-4 py-2">🎯 2D Total</td>
+                              <td className="border px-4 py-2 text-green-400">
+                                {player.amountPlayed.TwoD}
+                              </td>
+                            </tr>
+                            <tr className="bg-gray-800">
+                              <td className="border px-4 py-2">🎯 1D Total</td>
+                              <td className="border px-4 py-2 text-green-400">
+                                {player.amountPlayed.OneD}
+                              </td>
+                            </tr>
+                            <tr className="bg-gray-900 font-bold text-lg">
+                              <td className="border px-4 py-2">
+                                🔢 Grand Total
+                              </td>
+                              <td className="border px-4 py-2 text-yellow-300">
+                                {(
+                                  player.amountPlayed.ThreeD +
+                                  player.amountPlayed.TwoD +
+                                  player.amountPlayed.OneD
+                                ).toFixed(2)}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </tbody>
                   </table>
-
-                  {/* Totals Table */}
-                  <div className="mt-4 text-yellow-300">
-                    <table className="w-full border-collapse mt-4 font-mono text-sm rounded overflow-hidden shadow-md">
-                      <thead>
-                        <tr className="bg-red-700 text-white">
-                          <th className="border px-4 py-2 text-left">
-                            Category
-                          </th>
-                          <th className="border px-4 py-2 text-left">Amount</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="bg-gray-800">
-                          <td className="border px-4 py-2">🎯 3D Total</td>
-                          <td className="border px-4 py-2 text-green-400">
-                            {player.amountPlayed.ThreeD}
-                          </td>
-                        </tr>
-                        <tr className="bg-gray-900">
-                          <td className="border px-4 py-2">🎯 2D Total</td>
-                          <td className="border px-4 py-2 text-green-400">
-                            {player.amountPlayed.TwoD}
-                          </td>
-                        </tr>
-                        <tr className="bg-gray-800">
-                          <td className="border px-4 py-2">🎯 1D Total</td>
-                          <td className="border px-4 py-2 text-green-400">
-                            {player.amountPlayed.OneD}
-                          </td>
-                        </tr>
-                        <tr className="bg-gray-900 font-bold text-lg">
-                          <td className="border px-4 py-2">🔢 Grand Total</td>
-                          <td className="border px-4 py-2 text-yellow-300">
-                            {(
-                              player.amountPlayed.ThreeD +
-                              player.amountPlayed.TwoD +
-                              player.amountPlayed.OneD
-                            ).toFixed(2)}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
                 </div>
               ))}
             </div>
