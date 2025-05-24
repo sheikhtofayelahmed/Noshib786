@@ -9,7 +9,6 @@ import Breadcrumb from "./Breadcrumb"; // adjust path if needed
 const navItems = [
   { name: "Home", path: "/" },
   { name: "Games", path: "/agent/games" },
-  { name: "Accounts", path: "/agent/accounts" },
 ];
 
 export default function AgentLayout({ children }) {

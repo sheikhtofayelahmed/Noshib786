@@ -17,7 +17,9 @@ export default function NumberChart() {
 function Section({ title, rows }) {
   return (
     <div>
-      <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-yellow-400">{title}</h2>
+      <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-yellow-400">
+        {title}
+      </h2>
       <TableSection rows={rows} />
     </div>
   );

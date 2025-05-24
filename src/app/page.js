@@ -7,7 +7,6 @@ import { useAgent } from "@/context/AgentContext";
 
 import AgentLayout from "@/components/AgentLayout";
 import PlayerInput from "@/components/PlayerInput";
-import NumberChart from "@/components/NumberChart";
 
 export default function DashboardPage() {
   const { agentId } = useAgent();
@@ -24,8 +23,6 @@ export default function DashboardPage() {
   return (
     <AgentLayout>
       <PlayerInput />
-
-      <NumberChart />
     </AgentLayout>
   );
 }
