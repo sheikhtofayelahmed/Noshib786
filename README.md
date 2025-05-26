@@ -110,15 +110,15 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 **cookie is set to 1 hour. the security system will developed next**
 **80,40 mm printing size**
 <!-- **voucher should be replaced on name, voucher number should be on the middle** -->
-**discount should be shown based on customer or agentId on the agent game**
+<!-- **discount should be shown based on customer or agentId on the agent game** -->
 <!-- **game account: remove** -->
 **when multiple entry it block the submit button**
-**win should be move to games part, winning number should be highlighted based on straight, rumbo or both, single, down with winning multiple bonus**
+<!-- **win should be move to games part, winning number should be highlighted based on straight, rumbo or both, single, down with winning multiple bonus** -->
 **games should be moved to accounts**
 **9=16=5=2025 309 87**
 **happy new year should be moved to admin with amount of each numbers, should be highlight the numbers if it's above 100, add single part, top numbers shoould be shown on agent list button like view accounts**
 **whatsapp api integration**
 **create voucher for agent**
-**time countdown**
+<!-- **time countdown** -->
 **game account summary for each game and yearly game**
 **reload issue on agent game**

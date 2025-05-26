@@ -41,7 +41,7 @@ export default async function handler(req, res) {
         },
       },
       { $sort: { totalPlayed: -1 } },
-      { $limit: 3 },
+      // { $limit: 3 },
     ]);
 
     const result = await cursor.toArray();

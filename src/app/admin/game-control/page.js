@@ -29,19 +29,19 @@ export default function AdminGameControl() {
     };
     fetchStatus();
   }, []);
-  useEffect(() => {
-    const fetchTopNumber = async () => {
-      try {
-        const res = await fetch("/api/top-numbers"); // Replace with your actual endpoint
-        const data = await res.json();
-        setTopPlayedNumbers(data);
-      } catch (err) {
-        console.error("Failed to fetch top number:", err);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchTopNumber = async () => {
+  //     try {
+  //       const res = await fetch("/api/top-numbers"); // Replace with your actual endpoint
+  //       const data = await res.json();
+  //       setTopPlayedNumbers(data);
+  //     } catch (err) {
+  //       console.error("Failed to fetch top number:", err);
+  //     }
+  //   };
 
-    fetchTopNumber();
-  }, []);
+  //   fetchTopNumber();
+  // }, []);
 
   const toggleGameStatus = async () => {
     setLoading(true);
@@ -175,7 +175,7 @@ export default function AdminGameControl() {
         </button>
       </div>
 
-      <div className="mb-6 p-4 rounded bg-black bg-opacity-40 border border-yellow-500">
+      {/* <div className="mb-6 p-4 rounded bg-black bg-opacity-40 border border-yellow-500">
         <div className="text-lg font-bold text-yellow-400 mb-3">
           🔥 Most Played Numbers
         </div>
@@ -207,7 +207,7 @@ export default function AdminGameControl() {
               ))}
           </tbody>
         </table>
-      </div>
+      </div> */}
 
       {/* Winning Numbers */}
       <div className="mb-4">
