@@ -6,18 +6,27 @@ export default async function handler(req, res) {
   }
 
   try {
+    const { date, threeUp, downGame } = req.body;
+    console.log(date, threeUp, downGame);
+    if (!date || !threeUp || !downGame) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
     const client = await clientPromise;
     const db = client.db("thai-agent-lottery");
 
-    // Fetch the single winning_numbers document to get the game date
-    const winningDoc = await db.collection("winning_numbers").findOne({});
-    if (!winningDoc || !winningDoc.date) {
-      return res.status(400).json({ error: "Winning numbers date not found" });
-    }
+    // Format the date
+    const gameDate = new Date(date);
+    const day = gameDate.getDate().toString().padStart(2, "0");
+    const month = (gameDate.getMonth() + 1).toString().padStart(2, "0");
+    const year = gameDate.getFullYear();
 
-    const gameDate = new Date(winningDoc.date); // convert to Date object
+    const threeUpFormatted = threeUp.toString().padStart(3, "0");
+    const downGameFormatted = downGame.toString().padStart(2, "0");
 
-    // Get all playersInput entries
+    const formattedKey = `${day} ${month} ${year} ${threeUpFormatted} ${downGameFormatted}`;
+
+    // Get all player entries
     const playersInputs = await db
       .collection("playersInput")
       .find({})
@@ -29,24 +38,22 @@ export default async function handler(req, res) {
         .json({ message: "No player entries found to move" });
     }
 
-    // Add gameDate and movedAt to each document and remove _id
-    const historyDocs = playersInputs.map(({ _id, ...rest }) => ({
-      ...rest,
-      gameDate,
-    }));
+    // Prepare document for history
+    const historyEntry = {
+      [formattedKey]: playersInputs.map(({ _id, ...rest }) => rest),
+    };
 
-    // Insert into history collection
-    await db.collection("history").insertMany(historyDocs);
+    // Save to history
+    await db.collection("history").insertOne(historyEntry);
 
-    // Delete all documents from playersInput
+    // Clear the player inputs
     await db.collection("playersInput").deleteMany({});
 
     res.status(200).json({
-      message: "Moved all entries to history successfully",
-      movedCount: playersInputs.length,
+      message: `Moved ${playersInputs.length} entries under "${formattedKey}"`,
     });
   } catch (error) {
-    console.error("Error moving entries to history:", error);
+    console.error("Error saving to history:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 }

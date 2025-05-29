@@ -111,16 +111,33 @@ export default function AdminGameControl() {
       console.error("Update error:", error);
     }
   };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/win-status");
+        const data = await res.json();
+        setThreeUp(data.threeUp);
+        setDownGame(data.downGame);
+        setGameDate(data.date);
+      } catch (error) {
+        console.error("Error fetching winning numbers:", error);
+      }
+    };
 
+    fetchData();
+  }, []);
   const handleMoveAll = async () => {
     const confirmed = confirm(
       "Are you sure you want to move all entries to history?"
     );
     if (!confirmed) return;
-
     try {
       const res = await fetch("/api/move-entries-to-history", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ date: gameDate, threeUp, downGame }),
       });
       if (res.ok) {
         alert("All entries moved to history!");

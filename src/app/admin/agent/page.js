@@ -235,12 +235,12 @@ export default function AdminAgentPage() {
                   <td className="border border-yellow-400 p-2">{password}</td>
 
                   <td className="border border-yellow-400 p-2 space-x-2">
-                    <button
+                    {/* <button
                       onClick={() => router.push(`/agent-accounts/${agentId}`)}
                       className="px-3 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
                     >
                       💰
-                    </button>
+                    </button> */}
                     <button
                       onClick={() => router.push(`/agent-games/${agentId}`)}
                       className="px-3 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"

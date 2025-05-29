@@ -385,7 +385,7 @@ const Reports = () => {
 
                     <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
                       <td className="border border-gray-700 px-4 py-2">
-                        Final{" "}
+                        Total Win ---{" "}
                         {Math.floor(
                           totalAmounts.ThreeD -
                             (agent?.percentage?.threeD || 0) +
