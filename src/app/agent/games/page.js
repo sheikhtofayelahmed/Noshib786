@@ -141,7 +141,7 @@ const Reports = () => {
   const grandTotal =
     totalAmounts.ThreeD + totalAmounts.TwoD + totalAmounts.OneD;
   const getPermutations = (str) => {
-    if (str.length <= 1) return [str];
+    if (!str || str.length <= 1) return [str || ""];
     let perms = [];
     for (let i = 0; i < str.length; i++) {
       const char = str[i];
@@ -152,6 +152,7 @@ const Reports = () => {
     }
     return [...new Set(perms)];
   };
+
   const isWinningInput = (input) => {
     const parts = input.split("=");
     const number = parts[0];
