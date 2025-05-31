@@ -14,6 +14,7 @@ const Reports = () => {
   const [totalWins, setTotalWins] = useState({});
   const [agent, setAgent] = useState({});
   const [error, setError] = useState("");
+  const [moneyCal, setMoneyCal] = useState({});
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -185,6 +186,35 @@ const Reports = () => {
     return false;
   };
 
+  useEffect(() => {
+    if (totalWins && agent.percentage) {
+      const afterThreeD = totalAmounts.ThreeD - agent.percentage.threeD;
+      const afterTwoD = totalAmounts.TwoD - agent.percentage.twoD;
+      const afterOneD = totalAmounts.OneD - agent.percentage.oneD;
+      const afterSTR = totalWins.STR3D * agent.percentage.str;
+      const afterRUMBLE = totalWins.RUMBLE3D * agent.percentage.rumble;
+      const afterDOWN = totalWins.DOWN * agent.percentage.down;
+      const afterSINGLE = totalWins.SINGLE * agent.percentage.single;
+
+      const totalGame = afterThreeD + afterTwoD + afterOneD;
+      const totalWin = afterSTR + afterRUMBLE + afterDOWN + afterSINGLE;
+
+      // Example: log or update state
+      console.log("Total Game:", totalGame);
+      console.log("Total Win:", totalWin);
+      setMoneyCal({
+        afterThreeD,
+        afterTwoD,
+        afterOneD,
+        afterSTR,
+        afterRUMBLE,
+        afterDOWN,
+        afterSINGLE,
+        totalGame,
+        totalWin,
+      });
+    }
+  }, [totalWins, agent.percentage]);
   if (loading) return <p>Loading...</p>;
   if (fetched && players.length === 0)
     return <p>No players found for this agent.</p>;
@@ -284,16 +314,16 @@ const Reports = () => {
                         {totalAmounts.OneD.toFixed(0)}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                        {totalWins.STR3D}
+                        {totalWins.STR3D || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500 ">
-                        {totalWins.RUMBLE3D}
+                        {totalWins.RUMBLE3D || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                        {totalWins.DOWN}
+                        {totalWins.DOWN || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                        {totalWins.SINGLE}
+                        {totalWins.SINGLE || 0}
                       </td>
                     </tr>
 
@@ -329,40 +359,34 @@ const Reports = () => {
                         After Deduction
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {totalAmounts.ThreeD - agent?.percentage?.threeD || 0}
+                        {moneyCal.afterThreeD || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {totalAmounts.TwoD - agent?.percentage?.twoD}
+                        {moneyCal.afterTwoD || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {totalAmounts.OneD - agent?.percentage?.oneD}
+                        {moneyCal.afterOneD || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                        {totalWins?.STR3D || 0 * agent?.percentage?.str}
+                        {moneyCal.afterSTR || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                        {totalWins?.RUMBLE3D || 0 * agent?.percentage?.rumble}
+                        {moneyCal.afterRUMBLE || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                        {totalWins?.DOWN || 0 * agent?.percentage?.down}
+                        {moneyCal.afterDOWN || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                        {totalWins?.SINGLE || 0 * agent?.percentage?.single}
+                        {moneyCal.afterSINGLE || 0}
                       </td>
                     </tr>
 
-                    <tr className="bg-gray-900 font-bold text-lg ">
+                    <tr className="bg-gray-900 font-bold text-lg text-white">
                       <td className="border border-gray-700 px-4 py-2">
                         Total Game{" "}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-green-300">
-                        {Math.floor(
-                          totalAmounts.ThreeD -
-                            (agent?.percentage?.threeD || 0) +
-                            (totalAmounts.TwoD -
-                              (agent?.percentage?.twoD || 0)) +
-                            (totalAmounts.OneD - (agent?.percentage?.oneD || 0))
-                        )}
+                      <td className="border border-gray-700 px-4 py-2 ">
+                        {moneyCal.totalGame || 0}
                       </td>
                     </tr>
 
@@ -371,13 +395,7 @@ const Reports = () => {
                         Total Win
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-yellow-300">
-                        {Math.floor(
-                          totalWins.STR3D * (agent?.percentage?.str || 0) +
-                            totalWins.RUMBLE3D *
-                              (agent?.percentage?.rumble || 0) +
-                            totalWins.DOWN * (agent?.percentage?.down || 0) +
-                            totalWins.SINGLE * (agent?.percentage?.single || 0)
-                        )}
+                        {moneyCal.totalWin || 0}
                       </td>
                     </tr>
                   </tbody>
