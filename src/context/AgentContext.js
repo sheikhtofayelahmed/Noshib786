@@ -1,48 +1,66 @@
-// src/context/AgentContext.js (or wherever you keep this)
 "use client";
-import React, { createContext, useContext, useState } from "react";
+
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AgentContext = createContext();
 
 export function AgentProvider({ children }) {
   const [agentId, setAgentId] = useState(null);
-  const [loginError, setLoginError] = useState("");
+  const [loginError, setLoginError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = async (agentIdInput, password) => {
-    setLoginError(""); // clear previous error
+  // On mount, load agentId from localStorage if exists
+  useEffect(() => {
+    const storedAgentId = localStorage.getItem("agentId");
+    if (storedAgentId) {
+      setAgentId(storedAgentId);
+    }
+    setLoading(false);
+  }, []);
+
+  // Login function
+  async function login(inputAgentId, password) {
+    setLoginError(null);
+    // Call your login API here - example:
     try {
       const res = await fetch("/api/agent-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId: agentIdInput, password }),
+        body: JSON.stringify({ agentId: inputAgentId, password }),
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        setLoginError(errorData.error || "Login failed");
+        const data = await res.json();
+        setLoginError(data.message || "Login failed");
         return false;
       }
 
-      const data = await res.json();
-      setAgentId(data.agentId); // store agentId on successful login
+      // Login success
+      setAgentId(inputAgentId);
+      localStorage.setItem("agentId", inputAgentId);
       return true;
     } catch (error) {
-      setLoginError("Network error, please try again.");
+      setLoginError("Network error");
       return false;
     }
-  };
+  }
 
-  const logout = () => {
+  // Logout function
+  function logout() {
     setAgentId(null);
-    setLoginError("");
-    // Optional: clear tokens/localStorage here
-  };
+    localStorage.removeItem("agentId");
+    // Optionally redirect or handle post logout steps
+  }
 
   return (
-    <AgentContext.Provider value={{ agentId, login, logout, loginError }}>
+    <AgentContext.Provider
+      value={{ agentId, login, logout, loginError, loading }}
+    >
       {children}
     </AgentContext.Provider>
   );
 }
 
-export const useAgent = () => useContext(AgentContext);
+export function useAgent() {
+  return useContext(AgentContext);
+}

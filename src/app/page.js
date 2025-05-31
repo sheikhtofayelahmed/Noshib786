@@ -1,25 +1,24 @@
-// app/dashboard/page.js
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useAgent } from "@/context/AgentContext";
-
+import { useRouter } from "next/navigation";
 import AgentLayout from "@/components/AgentLayout";
 import PlayerInput from "@/components/PlayerInput";
-import WinningResults from "@/components/Win";
 
-export default function DashboardPage() {
-  const { agentId } = useAgent();
+export default function AgentDashboard() {
+  const { agentId, loading } = useAgent();
   const router = useRouter();
 
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
-    if (!agentId) router.push("/agent/login");
-  }, [agentId, router]);
+    if (!loading && !agentId) {
+      router.push("/agent/login");
+    }
+  }, [agentId, loading, router]);
 
-  if (!agentId) return null;
+  if (loading || !agentId) {
+    return null; // or a spinner if you want
+  }
 
   return (
     <AgentLayout>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import Breadcrumb from "./Breadcrumb"; // adjust path if needed
+import { useAgent } from "@/context/AgentContext";
 
 const navItems = [
   { name: "Home", path: "/" },
@@ -12,16 +13,11 @@ const navItems = [
 ];
 
 export default function AgentLayout({ children }) {
+  const { logout } = useAgent();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-
-  const logoutAgent = () => {
-    document.cookie = "agent-auth=; Max-Age=0; path=/";
-    localStorage.removeItem("agent-auth");
-    window.location.href = "/agent/login";
-  };
 
   return (
     <div className="min-h-screen font-mono bg-gradient-to-br from-black to-red-900 text-white flex flex-col md:flex-row">
@@ -64,7 +60,10 @@ export default function AgentLayout({ children }) {
 
         <div className="pt-6 border-t border-yellow-600 mt-6">
           <button
-            onClick={logoutAgent}
+            onClick={() => {
+              logout();
+              window.location.href = "/agent/login";
+            }}
             className="w-full text-sm bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow transition"
           >
             🚪 Logout

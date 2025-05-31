@@ -1,4 +1,3 @@
-// src/app/agent/login/page.js
 "use client";
 
 import { useState } from "react";
@@ -11,11 +10,14 @@ export default function AgentLogin() {
   const { login, loginError } = useAgent();
   const router = useRouter();
 
-  const handleLogin = async () => {
+  async function handleLogin() {
     if (!agentIdInput || !password) return;
+
     const success = await login(agentIdInput, password);
-    if (success) router.push("/");
-  };
+    if (success) {
+      router.push("/"); // Redirect after login
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white p-6">
