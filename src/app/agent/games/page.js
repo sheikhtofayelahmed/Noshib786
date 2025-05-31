@@ -205,13 +205,13 @@ const Reports = () => {
         )}
         {!loading && players.length > 0 && (
           <div className="mt-8">
-            <div className="mt-8 mb-8 max-w-4xl mx-auto">
-              <div className="my-4 bg-gray-900 bg-opacity-80 rounded-lg shadow-md ring-2 ring-yellow-500 p-6 text-center">
+            <div className="overflow-x-auto mt-8 mb-8 max-w-4xl mx-auto">
+              <div className="overflow-x-auto my-4 bg-gray-900 bg-opacity-80 rounded-lg shadow-md ring-2 ring-yellow-500 p-6 text-center">
                 <h2 className="text-3xl font-bold text-yellow-400 mb-6 animate-pulse">
                   📊 Game & Player Summary
                 </h2>
 
-                <table className="w-full border-collapse font-mono text-sm rounded-lg overflow-hidden shadow-lg">
+                <table className="overflow-x-auto w-full border-collapse font-mono text-sm rounded-lg overflow-hidden shadow-lg">
                   <tbody>
                     <tr className="bg-black border border-yellow-700">
                       <td
@@ -256,16 +256,16 @@ const Reports = () => {
                       <th className="border border-gray-700 px-4 py-3 text-center">
                         🎯 1D
                       </th>
-                      <th className="border border-gray-700 px-4 py-3 text-center">
+                      <th className="border bg-yellow-800 border-gray-700 px-4 py-3 text-center">
                         STR
                       </th>
-                      <th className="border border-gray-700 px-4 py-3 text-center">
+                      <th className="border bg-yellow-800 border-gray-700 px-4 py-3 text-center">
                         RUMBLE
                       </th>
-                      <th className="border border-gray-700 px-4 py-3 text-center">
+                      <th className="border bg-yellow-800 border-gray-700 px-4 py-3 text-center">
                         DOWN
                       </th>
-                      <th className="border border-gray-700 px-4 py-3 text-center">
+                      <th className="border bg-yellow-800 border-gray-700 px-4 py-3 text-center">
                         SINGLE
                       </th>
                     </tr>
@@ -283,16 +283,16 @@ const Reports = () => {
                       <td className="border border-gray-700 px-4 py-2 text-center">
                         {totalAmounts.OneD.toFixed(0)}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-center">
+                      <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                         {totalWins.STR3D}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-center">
+                      <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500 ">
                         {totalWins.RUMBLE3D}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-center">
+                      <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                         {totalWins.DOWN}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-center">
+                      <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                         {totalWins.SINGLE}
                       </td>
                     </tr>
@@ -310,16 +310,16 @@ const Reports = () => {
                       <td className="border border-gray-700 px-4 py-2 text-center">
                         {agent?.percentage?.oneD || 0}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-center">
+                      <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                         {agent?.percentage?.str || 0}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-center">
+                      <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                         {agent?.percentage?.rumble || 0}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-center">
+                      <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                         {agent?.percentage?.down || 0}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-center">
+                      <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                         {agent?.percentage?.single || 0}
                       </td>
                     </tr>
@@ -329,7 +329,7 @@ const Reports = () => {
                         After Deduction
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
-                        {totalAmounts.ThreeD - agent?.percentage?.threeD}
+                        {totalAmounts.ThreeD - agent?.percentage?.threeD || 0}
                       </td>
                       <td className="border border-gray-700 px-4 py-2 text-center">
                         {totalAmounts.TwoD - agent?.percentage?.twoD}
@@ -337,29 +337,25 @@ const Reports = () => {
                       <td className="border border-gray-700 px-4 py-2 text-center">
                         {totalAmounts.OneD - agent?.percentage?.oneD}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-center">
+                      <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                         {totalWins?.STR3D || 0 * agent?.percentage?.str}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-center">
+                      <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                         {totalWins?.RUMBLE3D || 0 * agent?.percentage?.rumble}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-center">
+                      <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                         {totalWins?.DOWN || 0 * agent?.percentage?.down}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 text-center">
+                      <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                         {totalWins?.SINGLE || 0 * agent?.percentage?.single}
                       </td>
                     </tr>
 
-                    <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
+                    <tr className="bg-gray-900 font-bold text-lg ">
                       <td className="border border-gray-700 px-4 py-2">
-                        🔢 Grand Total
+                        Total Game{" "}
                       </td>
-                      <td
-                        colSpan={4}
-                        className="border border-gray-700 px-4 py-2"
-                      >
-                        Game{" "}
+                      <td className="border border-gray-700 px-4 py-2 text-green-300">
                         {Math.floor(
                           totalAmounts.ThreeD -
                             (agent?.percentage?.threeD || 0) +
@@ -368,12 +364,13 @@ const Reports = () => {
                             (totalAmounts.OneD - (agent?.percentage?.oneD || 0))
                         )}
                       </td>
+                    </tr>
 
-                      <td
-                        colSpan={4}
-                        className="border border-gray-700 px-4 py-2"
-                      >
-                        Win{" "}
+                    <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
+                      <td className="border border-gray-700 px-4 py-2 text-yellow-300">
+                        Total Win
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-yellow-300">
                         {Math.floor(
                           totalWins.STR3D * (agent?.percentage?.str || 0) +
                             totalWins.RUMBLE3D *
@@ -381,27 +378,6 @@ const Reports = () => {
                             totalWins.DOWN * (agent?.percentage?.down || 0) +
                             totalWins.SINGLE * (agent?.percentage?.single || 0)
                         )}
-                      </td>
-                    </tr>
-
-                    <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
-                      <td className="border border-gray-700 px-4 py-2">
-                        Total Win ---{" "}
-                        {Math.floor(
-                          totalAmounts.ThreeD -
-                            (agent?.percentage?.threeD || 0) +
-                            (totalAmounts.TwoD -
-                              (agent?.percentage?.twoD || 0)) +
-                            (totalAmounts.OneD - (agent?.percentage?.oneD || 0))
-                        ) -
-                          Math.floor(
-                            totalWins.STR3D * (agent?.percentage?.str || 0) +
-                              totalWins.RUMBLE3D *
-                                (agent?.percentage?.rumble || 0) +
-                              totalWins.DOWN * (agent?.percentage?.down || 0) +
-                              totalWins.SINGLE *
-                                (agent?.percentage?.single || 0)
-                          )}
                       </td>
                     </tr>
                   </tbody>
