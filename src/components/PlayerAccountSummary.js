@@ -152,10 +152,11 @@ const PlayerAccountSummary = ({ agentId }) => {
     return [...new Set(perms)];
   };
 
-  const isWinningInput = (input) => {
+  const getMatchType = (input, threeUp, downGame) => {
     const parts = input.split("=");
     const number = parts[0];
     const amounts = parts.slice(1).map(Number);
+
     const permutations = getPermutations(threeUp);
     const reversedDown = downGame.split("").reverse().join("");
     const sumOfDigits = threeUp
@@ -164,24 +165,30 @@ const PlayerAccountSummary = ({ agentId }) => {
     const lastDigitOfSum = sumOfDigits % 10;
 
     if (number.length === 3) {
-      if (number === threeUp) return true;
-      if (permutations.includes(number)) {
-        return amounts.length >= 2; // Rumble condition (like STR=50=60)
+      if (number === threeUp) {
+        return { match: true, type: "str" };
+      }
+      if (permutations.includes(number) && amounts.length >= 2) {
+        return { match: true, type: "rumble" };
       }
     }
 
     if (number.length === 2) {
-      if (number === downGame) return true;
-      if (number === reversedDown) {
-        return amounts.length >= 2; // Rumble condition for downGame
+      if (number === downGame) {
+        return { match: true, type: "down" };
+      }
+      if (number === reversedDown && amounts.length >= 2) {
+        return { match: true, type: "rumble" };
       }
     }
 
     if (number.length === 1) {
-      return parseInt(number) === lastDigitOfSum;
+      if (parseInt(number) === lastDigitOfSum) {
+        return { match: true, type: "single" };
+      }
     }
 
-    return false;
+    return { match: false, type: null };
   };
 
   useEffect(() => {
@@ -437,23 +444,60 @@ const PlayerAccountSummary = ({ agentId }) => {
                 {/* Entries Table */}
                 <table className="w-full border-collapse text-sm font-mono mt-4">
                   <thead>
-                    <tr className="bg-yellow-600 text-black">
+                    <tr className="bg-yellow-600 text-white">
                       <th className="border px-3 py-2 text-left">#</th>
                       <th className="border px-3 py-2 text-left">Input</th>
                     </tr>
                   </thead>
                   <tbody>
                     {player.entries.map((entry, entryIdx) => {
-                      const isWinning = isWinningInput(entry.input);
+                      const { match, type } = getMatchType(
+                        entry.input,
+                        threeUp,
+                        downGame
+                      );
+                      const parts = entry.input.split("=");
+                      const number = parts[0];
+                      const amounts = parts.slice(1);
+
                       return (
-                        <tr
-                          key={entryIdx}
-                          className={`${
-                            entryIdx % 2 === 0 ? "bg-gray-700" : "bg-gray-800"
-                          } ${isWinning ? "winning-animation" : ""}`}
-                        >
+                        <tr key={entryIdx}>
                           <td className="border px-3 py-2">{entryIdx + 1}</td>
-                          <td className="border px-3 py-2">{entry.input}</td>
+                          <td className="border px-3 py-2">
+                            <span
+                              className={
+                                match && "text-yellow-300 font-bold text-xl "
+                              }
+                            >
+                              {number}
+                            </span>
+                            {amounts.map((amt, i) => {
+                              const highlightAll =
+                                type === "str" || type === "down";
+                              const highlightOne =
+                                type === "rumble" || type === "single";
+
+                              const shouldHighlight =
+                                (highlightAll && match) ||
+                                (highlightOne &&
+                                  match &&
+                                  i === amounts.length - 1);
+
+                              return (
+                                <span key={i}>
+                                  {"="}
+                                  <span
+                                    className={
+                                      shouldHighlight &&
+                                      "text-yellow-300 font-bold text-xl "
+                                    }
+                                  >
+                                    {amt}
+                                  </span>
+                                </span>
+                              );
+                            })}
+                          </td>
                         </tr>
                       );
                     })}

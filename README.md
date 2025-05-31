@@ -129,12 +129,12 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 <!-- **time countdown** -->
 
 **game account summary for each game and yearly game**
-**reload issue on agent game**
+<!-- **reload issue on agent game** -->
 **use =,-,/"**
 **3 column in the printing**
 **agent game editing by admin. will be added editing time, remove**
 **download option/whatsapp integration**
-**color the winning input**
+<!-- **color the winning input** -->
 **remove printing from agent and give 3 column in one table**
 **error in player summary**
 **make time reminder bigger**
