@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
+import React from "react";
 
-const PlayerAccountSummary = ({ agentId }) => {
+const PlayerAccountSummary = ({ agentId, print }) => {
   const [loading, setLoading] = useState(true);
   const [fetched, setFetched] = useState(false);
   const [isGameOn, setIsGameOn] = useState(null);
@@ -13,6 +14,7 @@ const PlayerAccountSummary = ({ agentId }) => {
   const [agent, setAgent] = useState({});
   const [error, setError] = useState("");
   const [moneyCal, setMoneyCal] = useState({});
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -127,18 +129,6 @@ const PlayerAccountSummary = ({ agentId }) => {
     fetchWins();
   }, [agentId, threeUp, downGame]);
 
-  const totalAmounts = players.reduce(
-    (acc, player) => {
-      acc.ThreeD += player.amountPlayed.ThreeD;
-      acc.TwoD += player.amountPlayed.TwoD;
-      acc.OneD += player.amountPlayed.OneD;
-      return acc;
-    },
-    { ThreeD: 0, TwoD: 0, OneD: 0 }
-  );
-
-  const grandTotal =
-    totalAmounts.ThreeD + totalAmounts.TwoD + totalAmounts.OneD;
   const getPermutations = (str) => {
     if (!str || str.length <= 1) return [str || ""];
     let perms = [];
@@ -193,13 +183,32 @@ const PlayerAccountSummary = ({ agentId }) => {
 
   useEffect(() => {
     if (totalWins && agent.percentage) {
-      const afterThreeD = totalAmounts.ThreeD - agent.percentage.threeD;
-      const afterTwoD = totalAmounts.TwoD - agent.percentage.twoD;
-      const afterOneD = totalAmounts.OneD - agent.percentage.oneD;
-      const afterSTR = totalWins.STR3D * agent.percentage.str;
-      const afterRUMBLE = totalWins.RUMBLE3D * agent.percentage.rumble;
-      const afterDOWN = totalWins.DOWN * agent.percentage.down;
-      const afterSINGLE = totalWins.SINGLE * agent.percentage.single;
+      const totalAmounts = players.reduce(
+        (acc, player) => {
+          acc.ThreeD += player.amountPlayed.ThreeD;
+          acc.TwoD += player.amountPlayed.TwoD;
+          acc.OneD += player.amountPlayed.OneD;
+          return acc;
+        },
+        { ThreeD: 0, TwoD: 0, OneD: 0 }
+      );
+      const afterThreeD = Math.floor(
+        totalAmounts.ThreeD * (1 - agent.percentage.threeD / 100)
+      );
+      const afterTwoD = Math.floor(
+        totalAmounts.TwoD * (1 - agent.percentage.twoD / 100)
+      );
+      const afterOneD = Math.floor(
+        totalAmounts.OneD * (1 - agent.percentage.oneD / 100)
+      );
+      const afterSTR = Math.floor(totalWins.STR3D * agent.percentage.str);
+      const afterRUMBLE = Math.floor(
+        totalWins.RUMBLE3D * agent.percentage.rumble
+      );
+      const afterDOWN = Math.floor(totalWins.DOWN * agent.percentage.down);
+      const afterSINGLE = Math.floor(
+        totalWins.SINGLE * agent.percentage.single
+      );
 
       const totalGame = afterThreeD + afterTwoD + afterOneD;
       const totalWin = afterSTR + afterRUMBLE + afterDOWN + afterSINGLE;
@@ -217,6 +226,7 @@ const PlayerAccountSummary = ({ agentId }) => {
         afterSINGLE,
         totalGame,
         totalWin,
+        totalAmounts,
       });
     }
   }, [totalWins, agent.percentage]);
@@ -309,13 +319,13 @@ const PlayerAccountSummary = ({ agentId }) => {
                       Total
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center">
-                      {totalAmounts.ThreeD.toFixed(0)}
+                      {moneyCal.totalAmounts.ThreeD.toFixed(0)}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center">
-                      {totalAmounts.TwoD.toFixed(0)}
+                      {moneyCal.totalAmounts.TwoD.toFixed(0)}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center">
-                      {totalAmounts.OneD.toFixed(0)}
+                      {moneyCal.totalAmounts.OneD.toFixed(0)}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                       {totalWins.STR3D || 0}
@@ -386,21 +396,73 @@ const PlayerAccountSummary = ({ agentId }) => {
                   </tr>
 
                   <tr className="bg-gray-900 font-bold text-lg text-white">
-                    <td className="border border-gray-700 px-4 py-2">
+                    <td
+                      colSpan={2}
+                      className="border border-gray-700 px-4 py-2"
+                    >
                       Total Game{" "}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 ">
+                    <td
+                      colSpan={2}
+                      className="border border-gray-700 px-4 py-2 "
+                    >
                       {moneyCal.totalGame || 0}
                     </td>
+                    <td colSpan={3} className="border border-gray-700 "></td>
+                    <td colSpan={1} className="border border-gray-700 "></td>
                   </tr>
 
                   <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
-                    <td className="border border-gray-700 px-4 py-2 text-yellow-300">
+                    <td
+                      colSpan={2}
+                      className="border border-gray-700 px-4 py-2 text-yellow-300"
+                    >
                       Total Win
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-yellow-300">
+                    <td
+                      colSpan={2}
+                      className="border border-gray-700 px-4 py-2 text-yellow-300"
+                    >
                       {moneyCal.totalWin || 0}
                     </td>
+                    <td colSpan={3} className="border border-gray-700 "></td>
+                    <td colSpan={1} className="border border-gray-700 "></td>
+                  </tr>
+                  <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
+                    <td
+                      colSpan={2}
+                      className="border border-gray-700 px-4 py-2 text-red-400"
+                    >
+                      এডমিন পাবে
+                    </td>
+                    <td
+                      colSpan={2}
+                      className="border border-gray-700 px-4 py-2 text-red-400"
+                    >
+                      {moneyCal.totalGame - moneyCal.totalWin >= 0
+                        ? moneyCal.totalGame - moneyCal.totalWin
+                        : 0}
+                    </td>
+                    <td colSpan={3} className="border border-gray-700 "></td>
+                    <td colSpan={1} className="border border-gray-700 "></td>
+                  </tr>
+                  <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
+                    <td
+                      colSpan={2}
+                      className="border border-gray-700 px-4 py-2 text-white"
+                    >
+                      এজেন্ট পাবে
+                    </td>
+                    <td
+                      colSpan={2}
+                      className="border border-gray-700 px-4 py-2 text-white"
+                    >
+                      {moneyCal.totalWin - moneyCal.totalGame >= 0
+                        ? moneyCal.totalWin - moneyCal.totalGame
+                        : 0}
+                    </td>
+                    <td colSpan={3} className="border border-gray-700 "></td>
+                    <td colSpan={1} className="border border-gray-700 "></td>
                   </tr>
                 </tbody>
               </table>
@@ -413,137 +475,147 @@ const PlayerAccountSummary = ({ agentId }) => {
 
           <div className="space-y-6 max-w-4xl mx-auto max-h-[60vh] overflow-y-auto pr-2">
             {players.map((player, idx) => (
-              <div key={idx} className="bg-gray-800 rounded-lg shadow p-5">
-                <p className="text-yellow-300 font-bold text-xl text-center">
-                  🎫 {player.voucher || "N/A"}
-                </p>
-                <div className="flex justify-between items-start mb-4">
-                  {/* Player Info */}
-                  <div>
-                    <h4 className="text-xl font-bold mb-1">{player.name}</h4>
-                    <p className="text-gray-400 text-sm">
-                      Time: {new Date(player.time).toLocaleString()}
-                    </p>
-                    <p className="text-gray-400 text-sm">
-                      Entries: {player.entries.length}
-                    </p>
+              <React.Fragment key={idx}>
+                <div
+                  key={idx}
+                  className="bg-gray-800 rounded-lg border border-yellow-500 shadow p-5"
+                >
+                  <p className="text-yellow-300 font-bold text-xl text-center">
+                    🎫 {player.voucher || "N/A"}
+                  </p>
+                  <div className="flex justify-between items-start mb-4">
+                    {/* Player Info */}
+                    <div>
+                      <h4 className="text-xl font-bold mb-1">{player.name}</h4>
+                      <p className="text-gray-400 text-sm">
+                        Time: {new Date(player.time).toLocaleString()}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Entries: {player.entries.length}
+                      </p>
+                    </div>
+
+                    {/* Print Button */}
+                    <div>
+                      {print && (
+                        <button
+                          onClick={() => window.print()}
+                          className="py-2 px-4 rounded bg-purple-600 hover:bg-purple-700 transition"
+                          title="Print Player Info"
+                        >
+                          🖨️ Print
+                        </button>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Print Button */}
-                  <div>
-                    <button
-                      onClick={() => window.print()}
-                      className="py-2 px-4 rounded bg-purple-600 hover:bg-purple-700 transition"
-                      title="Print Player Info"
-                    >
-                      🖨️ Print
-                    </button>
-                  </div>
-                </div>
+                  {/* Entries Table */}
+                  <table className="w-full border-collapse text-sm font-mono mt-4">
+                    <thead>
+                      <tr className="bg-yellow-600 text-white">
+                        <th className="border px-3 py-2 text-left">#</th>
+                        <th className="border px-3 py-2 text-left">Input</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {player.entries.map((entry, entryIdx) => {
+                        const { match, type } = getMatchType(
+                          entry.input,
+                          threeUp,
+                          downGame
+                        );
+                        const parts = entry.input.split("=");
+                        const number = parts[0];
+                        const amounts = parts.slice(1);
 
-                {/* Entries Table */}
-                <table className="w-full border-collapse text-sm font-mono mt-4">
-                  <thead>
-                    <tr className="bg-yellow-600 text-white">
-                      <th className="border px-3 py-2 text-left">#</th>
-                      <th className="border px-3 py-2 text-left">Input</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {player.entries.map((entry, entryIdx) => {
-                      const { match, type } = getMatchType(
-                        entry.input,
-                        threeUp,
-                        downGame
-                      );
-                      const parts = entry.input.split("=");
-                      const number = parts[0];
-                      const amounts = parts.slice(1);
+                        return (
+                          <tr key={entryIdx}>
+                            <td className="border px-3 py-2">{entryIdx + 1}</td>
+                            <td className="border px-3 py-2">
+                              <span
+                                className={
+                                  match && "text-yellow-300 font-bold text-xl "
+                                }
+                              >
+                                {number}
+                              </span>
+                              {amounts.map((amt, i) => {
+                                const highlightAll =
+                                  type === "str" || type === "down";
+                                const highlightOne =
+                                  type === "rumble" || type === "single";
 
-                      return (
-                        <tr key={entryIdx}>
-                          <td className="border px-3 py-2">{entryIdx + 1}</td>
-                          <td className="border px-3 py-2">
-                            <span
-                              className={
-                                match && "text-yellow-300 font-bold text-xl "
-                              }
-                            >
-                              {number}
-                            </span>
-                            {amounts.map((amt, i) => {
-                              const highlightAll =
-                                type === "str" || type === "down";
-                              const highlightOne =
-                                type === "rumble" || type === "single";
+                                const shouldHighlight =
+                                  (highlightAll && match) ||
+                                  (highlightOne &&
+                                    match &&
+                                    i === amounts.length - 1);
 
-                              const shouldHighlight =
-                                (highlightAll && match) ||
-                                (highlightOne &&
-                                  match &&
-                                  i === amounts.length - 1);
-
-                              return (
-                                <span key={i}>
-                                  {"="}
-                                  <span
-                                    className={
-                                      shouldHighlight &&
-                                      "text-yellow-300 font-bold text-xl "
-                                    }
-                                  >
-                                    {amt}
+                                return (
+                                  <span key={i}>
+                                    {"="}
+                                    <span
+                                      className={
+                                        shouldHighlight &&
+                                        "text-yellow-300 font-bold text-xl "
+                                      }
+                                    >
+                                      {amt}
+                                    </span>
                                   </span>
-                                </span>
-                              );
-                            })}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                                );
+                              })}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
 
-                {/* Summary Table */}
-                <table className="w-full border-collapse text-sm font-mono mt-6">
-                  <thead>
-                    <tr className="bg-red-700 text-white">
-                      <th className="border px-4 py-2 text-left">Category</th>
-                      <th className="border px-4 py-2 text-left">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="bg-gray-800">
-                      <td className="border px-4 py-2">🎯 3D Total</td>
-                      <td className="border px-4 py-2 text-green-400">
-                        {player.amountPlayed.ThreeD}
-                      </td>
-                    </tr>
-                    <tr className="bg-gray-900">
-                      <td className="border px-4 py-2">🎯 2D Total</td>
-                      <td className="border px-4 py-2 text-green-400">
-                        {player.amountPlayed.TwoD}
-                      </td>
-                    </tr>
-                    <tr className="bg-gray-800">
-                      <td className="border px-4 py-2">🎯 1D Total</td>
-                      <td className="border px-4 py-2 text-green-400">
-                        {player.amountPlayed.OneD}
-                      </td>
-                    </tr>
-                    <tr className="bg-gray-900 font-bold text-lg">
-                      <td className="border px-4 py-2">🔢 Grand Total</td>
-                      <td className="border px-4 py-2 text-yellow-300">
-                        {(
-                          player.amountPlayed.ThreeD +
-                          player.amountPlayed.TwoD +
-                          player.amountPlayed.OneD
-                        ).toFixed(0)}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                  {/* Summary Table */}
+                  <table className="w-full border-collapse text-sm font-mono mt-6">
+                    <thead>
+                      <tr className="bg-red-700 text-white">
+                        <th className="border px-4 py-2 text-left">Category</th>
+                        <th className="border px-4 py-2 text-left">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="bg-gray-800">
+                        <td className="border px-4 py-2">🎯 3D Total</td>
+                        <td className="border px-4 py-2 text-green-400">
+                          {player.amountPlayed.ThreeD}
+                        </td>
+                      </tr>
+                      <tr className="bg-gray-900">
+                        <td className="border px-4 py-2">🎯 2D Total</td>
+                        <td className="border px-4 py-2 text-green-400">
+                          {player.amountPlayed.TwoD}
+                        </td>
+                      </tr>
+                      <tr className="bg-gray-800">
+                        <td className="border px-4 py-2">🎯 1D Total</td>
+                        <td className="border px-4 py-2 text-green-400">
+                          {player.amountPlayed.OneD}
+                        </td>
+                      </tr>
+                      <tr className="bg-gray-900 font-bold text-lg">
+                        <td className="border px-4 py-2">🔢 Grand Total</td>
+                        <td className="border px-4 py-2 text-yellow-300">
+                          {(
+                            player.amountPlayed.ThreeD +
+                            player.amountPlayed.TwoD +
+                            player.amountPlayed.OneD
+                          ).toFixed(0)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                {idx !== players.length - 1 && (
+                  <div className="h-2 w-full my-12 bg-gradient-to-r from-pink-500 via-yellow-500 to-pink-500 rounded-full shadow-[0_0_15px_rgba(236,72,153,0.5)] animate-pulse" />
+                )}
+              </React.Fragment>
             ))}
           </div>
         </div>

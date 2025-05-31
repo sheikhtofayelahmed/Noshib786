@@ -7,7 +7,10 @@ const Reports = () => {
   const { agentId } = useAgent();
   return (
     <AgentProvider>
-      <PlayerAccountSummary agentId={agentId}></PlayerAccountSummary>
+      <PlayerAccountSummary
+        agentId={agentId}
+        print={false}
+      ></PlayerAccountSummary>
     </AgentProvider>
   );
 };

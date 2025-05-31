@@ -92,7 +92,10 @@ export default function AgentGames() {
         {loading && <p className="text-yellow-300">⏳ Loading...</p>}
         {error && <p className="text-red-500">❌ {error}</p>}
 
-        <PlayerAccountSummary agentId={agentId}></PlayerAccountSummary>
+        <PlayerAccountSummary
+          agentId={agentId}
+          print={true}
+        ></PlayerAccountSummary>
       </main>
     </div>
   );
