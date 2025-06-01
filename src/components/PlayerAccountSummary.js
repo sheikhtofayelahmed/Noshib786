@@ -561,25 +561,25 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                       Total
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center">
-                      {moneyCal.totalAmounts.ThreeD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.ThreeD.toFixed(0)}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center">
-                      {moneyCal.totalAmounts.TwoD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.TwoD.toFixed(0)}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center">
-                      {moneyCal.totalAmounts.OneD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.OneD.toFixed(0)}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                      {totalWins.STR3D || 0}
+                      {totalWins?.STR3D || 0}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500 ">
-                      {totalWins.RUMBLE3D || 0}
+                      {totalWins?.RUMBLE3D || 0}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                      {totalWins.DOWN || 0}
+                      {totalWins?.DOWN || 0}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                      {totalWins.SINGLE || 0}
+                      {totalWins?.SINGLE || 0}
                     </td>
                   </tr>
 
@@ -615,25 +615,25 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                       After Deduction
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center">
-                      {moneyCal.afterThreeD || 0}
+                      {moneyCal?.afterThreeD || 0}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center">
-                      {moneyCal.afterTwoD || 0}
+                      {moneyCal?.afterTwoD || 0}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center">
-                      {moneyCal.afterOneD || 0}
+                      {moneyCal?.afterOneD || 0}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                      {moneyCal.afterSTR || 0}
+                      {moneyCal?.afterSTR || 0}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                      {moneyCal.afterRUMBLE || 0}
+                      {moneyCal?.afterRUMBLE || 0}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                      {moneyCal.afterDOWN || 0}
+                      {moneyCal?.afterDOWN || 0}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
-                      {moneyCal.afterSINGLE || 0}
+                      {moneyCal?.afterSINGLE || 0}
                     </td>
                   </tr>
 
@@ -642,14 +642,14 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                       colSpan={2}
                       className="border border-gray-700 px-4 py-2"
                     >
-                      Total Game{" "}
+                      Total Game
                     </td>
                     <td
                       colSpan={2}
                       className="border border-gray-700 px-4 py-2 "
                     >
-                      {moneyCal.totalGame || 0}
-                    </td>{" "}
+                      {moneyCal?.totalGame || 0}
+                    </td>
                   </tr>
 
                   <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
@@ -663,7 +663,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                       colSpan={2}
                       className="border border-gray-700 px-4 py-2 text-yellow-300"
                     >
-                      {moneyCal.totalWin || 0}
+                      {moneyCal?.totalWin || 0}
                     </td>
                   </tr>
                   <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
@@ -677,8 +677,8 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                       colSpan={2}
                       className="border border-gray-700 px-4 py-2 text-red-400"
                     >
-                      {moneyCal.totalGame - moneyCal.totalWin >= 0
-                        ? moneyCal.totalGame - moneyCal.totalWin
+                      {moneyCal?.totalGame - moneyCal?.totalWin >= 0
+                        ? moneyCal?.totalGame - moneyCal?.totalWin
                         : 0}
                     </td>
                   </tr>
@@ -693,10 +693,10 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                       colSpan={2}
                       className="border border-gray-700 px-4 py-2 text-white"
                     >
-                      {moneyCal.totalWin - moneyCal.totalGame >= 0
-                        ? moneyCal.totalWin - moneyCal.totalGame
+                      {moneyCal?.totalWin - moneyCal?.totalGame >= 0
+                        ? moneyCal?.totalWin - moneyCal?.totalGame
                         : 0}
-                    </td>{" "}
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -774,7 +774,9 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                             <td className="border px-3 py-2">
                               <span
                                 className={
-                                  match && "text-yellow-300 font-bold text-xl "
+                                  match
+                                    ? "text-yellow-300 font-bold text-xl "
+                                    : ""
                                 }
                               >
                                 {number}
@@ -796,8 +798,9 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                                     {"="}
                                     <span
                                       className={
-                                        shouldHighlight &&
-                                        "text-yellow-300 font-bold text-xl "
+                                        shouldHighlight
+                                          ? "text-yellow-300 font-bold text-xl "
+                                          : ""
                                       }
                                     >
                                       {amt}

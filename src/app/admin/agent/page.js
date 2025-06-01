@@ -242,7 +242,9 @@ export default function AdminAgentPage() {
                       💰
                     </button> */}
                     <button
-                      onClick={() => router.push(`/agent-games/${agentId}`)}
+                      onClick={() =>
+                        router.push(`/admin/agent-games/${agentId}`)
+                      }
                       className="px-3 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
                     >
                       🎰
