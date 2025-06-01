@@ -210,7 +210,7 @@ export default function AdminAgentPage() {
         ) : (
           <table className="w-full text-yellow-300 border-collapse font-mono">
             <thead>
-              <tr className="bg-yellow-700 text-black">
+              <tr className="bg-yellow-700 text-white">
                 <th className="border border-yellow-400 p-2">Agent ID</th>
                 <th className="border border-yellow-400 p-2">Name</th>
                 <th className="border border-yellow-400 p-2">Password</th>
