@@ -22,16 +22,29 @@ const Ticker = ({ data, title }) => (
 // NumberTable Component - Transformed into a visually striking casino grid
 const NumberTable = ({ rows, data, title }) => (
   <div className="mb-16 bg-gray-900 rounded-xl shadow-2xl overflow-hidden border-2 border-red-800">
-    <Ticker
+    {/* <Ticker
       title={`Hot Numbers (${title})`}
       data={data.filter((n) => n.totalPlayed > 100)}
-    />
+    /> */}
     <div className="p-6 overflow-x-auto">
       <h3 className="text-3xl font-bold text-yellow-400 mb-8 text-center uppercase tracking-wider bg-black py-4 rounded-lg shadow-inner">
         {title} Game Board
       </h3>
       <table className="w-full border-collapse text-center text-white font-mono">
         <tbody>
+          {title !== "Single" && (
+            <tr>
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((row, i) => (
+                <td
+                  key={i}
+                  className="text-5xl text-green-600 p-4 border border-gray-500"
+                >
+                  {row}
+                </td>
+              ))}{" "}
+            </tr>
+          )}
+
           {rows.map((row, i) => (
             <tr key={i}>
               {row.map((num, j) => {
@@ -123,6 +136,27 @@ export default function HappyNewYear() {
     [579, 589, 670, 680, 690, 457, 467, 468, 478, 569],
     [678, 679, 689, 789, 780, 790, 890, 567, 568, 578],
   ];
+  const columns = Array.from({ length: 10 }, (_, i) => i); // 0–9 columns
+
+  const columnData = columns.reduce((acc, col) => {
+    acc[col] = [];
+    return acc;
+  }, {});
+
+  numberData.forEach((item) => {
+    const numStr = item._id;
+    const played = item.totalPlayed;
+
+    if (played > 100) {
+      const digitSum = numStr
+        .split("")
+        .map(Number)
+        .reduce((a, b) => a + b, 0);
+      const columnKey = digitSum % 10;
+
+      columnData[columnKey].push({ number: numStr, played });
+    }
+  }); // ✅ <-- fixed missing parenthesis
 
   return (
     <div className="w-full p-8 bg-gradient-to-b from-black to-red-950 min-h-screen font-sans text-gray-100 select-none overflow-x-hidden">
@@ -144,6 +178,44 @@ export default function HappyNewYear() {
       />
 
       {/* Tailwind CSS custom animations and colors (add to your global CSS or tailwind.config.js) */}
+      <div className="mb-16 bg-gray-950 rounded-xl shadow-2xl border-2 border-yellow-600 overflow-x-auto">
+        <h3 className="text-3xl font-bold text-yellow-400 mb-4 text-center uppercase tracking-wider bg-black py-4 rounded-lg shadow-inner">
+          🎯 Hot Numbers by Last Digit of Sum
+        </h3>
+        <table className="w-full text-center font-mono text-sm md:text-base text-white">
+          <thead>
+            <tr>
+              {columns.map((col) => (
+                <th
+                  key={col}
+                  className="p-2 bg-red-900 border border-gray-700 text-4xl"
+                >
+                  {col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              {columns.map((col) => (
+                <td
+                  key={col}
+                  className="align-top p-2 border border-gray-700 bg-gray-900"
+                >
+                  {columnData[col].map(({ number, played }, idx) => (
+                    <div
+                      key={idx}
+                      className="text-green-400 font-bold text-2xl mb-1 px-1"
+                    >
+                      <span className="text-white">{number}</span> = {played}
+                    </div>
+                  ))}
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
