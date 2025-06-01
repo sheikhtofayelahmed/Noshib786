@@ -504,6 +504,8 @@ export default function PlayerInput() {
           <input
             key={i}
             type="text"
+            inputMode="numeric"
+            pattern="[0-9=]+"
             value={input}
             onChange={(e) => handleInputChange(i, e.target.value)}
             placeholder={`Entry ${i + 1}`}
@@ -580,74 +582,101 @@ export default function PlayerInput() {
                       </tr>
                     </thead>
                     <tbody>
-                      {player.data.map((entry, entryIdx) => (
-                        <tr
-                          key={entry.id}
-                          className={
-                            entryIdx % 2 === 0 ? "bg-gray-700" : "bg-gray-800"
+                      {/* Calculate the total number of entries for the current player */}
+                      {(() => {
+                        const totalEntries = player.data.length;
+                        const oneThirdLength = Math.ceil(totalEntries / 3); // Ensures at least one row per section
+                        const twoThirdsLength = Math.ceil(totalEntries / 3) * 2;
+
+                        return player.data.map((entry, entryIdx) => {
+                          let rowTextColorClass = "text-gray-300"; // Default color
+
+                          if (entryIdx < oneThirdLength) {
+                            rowTextColorClass = "text-red-400"; // First one-third
+                          } else if (entryIdx < twoThirdsLength) {
+                            rowTextColorClass = "text-green-400"; // Second one-third
+                          } else {
+                            rowTextColorClass = "text-blue-400"; // Last one-third
                           }
-                        >
-                          <td className="border px-3 py-2">{entry.serial}</td>
-                          <td className="border px-3 py-2">
-                            {entry.isEditing ? (
-                              <div>
-                                <input
-                                  type="text"
-                                  value={entry.editValue}
-                                  onChange={(e) =>
-                                    handleEditChange(
-                                      idx,
-                                      entryIdx,
-                                      e.target.value
-                                    )
-                                  }
-                                  className={`w-full p-1 bg-black border-2 text-white rounded ${
-                                    entry.editError
-                                      ? "border-red-500"
-                                      : "border-yellow-400"
-                                  }`}
-                                />
-                                {entry.editError && (
-                                  <p className="text-red-400 text-xs mt-1">
-                                    Invalid entry format.
-                                  </p>
-                                )}
-                              </div>
-                            ) : (
-                              entry.input
-                            )}
-                          </td>
-                          <td className="border px-3 py-2 space-x-2">
-                            {!submittedPlayers.includes(player.name) && (
-                              <>
+
+                          return (
+                            <tr
+                              key={entry.id}
+                              className={`${
+                                entryIdx % 2 === 0
+                                  ? "bg-gray-700"
+                                  : "bg-gray-800"
+                              } ${rowTextColorClass}`}
+                            >
+                              <td className="border px-3 py-0">
+                                {entry.serial}
+                              </td>
+                              <td className="border px-3 py-0">
                                 {entry.isEditing ? (
-                                  <button
-                                    onClick={() =>
-                                      handleSaveEdit(idx, entryIdx)
-                                    }
-                                    className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded transition"
-                                  >
-                                    💾 Save
-                                  </button>
+                                  <div>
+                                    <input
+                                      type="text"
+                                      value={entry.editValue}
+                                      onChange={(e) =>
+                                        handleEditChange(
+                                          idx,
+                                          entryIdx,
+                                          e.target.value
+                                        )
+                                      }
+                                      className={`w-full p-1 bg-black border-2 text-white rounded ${
+                                        entry.editError
+                                          ? "border-red-500"
+                                          : "border-yellow-400"
+                                      }`}
+                                    />
+                                    {entry.editError && (
+                                      <p className="text-red-400 text-xs mt-1">
+                                        Invalid entry format.
+                                      </p>
+                                    )}
+                                  </div>
                                 ) : (
-                                  <button
-                                    onClick={() => handleEdit(idx, entryIdx)}
-                                    className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded transition"
-                                  >
-                                    ✏️ Edit
-                                  </button>
+                                  entry.input
                                 )}
-                                <button
-                                  onClick={() => handleDelete(idx, entryIdx)}
-                                  className="bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded transition"
-                                >
-                                  🗑️ Delete
-                                </button>
-                              </>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
+                              </td>
+                              <td className="border px-3 py-0 space-x-2">
+                                {!submittedPlayers.includes(player.name) && (
+                                  <>
+                                    {entry.isEditing ? (
+                                      <button
+                                        onClick={() =>
+                                          handleSaveEdit(idx, entryIdx)
+                                        }
+                                        className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded transition"
+                                      >
+                                        💾
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={() =>
+                                          handleEdit(idx, entryIdx)
+                                        }
+                                        className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded transition"
+                                      >
+                                        ✏️
+                                      </button>
+                                    )}
+                                    <button
+                                      onClick={() =>
+                                        handleDelete(idx, entryIdx)
+                                      }
+                                      className="bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded transition"
+                                    >
+                                      🗑️
+                                    </button>
+                                  </>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        });
+                      })()}
                     </tbody>
                   </table>
 

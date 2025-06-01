@@ -133,13 +133,13 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 **use =,-,/"**
 **3 column in the printing**
 **agent game editing by admin. will be added editing time, remove**
-**download option/whatsapp integration**
+<!-- **download option/whatsapp integration** -->
 <!-- **color the winning input** -->
-**remove printing from agent and give 3 column in one table**
-**error in player summary**
-**make time reminder bigger**
+<!-- **remove printing from agent and give 3 column in one table** -->
+<!-- **error in player summary** -->
+<!-- **make time reminder bigger** -->
 **bypass the input if there is countdown// add an waiting input list**
-**color the input by their serial 1/3 of their total**
-**highlight the voucher that they are separate**
-**remove color from the printing voucher**
+<!-- **color the input by their serial 1/3 of their total** -->
+<!-- **highlight the voucher that they are separate** -->
+<!-- **remove color from the printing voucher** -->
 **add sub agent**

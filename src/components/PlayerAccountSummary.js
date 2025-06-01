@@ -433,7 +433,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
     if (element) {
       const options = {
         margin: 10,
-        filename: "my-downloaded-div.pdf",
+        filename: agent?.name + "=" + agentId + "=" + date,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: {
           scale: 2,
@@ -736,10 +736,15 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                       {print && (
                         <button
                           onClick={handleDownloadPdf}
-                          className="py-2 px-4 rounded bg-purple-600 hover:bg-purple-700 transition"
+                          className="py-1 px-1 rounded-xl text-2xl bg-yellow-400 text-white transition duration-300"
                           title="Print Player Info"
                         >
-                          🖨️ Print
+                          <img
+                            src="/download.svg"
+                            alt="Download"
+                            width="50"
+                            height="50"
+                          />
                         </button>
                       )}
                     </div>
