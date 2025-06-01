@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import React from "react";
+import React, { useRef } from "react";
+// import html2pdf from "html2pdf.js";
 
 const PlayerAccountSummary = ({ agentId, print }) => {
   const [loading, setLoading] = useState(true);
@@ -15,6 +16,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
   const [error, setError] = useState("");
   const [moneyCal, setMoneyCal] = useState({});
 
+  const contentRef = useRef(null);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -230,6 +232,222 @@ const PlayerAccountSummary = ({ agentId, print }) => {
       });
     }
   }, [totalWins, agent.percentage]);
+
+  const handleSummaryPrint = (
+    agent,
+    date,
+    threeUp,
+    downGame,
+    moneyCal,
+    totalWins
+  ) => {
+    // Default empty objects to prevent errors if data is null or undefined
+    const safeAgent = agent || { name: "", percentage: {} };
+    const safeMoneyCal = moneyCal || {
+      totalAmounts: { ThreeD: 0, TwoD: 0, OneD: 0 },
+      totalGame: 0,
+      totalWin: 0,
+    };
+    const safeTotalWins = totalWins || {};
+
+    const win = window.open("", "_blank");
+    win.document.write(`
+    <html>
+      <head>
+        <title>Agent Summary</title>
+        <style>
+          @page {
+            size: 210mm 297mm /* Standard thermal printer paper width */
+            margin: 0;
+          }
+          body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 10px;
+            color: #000;
+            padding: 5px;
+            margin: 0;
+          }
+          .container {
+            width: 100%;
+          }
+          h2 {
+            font-size: 14px;
+            margin: 4px 0;
+            text-align: center;
+            font-weight: bold;
+          }
+          .header-table, .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+          }
+          .header-table td {
+            padding: 4px;
+            font-size: 12px;
+            text-align: center;
+            font-weight: bold;
+          }
+          /* --- MODIFIED: Increased padding for more row height --- */
+          .summary-table th, .summary-table td {
+            border: 1px solid #000;
+            padding: 5px; /* Increased from 3px to 5px */
+            text-align: center;
+            font-size: 9px;
+          }
+          .summary-table th {
+            font-weight: bold;
+            background-color: #eee;
+          }
+          .category-header {
+            text-align: left;
+            font-weight: bold;
+          }
+          .total-row td {
+            font-weight: bold;
+            font-size: 11px;
+            padding: 6px;
+          }
+          .highlight {
+            font-weight: bold;
+          }
+          .final-calc {
+            text-align: left;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h2>Game & Player Summary</h2>
+
+          <table class="header-table">
+            <tr>
+              <td>Agent: ${safeAgent.name}</td>
+              <td>Date: ${date || new Date().toLocaleDateString()}</td>
+            </tr>
+            <tr>
+              <td>3UP: ${threeUp || "XXX"}</td>
+              <td>DOWN: ${downGame || "XX"}</td>
+            </tr>
+          </table>
+
+          <table class="summary-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>3D</th>
+                <th>2D</th>
+                <th>1D</th>
+                <th>STR</th>
+                <th>RUM</th>
+                <th>DOWN</th>
+                <th>SGL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="category-header">Total</td>
+                <td>${(safeMoneyCal.totalAmounts?.ThreeD || 0).toFixed(0)}</td>
+                <td>${(safeMoneyCal.totalAmounts?.TwoD || 0).toFixed(0)}</td>
+                <td>${(safeMoneyCal.totalAmounts?.OneD || 0).toFixed(0)}</td>
+                <td class="highlight">${safeTotalWins.STR3D || 0}</td>
+                <td class="highlight">${safeTotalWins.RUMBLE3D || 0}</td>
+                <td class="highlight">${safeTotalWins.DOWN || 0}</td>
+                <td class="highlight">${safeTotalWins.SINGLE || 0}</td>
+              </tr>
+              <tr>
+                <td class="category-header">% / -</td>
+                <td>${safeAgent.percentage?.threeD || 0}</td>
+                <td>${safeAgent.percentage?.twoD || 0}</td>
+                <td>${safeAgent.percentage?.oneD || 0}</td>
+                <td class="highlight">${safeAgent.percentage?.str || 0}</td>
+                <td class="highlight">${safeAgent.percentage?.rumble || 0}</td>
+                <td class="highlight">${safeAgent.percentage?.down || 0}</td>
+                <td class="highlight">${safeAgent.percentage?.single || 0}</td>
+              </tr>
+              <tr>
+                <td class="category-header">After Ded.</td>
+                <td>${(safeMoneyCal.afterThreeD || 0).toFixed(0)}</td>
+                <td>${(safeMoneyCal.afterTwoD || 0).toFixed(0)}</td>
+                <td>${(safeMoneyCal.afterOneD || 0).toFixed(0)}</td>
+                <td class="highlight">${(safeMoneyCal.afterSTR || 0).toFixed(
+                  0
+                )}</td>
+                <td class="highlight">${(safeMoneyCal.afterRUMBLE || 0).toFixed(
+                  0
+                )}</td>
+                <td class="highlight">${(safeMoneyCal.afterDOWN || 0).toFixed(
+                  0
+                )}</td>
+                <td class="highlight">${(safeMoneyCal.afterSINGLE || 0).toFixed(
+                  0
+                )}</td>
+              </tr>
+              
+              {/* --- MODIFIED: Corrected colSpan for proper layout --- */}
+              <tr class="total-row">
+                <td colSpan="1" class="final-calc">Total Game</td>
+                <td colSpan="1">${(safeMoneyCal.totalGame || 0).toFixed(0)}</td>
+                  <td colSpan="2"><td/>
+                   <td colSpan="2"><td/>
+              </tr>
+              <tr class="total-row">
+                <td colSpan="1" class="final-calc">Total Win</td>
+                <td colSpan="1">${(safeMoneyCal.totalWin || 0).toFixed(0)}</td>
+                  <td colSpan="2"><td/>
+                   <td colSpan="2"><td/>
+              </tr>
+              <tr class="total-row">
+                <td colSpan="1" class="final-calc"> (এডমিন পাবে)</td>
+                <td colSpan="1">${Math.max(
+                  0,
+                  safeMoneyCal.totalGame - safeMoneyCal.totalWin
+                ).toFixed(0)}</td>
+                  <td colSpan="2"><td/>
+                   <td colSpan="2"><td/>
+              </tr>
+              <tr class="total-row">
+                <td colSpan="1" class="final-calc">(এজেন্ট পাবে)</td>
+                <td colSpan="1">${Math.max(
+                  0,
+                  safeMoneyCal.totalWin - safeMoneyCal.totalGame
+                ).toFixed(0)}</td>
+                <td colSpan="2"><td/>
+                   <td colSpan="2"><td/>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </body>
+    </html>
+  `);
+
+    win.document.close();
+    win.focus();
+    win.print();
+    win.close();
+  };
+
+  const handleDownloadPdf = async () => {
+    const html2pdf = (await import("html2pdf.js")).default;
+    const element = contentRef.current;
+    if (element) {
+      const options = {
+        margin: 10,
+        filename: "my-downloaded-div.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          // *** THIS IS THE KEY: Force a white background for the PDF rendering ***
+          background: "#ffffff", // Explicitly set white background for the canvas
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
+      html2pdf().set(options).from(element).save();
+    } else {
+      console.error("Content div not found!");
+    }
+  };
+
   if (loading) return <p>Loading...</p>;
   if (fetched && players.length === 0)
     return <p>No players found for this agent.</p>;
@@ -251,10 +469,35 @@ const PlayerAccountSummary = ({ agentId, print }) => {
         <div className="mt-8">
           <div className="overflow-x-auto mt-8 mb-8 max-w-4xl mx-auto">
             <div className="overflow-x-auto my-4 bg-gray-900 bg-opacity-80 rounded-lg shadow-md ring-2 ring-yellow-500 p-6 text-center">
-              <h2 className="text-3xl font-bold text-yellow-400 mb-6 animate-pulse">
-                📊 Game & Player Summary
-              </h2>
+              {/* Flex container to position title and button */}
+              <div className="flex justify-between items-center mb-6">
+                {/* Title (pushed to the left) */}
+                <h2 className="text-3xl font-bold text-yellow-400 animate-pulse">
+                  📊 Game & Player Summary
+                </h2>
 
+                {/* Button container (pushed to the right) */}
+                <div>
+                  {print && (
+                    <button
+                      onClick={() =>
+                        handleSummaryPrint(
+                          agent,
+                          date,
+                          threeUp,
+                          downGame,
+                          moneyCal,
+                          totalWins
+                        )
+                      }
+                      className="py-2 px-4 rounded bg-purple-600 hover:bg-purple-700 transition"
+                      title="Print Summary"
+                    >
+                      🖨️ Print
+                    </button>
+                  )}
+                </div>
+              </div>
               <table className="overflow-x-auto w-full border-collapse font-mono text-sm rounded-lg overflow-hidden shadow-lg">
                 <tbody>
                   <tr className="bg-black border border-yellow-700">
@@ -407,9 +650,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                       className="border border-gray-700 px-4 py-2 "
                     >
                       {moneyCal.totalGame || 0}
-                    </td>
-                    <td colSpan={3} className="border border-gray-700 "></td>
-                    <td colSpan={1} className="border border-gray-700 "></td>
+                    </td>{" "}
                   </tr>
 
                   <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
@@ -425,8 +666,6 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                     >
                       {moneyCal.totalWin || 0}
                     </td>
-                    <td colSpan={3} className="border border-gray-700 "></td>
-                    <td colSpan={1} className="border border-gray-700 "></td>
                   </tr>
                   <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
                     <td
@@ -443,8 +682,6 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                         ? moneyCal.totalGame - moneyCal.totalWin
                         : 0}
                     </td>
-                    <td colSpan={3} className="border border-gray-700 "></td>
-                    <td colSpan={1} className="border border-gray-700 "></td>
                   </tr>
                   <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
                     <td
@@ -460,9 +697,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                       {moneyCal.totalWin - moneyCal.totalGame >= 0
                         ? moneyCal.totalWin - moneyCal.totalGame
                         : 0}
-                    </td>
-                    <td colSpan={3} className="border border-gray-700 "></td>
-                    <td colSpan={1} className="border border-gray-700 "></td>
+                    </td>{" "}
                   </tr>
                 </tbody>
               </table>
@@ -477,6 +712,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
             {players.map((player, idx) => (
               <React.Fragment key={idx}>
                 <div
+                  ref={contentRef} // Attach the ref here
                   key={idx}
                   className="bg-gray-800 rounded-lg border border-yellow-500 shadow p-5"
                 >
@@ -499,7 +735,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                     <div>
                       {print && (
                         <button
-                          onClick={() => window.print()}
+                          onClick={handleDownloadPdf}
                           className="py-2 px-4 rounded bg-purple-600 hover:bg-purple-700 transition"
                           title="Print Player Info"
                         >
