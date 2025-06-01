@@ -163,21 +163,6 @@ export default function HappyNewYear() {
       <h1 className="text-center text-6xl font-extrabold mb-16 uppercase tracking-widest text-red-500 drop-shadow-lg animate-pulse-light">
         🎰 Thai Lottery Agent 🎲
       </h1>
-
-      <NumberTable title="Single" rows={singleRows} data={numberData} />
-      <NumberTable title="Down (2 Digit)" rows={downRows} data={numberData} />
-      <NumberTable
-        title="Double (3 Digit - 2 Aligned)"
-        rows={doubleRows}
-        data={numberData}
-      />
-      <NumberTable
-        title="3 Digit Unique"
-        rows={threeDigitRows}
-        data={numberData}
-      />
-
-      {/* Tailwind CSS custom animations and colors (add to your global CSS or tailwind.config.js) */}
       <div className="mb-16 bg-gray-950 rounded-xl shadow-2xl border-2 border-yellow-600 overflow-x-auto">
         <h3 className="text-3xl font-bold text-yellow-400 mb-4 text-center uppercase tracking-wider bg-black py-4 rounded-lg shadow-inner">
           🎯 Hot Numbers by Last Digit of Sum
@@ -216,6 +201,20 @@ export default function HappyNewYear() {
           </tbody>
         </table>
       </div>
+      <NumberTable title="Single" rows={singleRows} data={numberData} />
+      <NumberTable title="Down (2 Digit)" rows={downRows} data={numberData} />
+      <NumberTable
+        title="Double (3 Digit - 2 Aligned)"
+        rows={doubleRows}
+        data={numberData}
+      />
+      <NumberTable
+        title="3 Digit Unique"
+        rows={threeDigitRows}
+        data={numberData}
+      />
+
+      {/* Tailwind CSS custom animations and colors (add to your global CSS or tailwind.config.js) */}
     </div>
   );
 }
