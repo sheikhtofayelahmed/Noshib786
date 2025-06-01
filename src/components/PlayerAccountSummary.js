@@ -262,16 +262,16 @@ const PlayerAccountSummary = ({ agentId, print }) => {
           }
           body {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 10px;
+            font-size: 20px;
             color: #000;
-            padding: 5px;
+            padding: 8px 4px;
             margin: 0;
           }
           .container {
             width: 100%;
           }
           h2 {
-            font-size: 14px;
+            font-size: 20px;
             margin: 4px 0;
             text-align: center;
             font-weight: bold;
@@ -282,17 +282,16 @@ const PlayerAccountSummary = ({ agentId, print }) => {
             margin-top: 5px;
           }
           .header-table td {
-            padding: 4px;
-            font-size: 12px;
+            padding: 8px 4px;
+            font-size: 20px;
             text-align: center;
             font-weight: bold;
           }
-          /* --- MODIFIED: Increased padding for more row height --- */
           .summary-table th, .summary-table td {
             border: 1px solid #000;
-            padding: 5px; /* Increased from 3px to 5px */
+            padding: 8px 4px; /* Increased from 3px to 5px */
             text-align: center;
-            font-size: 9px;
+            font-size: 16px;
           }
           .summary-table th {
             font-weight: bold;
@@ -304,8 +303,8 @@ const PlayerAccountSummary = ({ agentId, print }) => {
           }
           .total-row td {
             font-weight: bold;
-            font-size: 11px;
-            padding: 6px;
+            font-size: 18px;
+            padding: 8px 4px;
           }
           .highlight {
             font-weight: bold;
@@ -383,7 +382,6 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                 )}</td>
               </tr>
               
-              {/* --- MODIFIED: Corrected colSpan for proper layout --- */}
               <tr class="total-row">
                 <td colSpan="1" class="final-calc">Total Game</td>
                 <td colSpan="1">${(safeMoneyCal.totalGame || 0).toFixed(0)}</td>
@@ -414,6 +412,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                 <td colSpan="2"><td/>
                    <td colSpan="2"><td/>
               </tr>
+           
             </tbody>
           </table>
         </div>

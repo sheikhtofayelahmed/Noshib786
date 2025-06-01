@@ -108,38 +108,13 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 ---
 
 **cookie is set to 1 hour. the security system will developed next**
-**80,40 mm printing size**
-
-<!-- **voucher should be replaced on name, voucher number should be on the middle** -->
-<!-- **discount should be shown based on customer or agentId on the agent game** -->
-<!-- **game account: remove** -->
 
 **when multiple entry it block the submit button**
 
-<!-- **win should be move to games part, winning number should be highlighted based on straight, rumbo or both, single, down with winning multiple bonus** -->
-
 **games should be moved to accounts**
-**9=16=5=2025 309 87**
-
-<!-- **happy new year should be moved to admin with amount of each numbers, should be highlight the numbers if it's above 100, add single part, top numbers shoould be shown on agent list button like view accounts** -->
-
-**whatsapp api integration**
-**create voucher for agent**
-
-<!-- **time countdown** -->
 
 **game account summary for each game and yearly game**
-<!-- **reload issue on agent game** -->
 **use =,-,/"**
-**3 column in the printing**
 **agent game editing by admin. will be added editing time, remove**
-<!-- **download option/whatsapp integration** -->
-<!-- **color the winning input** -->
-<!-- **remove printing from agent and give 3 column in one table** -->
-<!-- **error in player summary** -->
-<!-- **make time reminder bigger** -->
 **bypass the input if there is countdown// add an waiting input list**
-<!-- **color the input by their serial 1/3 of their total** -->
-<!-- **highlight the voucher that they are separate** -->
-<!-- **remove color from the printing voucher** -->
 **add sub agent**
