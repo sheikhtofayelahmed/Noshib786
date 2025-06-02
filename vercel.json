@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/checkGameStatus",
+      "schedule": "*/2 * * * *"
+    }
+  ]
+}

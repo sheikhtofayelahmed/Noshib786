@@ -150,7 +150,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
     const amounts = parts.slice(1).map(Number);
 
     const permutations = getPermutations(threeUp);
-    const reversedDown = downGame.split("").reverse().join("");
+    const reversedDown = downGame?.split("").reverse().join("");
     const sumOfDigits = threeUp
       .split("")
       .reduce((sum, d) => sum + parseInt(d), 0);
@@ -707,11 +707,13 @@ const PlayerAccountSummary = ({ agentId, print }) => {
             🎉 Player Summary 🎉
           </h3>
 
-          <div className="space-y-6 max-w-4xl mx-auto max-h-[60vh] overflow-y-auto pr-2">
+          <div
+            ref={contentRef}
+            className="space-y-6 max-w-4xl mx-auto max-h-[60vh] overflow-y-auto pr-2"
+          >
             {players.map((player, idx) => (
               <React.Fragment key={idx}>
                 <div
-                  ref={contentRef} // Attach the ref here
                   key={idx}
                   className="bg-gray-800 rounded-lg border border-yellow-500 shadow p-5"
                 >
