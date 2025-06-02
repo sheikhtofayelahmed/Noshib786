@@ -22,7 +22,7 @@ export default function AgentDashboard() {
   useEffect(() => {
     async function fetchGameStatus() {
       try {
-        const res = await fetch("/api/gameStatus");
+        const res = await fetch("/api/game-status");
         if (!res.ok) throw new Error("Failed to fetch game status");
 
         const data = await res.json();

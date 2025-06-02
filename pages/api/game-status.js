@@ -42,9 +42,10 @@ export default async function handler(req, res) {
         .collection("gameStatus")
         .updateOne({}, { $set: updateFields }, { upsert: true });
 
-      res
-        .status(200)
-        .json({ message: "Game status updated", updatedFields: updateFields });
+      res.status(200).json({
+        isGameOn: updateFields.isGameOn ?? false,
+        targetDateTime: updateFields.targetDateTime ?? null,
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
