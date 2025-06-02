@@ -3,6 +3,7 @@ import clientPromise from "lib/mongodb";
 export default async function handler(req, res) {
   const client = await clientPromise;
   const db = client.db("thai-agent-lottery");
+
   if (req.method === "GET") {
     try {
       const statusDoc = await db.collection("gameStatus").findOne({});
@@ -41,7 +42,9 @@ export default async function handler(req, res) {
         .collection("gameStatus")
         .updateOne({}, { $set: updateFields }, { upsert: true });
 
-      res.status(200).json({ message: "Game status updated", ...updateFields });
+      res
+        .status(200)
+        .json({ message: "Game status updated", updatedFields: updateFields });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });

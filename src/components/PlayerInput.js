@@ -246,25 +246,35 @@ export default function PlayerInput() {
 
   const handleSubmitAndPrint = async (player) => {
     try {
+      // Fetch current game status
       const statusRes = await fetch("/api/game-status");
       const statusData = await statusRes.json();
 
-      if (!statusData.isGameOn) {
-        alert("⛔ The game has ended. Submissions are now closed.");
+      const now = new Date();
+      const targetTime = statusData.targetDateTime
+        ? new Date(statusData.targetDateTime)
+        : null;
+
+      // Block if game is off or time is up
+      if (!statusData.isGameOn || (targetTime && now > targetTime)) {
+        alert(
+          "⛔ The game has ended or the time is up. Submissions are now closed."
+        );
         return;
       }
     } catch (err) {
       alert("⚠️ Failed to verify game status. Please try again.");
       return;
     }
-    // Prevent re-submission if already submitted
+
+    // Prevent re-submission if player already submitted
     if (submittedPlayers.includes(player.name)) {
       // Already submitted ➔ Only print
       handlePrint(player);
       return;
     }
 
-    // Defensive: Make sure data exists
+    // Defensive: Ensure player data entries exist
     const dataEntries = player.data || player.entries || [];
 
     const parsedData = dataEntries.map((entry) => ({ input: entry.input }));
@@ -273,6 +283,7 @@ export default function PlayerInput() {
       total2D = 0,
       total3D = 0;
 
+    // Calculate total amounts per digit type
     dataEntries.forEach((entry) => {
       const parts = entry.input.split("=");
       const num = parts[0];
@@ -294,14 +305,14 @@ export default function PlayerInput() {
 
     const payload = {
       voucher: player.voucher,
-      agentId: agentId, // Make sure agentId is in scope here
+      agentId: agentId, // ensure agentId is in scope
       name: player.name || "",
-      time: player.time,
       data: parsedData,
       amountPlayed: { OneD: total1D, TwoD: total2D, ThreeD: total3D },
     };
 
     try {
+      // Send data to backend
       const res = await fetch("/api/savePlayer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -315,12 +326,12 @@ export default function PlayerInput() {
       } else {
         const err = await res.json();
         alert(`❌ Failed to submit: ${err.message}`);
-        // Do NOT add player.name to submittedPlayers here, so retry allowed
+        // Do NOT add to submittedPlayers to allow retry
       }
     } catch (err) {
       console.error("Submit error:", err);
       alert("❌ An error occurred while submitting.");
-      // Do NOT add player.name here either
+      // Do NOT add to submittedPlayers to allow retry
     }
   };
 
