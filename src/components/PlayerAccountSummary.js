@@ -15,7 +15,8 @@ const PlayerAccountSummary = ({ agentId, print }) => {
   const [agent, setAgent] = useState({});
   const [error, setError] = useState("");
   const [moneyCal, setMoneyCal] = useState({});
-
+  const [uploadStatus, setUploadStatus] = useState(null);
+  const hasUploadedRef = useRef(false); // to prevent duplicate uploads
   const contentRef = useRef(null);
   useEffect(() => {
     const fetchData = async () => {
@@ -233,26 +234,42 @@ const PlayerAccountSummary = ({ agentId, print }) => {
   }, [totalWins, agent?.percentage, players]);
   useEffect(() => {
     const uploadSummary = async () => {
+      if (!moneyCal || Object.keys(moneyCal).length === 0) return;
+
       const res = await fetch("/api/save-summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           agentId: agentId,
           date: date,
-          summary: { moneyCal, year: new Date().getFullYear() },
+          summary: { ...moneyCal, year: new Date().getFullYear() },
         }),
       });
 
       const result = await res.json();
       if (result.success) {
         console.log("✅ Summary saved");
+      } else {
+        console.log("⚠️ Summary not saved:", result.message || result.error);
       }
     };
-
-    if (agentId && print && moneyCal) {
+    if (
+      (moneyCal.afterThreeD,
+      moneyCal.afterTwoD,
+      moneyCal.afterOneD,
+      moneyCal.afterSTR,
+      moneyCal.afterRUMBLE,
+      moneyCal.afterDOWN,
+      moneyCal.afterSINGLE,
+      moneyCal.totalGame,
+      moneyCal.totalWin,
+      moneyCal.totalAmounts,
+      moneyCal.WL)
+    ) {
+      console.log(moneyCal);
       uploadSummary();
     }
-  }, [agentId, print, moneyCal]);
+  }, [moneyCal, agentId, date]);
 
   const handleSummaryPrint = (
     agent,
