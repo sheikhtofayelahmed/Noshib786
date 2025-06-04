@@ -38,9 +38,8 @@ export default function Account() {
       </div>
     );
   }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 text-green-400 font-mono p-4 sm:p-8 flex flex-col items-center">
+    <div className="min-h-screen overflow-x-auto bg-gradient-to-br from-gray-800 to-gray-900 text-green-400 font-mono p-4 sm:p-8 flex flex-col items-center overflow-x-auto">
       {/* Page Title */}
       <h1 className="text-4xl sm:text-5xl font-bold mb-8 text-center text-yellow-300 drop-shadow-lg">
         GAME SUMMARIES
@@ -60,53 +59,55 @@ export default function Account() {
         </div>
       ) : (
         <>
-          {/* Table Container for Horizontal Scrolling on Small Screens */}
+          {/* Table Container - removed overflow-x-auto from here, now it's on the parent div */}
           {/* flex-shrink-0 ensures the div doesn't shrink below its content's intrinsic width */}
-          <div className="w-full max-w-full overflow-x-auto rounded-xl shadow-2xl border-2 border-green-500 flex-shrink-0">
+          <div className="overflow-x-auto w-full max-w-full rounded-xl shadow-2xl border-2 border-green-500 flex-shrink-0">
             <table
+              // Added table-fixed to ensure fixed column widths
               // Increased min-width to 1024px to ensure horizontal scrolling on most mobile and tablet screens.
-              className="min-w-full min-w-[1024px] border-collapse text-sm sm:text-base bg-gray-700 text-green-300"
+              className="overflow-x-auto border-collapse text-sm sm:text-base bg-gray-700 text-green-300 table-fixed"
             >
               {/* Table Header */}
               <thead className="bg-gray-900 text-yellow-300 uppercase tracking-wider">
                 <tr>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left rounded-tl-lg">
+                  {/* Assigned specific widths to each column header */}
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left rounded-tl-lg w-32">
                     Agent ID
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-32">
                     Date
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-24">
                     Year
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left">
-                    After 3D
+                  {/* <th className="p-3 sm:p-4 border-b border-green-600 text-left w-28">
+                    3D
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left">
-                    After 2D
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-28">
+                    2D
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left">
-                    After 1D
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-28">
+                    1D
+                  </th> */}
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-28">
+                    STR
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left">
-                    After STR
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-32">
+                    RUMBLE
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left">
-                    After RUMBLE
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-28">
+                    DOWN
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left">
-                    After DOWN
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-32">
+                    SINGLE
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left">
-                    After SINGLE
-                  </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-32">
                     Total Game
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-32">
                     Total Win
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left rounded-tr-lg">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left rounded-tr-lg w-24">
                     W/L
                   </th>
                 </tr>
@@ -136,45 +137,46 @@ export default function Account() {
                       key={i}
                       className="hover:bg-gray-600 transition-colors duration-200 ease-in-out"
                     >
-                      <td className="p-3 sm:p-4 border-b border-gray-600">
+                      {/* Added whitespace-nowrap to prevent text wrapping in cells */}
+                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {agentId ?? "-"}
                       </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600">
+                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {date && date !== "---"
                           ? new Date(date).toLocaleDateString()
                           : "-"}
                       </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600">
+                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {year ?? "-"}
                       </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600">
+                      {/* <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {afterThreeD ?? "-"}
                       </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600">
+                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {afterTwoD ?? "-"}
                       </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600">
+                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {afterOneD ?? "-"}
-                      </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600">
+                      </td> */}
+                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {afterSTR ?? "-"}
                       </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600">
+                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {afterRUMBLE ?? "-"}
                       </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600">
+                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {afterDOWN ?? "-"}
                       </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600">
+                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {afterSINGLE ?? "-"}
                       </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600">
+                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {totalGame ?? "-"}
                       </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600">
+                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {totalWin ?? "-"}
                       </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600">
+                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {WL ?? "-"}
                       </td>
                     </tr>
@@ -183,8 +185,6 @@ export default function Account() {
               </tbody>
             </table>
           </div>
-
-          {/* Delete Button */}
         </>
       )}
     </div>
