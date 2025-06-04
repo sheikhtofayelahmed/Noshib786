@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { voucher, agentId, name, data, amountPlayed } = req.body;
+  const { voucher, agentId, name, SAId, data, amountPlayed } = req.body;
 
   // 🔒 Use server-side time only (don't trust client-sent time)
   const serverTime = new Date();
@@ -52,6 +52,7 @@ export default async function handler(req, res) {
       voucher,
       agentId,
       name,
+      SAId,
       time: serverTime, // 🔐 Save only trusted server timestamp
       entries,
       amountPlayed,

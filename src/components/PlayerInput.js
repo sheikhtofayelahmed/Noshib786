@@ -6,6 +6,7 @@ import { useAgent } from "src/context/AgentContext";
 
 export default function PlayerInput() {
   const [name, setName] = useState("");
+  const [SAId, setSAId] = useState("");
   const [inputs, setInputs] = useState(Array(20).fill(""));
   const [errors, setErrors] = useState(Array(20).fill(false));
   const [players, setPlayers] = useState([]);
@@ -142,6 +143,7 @@ export default function PlayerInput() {
     const time = new Date().toLocaleString();
     const newPlayer = {
       name,
+      SAId,
       time: new Date().toLocaleString(),
       voucher: `VC-${agentId}-${new Date(time).getTime().toString().slice(-5)}`,
       data: newEntries,
@@ -361,6 +363,7 @@ export default function PlayerInput() {
       voucher: player.voucher,
       agentId: agentId, // Ensure agentId is accessible in this scope (e.g., passed as argument or globally defined)
       name: player.name || "",
+      SAId: player.SAId || "",
       data: parsedData,
       amountPlayed: { OneD: total1D, TwoD: total2D, ThreeD: total3D },
     };
@@ -476,6 +479,7 @@ export default function PlayerInput() {
       voucher: player.voucher,
       agentId: agentId,
       name: player.name || "",
+      SAId: player.SAId || "",
       data: parsedData,
       amountPlayed: { OneD: total1D, TwoD: total2D, ThreeD: total3D },
       submissionAttemptTime: new Date().toISOString(), // When it tried to submit
@@ -604,6 +608,7 @@ export default function PlayerInput() {
       <div class="container">
         <h2>${player.voucher || ""}</h2>
         <h2>Player: ${player.name || ""}</h2>
+        <h2>Player: ${player.SAId || ""}</h2>
         <p> Date: ${new Date(player.time).toLocaleString()}</p>
 
        <table class="input-table" style="width: 100%; border-collapse: collapse;" border="1">
@@ -692,7 +697,14 @@ export default function PlayerInput() {
         <h1 className="text-4xl font-bold text-center mb-6 text-yellow-400">
           🎰 Player Input 🎰
         </h1>
-
+        <label className="block mb-2 text-yellow-300 ">Sub Agent:</label>
+        <input
+          type="number"
+          value={SAId}
+          onChange={(e) => setSAId(e.target.value)}
+          placeholder="Your Sub Agent Id"
+          className="w-full p-3 mb-4 rounded bg-black border-2 border-red-700 text-white"
+        />
         <label className="block mb-2 text-yellow-300 ">Player Name:</label>
         <input
           type="text"
@@ -751,6 +763,9 @@ export default function PlayerInput() {
                   </p>
                   <div className="flex justify-between items-start">
                     <div>
+                      <h4 className="text-xl font-bold mb-1">
+                        Sub Agent: {player.SAId}
+                      </h4>
                       <h4 className="text-xl font-bold mb-1">
                         Player name: {player.name}
                       </h4>
