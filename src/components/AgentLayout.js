@@ -10,6 +10,7 @@ import { useAgent } from "@/context/AgentContext";
 const navItems = [
   { name: "Home", path: "/" },
   { name: "Games", path: "/agent/games" },
+  { name: "Waiting Data", path: "/agent/waitingData" },
 ];
 
 export default function AgentLayout({ children }) {
