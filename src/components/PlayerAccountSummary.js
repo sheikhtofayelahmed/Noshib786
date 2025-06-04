@@ -760,7 +760,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {player.entries.map((entry, entryIdx) => {
+                      {player?.entries?.map((entry, entryIdx) => {
                         const { match, type } = getMatchType(
                           entry.input,
                           threeUp,

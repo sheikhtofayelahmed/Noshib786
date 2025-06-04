@@ -182,7 +182,7 @@ export default function AdminGameControl() {
             type="datetime-local"
             value={targetDateTime}
             onChange={(e) => setTargetDateTime(e.target.value)}
-            className="w-60 px-4 py-2 rounded bg-gray-800 border border-gray-500 text-white focus:outline-none"
+            className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg px-4 py-2 rounded bg-gray-800 border border-gray-500 text-white focus:outline-none"
           />
         </div>
 
