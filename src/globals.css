@@ -79,3 +79,21 @@ th {
 .animate-pulse-light {
   animation: pulse-light 3s infinite alternate;
 }
+/* styles/globals.css or a dedicated CSS file */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #333; /* Dark track */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #888; /* Grey thumb */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #aaa; /* Lighter grey on hover */
+}

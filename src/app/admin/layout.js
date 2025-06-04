@@ -11,7 +11,8 @@ const navItems = [
   { name: "Inactive Agent", path: "/admin/inactive-agent" },
   { name: "Agent", path: "/admin/agent" },
   { name: "Account", path: "/admin/account" },
-  { name: "HappyNewYear", path: "/admin/HappyNewYear" },
+  { name: "Happy New Year", path: "/admin/HappyNewYear" },
+  { name: "Waiting Data", path: "/admin/waitingData" },
 ];
 
 export default function AdminLayout({ children }) {
