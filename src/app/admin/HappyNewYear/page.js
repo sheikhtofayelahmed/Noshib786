@@ -41,7 +41,7 @@ const NumberTable = ({ rows, data, title }) => (
                 >
                   {row}
                 </td>
-              ))}{" "}
+              ))}
             </tr>
           )}
 
