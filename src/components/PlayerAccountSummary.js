@@ -182,18 +182,18 @@ const PlayerAccountSummary = ({ agentId, print }) => {
 
     return { match: false, type: null };
   };
-
   useEffect(() => {
-    if (totalWins && agent.percentage) {
+    if (totalWins && agent?.percentage) {
       const totalAmounts = players.reduce(
         (acc, player) => {
-          acc.ThreeD += player.amountPlayed.ThreeD;
-          acc.TwoD += player.amountPlayed.TwoD;
-          acc.OneD += player.amountPlayed.OneD;
+          acc.ThreeD += player.amountPlayed.ThreeD || 0;
+          acc.TwoD += player.amountPlayed.TwoD || 0;
+          acc.OneD += player.amountPlayed.OneD || 0;
           return acc;
         },
         { ThreeD: 0, TwoD: 0, OneD: 0 }
       );
+
       const afterThreeD = Math.floor(
         totalAmounts.ThreeD * (1 - agent.percentage.threeD / 100)
       );
@@ -214,10 +214,8 @@ const PlayerAccountSummary = ({ agentId, print }) => {
 
       const totalGame = afterThreeD + afterTwoD + afterOneD;
       const totalWin = afterSTR + afterRUMBLE + afterDOWN + afterSINGLE;
+      const WL = totalGame - totalWin;
 
-      // Example: log or update state
-      console.log("Total Game:", totalGame);
-      console.log("Total Win:", totalWin);
       setMoneyCal({
         afterThreeD,
         afterTwoD,
@@ -229,9 +227,32 @@ const PlayerAccountSummary = ({ agentId, print }) => {
         totalGame,
         totalWin,
         totalAmounts,
+        WL,
       });
     }
-  }, [totalWins, agent.percentage]);
+  }, [totalWins, agent?.percentage, players]);
+  useEffect(() => {
+    const uploadSummary = async () => {
+      const res = await fetch("/api/save-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          agentId: agentId,
+          date: date,
+          summary: { moneyCal, year: new Date().getFullYear() },
+        }),
+      });
+
+      const result = await res.json();
+      if (result.success) {
+        console.log("✅ Summary saved");
+      }
+    };
+
+    if (agentId && print && moneyCal) {
+      uploadSummary();
+    }
+  }, [agentId, print, moneyCal]);
 
   const handleSummaryPrint = (
     agent,
@@ -829,28 +850,28 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                       <tr className="bg-gray-800">
                         <td className="border px-4 py-2">🎯 3D Total</td>
                         <td className="border px-4 py-2 text-green-400">
-                          {player.amountPlayed.ThreeD}
+                          {player?.amountPlayed?.ThreeD}
                         </td>
                       </tr>
                       <tr className="bg-gray-900">
                         <td className="border px-4 py-2">🎯 2D Total</td>
                         <td className="border px-4 py-2 text-green-400">
-                          {player.amountPlayed.TwoD}
+                          {player?.amountPlayed?.TwoD}
                         </td>
                       </tr>
                       <tr className="bg-gray-800">
                         <td className="border px-4 py-2">🎯 1D Total</td>
                         <td className="border px-4 py-2 text-green-400">
-                          {player.amountPlayed.OneD}
+                          {player?.amountPlayed?.OneD}
                         </td>
                       </tr>
                       <tr className="bg-gray-900 font-bold text-lg">
                         <td className="border px-4 py-2">🔢 Grand Total</td>
                         <td className="border px-4 py-2 text-yellow-300">
                           {(
-                            player.amountPlayed.ThreeD +
-                            player.amountPlayed.TwoD +
-                            player.amountPlayed.OneD
+                            player?.amountPlayed?.ThreeD +
+                            player?.amountPlayed?.TwoD +
+                            player?.amountPlayed?.OneD
                           ).toFixed(0)}
                         </td>
                       </tr>
