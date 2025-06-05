@@ -36,7 +36,6 @@ export default function VoucherModal({ isOpen, onClose }) {
       setIsGameOn(null);
     }
   }, [isOpen]);
-
   // Effect for countdown timer logic
 
   // Effect to calculate amountPlayed based on currentVoucherData.data
@@ -70,12 +69,10 @@ export default function VoucherModal({ isOpen, onClose }) {
       });
     }
     setAmountPlayed({ OneD: total1D, TwoD: total2D, ThreeD: total3D });
-  }, [currentVoucherData]); // Recalculate when currentVoucherData changes
-
-  // Utility function for validation
+  }, [currentVoucherData]); // Recalculate when c
   const validateEntry = (input) => {
     if (!input) return true; // allow empty
-    if (!/^[\d=]+$/.test(input)) return false;
+    if (!/^[\d.]+$/.test(input)) return false;
     if (input.startsWith(".")) return false;
 
     const parts = input.split(".");
@@ -189,6 +186,7 @@ export default function VoucherModal({ isOpen, onClose }) {
         }
         return entry;
       });
+
       return { ...prevData, data: updatedData };
     });
   };
@@ -213,26 +211,6 @@ export default function VoucherModal({ isOpen, onClose }) {
 
       const updatedData = prevData.data.map((entry, idx) => {
         if (idx === entryIdx) {
-          // Send update to backend
-          // Example:
-          // fetch(`/api/update-voucher-entry`, { // Corrected API URL
-          //   method: 'POST',
-          //   headers: { 'Content-Type': 'application/json' },
-          //   body: JSON.stringify({
-          //     voucher: prevData.voucher,
-          //     entryId: entry.id,
-          //     newValue: entry.editValue
-          //   })
-          // })
-          // .then(res => res.json())
-          // .then(data => {
-          //   if (!data.success) {
-          //     setMessage('Failed to save entry on server.');
-          //   }
-          // }).catch(err => {
-          //   setMessage('Error saving entry to server.');
-          //   console.error(err);
-          // });
           setMessage("Entry saved successfully!");
           return {
             ...entry,
@@ -453,7 +431,7 @@ export default function VoucherModal({ isOpen, onClose }) {
         {currentVoucherData ? (
           <div className="my-8 bg-gray-800 p-5 rounded-xl border border-yellow-500 shadow-xl">
             <p className="text-yellow-300 font-bold text-xl text-center mb-4">
-              Voucher:{" "}
+              Voucher:
               <span className="font-mono text-white">
                 {currentVoucherData.voucher || "N/A"}
               </span>
@@ -468,6 +446,12 @@ export default function VoucherModal({ isOpen, onClose }) {
                 </h4>
                 <p className="text-gray-400 text-sm mb-1">
                   Time: {new Date(currentVoucherData.time).toLocaleString()}
+                </p>
+                <p className="text-gray-400 text-sm mb-1">
+                  Updated Time:
+                  {currentVoucherData?.updatedAt
+                    ? new Date(currentVoucherData.updatedAt).toLocaleString()
+                    : "Not Edited Yet"}
                 </p>
                 <p className="text-gray-400 text-sm">
                   Entries: {currentVoucherData?.entries.length}
@@ -528,7 +512,7 @@ export default function VoucherModal({ isOpen, onClose }) {
                         } ${rowTextColorClass}`}
                       >
                         <td className="border border-gray-600 px-3 py-0">
-                          {entry.serial}
+                          {entryIdx + 1}
                         </td>
                         <td className="border border-gray-600 px-3 py-0">
                           {entry.isEditing ? (
