@@ -5,7 +5,7 @@ export default async function handler(req, res) {
 
   try {
     const client = await clientPromise;
-    const db = client.db(); // or db("your_db_name") if you need to specify
+    const db = client.db("thai-agent-lottery"); // or db("your_db_name") if you need to specify
     const collection = db.collection("game_summaries");
 
     const { agentId, date, summary } = req.body;

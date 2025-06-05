@@ -490,7 +490,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
     return <p>No players found for this agent.</p>;
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
+    <div className=" min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
       {loading && (
         <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>
       )}
@@ -503,13 +503,13 @@ const PlayerAccountSummary = ({ agentId, print }) => {
         </div>
       )}
       {!loading && players.length > 0 && (
-        <div className="mt-8">
+        <div className="mt-8 w-full">
           <div className="overflow-x-auto mt-8 mb-8 max-w-4xl mx-auto">
             <div className="overflow-x-auto my-4 bg-gray-900 bg-opacity-80 rounded-lg shadow-md ring-2 ring-yellow-500 p-6 text-center">
               {/* Flex container to position title and button */}
               <div className="flex justify-between items-center mb-6">
                 {/* Title (pushed to the left) */}
-                <h2 className="text-3xl font-bold text-yellow-400 animate-pulse">
+                <h2 className="text-base sm:text-lg md:text-2xl lg:text-3xl  font-bold text-yellow-400 animate-pulse">
                   📊 Game & Player Summary
                 </h2>
 
@@ -540,7 +540,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                   <tr className="bg-black border border-yellow-700">
                     <td
                       colSpan="2"
-                      className="px-6 py-4 text-4xl font-extrabold text-yellow-500 tracking-widest"
+                      className="px-6 py-4 text-base sm:text-lg md:text-2xl lg:text-3xl  font-extrabold text-yellow-500 tracking-widest"
                     >
                       {agent?.name}
                     </td>

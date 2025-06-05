@@ -201,77 +201,84 @@ export default function AdminAgentPage() {
       </form>
 
       {/* Agent List */}
-      <section>
+      <section className="w-full max-w-full">
         <h2 className="text-2xl font-bold mb-4 text-yellow-400">
           🧑‍💼 Agents List
         </h2>
         {loadingAgents ? (
           <p className="text-yellow-300">Loading agents...</p>
         ) : (
-          <table className="w-full text-yellow-300 border-collapse font-mono">
-            <thead>
-              <tr className="bg-yellow-700 text-white">
-                <th className="border border-yellow-400 p-2">Agent ID</th>
-                <th className="border border-yellow-400 p-2">Name</th>
-                <th className="border border-yellow-400 p-2">Password</th>
-                <th className="border border-yellow-400 p-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {agents.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="text-center p-4 text-pink-400 font-bold"
-                  >
-                    No agents found.
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-yellow-300 border-collapse font-mono">
+              <thead>
+                <tr className="bg-yellow-700 text-white">
+                  <th className="border border-yellow-400 p-2">Agent ID</th>
+                  <th className="border border-yellow-400 p-2">Name</th>
+                  <th className="border border-yellow-400 p-2">Password</th>
+                  <th colSpan={3} className="border border-yellow-400 p-2">
+                    Actions
+                  </th>
                 </tr>
-              )}
-              {agents.map(({ agentId, name, password, active, percentage }) => (
-                <tr key={agentId} className="odd:bg-gray-800 even:bg-gray-900">
-                  <td className="border border-yellow-400 p-2">{agentId}</td>
-                  <td className="border border-yellow-400 p-2">{name}</td>
-                  <td className="border border-yellow-400 p-2">{password}</td>
-
-                  <td className="border border-yellow-400 p-2 space-x-2">
-                    {/* <button
-                      onClick={() => router.push(`/agent-accounts/${agentId}`)}
-                      className="px-3 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+              </thead>
+              <tbody>
+                {agents.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="text-center p-4 text-pink-400 font-bold"
                     >
-                      💰
-                    </button> */}
-                    <button
-                      onClick={() =>
-                        router.push(`/admin/agent-games/${agentId}`)
-                      }
-                      className="px-3 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                      No agents found.
+                    </td>
+                  </tr>
+                )}
+                {agents.map(
+                  ({ agentId, name, password, active, percentage }) => (
+                    <tr
+                      key={agentId}
+                      className="odd:bg-gray-800 even:bg-gray-900"
                     >
-                      🎰
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleEditClick({ agentId, name, percentage })
-                      }
-                      className="px-3 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
-                    >
-                      %
-                    </button>
-                    <button
-                      onClick={() => toggleActive(agentId, active)}
-                      className={`px-3 py-1 rounded ${
-                        active
-                          ? "bg-red-600 hover:bg-red-700"
-                          : "bg-green-600 hover:bg-green-700"
-                      } text-white font-semibold`}
-                    >
-                      {active && "🗑️"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      <td className="border border-yellow-400 p-2">
+                        {agentId}
+                      </td>
+                      <td className="border border-yellow-400 p-2">{name}</td>
+                      <td className="border border-yellow-400 p-2">
+                        {password}
+                      </td>
+                      <td className="border border-yellow-400 p-2 space-x-2">
+                        <button
+                          onClick={() =>
+                            router.push(`/admin/agent-games/${agentId}`)
+                          }
+                          className="px-3 py-1 rounded  text-black font-semibold"
+                        >
+                          🎰
+                        </button>
+                      </td>
+                      <td className="border border-yellow-400 p-2 space-x-2">
+                        <button
+                          onClick={() =>
+                            handleEditClick({ agentId, name, percentage })
+                          }
+                          className="px-3 py-1 rounded  text-yellow-400 font-semibold"
+                        >
+                          %
+                        </button>
+                      </td>
+                      <td className="border border-yellow-400 p-2 space-x-2">
+                        <button
+                          onClick={() => toggleActive(agentId, active)}
+                          className={`px-3 py-1 rounded 
+                          } text-white font-semibold`}
+                        >
+                          {active && "🗑️"}
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 

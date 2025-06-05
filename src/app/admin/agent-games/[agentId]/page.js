@@ -20,36 +20,6 @@ export default function AgentGames() {
   };
 
   return (
-    <div className="min-h-screen font-mono bg-gradient-to-br from-black to-red-900 text-white flex flex-col md:flex-row">
-      {/* Mobile Header */}
-      <div className="flex justify-between items-center p-4 bg-black md:hidden border-b border-yellow-500">
-        <h2 className="text-xl font-bold text-yellow-400">🎰 Game Admin</h2>
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="text-yellow-400"
-        >
-          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
-
-      {/* Sidebar */}
-
-      {/* Overlay for mobile */}
-
-      {/* Main Content */}
-      <main className="flex-1 p-6 overflow-y-auto">
-        <h2 className="text-3xl font-bold text-yellow-300 mb-6">
-          🎮 Games by Agent
-        </h2>
-
-        {loading && <p className="text-yellow-300">⏳ Loading...</p>}
-        {error && <p className="text-red-500">❌ {error}</p>}
-
-        <PlayerAccountSummary
-          agentId={agentId}
-          print={true}
-        ></PlayerAccountSummary>
-      </main>
-    </div>
+    <PlayerAccountSummary agentId={agentId} print={true} className="w-full" />
   );
 }
