@@ -109,8 +109,5 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 
 **cookie is set to 1 hour. the security system will developed next**
 
-**when multiple entry it block the submit button**
-
 **game account summary for each game and yearly game**
-**use =,-,/"**
 **make every admin api secured**

@@ -895,8 +895,8 @@ display: flex;
                   </table>
 
                   {/* Totals Calculation */}
-                  <div className="mt-6">
-                    <table className="w-full border-collapse font-mono text-sm text-yellow-300">
+                  <div className="mt-6 overflow-x-auto w-full">
+                    <table className=" w-max border-collapse font-mono text-sm text-yellow-300">
                       <thead>
                         <tr className="bg-red-700 text-white">
                           <th className="border border-gray-600 px-4 py-2 text-left">

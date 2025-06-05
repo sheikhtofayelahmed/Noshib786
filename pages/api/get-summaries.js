@@ -5,7 +5,7 @@ export default async function handler(req, res) {
 
   try {
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("thai-agent-lottery");
     const collection = db.collection("game_summaries");
 
     // Fetch all summaries - you can add filters/pagination later
