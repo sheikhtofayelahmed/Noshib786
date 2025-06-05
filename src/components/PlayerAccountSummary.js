@@ -146,6 +146,9 @@ const PlayerAccountSummary = ({ agentId, print }) => {
   };
 
   const getMatchType = (input, threeUp, downGame) => {
+    if (!input || !threeUp || !downGame) {
+      return { match: false, type: null };
+    }
     const parts = input.split("=");
     const number = parts[0];
     const amounts = parts.slice(1).map(Number);

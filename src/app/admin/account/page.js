@@ -65,7 +65,7 @@ export default function Account() {
             <table
               // Added table-fixed to ensure fixed column widths
               // Increased min-width to 1024px to ensure horizontal scrolling on most mobile and tablet screens.
-              className="overflow-x-auto border-collapse text-sm sm:text-base bg-gray-700 text-green-300 table-fixed"
+              className="overflow-x-auto border-collapse text-sm sm:text-base bg-gray-700 text-green-300 "
             >
               {/* Table Header */}
               <thead className="bg-gray-900 text-yellow-300 uppercase tracking-wider">
