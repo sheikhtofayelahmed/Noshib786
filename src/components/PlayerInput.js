@@ -362,11 +362,13 @@ export default function PlayerInput() {
 
       if (res.ok) {
         alert("✅ Player data submitted to database!");
-        setIsCompleted(true);
-        setPlayers([]);
 
-        setPrint(true);
-        handlePrint(player);
+        // ✅ Update only the submitted player
+        setPlayers((prevPlayers) =>
+          prevPlayers.map((p) =>
+            p.voucher === player.voucher ? { ...p, submitted: true } : p
+          )
+        );
       } else {
         const err = await res.json();
         const errorMessage =
@@ -673,9 +675,7 @@ export default function PlayerInput() {
     win.document.close();
     win.print();
   };
-  useEffect(() => {
-    console.log(isCompleted, "is complete button");
-  }, [isCompleted]);
+
   return (
     <div className="min-h-screen  text-white p-6 ">
       <div className="mb-16 p-4rounded text-yellow-200 font-mono text-3xl text-center">
@@ -766,17 +766,17 @@ export default function PlayerInput() {
                         Entries: {player.data.length}
                       </p>
                     </div>
-                    {print ? (
+                    {player.submitted ? (
                       <button
                         onClick={() => handlePrint(player)}
-                        className="py-2 px-4 rounded font-semibold text-white bg-purple-600 hover:bg-purple-700 transition"
+                        className="bg-purple-600 hover:bg-purple-700 py-2 px-4 rounded font-semibold text-white transition"
                       >
                         🖨️ Print
                       </button>
                     ) : (
                       <button
                         onClick={() => handleSubmitAndPrint(player)}
-                        className="py-2 px-4 rounded font-semibold text-white bg-blue-600 hover:bg-blue-700 transition"
+                        className="bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded font-semibold text-white transition"
                       >
                         🚀 Submit
                       </button>
