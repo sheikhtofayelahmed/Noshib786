@@ -111,11 +111,6 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 
 **when multiple entry it block the submit button**
 
-**games should be moved to accounts**
-
 **game account summary for each game and yearly game**
 **use =,-,/"**
-**agent game editing by admin. will be added editing time, remove**
-<!-- **bypass the input if there is countdown// add an waiting input list** -->
-<!-- **add sub agent** -->
 **make every admin api secured**

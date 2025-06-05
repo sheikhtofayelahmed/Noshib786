@@ -17,6 +17,9 @@ export default function PlayerInput() {
   const [timeLeft, setTimeLeft] = useState("");
   const [error, setError] = useState("");
   const [isGameOn, setIsGameOn] = useState(null);
+  const [isCompleted, setIsCompleted] = useState(true);
+  const [print, setPrint] = useState(false);
+
   useEffect(() => {
     const fetchTarget = async () => {
       try {
@@ -150,6 +153,7 @@ export default function PlayerInput() {
     setName("");
     setInputs(Array(20).fill(""));
     setErrors(Array(20).fill(false));
+    setIsCompleted(false);
   };
 
   const handleAddInputs = () => {
@@ -277,24 +281,7 @@ export default function PlayerInput() {
       );
       return;
     }
-
-    // Prevent re-submission if player already submitted to the active game
-    // (This check assumes `submittedPlayers` tracks active submissions, not waiting ones)
-    if (submittedPlayers.includes(player.name)) {
-      alert(
-        `ℹ️ Player ${player.name} has already been submitted for this game.`
-      );
-      handlePrint(player); // Only print if already submitted
-      return;
-    }
-
-    // Defensive: Ensure player data entries exist
     const dataEntries = player.data || player.entries || [];
-
-    if (dataEntries.length === 0) {
-      alert("ℹ️ No game entries found for this player. Submission cancelled.");
-      return;
-    }
 
     const parsedData = dataEntries.map((entry) => ({ input: entry.input }));
 
@@ -375,8 +362,10 @@ export default function PlayerInput() {
 
       if (res.ok) {
         alert("✅ Player data submitted to database!");
-        // Assuming setSubmittedPlayers and handlePrint are available in the scope
-        setSubmittedPlayers((prev) => [...prev, player.name]);
+        setIsCompleted(true);
+        setPlayers([]);
+
+        setPrint(true);
         handlePrint(player);
       } else {
         const err = await res.json();
@@ -684,7 +673,9 @@ export default function PlayerInput() {
     win.document.close();
     win.print();
   };
-
+  useEffect(() => {
+    console.log(isCompleted, "is complete button");
+  }, [isCompleted]);
   return (
     <div className="min-h-screen  text-white p-6 ">
       <div className="mb-16 p-4rounded text-yellow-200 font-mono text-3xl text-center">
@@ -734,6 +725,7 @@ export default function PlayerInput() {
         <div className="flex flex-wrap gap-2 mt-4">
           <button
             onClick={handleSavePlayer}
+            // disabled={isCompleted === false}
             className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
           >
             🎲 Complete
@@ -774,18 +766,21 @@ export default function PlayerInput() {
                         Entries: {player.data.length}
                       </p>
                     </div>
-                    <button
-                      onClick={() => handleSubmitAndPrint(player)}
-                      className={`py-2 px-4 rounded font-semibold text-white transition ${
-                        submittedPlayers.includes(player.name)
-                          ? "bg-purple-600 hover:bg-purple-700"
-                          : "bg-blue-600 hover:bg-blue-700"
-                      }`}
-                    >
-                      {submittedPlayers.includes(player.name)
-                        ? "🖨️ Print"
-                        : "🚀 Submit"}
-                    </button>
+                    {print ? (
+                      <button
+                        onClick={() => handlePrint(player)}
+                        className="py-2 px-4 rounded font-semibold text-white bg-purple-600 hover:bg-purple-700 transition"
+                      >
+                        🖨️ Print
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleSubmitAndPrint(player)}
+                        className="py-2 px-4 rounded font-semibold text-white bg-blue-600 hover:bg-blue-700 transition"
+                      >
+                        🚀 Submit
+                      </button>
+                    )}
                   </div>
 
                   <table className="w-full mt-4 border-collapse font-mono text-sm">
@@ -856,37 +851,33 @@ export default function PlayerInput() {
                                 )}
                               </td>
                               <td className="border px-3 py-0 space-x-2">
-                                {!submittedPlayers.includes(player.name) && (
-                                  <>
-                                    {entry.isEditing ? (
-                                      <button
-                                        onClick={() =>
-                                          handleSaveEdit(idx, entryIdx)
-                                        }
-                                        className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded transition"
-                                      >
-                                        💾
-                                      </button>
-                                    ) : (
-                                      <button
-                                        onClick={() =>
-                                          handleEdit(idx, entryIdx)
-                                        }
-                                        className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded transition"
-                                      >
-                                        ✏️
-                                      </button>
-                                    )}
+                                {/* {!submittedPlayers.includes(player.name) && ( */}
+                                <>
+                                  {entry.isEditing ? (
                                     <button
                                       onClick={() =>
-                                        handleDelete(idx, entryIdx)
+                                        handleSaveEdit(idx, entryIdx)
                                       }
-                                      className="bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded transition"
+                                      className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded transition"
                                     >
-                                      🗑️
+                                      💾
                                     </button>
-                                  </>
-                                )}
+                                  ) : (
+                                    <button
+                                      onClick={() => handleEdit(idx, entryIdx)}
+                                      className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded transition"
+                                    >
+                                      ✏️
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => handleDelete(idx, entryIdx)}
+                                    className="bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded transition"
+                                  >
+                                    🗑️
+                                  </button>
+                                </>
+                                {/* )} */}
                               </td>
                             </tr>
                           );
