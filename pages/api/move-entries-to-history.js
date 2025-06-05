@@ -7,7 +7,6 @@ export default async function handler(req, res) {
 
   try {
     const { date, threeUp, downGame } = req.body;
-    console.log(date, threeUp, downGame);
     if (!date || !threeUp || !downGame) {
       return res.status(400).json({ error: "Missing required fields" });
     }

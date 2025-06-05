@@ -99,7 +99,6 @@ export default function VoucherModal({ isOpen, onClose }) {
 
   // Placeholder for handlePrint (replace with actual printing logic)
   const handlePrint = (player) => {
-    console.log("Initiating print for:", player.voucher);
     setMessage(`Printing voucher ${player.voucher}...`);
   };
 
@@ -147,7 +146,6 @@ export default function VoucherModal({ isOpen, onClose }) {
           })),
         };
         setCurrentVoucherData(formattedData);
-        console.log(currentVoucherData);
         setMessage("");
         // Check if this voucher was already submitted based on your criteria
         // For demonstration, assuming a field like `isSubmittedToActiveGame`
@@ -331,7 +329,6 @@ export default function VoucherModal({ isOpen, onClose }) {
       data: parsedData,
       amountPlayed: amountPlayed,
     };
-    console.log("payload", payload);
     try {
       const res = await fetch(`/api/updateSavePlayer`, {
         method: "POST",

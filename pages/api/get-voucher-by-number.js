@@ -24,7 +24,6 @@ export default async function handler(req, res) {
 
     // Find the voucher data by the voucher number
     const voucherData = await collection.findOne({ voucher: voucherNumber });
-    console.log(voucherData, "from api");
 
     if (voucherData) {
       // If data is found, return it

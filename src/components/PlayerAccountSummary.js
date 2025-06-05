@@ -35,7 +35,6 @@ const PlayerAccountSummary = ({ agentId, print }) => {
   }, []);
 
   useEffect(() => {
-    console.log("agentId in useEffect:", agentId);
     if (!agentId) return;
 
     const fetchAgent = async () => {
@@ -51,7 +50,6 @@ const PlayerAccountSummary = ({ agentId, print }) => {
 
         const data = await res.json();
         setAgent(data.agent);
-        console.log("Fetched agent:", data.agent.percentage);
       } catch (error) {
         console.error("Error fetching agent:", error.message);
       }
@@ -269,7 +267,6 @@ const PlayerAccountSummary = ({ agentId, print }) => {
       moneyCal.totalAmounts,
       moneyCal.WL)
     ) {
-      console.log(moneyCal);
       uploadSummary();
     }
   }, [moneyCal, agentId, date]);

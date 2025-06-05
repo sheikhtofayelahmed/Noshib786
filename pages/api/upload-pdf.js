@@ -28,7 +28,6 @@ export default async function handler(req, res) {
   bb.on("finish", async () => {
     const client = await clientPromise;
     const db = client.db("thai-agent-lottery");
-    console.log(pdfBuffer);
     await db.collection("pdfs").insertOne({
       agentId,
       createdAt: new Date(),

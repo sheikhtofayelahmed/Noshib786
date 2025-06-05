@@ -66,7 +66,6 @@ export default function AdminGameControl() {
       });
       if (!res.ok) throw new Error("Failed to update game status");
       const data = await res.json();
-      console.log("Returned from API:", data.isGameOn);
 
       setIsGameOn(data.isGameOn);
     } catch (err) {
@@ -163,8 +162,6 @@ export default function AdminGameControl() {
       console.error("Move error:", error);
     }
   };
-  console.log("Current:", isGameOn);
-  console.log("Sending to API:", !isGameOn);
 
   return (
     <div className="max-w-2xl mx-auto mt-6 bg-gray-900 bg-opacity-90 p-6 rounded-lg ring-2 ring-red-500 text-white space-y-6">

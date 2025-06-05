@@ -137,9 +137,6 @@ export default function PlayerInput() {
       editValue: input,
       editError: false,
     }));
-    // console.log(newEntries)
-    // const voucherNumber = `VC-${agentId}-${new Date(player.time).getTime().toString().slice(-5)}`
-
     const time = new Date().toLocaleString();
     const newPlayer = {
       name,

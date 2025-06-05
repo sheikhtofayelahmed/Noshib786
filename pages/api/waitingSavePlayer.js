@@ -15,7 +15,6 @@ export default async function handler(req, res) {
   }
 
   const { voucher, agentId, name, data, amountPlayed } = req.body;
-  console.log("Received payload for waiting list:", req.body); // Log the incoming payload
 
   // 2. Server-Side Timestamp: Always use the server's time.
   const serverTime = new Date();
@@ -60,9 +59,7 @@ export default async function handler(req, res) {
 
     // 6. Save to 'waitingSavePlayer' Collection:
     // All submissions now go here by default.
-    console.log(
-      "Saving player data to 'waitingSavePlayer' collection for review."
-    );
+  
 
     const waitingResult = await db.collection("waitingSavePlayer").insertOne({
       voucher,

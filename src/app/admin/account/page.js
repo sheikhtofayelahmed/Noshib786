@@ -31,6 +31,31 @@ export default function Account() {
     }
     fetchSummaries(); // Call the fetch function when the component mounts
   }, []);
+  // Calculate totals of numeric fields
+  const totals = summaries.reduce(
+    (acc, curr) => {
+      acc.afterSTR += Number(curr.afterSTR) || 0;
+      acc.afterRUMBLE += Number(curr.afterRUMBLE) || 0;
+      acc.afterDOWN += Number(curr.afterDOWN) || 0;
+      acc.afterSINGLE += Number(curr.afterSINGLE) || 0;
+      acc.totalGame += Number(curr.totalGame) || 0;
+      acc.totalWin += Number(curr.totalWin) || 0;
+      return acc;
+    },
+    {
+      afterSTR: 0,
+      afterRUMBLE: 0,
+      afterDOWN: 0,
+      afterSINGLE: 0,
+      totalGame: 0,
+      totalWin: 0,
+    }
+  );
+
+  // Calculate total W/L if needed (you can decide how to do this based on your data)
+  // For now, let's leave W/L blank or calculate as totalWin - totalGame
+  const totalWL = totals.totalGame - totals.totalWin;
+
   if (loading) {
     return (
       <div className=" min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 text-green-400 font-mono text-xl">
@@ -61,7 +86,7 @@ export default function Account() {
         <>
           {/* Table Container - removed overflow-x-auto from here, now it's on the parent div */}
           {/* flex-shrink-0 ensures the div doesn't shrink below its content's intrinsic width */}
-          <div className="overflow-x-auto w-full max-w-full rounded-xl shadow-2xl border-2 border-green-500 flex-shrink-0">
+          <div className="overflow-x-auto w-full  rounded-xl shadow-2xl border-2 border-green-500 flex-shrink-0">
             <table
               // Added table-fixed to ensure fixed column widths
               // Increased min-width to 1024px to ensure horizontal scrolling on most mobile and tablet screens.
@@ -71,43 +96,43 @@ export default function Account() {
               <thead className="bg-gray-900 text-yellow-300 uppercase tracking-wider">
                 <tr>
                   {/* Assigned specific widths to each column header */}
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left rounded-tl-lg w-32">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left rounded-tl-lg  ">
                     Agent ID
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-32">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
                     Date
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-24">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
                     Year
                   </th>
-                  {/* <th className="p-3 sm:p-4 border-b border-green-600 text-left w-28">
+                  {/* <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
                     3D
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-28">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
                     2D
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-28">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
                     1D
                   </th> */}
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-28">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
                     STR
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-32">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
                     RUMBLE
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-28">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
                     DOWN
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-32">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
                     SINGLE
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-32">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
                     Total Game
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left w-32">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
                     Total Win
                   </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left rounded-tr-lg w-24">
+                  <th className="p-3 sm:p-4 border-b border-green-600 text-left rounded-tr-lg  ">
                     W/L
                   </th>
                 </tr>
@@ -176,12 +201,49 @@ export default function Account() {
                       <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
                         {totalWin ?? "-"}
                       </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
+                      <td
+                        className={`p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap ${
+                          WL < 0 ? "text-red-500 font-semibold" : ""
+                        }`}
+                      >
                         {WL ?? "-"}
                       </td>
                     </tr>
                   )
                 )}
+                <tr className="bg-gray-800 font-bold text-yellow-300">
+                  <td
+                    className="p-3 sm:p-4 border-t border-green-600 text-left"
+                    colSpan={3}
+                  >
+                    Total
+                  </td>
+                  <td className="p-3 sm:p-4 border-t border-green-600 whitespace-nowrap">
+                    {totals.afterSTR}
+                  </td>
+                  <td className="p-3 sm:p-4 border-t border-green-600 whitespace-nowrap">
+                    {totals.afterRUMBLE}
+                  </td>
+                  <td className="p-3 sm:p-4 border-t border-green-600 whitespace-nowrap">
+                    {totals.afterDOWN}
+                  </td>
+                  <td className="p-3 sm:p-4 border-t border-green-600 whitespace-nowrap">
+                    {totals.afterSINGLE}
+                  </td>
+                  <td className="p-3 sm:p-4 border-t border-green-600 whitespace-nowrap">
+                    {totals.totalGame}
+                  </td>
+                  <td className="p-3 sm:p-4 border-t border-green-600 whitespace-nowrap">
+                    {totals.totalWin}
+                  </td>
+                  <td
+                    className={`p-3 sm:p-4 border-t border-green-600 whitespace-nowrap ${
+                      totalWL < 0 ? "text-red-500 font-semibold" : ""
+                    }`}
+                  >
+                    {totalWL}
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
