@@ -14,7 +14,7 @@ export default async function handler(req, res) {
       },
       {
         $addFields: {
-          splitInput: { $split: ["$input", "="] },
+          splitInput: { $split: ["$input", "."] },
         },
       },
       {

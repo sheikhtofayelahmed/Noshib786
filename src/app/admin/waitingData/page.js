@@ -219,7 +219,7 @@ const AdminApprovalDashboard = () => {
                 </thead>
                 <tbody>
                   {player?.entries?.map((entry, entryIdx) => {
-                    const parts = entry.input.split("=");
+                    const parts = entry.input.split(".");
                     const number = parts[0];
                     const amounts = parts.slice(1);
 
@@ -235,7 +235,7 @@ const AdminApprovalDashboard = () => {
                           <span className="text-white">{number}</span>
                           {amounts.map((amt, i) => (
                             <span key={i}>
-                              {"="}
+                              {"."}
                               <span>{amt}</span>
                             </span>
                           ))}

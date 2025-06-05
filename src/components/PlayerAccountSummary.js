@@ -147,7 +147,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
     if (!input || !threeUp || !downGame) {
       return { match: false, type: null };
     }
-    const parts = input.split("=");
+    const parts = input.split(".");
     const number = parts[0];
     const amounts = parts.slice(1).map(Number);
 
@@ -470,7 +470,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
     if (element) {
       const options = {
         margin: 10,
-        filename: agent?.name + "=" + agentId + "=" + date,
+        filename: agent?.name + "." + agentId + "." + date,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: {
           scale: 2,
@@ -804,7 +804,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                           threeUp,
                           downGame
                         );
-                        const parts = entry.input.split("=");
+                        const parts = entry.input.split(".");
                         const number = parts[0];
                         const amounts = parts.slice(1);
 
@@ -835,7 +835,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
 
                                 return (
                                   <span key={i}>
-                                    {"="}
+                                    {"."}
                                     <span
                                       className={
                                         shouldHighlight

@@ -47,7 +47,7 @@ export default function VoucherModal({ isOpen, onClose }) {
 
     if (currentVoucherData && currentVoucherData.data) {
       currentVoucherData.data.forEach((entry) => {
-        const parts = entry.input.split("=");
+        const parts = entry.input.split(".");
         const num = parts[0];
         const amounts = parts
           .slice(1)
@@ -76,9 +76,9 @@ export default function VoucherModal({ isOpen, onClose }) {
   const validateEntry = (input) => {
     if (!input) return true; // allow empty
     if (!/^[\d=]+$/.test(input)) return false;
-    if (input.startsWith("=")) return false;
+    if (input.startsWith(".")) return false;
 
-    const parts = input.split("=");
+    const parts = input.split(".");
     const first = parts[0];
 
     if (/^\d$/.test(first)) {

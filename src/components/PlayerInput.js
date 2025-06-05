@@ -72,7 +72,7 @@ export default function PlayerInput() {
 
     players.forEach((player) => {
       player.data.forEach((entry) => {
-        const parts = entry.input.split("=");
+        const parts = entry.input.split(".");
         const num = parts[0];
         const amounts = parts
           .slice(1)
@@ -99,10 +99,11 @@ export default function PlayerInput() {
 
   const validateEntry = (input) => {
     if (!input) return true; // allow empty
-    if (!/^[\d=]+$/.test(input)) return false;
-    if (input.startsWith("=")) return false;
+    // if (!/^[\d=]+$/.test(input)) return false;
+    if (!/^[\d.]+$/.test(input)) return false;
+    if (input.startsWith(".")) return false;
 
-    const parts = input.split("=");
+    const parts = input.split(".");
     const first = parts[0];
 
     if (/^\d$/.test(first)) {
@@ -297,7 +298,7 @@ export default function PlayerInput() {
       if (
         !entry.input ||
         typeof entry.input !== "string" ||
-        !entry.input.includes("=")
+        !entry.input.includes(".")
       ) {
         console.warn(
           `Skipping malformed entry input: ${JSON.stringify(
@@ -307,7 +308,7 @@ export default function PlayerInput() {
         return; // Skip this entry
       }
 
-      const parts = entry.input.split("=");
+      const parts = entry.input.split(".");
       const num = parts[0];
       // Filter for valid numbers and positive amounts
       const amounts = parts
@@ -418,7 +419,7 @@ export default function PlayerInput() {
       if (
         !entry.input ||
         typeof entry.input !== "string" ||
-        !entry.input.includes("=")
+        !entry.input.includes(".")
       ) {
         console.warn(
           `Skipping malformed entry input: ${JSON.stringify(
@@ -428,7 +429,7 @@ export default function PlayerInput() {
         return; // Skip this entry
       }
 
-      const parts = entry.input.split("=");
+      const parts = entry.input.split(".");
       const num = parts[0];
       // Filter for valid numbers and positive amounts
       const amounts = parts
