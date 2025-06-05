@@ -140,12 +140,14 @@ export default function PlayerInput() {
       editValue: input,
       editError: false,
     }));
-    const time = new Date().toLocaleString();
+
+    const voucher = `${agentId}-${Math.floor(Math.random() * 10000)}`;
+
     const newPlayer = {
       name,
       SAId,
       time: new Date().toLocaleString(),
-      voucher: `VC-${agentId}-${new Date(time).getTime().toString().slice(-5)}`,
+      voucher: voucher,
       data: newEntries,
     };
 
@@ -544,7 +546,10 @@ export default function PlayerInput() {
         .container {
           width: 100%;
         }
+.name-subagent{
 
+display: flex;
+}
         h2 {
           font-size: 12px;
           margin: 2px 0;
@@ -595,8 +600,10 @@ export default function PlayerInput() {
     <body>
       <div class="container">
         <h2>${player.voucher || ""}</h2>
-        <h2>Player: ${player.name || ""}</h2>
-        <h2>Player: ${player.SAId || ""}</h2>
+
+        <h2>Player: ${player.name || ""} || Sub Agent: ${player.SAId || ""}</h2>
+    
+ 
         <p> Date: ${new Date(player.time).toLocaleString()}</p>
 
        <table class="input-table" style="width: 100%; border-collapse: collapse;" border="1">
