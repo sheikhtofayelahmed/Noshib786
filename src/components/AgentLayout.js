@@ -10,6 +10,7 @@ import { useAgent } from "@/context/AgentContext";
 const navItems = [
   { name: "Home", path: "/" },
   { name: "Games", path: "/agent/games" },
+  { name: "Sub Agent Games", path: "/agent/subAgentGames" },
   { name: "Waiting Data", path: "/agent/waitingData" },
 ];
 

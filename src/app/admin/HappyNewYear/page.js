@@ -34,7 +34,7 @@ const NumberTable = ({ rows, data, title }) => (
         <tbody>
           {title !== "Single" && (
             <tr>
-              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((row, i) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((row, i) => (
                 <td
                   key={i}
                   className="text-5xl text-green-600 p-4 border border-gray-500"
@@ -98,7 +98,7 @@ export default function HappyNewYear() {
     fetchData();
   }, []);
 
-  const singleRows = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]];
+  const singleRows = [[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]];
 
   const downRows = [
     [10, 20, 30, 40, 50, 60, 70, 80, 90, 0],

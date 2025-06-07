@@ -124,6 +124,26 @@ export default function AdminGameControl() {
       console.error("Update error:", error);
     }
   };
+  const handleDelete = async () => {
+    try {
+      const res = await fetch("/api/delete-win", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ threeUp: "", downGame: "", date: "---" }),
+      });
+      const result = await res.json();
+      if (res.ok) {
+        alert("Game reset successfully!");
+        setThreeUp("");
+        setDownGame(" ");
+        setGameDate("---");
+      } else {
+        alert(result.error || "Failed to update.");
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -252,12 +272,22 @@ export default function AdminGameControl() {
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row sm:justify-between gap-4 mt-4">
-          <button
-            onClick={handleSubmit}
-            className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-2 rounded shadow w-full sm:w-auto"
-          >
-            Save
-          </button>
+          <div>
+            <button
+              onClick={handleSubmit}
+              className="bg-green-500 hover:bg-yellow-600 text-black font-bold px-6 py-2 mx-1 rounded shadow w-full sm:w-auto"
+            >
+              Save
+            </button>
+            <button
+              onClick={handleDelete}
+              className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-2 mx-1 rounded shadow w-full sm:w-auto"
+            >
+              Delete
+            </button>
+          </div>
+
+          <div />
           <button
             onClick={handleMoveAll}
             className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 rounded shadow w-full sm:w-auto"
@@ -269,13 +299,13 @@ export default function AdminGameControl() {
       <button
         onClick={openVoucherModal}
         className="px-8 py-4
-           bg-gradient-to-r from-black via-red-800 to-red-600
-           text-yellow-300 font-mono text-xl font-extrabold
-           border-2 border-yellow-400 rounded-2xl
-           shadow-[0_0_12px_0_rgba(255,255,0,0.6)]
-           transition-all duration-300 ease-out
-           hover:scale-110 hover:shadow-[0_0_20px_4px_rgba(255,255,0,0.8)] hover:animate-pulse
-           focus:outline-none focus:ring-4 focus:ring-yellow-400/60"
+         bg-gradient-to-r from-black via-red-800 to-red-600
+         text-yellow-300 font-mono text-2xl tracking-widest font-extrabold uppercase
+         border-4 border-yellow-400 rounded-2xl
+         shadow-[0_0_16px_4px_rgba(255,255,0,0.5)]
+         transition-all duration-300 ease-out
+         hover:scale-110 hover:shadow-[0_0_28px_8px_rgba(255,255,0,0.8)] hover:animate-pulse
+         focus:outline-none focus:ring-4 focus:ring-yellow-400/70"
       >
         Open Voucher Search & Edit
       </button>
