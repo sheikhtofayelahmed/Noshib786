@@ -4,251 +4,202 @@ import React, { useEffect, useState } from "react";
 export default function Account() {
   const [summaries, setSummaries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState(""); // State for user messages
+  const [message, setMessage] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
 
   useEffect(() => {
-    // Function to fetch game summaries from the API
     async function fetchSummaries() {
       try {
-        // Construct the full API URL using the appId
-        const apiUrl = `/api/get-summaries`;
-        const res = await fetch(apiUrl); // Fetch data from the API endpoint
-        const data = await res.json(); // Parse the JSON response
+        const res = await fetch(`/api/get-summaries`);
+        const data = await res.json();
 
         if (data.success) {
-          setSummaries(data.summaries); // Update the summaries state with fetched data
-          setMessage(""); // Clear any previous messages
+          const sortedSummaries = [...data.summaries].sort(
+            (a, b) => new Date(b.date) - new Date(a.date)
+          );
+
+          setSummaries(sortedSummaries);
+          setMessage("");
+
+          if (sortedSummaries.length > 0) {
+            setSelectedDate(sortedSummaries[0].date); // 🟡 Set the most recent date
+          }
         } else {
           console.error("Failed to fetch summaries:", data.message);
-          setMessage("Failed to load summaries. Please try again."); // Display error message
+          setMessage("Failed to load summaries. Please try again.");
         }
       } catch (error) {
         console.error("Error fetching summaries:", error);
-        setMessage("An error occurred while fetching data."); // Display generic error message
+        setMessage("An error occurred while fetching data.");
       } finally {
-        setLoading(false); // Set loading to false regardless of success or failure
+        setLoading(false);
       }
     }
-    fetchSummaries(); // Call the fetch function when the component mounts
+
+    fetchSummaries();
   }, []);
-  // Calculate totals of numeric fields
-  const totals = summaries.reduce(
-    (acc, curr) => {
-      acc.afterSTR += Number(curr.afterSTR) || 0;
-      acc.afterRUMBLE += Number(curr.afterRUMBLE) || 0;
-      acc.afterDOWN += Number(curr.afterDOWN) || 0;
-      acc.afterSINGLE += Number(curr.afterSINGLE) || 0;
-      acc.totalGame += Number(curr.totalGame) || 0;
-      acc.totalWin += Number(curr.totalWin) || 0;
-      return acc;
-    },
-    {
-      afterSTR: 0,
-      afterRUMBLE: 0,
-      afterDOWN: 0,
-      afterSINGLE: 0,
-      totalGame: 0,
-      totalWin: 0,
+
+  const filteredByDate = selectedDate
+    ? summaries.filter((item) => item.date === selectedDate)
+    : [];
+
+  const yearlyTotals = summaries.reduce((acc, item) => {
+    const { agentId } = item;
+    if (!agentId) return acc;
+
+    const keys = [
+      "afterThreeD",
+      "afterTwoD",
+      "afterOneD",
+      "afterSTR",
+      "afterRUMBLE",
+      "afterDOWN",
+      "afterSINGLE",
+      "totalGame",
+      "totalWin",
+      "totalAmounts",
+    ];
+
+    if (!acc[agentId]) {
+      acc[agentId] = {
+        agentId,
+        afterThreeD: 0,
+        afterTwoD: 0,
+        afterOneD: 0,
+        afterSTR: 0,
+        afterRUMBLE: 0,
+        afterDOWN: 0,
+        afterSINGLE: 0,
+        totalGame: 0,
+        totalWin: 0,
+        totalAmounts: 0,
+      };
     }
-  );
 
-  // Calculate total W/L if needed (you can decide how to do this based on your data)
-  // For now, let's leave W/L blank or calculate as totalWin - totalGame
-  const totalWL = totals.totalGame - totals.totalWin;
+    for (const key of keys) {
+      if (typeof item[key] === "number") {
+        acc[agentId][key] += item[key];
+      }
+    }
 
-  if (loading) {
-    return (
-      <div className=" min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 text-green-400 font-mono text-xl">
-        <p>Loading game summaries...</p>
-      </div>
-    );
-  }
+    return acc;
+  }, {});
+
+  const yearlyData = Object.values(yearlyTotals).map((item) => ({
+    ...item,
+    WL: item.totalGame - item.totalWin,
+  }));
+
   return (
-    <div className="min-h-screen overflow-x-auto bg-gradient-to-br from-gray-800 to-gray-900 text-green-400 font-mono p-4 sm:p-8 flex flex-col items-center overflow-x-auto">
-      {/* Page Title */}
-      <h1 className="text-4xl sm:text-5xl font-bold mb-8 text-center text-yellow-300 drop-shadow-lg">
-        GAME SUMMARIES
-      </h1>
+    <div className="p-4 bg-black min-h-screen text-white font-mono">
+      {/* Date Selector */}
+      <div className="mb-6">
+        <label className="block mb-2 text-lg font-bold text-yellow-400">
+          Select Date
+        </label>
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="px-4 py-2 rounded bg-gray-800 border border-gray-500"
+        />
+      </div>
 
-      {/* Message Display */}
-      {message && (
-        <div className="bg-blue-900 text-blue-300 p-3 rounded-lg mb-6 shadow-md text-center">
-          {message}
-        </div>
-      )}
-
-      {/* Conditional rendering for no data */}
-      {!summaries.length && !loading ? (
-        <div className="bg-gray-700 p-8 rounded-xl shadow-lg text-center text-red-400 text-lg">
-          <p>No game data found. Start playing to see your summaries!</p>
+      {/* Table for Selected Date */}
+      {selectedDate && filteredByDate.length > 0 ? (
+        <div className="mb-12 overflow-x-auto border border-yellow-600 rounded-xl">
+          <h2 className="text-xl font-bold text-yellow-300 py-3 text-center">
+            Summary for {selectedDate}
+          </h2>
+          <table className="w-full text-sm bg-gray-900 border border-collapse text-green-200 text-center">
+            <thead className="bg-gray-800 text-yellow-300">
+              <tr>
+                <th className="p-2">Agent ID</th>
+                <th className="p-2">3D</th>
+                <th className="p-2">2D</th>
+                <th className="p-2">1D</th>
+                <th className="p-2">STR</th>
+                <th className="p-2">RUMBLE</th>
+                <th className="p-2">DOWN</th>
+                <th className="p-2">SINGLE</th>
+                <th className="p-2">Total Game</th>
+                <th className="p-2">Total Win</th>
+                <th className="p-2">W/L</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredByDate.map((item, idx) => (
+                <tr key={idx} className="hover:bg-gray-700">
+                  <td className="p-2">{item.agentId}</td>
+                  <td className="p-2">{item.afterThreeD}</td>
+                  <td className="p-2">{item.afterTwoD}</td>
+                  <td className="p-2">{item.afterOneD}</td>
+                  <td className="p-2">{item.afterSTR}</td>
+                  <td className="p-2">{item.afterRUMBLE}</td>
+                  <td className="p-2">{item.afterDOWN}</td>
+                  <td className="p-2">{item.afterSINGLE}</td>
+                  <td className="p-2">{item.totalGame}</td>
+                  <td className="p-2">{item.totalWin}</td>
+                  <td className="p-2">{item.totalGame - item.totalWin}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : (
-        <>
-          {/* Table Container - removed overflow-x-auto from here, now it's on the parent div */}
-          {/* flex-shrink-0 ensures the div doesn't shrink below its content's intrinsic width */}
-          <div className="overflow-x-auto w-full  rounded-xl shadow-2xl border-2 border-green-500 flex-shrink-0">
-            <table
-              // Added table-fixed to ensure fixed column widths
-              // Increased min-width to 1024px to ensure horizontal scrolling on most mobile and tablet screens.
-              className="overflow-x-auto border-collapse text-sm sm:text-base bg-gray-700 text-green-300 "
-            >
-              {/* Table Header */}
-              <thead className="bg-gray-900 text-yellow-300 uppercase tracking-wider">
-                <tr>
-                  {/* Assigned specific widths to each column header */}
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left rounded-tl-lg  ">
-                    Agent ID
-                  </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
-                    Date
-                  </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
-                    Year
-                  </th>
-                  {/* <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
-                    3D
-                  </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
-                    2D
-                  </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
-                    1D
-                  </th> */}
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
-                    STR
-                  </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
-                    RUMBLE
-                  </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
-                    DOWN
-                  </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
-                    SINGLE
-                  </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
-                    Total Game
-                  </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left  ">
-                    Total Win
-                  </th>
-                  <th className="p-3 sm:p-4 border-b border-green-600 text-left rounded-tr-lg  ">
-                    W/L
-                  </th>
-                </tr>
-              </thead>
-              {/* Table Body */}
-              <tbody>
-                {summaries.map(
-                  (
-                    {
-                      agentId,
-                      date,
-                      year,
-                      afterThreeD,
-                      afterTwoD,
-                      afterOneD,
-                      afterSTR,
-                      afterRUMBLE,
-                      afterDOWN,
-                      afterSINGLE,
-                      totalGame,
-                      totalWin,
-                      WL,
-                    },
-                    i
-                  ) => (
-                    <tr
-                      key={i}
-                      className="hover:bg-gray-600 transition-colors duration-200 ease-in-out"
-                    >
-                      {/* Added whitespace-nowrap to prevent text wrapping in cells */}
-                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
-                        {agentId ?? "-"}
-                      </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
-                        {date && date !== "---"
-                          ? new Date(date).toLocaleDateString()
-                          : "-"}
-                      </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
-                        {year ?? "-"}
-                      </td>
-                      {/* <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
-                        {afterThreeD ?? "-"}
-                      </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
-                        {afterTwoD ?? "-"}
-                      </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
-                        {afterOneD ?? "-"}
-                      </td> */}
-                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
-                        {afterSTR ?? "-"}
-                      </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
-                        {afterRUMBLE ?? "-"}
-                      </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
-                        {afterDOWN ?? "-"}
-                      </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
-                        {afterSINGLE ?? "-"}
-                      </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
-                        {totalGame ?? "-"}
-                      </td>
-                      <td className="p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap">
-                        {totalWin ?? "-"}
-                      </td>
-                      <td
-                        className={`p-3 sm:p-4 border-b border-gray-600 whitespace-nowrap ${
-                          WL < 0 ? "text-red-500 font-semibold" : ""
-                        }`}
-                      >
-                        {WL ?? "-"}
-                      </td>
-                    </tr>
-                  )
-                )}
-                <tr className="bg-gray-800 font-bold text-yellow-300">
-                  <td
-                    className="p-3 sm:p-4 border-t border-green-600 text-left"
-                    colSpan={3}
-                  >
-                    Total
-                  </td>
-                  <td className="p-3 sm:p-4 border-t border-green-600 whitespace-nowrap">
-                    {totals.afterSTR}
-                  </td>
-                  <td className="p-3 sm:p-4 border-t border-green-600 whitespace-nowrap">
-                    {totals.afterRUMBLE}
-                  </td>
-                  <td className="p-3 sm:p-4 border-t border-green-600 whitespace-nowrap">
-                    {totals.afterDOWN}
-                  </td>
-                  <td className="p-3 sm:p-4 border-t border-green-600 whitespace-nowrap">
-                    {totals.afterSINGLE}
-                  </td>
-                  <td className="p-3 sm:p-4 border-t border-green-600 whitespace-nowrap">
-                    {totals.totalGame}
-                  </td>
-                  <td className="p-3 sm:p-4 border-t border-green-600 whitespace-nowrap">
-                    {totals.totalWin}
-                  </td>
-                  <td
-                    className={`p-3 sm:p-4 border-t border-green-600 whitespace-nowrap ${
-                      totalWL < 0 ? "text-red-500 font-semibold" : ""
-                    }`}
-                  >
-                    {totalWL}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </>
+        selectedDate && (
+          <p className="text-yellow-400 text-center font-bold py-5 text-2xl">
+            No data found for {selectedDate}
+          </p>
+        )
       )}
+
+      {/* Yearly Summary */}
+      <div className="overflow-x-auto border border-pink-600 rounded-xl">
+        <h2 className="text-xl font-bold text-pink-400  py-3 text-center">
+          Yearly Total by Agent
+        </h2>
+        <table className="w-full text-sm bg-gray-900 border border-collapse text-green-200 text-center">
+          <thead className="bg-gray-800 text-pink-300">
+            <tr>
+              <th className="p-2">Agent ID</th>
+              <th className="p-2">3D</th>
+              <th className="p-2">2D</th>
+              <th className="p-2">1D</th>
+              <th className="p-2">STR</th>
+              <th className="p-2">RUMBLE</th>
+              <th className="p-2">DOWN</th>
+              <th className="p-2">SINGLE</th>
+              <th className="p-2">Total Game</th>
+              <th className="p-2">Total Win</th>
+              <th className="p-2">W/L</th>
+            </tr>
+          </thead>
+          <tbody>
+            {yearlyData.map((item, idx) => (
+              <tr key={idx} className="hover:bg-gray-700">
+                <td className="p-2">{item.agentId}</td>
+                <td className="p-2">{item.afterThreeD}</td>
+                <td className="p-2">{item.afterTwoD}</td>
+                <td className="p-2">{item.afterOneD}</td>
+                <td className="p-2">{item.afterSTR}</td>
+                <td className="p-2">{item.afterRUMBLE}</td>
+                <td className="p-2">{item.afterDOWN}</td>
+                <td className="p-2">{item.afterSINGLE}</td>
+                <td className="p-2">{item.totalGame}</td>
+                <td className="p-2">{item.totalWin}</td>
+                <td
+                  className={`p-2 ${
+                    item.WL < 0 ? "text-red-500 font-bold" : ""
+                  }`}
+                >
+                  {item.WL}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     await collection.insertOne({
       agentId,
       date,
-      ...summary,
+      summary,
       uploadedAt: new Date(),
     });
 

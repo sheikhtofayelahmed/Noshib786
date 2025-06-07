@@ -243,7 +243,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
         body: JSON.stringify({
           agentId: agentId,
           date: date,
-          summary: { ...moneyCal, year: new Date().getFullYear() },
+          summary: moneyCal,
         }),
       });
 

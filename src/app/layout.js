@@ -1,3 +1,4 @@
+"use client";
 import { AgentProvider } from "@/context/AgentContext";
 import "src/globals.css";
 
