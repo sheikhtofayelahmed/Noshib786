@@ -13,11 +13,7 @@ export default function AgentGames() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const logoutAdmin = () => {
-    document.cookie = "admin-auth=; Max-Age=0; path=/";
-    localStorage.removeItem("admin-auth");
-    window.location.href = "/admin/login";
-  };
+
 
   return (
     <PlayerAccountSummary agentId={agentId} print={true} className="w-full" />

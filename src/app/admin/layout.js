@@ -25,9 +25,10 @@ export default function AdminLayout({ children }) {
   const logoutAdmin = () => {
     document.cookie = "admin-auth=; Max-Age=0; path=/";
     localStorage.removeItem("admin-auth");
-    window.location.href = "/admin/login";
-  };
 
+    // ❗ Must reload to re-trigger middleware + cookie parsing
+    window.location.href = "/admin/login"; // DO NOT use router.push
+  };
   return (
     <div className="min-h-screen font-mono bg-gradient-to-br from-black to-red-900 text-white flex flex-col md:flex-row">
       {/* Mobile Header */}

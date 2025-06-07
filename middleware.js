@@ -1,15 +1,14 @@
+// middleware.ts (App Router root)
 import { NextResponse } from "next/server";
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
   const isLoggedIn = request.cookies.get("admin-auth")?.value === "true";
 
-  // Allow access to login page
   if (pathname === "/admin/login") {
     return NextResponse.next();
   }
 
-  // Protect admin pages
   if (pathname.startsWith("/admin") && !isLoggedIn) {
     return NextResponse.redirect(new URL("/admin/login", request.url));
   }
@@ -18,5 +17,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/", "/admin/:path*"],
+  matcher: ["/admin/:path*"],
 };
