@@ -18,7 +18,7 @@ export default function Breadcrumb() {
         {isAgent && (
           <li>
             <Link href="/" className="hover:underline">
-              🎮 Home
+              🎮
             </Link>
           </li>
         )}

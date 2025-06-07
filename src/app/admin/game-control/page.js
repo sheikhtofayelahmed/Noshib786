@@ -104,7 +104,14 @@ export default function AdminGameControl() {
     }
   };
   const handleSubmit = async () => {
-    if (!threeUp || !downGame || !gameDate) {
+    console.log(threeUp, downGame, gameDate);
+    if (
+      threeUp === "" ||
+      downGame === "" ||
+      gameDate === "" ||
+      threeUp.length !== 3 ||
+      downGame.length !== 2
+    ) {
       alert("All fields are required.");
       return;
     }
@@ -129,14 +136,14 @@ export default function AdminGameControl() {
       const res = await fetch("/api/delete-win", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ threeUp: "", downGame: "", date: "---" }),
+        body: JSON.stringify({ threeUp: "", downGame: "", date: "" }),
       });
       const result = await res.json();
       if (res.ok) {
         alert("Game reset successfully!");
         setThreeUp("");
         setDownGame(" ");
-        setGameDate("---");
+        setGameDate("");
       } else {
         alert(result.error || "Failed to update.");
       }
@@ -174,6 +181,7 @@ export default function AdminGameControl() {
       });
       if (res.ok) {
         alert("All entries moved to history!");
+        handleDelete();
       } else {
         const data = await res.json();
         alert(data.error || "Failed to move entries.");
@@ -236,7 +244,6 @@ export default function AdminGameControl() {
           </label>
           <input
             type="text"
-            maxLength={3}
             value={threeUp}
             onChange={(e) => setThreeUp(e.target.value.toUpperCase())}
             className="w-full px-4 py-2 rounded bg-gray-800 border border-yellow-500 focus:outline-none"
@@ -250,7 +257,6 @@ export default function AdminGameControl() {
           </label>
           <input
             type="text"
-            maxLength={2}
             value={downGame}
             onChange={(e) => setDownGame(e.target.value.toUpperCase())}
             className="w-full px-4 py-2 rounded bg-gray-800 border border-pink-500 focus:outline-none"
@@ -272,27 +278,31 @@ export default function AdminGameControl() {
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row sm:justify-between gap-4 mt-4">
-          <div>
-            <button
-              onClick={handleSubmit}
-              className="bg-green-500 hover:bg-yellow-600 text-black font-bold px-6 py-2 mx-1 rounded shadow w-full sm:w-auto"
-            >
-              Save
-            </button>
-            <button
-              onClick={handleDelete}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-2 mx-1 rounded shadow w-full sm:w-auto"
-            >
-              Delete
-            </button>
-          </div>
+          <button
+            onClick={handleSubmit}
+            className="bg-green-500 hover:bg-yellow-600 text-black font-bold px-6 py-2 mx-1 rounded shadow w-full sm:w-auto"
+          >
+            Save
+          </button>
 
           <div />
           <button
-            onClick={handleMoveAll}
+            onClick={() => {
+              const confirmation = prompt(
+                "⚠️ To confirm deletion, please type 'Delete'"
+              );
+
+              if (confirmation === "Delete") {
+                handleMoveAll();
+              } else if (confirmation !== null) {
+                alert(
+                  "❌ Deletion canceled. You did not type 'Delete' correctly."
+                );
+              }
+            }}
             className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 rounded shadow w-full sm:w-auto"
           >
-            Move
+            Delete Game
           </button>
         </div>
       </div>

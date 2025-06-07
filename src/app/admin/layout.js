@@ -7,12 +7,13 @@ import { Menu, X } from "lucide-react";
 import Breadcrumb from "@/components/Breadcrumb"; // adjust path if needed
 
 const navItems = [
+  { name: "Home", path: "/admin" },
   { name: "Game Control", path: "/admin/game-control" },
-  { name: "Inactive Agent", path: "/admin/inactive-agent" },
   { name: "Agent", path: "/admin/agent" },
   { name: "Account", path: "/admin/account" },
   { name: "Happy New Year", path: "/admin/HappyNewYear" },
   { name: "Waiting Data", path: "/admin/waitingData" },
+  { name: "Inactive Agent", path: "/admin/inactive-agent" },
 ];
 
 export default function AdminLayout({ children }) {

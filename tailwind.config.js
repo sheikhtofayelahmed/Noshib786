@@ -8,11 +8,24 @@ module.exports = {
         "casino-red": "#cc0000",
         "casino-gold": "#ffd700",
         "casino-green": "#008000",
+        fire: {
+          100: "#fff7e6",
+          300: "#ffc266",
+          500: "#ff6600",
+          700: "#cc3300",
+        },
+      },
+      fontFamily: {
+        bangla: ["var(--font-bangla)"],
       },
       keyframes: {
         marquee: {
           "0%": { transform: "translateX(100%)" },
           "100%": { transform: "translateX(-100%)" },
+        },
+        fire: {
+          "0%, 100%": { color: "#ff6600", transform: "scale(1)" },
+          "50%": { color: "#ffc266", transform: "scale(1.05)" },
         },
         "pulse-light": {
           "0%, 100%": {
@@ -28,6 +41,7 @@ module.exports = {
         },
       },
       animation: {
+        fire: "fire 1.5s ease-in-out infinite",
         marquee: "marquee 20s linear infinite",
         "pulse-light": "pulse-light 3s infinite alternate",
       },

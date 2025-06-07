@@ -10,7 +10,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
   const [players, setPlayers] = useState([]);
   const [threeUp, setThreeUp] = useState();
   const [downGame, setDownGame] = useState();
-  const [date, setDate] = useState("---");
+  const [date, setDate] = useState("");
   const [totalWins, setTotalWins] = useState({});
   const [agent, setAgent] = useState({});
   const [error, setError] = useState("");
@@ -568,7 +568,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                   {/* All Players Total Summary Section */}
 
                   <tr className="bg-green-800 text-white text-lg">
-                    <th className="border border-gray-700 px-4 py-3 text-left">
+                    <th className="border border-gray-700 px-4 py-3 text-center">
                       Category
                     </th>
                     <th className="border border-gray-700 px-4 py-3 text-center">
@@ -707,7 +707,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                   <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
                     <td
                       colSpan={2}
-                      className="border border-gray-700 px-4 py-2 text-red-400"
+                      className="font-bangla border border-gray-700 px-4 py-2 text-red-400"
                     >
                       এডমিন পাবে
                     </td>
@@ -723,7 +723,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                   <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
                     <td
                       colSpan={2}
-                      className="border border-gray-700 px-4 py-2 text-white"
+                      className="font-bangla border border-gray-700 px-4 py-2 text-white"
                     >
                       এজেন্ট পাবে
                     </td>

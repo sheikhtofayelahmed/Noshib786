@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 export default function Win() {
   const [threeUp, setThreeUp] = useState("XXX");
   const [downGame, setDownGame] = useState("X");
-  const [date, setDate] = useState("---");
+  const [date, setDate] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
