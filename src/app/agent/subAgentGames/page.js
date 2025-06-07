@@ -101,7 +101,7 @@ const SubAgentSummary = () => {
                     {player?.entries?.map((entry, entryIdx) => (
                       <tr key={entryIdx}>
                         <td className="border px-3 py-2">{entryIdx + 1}</td>
-                        <td className="border px-3 py-2 text-yellow-300 font-bold text-xl">
+                        <td className="border px-3 py-2 text-white font-bold ">
                           {entry.input}
                         </td>
                       </tr>
