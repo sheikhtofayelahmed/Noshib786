@@ -2,7 +2,7 @@
 // This file handles the verification of the MFA code.
 
 import { NextResponse } from "next/server";
-import { authenticator } from "otpauth"; // Ensure 'otpauth' is installed
+import { authenticator } from "otplib"; // Ensure 'otpauth' is installed
 import clientPromise from "/lib/mongodb"; // Ensure this path is correct
 
 export async function POST(request) {
