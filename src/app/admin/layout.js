@@ -1,3 +1,4 @@
+// app/admin/layout.js
 "use client";
 
 import Link from "next/link";
@@ -14,6 +15,7 @@ const navItems = [
   { name: "Happy New Year", path: "/admin/HappyNewYear" },
   { name: "Waiting Data", path: "/admin/waitingData" },
   { name: "Inactive Agent", path: "/admin/inactive-agent" },
+  { name: "MFA Settings", path: "/admin/mfa-settings" }, // NEW: Link to MFA settings
 ];
 
 export default function AdminLayout({ children }) {
@@ -22,13 +24,33 @@ export default function AdminLayout({ children }) {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  const logoutAdmin = () => {
-    document.cookie = "admin-auth=; Max-Age=0; path=/";
-    localStorage.removeItem("admin-auth");
+  const logoutAdmin = async () => {
+    try {
+      // Step 1: Make the fetch call to your server-side logout API endpoint.
+      // AWAIT this fetch call to ensure it completes before redirecting.
+      const response = await fetch("/api/admin-logout", {
+        method: "GET",
+      });
 
-    // ❗ Must reload to re-trigger middleware + cookie parsing
-    window.location.href = "/admin/login"; // DO NOT use router.push
+      if (response.ok) {
+        console.log(
+          "Logout API call successful. Cookie should be cleared by server."
+        );
+        window.location.href = "/admin/login";
+      } else {
+        const errorText = await response.text();
+        console.error("Logout API call failed:", response.status, errorText);
+        window.location.href = "/admin/login"; // Fallback redirect
+      }
+    } catch (error) {
+      console.error(
+        "Network or unexpected error during logout process:",
+        error
+      );
+      window.location.href = "/admin/login"; // Fallback redirect
+    }
   };
+
   return (
     <div className="min-h-screen font-mono bg-gradient-to-br from-black to-red-900 text-white flex flex-col md:flex-row">
       {/* Mobile Header */}
@@ -88,7 +110,7 @@ export default function AdminLayout({ children }) {
 
       {/* Main Content */}
       <main className="flex-1 p-6">
-        <Breadcrumb />
+        <Breadcrumb /> {/* Ensure this component exists or remove/replace */}
         {children}
       </main>
     </div>

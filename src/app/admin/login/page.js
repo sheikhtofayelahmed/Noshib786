@@ -1,27 +1,79 @@
-"use client";
+// app/admin/login/page.js
+"use client"; // This component runs on the client due to useState, useRouter, etc.
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [username, setUsername] = useState("admin"); // Assuming fixed 'admin' username for simplicity
   const [password, setPassword] = useState("");
+  const [mfaCode, setMfaCode] = useState(""); // New state for MFA code
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mfaRequired, setMfaRequired] = useState(false); // State to control MFA step visibility
+
   const handleLogin = async () => {
     setLoading(true);
     setError("");
-    const res = await fetch("/api/admin-login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-    setLoading(false);
-    if (res.ok) {
-      router.push("/admin");
-    } else {
-      const data = await res.json();
-      setError(data.error || "Login failed");
+
+    try {
+      // Step 1: Initial password login
+      const res = await fetch("/api/admin-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      setLoading(false);
+
+      if (res.status === 202) {
+        // HTTP 202: MFA required
+        setMfaRequired(true);
+        setError("MFA required. Please enter your code.");
+        // Password state is kept, but input is hidden
+      } else if (res.ok) {
+        // HTTP 200: Login successful (no MFA or MFA not enabled)
+        console.log("Login successful!");
+        router.push("/admin"); // Redirect to admin dashboard
+      } else {
+        const data = await res.json();
+        setError(data.error || "Login failed");
+      }
+    } catch (err) {
+      setLoading(false);
+      console.error("Login fetch error:", err);
+      setError("Network error or server unreachable. Please try again.");
+    }
+  };
+
+  const handleMfaVerify = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      // Step 2: MFA code verification
+      const res = await fetch("/api/mfa-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, mfaCode }),
+      });
+
+      setLoading(false);
+
+      if (res.ok) {
+        console.log("MFA verification successful!");
+        router.push("/admin"); // Redirect to admin dashboard
+      } else {
+        const data = await res.json();
+        setError(data.error || "MFA verification failed. Invalid code?");
+      }
+    } catch (err) {
+      setLoading(false);
+      console.error("MFA verify fetch error:", err);
+      setError(
+        "Network error or server unreachable during MFA verification. Please try again."
+      );
     }
   };
 
@@ -31,21 +83,74 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-yellow-400 mb-4 font-mono">
           🎰 Admin Login
         </h1>
-        <input
-          type="password"
-          placeholder="Enter password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          disabled={loading}
+
+        {/* Username input (can be hidden if 'admin' is truly fixed and not user-configurable) */}
+        {/* <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           className="w-full p-2 mb-4 rounded bg-gray-800 border border-yellow-300 text-yellow-200 focus:outline-none"
-        />
-        <button
-          onClick={handleLogin}
-          className="w-full bg-yellow-500 text-black py-2 rounded hover:bg-yellow-600 font-bold"
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-        {error && <p className="mt-2 text-red-400 font-mono">{error}</p>}
+          disabled={loading}
+        /> */}
+
+        {/* Password input section */}
+        {!mfaRequired && (
+          <>
+            <input
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              className="w-full p-2 mb-4 rounded bg-gray-800 border border-yellow-300 text-yellow-200 focus:outline-none"
+            />
+            <button
+              onClick={handleLogin}
+              className="w-full bg-yellow-500 text-black py-2 rounded hover:bg-yellow-600 font-bold"
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+          </>
+        )}
+
+        {/* MFA code input section */}
+        {mfaRequired && (
+          <>
+            <input
+              type="text"
+              placeholder="Enter MFA code"
+              value={mfaCode}
+              onChange={(e) => setMfaCode(e.target.value)}
+              disabled={loading}
+              className="w-full p-2 mb-4 rounded bg-gray-800 border border-yellow-300 text-yellow-200 focus:outline-none"
+              maxLength={6} // MFA codes are typically 6 digits
+            />
+            <button
+              onClick={handleMfaVerify}
+              className="w-full bg-green-500 text-black py-2 rounded hover:bg-green-600 font-bold"
+              disabled={loading}
+            >
+              {loading ? "Verifying MFA..." : "Verify Code"}
+            </button>
+            <button
+              onClick={() => {
+                setMfaRequired(false);
+                setPassword("");
+                setError("");
+              }} // Allows user to go back and re-enter password
+              className="w-full bg-gray-500 text-white py-2 rounded mt-2 hover:bg-gray-600 font-bold"
+              disabled={loading}
+            >
+              Back to Password
+            </button>
+          </>
+        )}
+
+        {error && (
+          <p className="mt-2 text-red-400 font-mono text-center">{error}</p>
+        )}
       </div>
     </div>
   );
