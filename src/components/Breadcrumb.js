@@ -16,8 +16,8 @@ export default function Breadcrumb() {
       <ol className="list-reset flex">
         {/* Show Home only for agent routes */}
         {isAgent && (
-          <li>
-            <Link href="/" className="hover:underline">
+          <li className="bg-yellow-400 rounded-md ">
+            <Link href="/" className="hover:underline text-white text-xl">
               🎮
             </Link>
           </li>

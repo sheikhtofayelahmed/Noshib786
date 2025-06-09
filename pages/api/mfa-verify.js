@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     // Set cookie using raw headers
     res.setHeader(
       "Set-Cookie",
-      `admin-auth=true; Path=/admin; HttpOnly; SameSite=Lax; Max-Age=3600${
+      `admin-auth=true; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600${
         process.env.NODE_ENV === "production" ? "; Secure" : ""
       }`
     );

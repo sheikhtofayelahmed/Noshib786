@@ -47,7 +47,7 @@ export default async function handler(req, res) {
       httpOnly: true, // Makes the cookie inaccessible to client-side JavaScript.
       secure: process.env.NODE_ENV === "production", // Only send cookie over HTTPS in production.
       maxAge: 60 * 60 * 1, // Cookie expires in 1 hour (in seconds).
-      path: "/admin", // CORRECTED: Set path to '/' so it's sent to all API routes and pages.
+      path: "/", // CORRECTED: Set path to '/' so it's sent to all API routes and pages.
       sameSite: "Lax", // Recommended for CSRF protection
     });
 
