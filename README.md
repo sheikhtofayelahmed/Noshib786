@@ -111,3 +111,4 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 
 **game account summary for each game and yearly game**
 **make every admin api secured**
+**replace username of admin**
