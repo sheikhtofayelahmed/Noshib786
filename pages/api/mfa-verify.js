@@ -1,74 +1,53 @@
-// app/api/admin/mfa-verify/route.js (NEW - App Router)
-// This file handles the verification of the MFA code.
+import { authenticator } from "otplib";
+import clientPromise from "lib/mongodb";
 
-import { NextResponse } from "next/server";
-import { authenticator } from "otplib"; // Ensure 'otpauth' is installed
-import clientPromise from "/lib/mongodb"; // Ensure this path is correct
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
-export async function POST(request) {
   try {
-    const { username, mfaCode } = await request.json(); // Expect username and MFA code
+    const { username, mfaCode } = req.body;
 
     if (!username || !mfaCode) {
-      return NextResponse.json(
-        { error: "Username and MFA code are required" },
-        { status: 400 }
-      );
+      return res.status(400).json({
+        error: "Username and MFA code are required",
+      });
     }
 
     const client = await clientPromise;
     const db = client.db("thai-agent-lottery");
-    const admin = await db.collection("admins").findOne({ username: username });
+    const admin = await db.collection("admins").findOne({ username });
 
     if (!admin) {
-      return NextResponse.json({ error: "Admin not found" }, { status: 404 });
+      return res.status(404).json({ error: "Admin not found" });
     }
 
     if (!admin.mfaEnabled || !admin.mfaSecret) {
-      // If MFA is not enabled for this user, they shouldn't be attempting MFA.
-      return NextResponse.json(
-        { error: "MFA not enabled for this account" },
-        { status: 403 }
-      );
+      return res
+        .status(403)
+        .json({ error: "MFA not enabled for this account" });
     }
 
-    // Create a new OTPAuth.TOTP instance from the stored secret
-    const totp = new authenticator.TOTP({
-      secret: admin.mfaSecret,
-      digits: 6, // Standard for authenticator apps
-      period: 30, // Standard period (30 seconds)
-      algorithm: "SHA1", // Standard algorithm
-    });
+    const isValid = authenticator.check(mfaCode, admin.mfaSecret);
 
-    // Validate the received MFA code
-    // The .validate() method returns the delta (time step difference) if valid, or null if invalid.
-    const delta = totp.validate({ token: mfaCode, window: 1 }); // window: 1 allows for a small time skew
-
-    if (delta === null) {
-      // If delta is null, the code is invalid
-      return NextResponse.json({ error: "Invalid MFA code" }, { status: 401 });
+    if (!isValid) {
+      return res.status(401).json({ error: "Invalid MFA code" });
     }
 
-    // If MFA code is valid, proceed with setting the authentication cookie
-    const response = NextResponse.json(
-      { message: "MFA verification successful" },
-      { status: 200 }
+    // Set cookie using raw headers
+    res.setHeader(
+      "Set-Cookie",
+      `admin-auth=true; Path=/admin; HttpOnly; SameSite=Lax; Max-Age=3600${
+        process.env.NODE_ENV === "production" ? "; Secure" : ""
+      }`
     );
 
-    response.cookies.set("admin-auth", "true", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 1, // 1 hour
-      path: "/admin",
-      sameSite: "Lax",
-    });
-
-    return response;
+    return res.status(200).json({ message: "MFA verification successful" });
   } catch (err) {
     console.error("MFA verification API error:", err);
-    return NextResponse.json(
-      { error: "Server error during MFA verification" },
-      { status: 500 }
-    );
+    return res.status(500).json({
+      error: "Server error during MFA verification",
+    });
   }
 }

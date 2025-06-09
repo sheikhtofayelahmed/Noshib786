@@ -49,7 +49,7 @@ export default async function handler(req, res) {
           secret: newSecret,
           issuer: "Thai Agent Lottery Admin", // Your application name
           label: admin.username, // User identifier (e.g., admin's email or username)
-          algorithm: "SHA1",
+          algorithm: "sha1",
           digits: 6,
           period: 30,
         });
@@ -75,16 +75,15 @@ export default async function handler(req, res) {
         }
 
         // Verify the initial MFA code with the provided secret
-        const totpPost = new authenticator.TOTP({
-          secret: mfaSecret,
+        authenticator.options = {
           digits: 6,
-          period: 30,
-          algorithm: "SHA1",
-        });
+          step: 30,
+          algorithm: "sha1", // optional; SHA1 is the default
+        };
 
-        const deltaPost = totpPost.validate({ token: mfaCode, window: 1 }); // window: 1 allows for a small time skew
+        const isValid = authenticator.check(mfaCode, mfaSecret);
 
-        if (deltaPost === null) {
+        if (!isValid) {
           return res
             .status(401)
             .json({ error: "Invalid MFA code. Please try again." });
