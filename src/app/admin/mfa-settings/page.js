@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic"; // Import dynamic for client-side loading
+import { cookies } from "next/headers";
 
 // Use dynamic import for QRCode to ensure it's only loaded on the client-side.
 // This helps avoid SSR issues and potential import conflicts.
@@ -30,40 +31,41 @@ export default function MfaSettingsPage() {
     const checkMfaStatus = async () => {
       setLoading(true);
       setError(""); // Clear previous errors
-      if (document.cookie.includes("admin-auth")) {
-        console.log(document.cookie, "cookie frontend");
-        try {
-          // Now call the new API route to get the actual MFA status
-          const res = await fetch("/api/mfa-status", {
-            // CORRECTED URL
-            method: "GET",
-            headers: {
-              Cookie: document.cookie,
-            },
-          });
 
-          if (res.ok) {
-            const data = await res.json();
-            setMfaEnabled(data.mfaEnabled); // Set state based on API response
-            setSuccess("MFA status loaded successfully.");
-          } else {
-            // If the API call itself returns an error (e.g., 401 Unauthorized, 404 Not Found)
-            const errorData = await res.json();
-            setError(
-              errorData.error || "Failed to fetch MFA status from server."
-            );
-            setMfaEnabled(false); // Default to disabled on error
-          }
-        } catch (err) {
-          // Handle network errors or other unexpected issues
-          console.error("Failed to fetch MFA status:", err);
+      // CORRECTED: Await the cookies() function call.
+      const cookieStore = await cookies(); // Access server-side cookies
+      const cookie = cookieStore.get("admin-auth");
+      try {
+        // Now call the new API route to get the actual MFA status
+        const res = await fetch("/api/mfa-status", {
+          // CORRECTED URL
+          method: "GET",
+          headers: {
+            cookie,
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setMfaEnabled(data.mfaEnabled); // Set state based on API response
+          setSuccess("MFA status loaded successfully.");
+        } else {
+          // If the API call itself returns an error (e.g., 401 Unauthorized, 404 Not Found)
+          const errorData = await res.json();
           setError(
-            "Network error or server unreachable. Unable to load MFA status."
+            errorData.error || "Failed to fetch MFA status from server."
           );
-          setMfaEnabled(false); // Default to disabled on network error
-        } finally {
-          setLoading(false);
+          setMfaEnabled(false); // Default to disabled on error
         }
+      } catch (err) {
+        // Handle network errors or other unexpected issues
+        console.error("Failed to fetch MFA status:", err);
+        setError(
+          "Network error or server unreachable. Unable to load MFA status."
+        );
+        setMfaEnabled(false); // Default to disabled on network error
+      } finally {
+        setLoading(false);
       }
     };
     checkMfaStatus();
