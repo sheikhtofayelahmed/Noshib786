@@ -35,7 +35,7 @@ export default function LoginPage() {
         // HTTP 200: Login successful (no MFA or MFA not enabled)
 
         console.log("Login successful!");
-        router.push("/admin"); // Redirect to admin dashboard
+        router.push("/admin/game-control"); // Redirect to admin dashboard
       } else {
         const data = await res.json();
         setError(data.error || "Login failed");
@@ -67,7 +67,7 @@ export default function LoginPage() {
         console.log("Frontend MFA verification successful!", data); // Log the actual data
 
         setLoading(false);
-        router.push("/admin"); // Redirect to admin dashboard
+        router.push("/admin/game-control"); // Redirect to admin dashboard
       } else {
         // Always consume the response body for error cases too
         const data = await res.json();
