@@ -32,7 +32,7 @@ export default function MfaSettingsPage() {
       setError(""); // Clear previous errors
       try {
         // Now call the new API route to get the actual MFA status
-        const res = await fetch("/api/admin/mfa-status", {
+        const res = await fetch("/api/mfa-status", {
           // CORRECTED URL
           method: "GET",
           headers: {
