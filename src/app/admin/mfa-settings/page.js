@@ -36,9 +36,7 @@ export default function MfaSettingsPage() {
           // CORRECTED URL
           method: "GET",
           headers: {
-            // Include cookie header if not automatically sent by browser
-            // For same-origin requests, browser usually sends it automatically.
-            // If you have issues, you might add: 'Cookie': document.cookie
+            Cookie: document.cookie,
           },
         });
 
