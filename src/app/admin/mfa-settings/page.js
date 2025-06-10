@@ -30,38 +30,40 @@ export default function MfaSettingsPage() {
     const checkMfaStatus = async () => {
       setLoading(true);
       setError(""); // Clear previous errors
-      console.log(document.cookie, "cookie frontend");
-      try {
-        // Now call the new API route to get the actual MFA status
-        const res = await fetch("/api/mfa-status", {
-          // CORRECTED URL
-          method: "GET",
-          headers: {
-            Cookie: document.cookie,
-          },
-        });
+      if (document.cookie.includes("admin-auth")) {
+        console.log(document.cookie, "cookie frontend");
+        try {
+          // Now call the new API route to get the actual MFA status
+          const res = await fetch("/api/mfa-status", {
+            // CORRECTED URL
+            method: "GET",
+            headers: {
+              Cookie: document.cookie,
+            },
+          });
 
-        if (res.ok) {
-          const data = await res.json();
-          setMfaEnabled(data.mfaEnabled); // Set state based on API response
-          setSuccess("MFA status loaded successfully.");
-        } else {
-          // If the API call itself returns an error (e.g., 401 Unauthorized, 404 Not Found)
-          const errorData = await res.json();
+          if (res.ok) {
+            const data = await res.json();
+            setMfaEnabled(data.mfaEnabled); // Set state based on API response
+            setSuccess("MFA status loaded successfully.");
+          } else {
+            // If the API call itself returns an error (e.g., 401 Unauthorized, 404 Not Found)
+            const errorData = await res.json();
+            setError(
+              errorData.error || "Failed to fetch MFA status from server."
+            );
+            setMfaEnabled(false); // Default to disabled on error
+          }
+        } catch (err) {
+          // Handle network errors or other unexpected issues
+          console.error("Failed to fetch MFA status:", err);
           setError(
-            errorData.error || "Failed to fetch MFA status from server."
+            "Network error or server unreachable. Unable to load MFA status."
           );
-          setMfaEnabled(false); // Default to disabled on error
+          setMfaEnabled(false); // Default to disabled on network error
+        } finally {
+          setLoading(false);
         }
-      } catch (err) {
-        // Handle network errors or other unexpected issues
-        console.error("Failed to fetch MFA status:", err);
-        setError(
-          "Network error or server unreachable. Unable to load MFA status."
-        );
-        setMfaEnabled(false); // Default to disabled on network error
-      } finally {
-        setLoading(false);
       }
     };
     checkMfaStatus();
