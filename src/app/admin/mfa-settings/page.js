@@ -30,6 +30,7 @@ export default function MfaSettingsPage() {
     const checkMfaStatus = async () => {
       setLoading(true);
       setError(""); // Clear previous errors
+      console.log(document.cookie, "cookie frontend");
       try {
         // Now call the new API route to get the actual MFA status
         const res = await fetch("/api/mfa-status", {
