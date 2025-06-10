@@ -1,4 +1,3 @@
-// app/admin/login/page.js
 "use client"; // This component runs on the client due to useState, useRouter, etc.
 
 import { useRouter } from "next/navigation";
@@ -34,6 +33,8 @@ export default function LoginPage() {
         // Password state is kept, but input is hidden
       } else if (res.ok) {
         // HTTP 200: Login successful (no MFA or MFA not enabled)
+        const data = await res.json();
+
         console.log("Login successful!");
         router.push("/admin"); // Redirect to admin dashboard
       } else {
@@ -60,15 +61,20 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
-        console.log(res.json(), "frontend MFA verification successful!");
+        // Await res.json() to consume the response stream,
+        // even if you don't strictly need the 'message' data for redirection.
+        // This is good practice to prevent resource leaks and ensure proper handling.
+        const data = await res.json();
+        console.log("Frontend MFA verification successful!", data); // Log the actual data
+
         setLoading(false);
         router.push("/admin"); // Redirect to admin dashboard
       } else {
-        setLoading(false);
+        // Always consume the response body for error cases too
         const data = await res.json();
-        console.log(data, "frontend MFA verification successful!");
-
+        console.log("MFA verification failed (backend response):", data);
         setError(data.error || "MFA verification failed. Invalid code?");
+        setLoading(false); // Make sure loading is set to false in error case
       }
     } catch (err) {
       setLoading(false);
