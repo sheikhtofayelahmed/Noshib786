@@ -59,13 +59,15 @@ export default function LoginPage() {
         body: JSON.stringify({ username, mfaCode }),
       });
 
-      setLoading(false);
-
       if (res.ok) {
-        console.log("MFA verification successful!");
+        console.log(res.json(), "frontend MFA verification successful!");
+        setLoading(false);
         router.push("/admin"); // Redirect to admin dashboard
       } else {
+        setLoading(false);
         const data = await res.json();
+        console.log(data, "frontend MFA verification successful!");
+
         setError(data.error || "MFA verification failed. Invalid code?");
       }
     } catch (err) {

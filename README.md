@@ -1,36 +1,4 @@
-# 🎮 Thai Lottery Agent - Number Game
-
-A simple number game system designed for Thai lottery agents. Built with modern technologies and an easy-to-use architecture.
-
----
-
-## 🧱 Tech Stack
-
-- **Frontend:** Next.js (App Router, JavaScript)
-- **Styling:** Tailwind CSS
-- **Database:** MongoDB Atlas (using native `mongodb` driver, no Mongoose)
-- **Authentication:** Custom (if needed)
-- **State Management:** React Hooks
-
----
-
-## ⚙️ Project Setup
-
 [Link https://thai-lottery-agent.vercel.app/](https://thai-lottery-agent.vercel.app/)
-
-## issue
-
-**input validation**
-**it goes to admin page after opening local host just because of it catch"admin" from local storage.**
-**for one digit, rumbo declared as 0**
-**after submitting input to the server, edit and delete option should be closed**
-**winning numbers data is manual right now, the win.js api will update**
-
-Here's a **README**-style version of the theme description that you can save for future reference:
-
----
-
-# **Casino-Inspired Gaming Theme**
 
 ## **Overview:**
 
@@ -107,8 +75,5 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 
 ---
 
-**cookie is set to 1 hour. the security system will developed next**
-
-**game account summary for each game and yearly game**
 **make every admin api secured**
 **replace username of admin**
