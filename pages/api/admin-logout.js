@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       httpOnly: true, // Prevents client-side JavaScript access for security.
       secure: process.env.NODE_ENV === "production", // Only send over HTTPS in production.
       maxAge: 0, // Immediately expires the cookie, effectively deleting it.
-      path: "/admin", // CORRECTED: Set path to '/' to match login cookie.
+      path: "/", // CORRECTED: Set path to '/' to match login cookie.
       sameSite: "Lax", // Recommended for modern browsers and security.
     });
 
