@@ -33,7 +33,6 @@ export default function LoginPage() {
         // Password state is kept, but input is hidden
       } else if (res.ok) {
         // HTTP 200: Login successful (no MFA or MFA not enabled)
-        const data = await res.json();
 
         console.log("Login successful!");
         router.push("/admin"); // Redirect to admin dashboard
