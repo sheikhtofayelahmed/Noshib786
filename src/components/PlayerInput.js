@@ -19,6 +19,7 @@ export default function PlayerInput() {
   const [isGameOn, setIsGameOn] = useState(null);
   const [isCompleted, setIsCompleted] = useState(true);
   const [print, setPrint] = useState(false);
+  const [agent, setAgent] = useState();
 
   useEffect(() => {
     const fetchTarget = async () => {
@@ -65,7 +66,29 @@ export default function PlayerInput() {
 
     return () => clearInterval(interval);
   }, [targetTime]);
+  useEffect(() => {
+    if (!agentId) return;
 
+    const fetchAgent = async () => {
+      try {
+        const res = await fetch(`/api/getAgentById?agentId=${agentId}`);
+
+        // Check status and log for debug
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Response not OK:", res.status, text);
+          throw new Error("Failed to fetch agent data");
+        }
+
+        const data = await res.json();
+        setAgent(data.agent);
+      } catch (error) {
+        console.error("Error fetching agent:", error.message);
+      }
+    };
+
+    fetchAgent();
+  }, [agentId]);
   // At the top of your component
   useEffect(() => {
     let total1D = 0,
@@ -355,6 +378,7 @@ export default function PlayerInput() {
     const payload = {
       voucher: player.voucher,
       agentId: agentId, // Ensure agentId is accessible in this scope (e.g., passed as argument or globally defined)
+      agentName: agent.name,
       name: player.name || "",
       SAId: player.SAId || "",
       data: parsedData,
@@ -476,6 +500,7 @@ export default function PlayerInput() {
     const waitingPayload = {
       voucher: player.voucher,
       agentId: agentId,
+      agentName: agent.name,
       name: player.name || "",
       SAId: player.SAId || "",
       data: parsedData,

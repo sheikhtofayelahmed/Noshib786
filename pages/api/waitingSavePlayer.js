@@ -6,15 +6,12 @@ import clientPromise from "../../lib/mongodb";
 export default async function handler(req, res) {
   // 1. Method Check: Ensure only POST requests are allowed.
   if (req.method !== "POST") {
-    return res
-      .status(405)
-      .json({
-        message:
-          "Method Not Allowed. This endpoint only accepts POST requests.",
-      });
+    return res.status(405).json({
+      message: "Method Not Allowed. This endpoint only accepts POST requests.",
+    });
   }
 
-  const { voucher, agentId, name, data, amountPlayed } = req.body;
+  const { voucher, agentId, agentName, name, data, amountPlayed } = req.body;
 
   // 2. Server-Side Timestamp: Always use the server's time.
   const serverTime = new Date();
@@ -59,11 +56,11 @@ export default async function handler(req, res) {
 
     // 6. Save to 'waitingSavePlayer' Collection:
     // All submissions now go here by default.
-  
 
     const waitingResult = await db.collection("waitingSavePlayer").insertOne({
       voucher,
       agentId,
+      agentName,
       name,
       entries: sanitizedEntries, // Use sanitized data
       amountPlayed, // Include amountPlayed as it's part of the original submission

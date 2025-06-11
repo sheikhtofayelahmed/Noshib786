@@ -5,7 +5,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { voucher, agentId, name, SAId, data, amountPlayed } = req.body;
+  const { voucher, agentId, agentName, name, SAId, data, amountPlayed } =
+    req.body;
 
   // 🔒 Use server-side time only (don't trust client-sent time)
   const serverTime = new Date();
@@ -51,6 +52,7 @@ export default async function handler(req, res) {
     const playerResult = await db.collection("playersInput").insertOne({
       voucher,
       agentId,
+      agentName,
       name,
       SAId,
       time: serverTime, // 🔐 Save only trusted server timestamp
