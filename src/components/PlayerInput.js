@@ -546,7 +546,7 @@ export default function PlayerInput() {
 
         body {
           font-family: Arial, sans-serif;
-          font-size: 10px;
+          font-size: 16px;
           color: #000;
           padding: 4px;
           margin: 0;
@@ -560,13 +560,13 @@ export default function PlayerInput() {
 display: flex;
 }
         h2 {
-          font-size: 12px;
+          font-size: 16px;
           margin: 2px 0;
           text-align: center;
         }
 
         p {
-          font-size: 10px;
+          font-size: 16px;
           text-align: center;
           margin: 2px 0;
         }
@@ -578,9 +578,9 @@ display: flex;
         }
 
         .input-table td {
-          width: 33.33%;
+          width: 50%;
           padding: 2px;
-          font-size: 10px;
+          font-size: 16px;
           text-align: left;
         }
 
@@ -594,7 +594,7 @@ display: flex;
           border: 1px solid #000;
           padding: 2px;
           text-align: center;
-          font-size: 9px;
+          font-size: 16px;
         }
 
         .totals-table th {
@@ -616,27 +616,32 @@ display: flex;
         <p> Date: ${new Date(player.time).toLocaleString()}</p>
 
        <table class="input-table" style="width: 100%; border-collapse: collapse;" border="1">
-  <tbody>
-    ${(() => {
-      const total = player?.data.length;
-      const third = Math.ceil(total / 3);
-      const col1 = player?.data.slice(0, third);
-      const col2 = player?.data.slice(third, third * 2);
-      const col3 = player?.data.slice(third * 2, total);
+ <tbody>
+  ${(() => {
+    const sortedData = [...player?.data].sort((a, b) => {
+      const aPrefix = a.input.split(".")[0];
+      const bPrefix = b.input.split(".")[0];
+      return bPrefix.length - aPrefix.length; // Sort: 3-digit > 2-digit > 1-digit
+    });
 
-      const maxRows = Math.max(col1.length, col2.length, col3.length);
-      const rows = [];
+    const total = sortedData.length;
+    const half = Math.ceil(total / 2);
+    const col1 = sortedData.slice(0, half);
+    const col2 = sortedData.slice(half, total);
 
-      for (let i = 0; i < maxRows; i++) {
-        const c1 = col1[i] ? col1[i].input : "";
-        const c2 = col2[i] ? col2[i].input : "";
-        const c3 = col3[i] ? col3[i].input : "";
-        rows.push(`<tr><td>${c1}</td><td>${c2}</td><td>${c3}</td></tr>`);
-      }
+    const maxRows = Math.max(col1.length, col2.length);
+    const rows = [];
 
-      return rows.join("");
-    })()}
-  </tbody>
+    for (let i = 0; i < maxRows; i++) {
+      const c1 = col1[i] ? col1[i].input : "";
+      const c2 = col2[i] ? col2[i].input : "";
+      rows.push(`<tr><td>${c1}</td><td>${c2}</td></tr>`);
+    }
+
+    return rows.join("");
+  })()}
+</tbody>
+
 </table>
 
 
@@ -815,70 +820,92 @@ display: flex;
                       </tr>
                     </thead>
                     <tbody>
-                      {player.data.map((entry, entryIdx) => (
-                        <tr
-                          key={entry.id}
-                          className={
-                            entryIdx % 2 === 0 ? "bg-gray-700" : "bg-gray-800"
-                          }
-                        >
-                          <td className="border px-3 py-0">{entry.serial}</td>
-                          <td className="border px-3 py-0">
-                            {entry.isEditing ? (
-                              <div>
-                                <input
-                                  type="text"
-                                  value={entry.editValue}
-                                  onChange={(e) =>
-                                    handleEditChange(
-                                      idx,
-                                      entryIdx,
-                                      e.target.value
-                                    )
-                                  }
-                                  className={`w-full p-1 bg-black border-2 text-white rounded ${
-                                    entry.editError
-                                      ? "border-red-500"
-                                      : "border-yellow-400"
-                                  }`}
-                                />
-                                {entry.editError && (
-                                  <p className="text-red-400 text-xs mt-1">
-                                    Invalid entry format.
-                                  </p>
-                                )}
-                              </div>
-                            ) : (
-                              entry.input
-                            )}
-                          </td>
-                          <td className="border px-3 py-0 space-x-2">
-                            <>
+                      {[...player.data]
+                        // Annotate with original index
+                        .map((entry, originalIdx) => ({
+                          ...entry,
+                          originalIdx,
+                        }))
+                        // Sort by prefix length
+                        .sort((a, b) => {
+                          const prefixA = a.input.split(".")[0];
+                          const prefixB = b.input.split(".")[0];
+                          return prefixB.length - prefixA.length;
+                        })
+                        .map((entry, sortedIdx) => (
+                          <tr
+                            key={entry.id}
+                            className={
+                              sortedIdx % 2 === 0
+                                ? "bg-gray-700"
+                                : "bg-gray-800"
+                            }
+                          >
+                            <td className="border px-3 py-0">
+                              {sortedIdx + 1}
+                            </td>
+                            <td className="border px-3 py-0">
                               {entry.isEditing ? (
-                                <button
-                                  onClick={() => handleSaveEdit(idx, entryIdx)}
-                                  className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded transition"
-                                >
-                                  💾
-                                </button>
+                                <div>
+                                  <input
+                                    type="text"
+                                    value={entry.editValue}
+                                    onChange={(e) =>
+                                      handleEditChange(
+                                        idx,
+                                        entry.originalIdx,
+                                        e.target.value
+                                      )
+                                    }
+                                    className={`w-full p-1 bg-black border-2 text-white rounded ${
+                                      entry.editError
+                                        ? "border-red-500"
+                                        : "border-yellow-400"
+                                    }`}
+                                  />
+                                  {entry.editError && (
+                                    <p className="text-red-400 text-xs mt-1">
+                                      Invalid entry format.
+                                    </p>
+                                  )}
+                                </div>
                               ) : (
-                                <button
-                                  onClick={() => handleEdit(idx, entryIdx)}
-                                  className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded transition"
-                                >
-                                  ✏️
-                                </button>
+                                entry.input
                               )}
-                              <button
-                                onClick={() => handleDelete(idx, entryIdx)}
-                                className="bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded transition"
-                              >
-                                🗑️
-                              </button>
-                            </>
-                          </td>
-                        </tr>
-                      ))}
+                            </td>
+                            <td className="border px-3 py-0 space-x-2">
+                              <>
+                                {entry.isEditing ? (
+                                  <button
+                                    onClick={() =>
+                                      handleSaveEdit(idx, entry.originalIdx)
+                                    }
+                                    className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded transition"
+                                  >
+                                    💾
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() =>
+                                      handleEdit(idx, entry.originalIdx)
+                                    }
+                                    className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded transition"
+                                  >
+                                    ✏️
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() =>
+                                    handleDelete(idx, entry.originalIdx)
+                                  }
+                                  className="bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded transition"
+                                >
+                                  🗑️
+                                </button>
+                              </>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
 
