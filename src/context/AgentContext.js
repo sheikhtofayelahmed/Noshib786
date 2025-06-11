@@ -8,6 +8,8 @@ export function AgentProvider({ children }) {
   const [agentId, setAgentId] = useState(null);
   const [loginError, setLoginError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [entryCount, setEntryCount] = useState(0);
+  const [waitingEntryCount, setWaitingEntryCount] = useState(0);
 
   // On mount, load agentId from localStorage if exists
   useEffect(() => {
@@ -51,10 +53,93 @@ export function AgentProvider({ children }) {
     localStorage.removeItem("agentId");
     // Optionally redirect or handle post logout steps
   }
+  const fetchEntryCount = async (agentId) => {
+    try {
+      const res = await fetch("/api/getVoucherQntByAgentId", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ agentId }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Failed to fetch entry count");
+      }
+
+      const data = await res.json();
+      setEntryCount(data.count);
+    } catch (err) {
+      console.error("Error fetching entry count:", err);
+      setErrorCount(err.message);
+    }
+  };
+  const fetchWaitingPlayers = async (agentId) => {
+    if (!agentId) {
+      setError("Agent ID is missing. Cannot fetch waiting players.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Fetch data from your new API endpoint
+      const response = await fetch(
+        `/api/getWaitingPlayersByAgentId`, // No query params in URL
+        {
+          method: "POST", // Specify POST method
+          headers: {
+            "Content-Type": "application/json", // Tell server we're sending JSON
+          },
+          body: JSON.stringify({ agentId }), // Send agentId in the request body as JSON
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message ||
+            `Failed to fetch waiting players: ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      setWaitingEntryCount(data.players.length);
+      // ...
+    } catch (e) {
+      console.error("Error fetching waiting players:", e);
+      setError(
+        e.message || "Failed to load waiting players. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    if (!agentId) return;
+
+    if (agentId) {
+      fetchEntryCount(agentId);
+
+      fetchWaitingPlayers(agentId);
+    }
+  }, [agentId]);
 
   return (
     <AgentContext.Provider
-      value={{ agentId, login, logout, loginError, loading }}
+      value={{
+        agentId,
+        entryCount,
+        fetchEntryCount,
+        waitingEntryCount,
+        fetchWaitingPlayers,
+        login,
+        logout,
+        loginError,
+        loading,
+      }}
     >
       {children}
     </AgentContext.Provider>

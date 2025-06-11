@@ -7,19 +7,26 @@ import { Menu, X } from "lucide-react";
 import Breadcrumb from "./Breadcrumb"; // adjust path if needed
 import { useAgent } from "@/context/AgentContext";
 
-const navItems = [
-  { name: "Home", path: "/" },
-  { name: "Games", path: "/agent/games" },
-  { name: "Sub Agent Games", path: "/agent/subAgentGames" },
-  { name: "Waiting Data", path: "/agent/waitingData" },
-];
-
 export default function AgentLayout({ children }) {
-  const { logout } = useAgent();
+  const { entryCount, waitingEntryCount, logout } = useAgent();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const navItems = [
+    { name: "Home", path: "/" },
+    {
+      name: `Games${entryCount !== undefined ? ` (${entryCount})` : ""}`,
+      path: "/agent/games",
+    },
+    { name: "Sub Agent Games", path: "/agent/subAgentGames" },
+    {
+      name: `Waiting Entry ${
+        waitingEntryCount !== undefined ? ` (${waitingEntryCount})` : ""
+      }`,
+      path: "/agent/waitingData",
+    },
+  ];
 
   return (
     <div className="min-h-screen font-mono bg-gradient-to-br from-black to-red-900 text-white flex flex-col md:flex-row">

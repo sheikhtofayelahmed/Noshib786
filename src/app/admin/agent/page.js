@@ -14,6 +14,17 @@ export default function AdminAgentPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [adding, setAdding] = useState(false);
+  const [entryCounts, setEntryCounts] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [iPercentages, setIPercentages] = useState({
+    threeD: "",
+    twoD: "",
+    oneD: "",
+    str: "",
+    rumble: "",
+    down: "",
+    single: "",
+  });
 
   const [percentages, setPercentages] = useState({
     threeD: 0,
@@ -26,7 +37,7 @@ export default function AdminAgentPage() {
   });
   const [editingAgent, setEditingAgent] = useState(null);
   const [showPercentageModal, setShowPercentageModal] = useState(false);
-
+  const [modal, setModal] = useState(false);
   useEffect(() => {
     fetchAgents();
   }, []);
@@ -68,7 +79,7 @@ export default function AdminAgentPage() {
 
   const handleAddAgent = async (e) => {
     e.preventDefault();
-    if (!agentId || !password || !name) {
+    if (!agentId || !password || !name || !iPercentages) {
       setError("Please fill all fields");
       return;
     }
@@ -80,7 +91,12 @@ export default function AdminAgentPage() {
       const res = await fetch("/api/addAgent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId, password, name }),
+        body: JSON.stringify({
+          agentId,
+          password,
+          name,
+          percentages: iPercentages,
+        }),
       });
       const data = await res.json();
 
@@ -151,6 +167,37 @@ export default function AdminAgentPage() {
     }
   };
 
+  useEffect(() => {
+    const fetchCountsForAgents = async () => {
+      const counts = {};
+
+      for (const agent of agents) {
+        try {
+          const res = await fetch("/api/getVoucherQntByAgentId", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ agentId: agent.agentId }),
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            counts[agent.agentId] = data.count;
+          } else {
+            counts[agent.agentId] = "Error";
+          }
+        } catch (err) {
+          counts[agent.agentId] = "Error";
+        }
+      }
+
+      setEntryCounts(counts);
+    };
+
+    if (agents.length > 0) {
+      fetchCountsForAgents();
+    }
+  }, [agents]);
+
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black to-red-900 min-h-screen">
       <h1 className="text-4xl mb-6 text-yellow-400 font-bold">
@@ -158,47 +205,6 @@ export default function AdminAgentPage() {
       </h1>
 
       {/* Add Agent Form */}
-      <form
-        onSubmit={handleAddAgent}
-        className="bg-black bg-opacity-70 p-6 rounded-lg shadow-lg max-w-md mb-10"
-      >
-        <h2 className="text-2xl font-bold mb-4 text-yellow-400">
-          ➕ Add New Agent
-        </h2>
-        <input
-          type="text"
-          placeholder="Agent Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
-          disabled={adding}
-        />
-        <input
-          type="text"
-          placeholder="Agent ID"
-          value={agentId}
-          onChange={(e) => setAgentId(e.target.value)}
-          className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
-          disabled={adding}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
-          disabled={adding}
-        />
-
-        <button
-          type="submit"
-          disabled={adding}
-          className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded transition"
-        >
-          {adding ? "Adding..." : "Add Agent"}
-        </button>
-        {error && <p className="mt-2 text-red-400">{error}</p>}
-      </form>
 
       {/* Agent List */}
       <section className="w-full max-w-full">
@@ -208,13 +214,14 @@ export default function AdminAgentPage() {
         {loadingAgents ? (
           <p className="text-yellow-300">Loading agents...</p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto text-center">
             <table className="min-w-full text-yellow-300 border-collapse font-mono">
               <thead>
                 <tr className="bg-yellow-700 text-white">
                   <th className="border border-yellow-400 p-2">Agent ID</th>
                   <th className="border border-yellow-400 p-2">Name</th>
                   <th className="border border-yellow-400 p-2">Password</th>
+                  <th className="border border-yellow-400 p-2">Voucher</th>
                   <th colSpan={3} className="border border-yellow-400 p-2">
                     Actions
                   </th>
@@ -244,6 +251,11 @@ export default function AdminAgentPage() {
                       <td className="border border-yellow-400 p-2">
                         {password}
                       </td>
+                      <td className="border border-yellow-400 p-2 space-x-2 text-green-400">
+                        {entryCounts[agentId] !== undefined
+                          ? entryCounts[agentId]
+                          : "Loading..."}
+                      </td>
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <button
                           onClick={() =>
@@ -267,10 +279,10 @@ export default function AdminAgentPage() {
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <button
                           onClick={() => toggleActive(agentId, active)}
-                          className={`px-3 py-1 rounded 
-                          } text-white font-semibold`}
+                          className={`px-3 py-1 rounded  
+                          } text-red-500 font-semibold`}
                         >
-                          {active && "🗑️"}
+                          {active && "Inactive"}
                         </button>
                       </td>
                     </tr>
@@ -279,6 +291,75 @@ export default function AdminAgentPage() {
               </tbody>
             </table>
           </div>
+        )}
+        <button
+          onClick={() => {
+            setModal(!modal);
+          }}
+          className="text-2xl font-bold  text-yellow-400 mt-6"
+        >
+          ➕ Add New Agent
+        </button>
+        {modal && (
+          <form
+            onSubmit={handleAddAgent}
+            className="bg-black bg-opacity-70 p-6 rounded-lg shadow-lg max-w-md mb-10"
+          >
+            <input
+              type="text"
+              placeholder="Agent Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
+              disabled={adding}
+            />
+            <input
+              type="text"
+              placeholder="Agent ID"
+              value={agentId}
+              onChange={(e) => setAgentId(e.target.value)}
+              className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
+              disabled={adding}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
+              disabled={adding}
+            />
+            {Object.entries(iPercentages).map(([key, value]) => (
+              <div key={key} className="mb-3">
+                {/* <label className="block capitalize text-sm text-yellow-400 mb-1">
+                {key}
+              </label> */}
+                <input
+                  type="number"
+                  placeholder={key}
+                  value={value}
+                  onChange={(e) =>
+                    setIPercentages((prev) => ({
+                      ...prev,
+                      [key]: parseFloat(e.target.value) || 0,
+                    }))
+                  }
+                  className="w-full p-3 rounded bg-black border border-yellow-400 text-yellow-300 placeholder-yellow-600"
+                  disabled={adding}
+                  required
+                />
+              </div>
+            ))}
+
+            <button
+              type="submit"
+              disabled={adding}
+              className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded transition"
+            >
+              {adding ? "Adding..." : "Add Agent"}
+            </button>
+            {error && <p className="mt-2 text-red-400">{error}</p>}
+          </form>
         )}
       </section>
 
@@ -300,7 +381,7 @@ export default function AdminAgentPage() {
                   onChange={(e) =>
                     setPercentages((prev) => ({
                       ...prev,
-                      [key]: parseFloat(e.target.value) || 0,
+                      [key]: parseFloat(e.target.value) || "",
                     }))
                   }
                 />

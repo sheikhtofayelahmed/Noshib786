@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic"; // Import dynamic for client-side loading
-import { cookies } from "next/headers";
+// import { cookies } from "next/headers";
 
 // Use dynamic import for QRCode to ensure it's only loaded on the client-side.
 // This helps avoid SSR issues and potential import conflicts.

@@ -8,6 +8,7 @@ import PlayerInput from "@/components/PlayerInput";
 
 export default function AgentDashboard() {
   const { agentId, loading } = useAgent();
+  const [agent, setAgent] = useState();
   const router = useRouter();
 
   // State for game status
@@ -45,6 +46,29 @@ export default function AgentDashboard() {
 
     fetchGameStatus();
   }, []);
+  useEffect(() => {
+    if (!agentId) return;
+
+    const fetchAgent = async () => {
+      try {
+        const res = await fetch(`/api/getAgentById?agentId=${agentId}`);
+
+        // Check status and log for debug
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Response not OK:", res.status, text);
+          throw new Error("Failed to fetch agent data");
+        }
+
+        const data = await res.json();
+        setAgent(data.agent);
+      } catch (error) {
+        console.error("Error fetching agent:", error.message);
+      }
+    };
+
+    fetchAgent();
+  }, [agentId]);
 
   if (loading || !agentId || gameActive === null) {
     return null; // or loading spinner
@@ -52,6 +76,11 @@ export default function AgentDashboard() {
 
   return (
     <AgentLayout>
+      <h1 className="text-2xl font-bold text-yellow-400 mb-4">ID: {agentId}</h1>
+      <h1 className="text-2xl font-bold text-yellow-400 mb-4">
+        Name: {agent?.name}
+      </h1>
+
       {gameActive ? (
         <PlayerInput />
       ) : (

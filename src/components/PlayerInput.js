@@ -12,7 +12,7 @@ export default function PlayerInput() {
   const [players, setPlayers] = useState([]);
   const [submittedPlayers, setSubmittedPlayers] = useState([]);
   const [amountPlayed, setAmountPlayed] = useState({});
-  const { agentId } = useAgent();
+  const { agentId, fetchEntryCount, fetchWaitingPlayers } = useAgent();
   const [targetTime, setTargetTime] = useState(null);
   const [timeLeft, setTimeLeft] = useState("");
   const [error, setError] = useState("");
@@ -59,11 +59,13 @@ export default function PlayerInput() {
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-      setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+      const isWarning = diff <= 10 * 60 * 1000; // 10 minutes in milliseconds
+      setTimeLeft({ text: `${hours}h ${minutes}m ${seconds}s`, isWarning });
     }, 1000);
 
     return () => clearInterval(interval);
   }, [targetTime]);
+
   // At the top of your component
   useEffect(() => {
     let total1D = 0,
@@ -238,6 +240,10 @@ export default function PlayerInput() {
   };
 
   const handleDelete = (playerIdx, entryIdx) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this entry?"
+    );
+    if (!confirmDelete) return;
     setPlayers(
       players.map((player, i) =>
         i === playerIdx
@@ -372,6 +378,7 @@ export default function PlayerInput() {
             p.voucher === player.voucher ? { ...p, submitted: true } : p
           )
         );
+        fetchEntryCount(agentId);
       } else {
         const err = await res.json();
         const errorMessage =
@@ -494,6 +501,7 @@ export default function PlayerInput() {
       });
 
       if (res.ok) {
+        fetchWaitingPlayers(agentId);
         alert("✅ Player data saved to 'waiting' list successfully!");
         // You might have a separate `setWaitingPlayers` state or similar
         // if you want to track players in the waiting list in your UI.
@@ -686,11 +694,18 @@ display: flex;
 
   return (
     <div className="min-h-screen  text-white p-6 ">
-      <div className="mb-16 p-4rounded text-yellow-200 font-mono text-3xl text-center">
-        ⏳ Time Remaining: <span className="font-bold">{timeLeft}</span>
+      <div
+        className={`mb-16 p-4 rounded text-yellow-200 font-mono text-xl lg:text-3xl text-center transition-colors duration-500 ${
+          timeLeft?.isWarning
+            ? "bg-red-600 text-white font-extrabold animate-pulse"
+            : ""
+        }`}
+      >
+        ⏳ Time Remaining: <p className="font-bold">{timeLeft?.text}</p>
       </div>
+
       <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-red-500 shadow-2xl p-6">
-        <h1 className="text-4xl font-bold text-center mb-6 text-yellow-400">
+        <h1 className="text-lg lg:text-4xl  font-bold text-center mb-6 text-yellow-400">
           🎰 Player Input 🎰
         </h1>
         <label className="block mb-2 text-yellow-300 ">Sub Agent:</label>

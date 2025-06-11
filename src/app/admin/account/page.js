@@ -91,7 +91,7 @@ export default function Account() {
   }));
 
   return (
-    <div className="p-4 bg-black min-h-screen text-white font-mono">
+    <div className="p-4 min-h-screen text-white font-mono">
       {/* Date Selector */}
       <div className="mb-6">
         <label className="block mb-2 text-lg font-bold text-yellow-400">

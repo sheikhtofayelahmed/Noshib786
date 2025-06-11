@@ -6,6 +6,7 @@ export default async function handler(req, res) {
   }
 
   const { agentId } = req.body;
+  console.log
   if (!agentId) {
     return res.status(400).json({ message: "Missing agentId" });
   }
@@ -13,13 +14,12 @@ export default async function handler(req, res) {
   try {
     const client = await clientPromise;
     const db = client.db("thai-agent-lottery");
-    const players = await db
-      .collection("playersInput")
-      .find({ agentId })
-      .sort({ time: -1 })
-      .toArray();
 
-    return res.status(200).json({ players });
+    const count = await db
+      .collection("playersInput")
+      .countDocuments({ agentId });
+
+    return res.status(200).json({ count });
   } catch (error) {
     console.error("Fetch error:", error);
     return res.status(500).json({ message: "Internal server error" });

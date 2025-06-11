@@ -33,10 +33,12 @@ export default async function handler(req, res) {
     // --- MFA Logic Start ---
     // If MFA is enabled, we DO NOT set the auth cookie here.
     // Instead, we signal to the client that MFA verification is required.
-    if (admin.mfaEnabled && admin.mfaSecret) {
-      // For Pages Router, return 202 status with a JSON response.
-      return res.status(202).json({ message: "MFA required" }); // 202 Accepted, awaiting MFA
-    }
+
+    // if (admin.mfaEnabled && admin.mfaSecret) {
+    //   // For Pages Router, return 202 status with a JSON response.
+    //   return res.status(202).json({ message: "MFA required" }); // 202 Accepted, awaiting MFA
+    // }
+
     // --- MFA Logic End ---
 
     // If MFA is NOT enabled, or if this is a successful password verification for MFA-disabled user,

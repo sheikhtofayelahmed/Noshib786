@@ -3,26 +3,38 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import Breadcrumb from "@/components/Breadcrumb"; // adjust path if needed
 
-const navItems = [
-  { name: "Home", path: "/admin" },
-  { name: "Game Control", path: "/admin/game-control" },
-  { name: "Agent", path: "/admin/agent" },
-  { name: "Account", path: "/admin/account" },
-  { name: "Happy New Year", path: "/admin/HappyNewYear" },
-  { name: "Waiting Data", path: "/admin/waitingData" },
-  { name: "Inactive Agent", path: "/admin/inactive-agent" },
-  { name: "MFA Settings", path: "/admin/mfa-settings" }, // NEW: Link to MFA settings
-];
-
 export default function AdminLayout({ children }) {
+  const [pendingPlayers, setPendingPlayers] = useState([]);
+  const navItems = [
+    { name: "Home", path: "/admin" },
+    { name: "Game Control", path: "/admin/game-control" },
+    { name: "Agent", path: "/admin/agent" },
+    { name: "Voucher", path: "/admin/voucher" },
+    { name: "Account", path: "/admin/account" },
+    { name: "HNY- 3UP", path: "/admin/hny-3up" },
+    { name: "HNY- DOUBLE", path: "/admin/hny-double" },
+    { name: "HNY- DOWN", path: "/admin/hny-down" },
+    { name: "HNY- SINGLE", path: "/admin/hny-single" },
+    {
+      name: `Waiting Data ${
+        pendingPlayers !== undefined ? ` (${pendingPlayers})` : ""
+      }`,
+      path: "/admin/waitingData",
+    },
+    { name: "Inactive Agent", path: "/admin/inactive-agent" },
+    { name: "MFA Settings", path: "/admin/mfa-settings" }, // NEW: Link to MFA settings
+  ];
+
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const logoutAdmin = async () => {
     try {
@@ -51,6 +63,35 @@ export default function AdminLayout({ children }) {
     }
   };
 
+  // Function to fetch pending players
+  const fetchPendingPlayers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch("/api/getPendingPlayers"); // New API endpoint
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message ||
+            `Failed to fetch pending players: ${response.statusText}`
+        );
+      }
+      const data = await response.json();
+
+      setPendingPlayers(data.length);
+    } catch (e) {
+      console.error("Error fetching pending players:", e);
+      setError(
+        e.message || "Failed to load pending players. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPendingPlayers();
+  }, []);
   return (
     <div className="min-h-screen font-mono bg-gradient-to-br from-black to-red-900 text-white flex flex-col md:flex-row">
       {/* Mobile Header */}

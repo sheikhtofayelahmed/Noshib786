@@ -1,6 +1,5 @@
 "use client";
 
-import VoucherModal from "@/components/VoucherModal";
 import { useState, useEffect } from "react";
 
 export default function AdminGameControl() {
@@ -12,17 +11,8 @@ export default function AdminGameControl() {
   const [error, setError] = useState("");
   const [topPlayedNumbers, setTopPlayedNumbers] = useState([]);
   const [targetDateTime, setTargetDateTime] = useState("");
-  const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
 
   // Function to open the Voucher Modal
-  const openVoucherModal = () => {
-    setIsVoucherModalOpen(true);
-  };
-
-  // Function to close the Voucher Modal
-  const closeVoucherModal = () => {
-    setIsVoucherModalOpen(false);
-  };
 
   const [countdown, setCountdown] = useState(null);
   // Fetch initial game status and winning numbers
@@ -306,23 +296,6 @@ export default function AdminGameControl() {
           </button>
         </div>
       </div>
-      <button
-        onClick={openVoucherModal}
-        className="px-8 py-4
-         bg-gradient-to-r from-black via-red-800 to-red-600
-         text-yellow-300 font-mono text-2xl tracking-widest font-extrabold uppercase
-         border-4 border-yellow-400 rounded-2xl
-         shadow-[0_0_16px_4px_rgba(255,255,0,0.5)]
-         transition-all duration-300 ease-out
-         hover:scale-110 hover:shadow-[0_0_28px_8px_rgba(255,255,0,0.8)] hover:animate-pulse
-         focus:outline-none focus:ring-4 focus:ring-yellow-400/70"
-      >
-        Open Voucher Search & Edit
-      </button>
-
-      {/* The VoucherModal component, conditionally rendered based on isVoucherModalOpen state */}
-      {/* It receives 'isOpen' to control its visibility and 'onClose' to handle closing */}
-      <VoucherModal isOpen={isVoucherModalOpen} onClose={closeVoucherModal} />
     </div>
   );
 }

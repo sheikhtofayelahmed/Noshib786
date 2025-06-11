@@ -13,7 +13,7 @@ export default function Breadcrumb() {
 
   return (
     <nav className="text-yellow-400 mb-4 text-sm" aria-label="Breadcrumb">
-      <ol className="list-reset flex">
+      <ol className="gap-2 list-none p-0 m-0 flex items-center">
         {/* Show Home only for agent routes */}
         {isAgent && (
           <li className="bg-yellow-400 rounded-md ">

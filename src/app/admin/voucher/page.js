@@ -1,13 +1,15 @@
+"use client";
 import React, { useState, useEffect } from "react";
 
 // VoucherModal component for searching, displaying, and editing voucher data
-export default function VoucherModal({ isOpen, onClose }) {
+export default function VoucherModal() {
   // Existing state for modal functionality
   const [voucherNumberInput, setVoucherNumberInput] = useState("");
   const [currentVoucherData, setCurrentVoucherData] = useState(null); // Stores the fetched player/voucher data
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isVoucherSubmitted, setIsVoucherSubmitted] = useState(false); // Tracks if the voucher is submitted/printed
+  const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
 
   // State variables integrated from the provided code
   const [amountPlayed, setAmountPlayed] = useState({
@@ -24,18 +26,16 @@ export default function VoucherModal({ isOpen, onClose }) {
 
   // Effect to clear state when modal opens/closes to ensure fresh data on each open
   useEffect(() => {
-    if (isOpen) {
-      setVoucherNumberInput("");
-      setCurrentVoucherData(null);
-      setMessage("");
-      setIsVoucherSubmitted(false);
-      setAmountPlayed({ OneD: 0, TwoD: 0, ThreeD: 0 }); // Reset totals
-      setTargetTime(null); // Reset game status info
-      setTimeLeft("");
-      setError("");
-      setIsGameOn(null);
-    }
-  }, [isOpen]);
+    setVoucherNumberInput("");
+    setCurrentVoucherData(null);
+    setMessage("");
+    setIsVoucherSubmitted(false);
+    setAmountPlayed({ OneD: 0, TwoD: 0, ThreeD: 0 }); // Reset totals
+    setTargetTime(null); // Reset game status info
+    setTimeLeft("");
+    setError("");
+    setIsGameOn(null);
+  }, []);
   // Effect for countdown timer logic
 
   // Effect to calculate amountPlayed based on currentVoucherData.data
@@ -362,21 +362,9 @@ export default function VoucherModal({ isOpen, onClose }) {
   const oneThirdLength = Math.ceil(totalEntries / 3);
   const twoThirdsLength = Math.ceil(totalEntries / 3) * 2;
 
-  if (!isOpen) return null;
-
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div className="flex items-center justify-center ">
       <div className="bg-gray-900 rounded-xl shadow-2xl border-2 border-yellow-500 w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative text-white font-mono">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-yellow-400 hover:text-yellow-300 transition text-2xl font-bold"
-        >
-          &times;
-        </button>
-
         <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-center text-yellow-300 drop-shadow-lg">
           VOUCHER DETAILS
         </h2>
@@ -506,7 +494,7 @@ export default function VoucherModal({ isOpen, onClose }) {
 
                     return (
                       <tr
-                        key={entry._id}
+                        key={entryIdx}
                         className={`${
                           entryIdx % 2 === 0 ? "bg-gray-700" : "bg-gray-800"
                         } ${rowTextColorClass}`}

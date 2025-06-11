@@ -50,7 +50,6 @@ const SubAgentSummary = () => {
   if (fetched && players.length === 0)
     return <p>No players found for this agent.</p>;
 
-  // Group players by SAId
   const groupedBySAId = players.reduce((acc, player) => {
     const key = player.SAId || "Unknown";
     if (!acc[key]) acc[key] = [];
@@ -65,7 +64,7 @@ const SubAgentSummary = () => {
         .map(([saId, group], groupIndex) => (
           <div key={saId} className="mb-20 max-w-4xl mx-auto">
             <h2 className="text-3xl text-yellow-400 font-extrabold text-center mb-2">
-              🎯 Sub-Agent: {saId}
+              🎯 Sub-Agent: {saId} (Vouchers: {group.length})
             </h2>
 
             {group.map((player, idx) => (
@@ -89,7 +88,6 @@ const SubAgentSummary = () => {
                   </div>
                 </div>
 
-                {/* Entries Table */}
                 <table className="w-full border-collapse text-sm font-mono mt-4">
                   <thead>
                     <tr className="bg-yellow-600 text-white">
@@ -101,7 +99,7 @@ const SubAgentSummary = () => {
                     {player?.entries?.map((entry, entryIdx) => (
                       <tr key={entryIdx}>
                         <td className="border px-3 py-2">{entryIdx + 1}</td>
-                        <td className="border px-3 py-2 text-white font-bold ">
+                        <td className="border px-3 py-2 text-white font-bold">
                           {entry.input}
                         </td>
                       </tr>
@@ -109,7 +107,6 @@ const SubAgentSummary = () => {
                   </tbody>
                 </table>
 
-                {/* Summary Table */}
                 <table className="w-full border-collapse text-sm font-mono mt-6">
                   <thead>
                     <tr className="bg-red-700 text-white">
