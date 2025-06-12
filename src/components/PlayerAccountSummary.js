@@ -470,7 +470,7 @@ const PlayerAccountSummary = ({ agentId, print }) => {
     if (element) {
       const options = {
         margin: 10,
-        filename: agent?.name + "." + agentId + "." + date,
+        filename: `${agent?.name}.${agentId}.${date}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: {
           scale: 2,

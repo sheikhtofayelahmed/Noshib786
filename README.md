@@ -104,5 +104,5 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 <!-- **agent name and id on the homepage of the agent** -->
 
 **add print on admin and agent page**
-**print input number organized by their type like 3up, down and single**
+<!-- **print input number organized by their type like 3up, down and single** -->
 **make all the printing style like small printer**
