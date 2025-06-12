@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import React, { useRef } from "react";
 // import html2pdf from "html2pdf.js";
 
-const PlayerAccountSummary = ({ agentId, print }) => {
+const PlayerAccountSummary = ({ agentId }) => {
   const [loading, setLoading] = useState(true);
   const [fetched, setFetched] = useState(false);
   const [isGameOn, setIsGameOn] = useState(null);
@@ -504,7 +504,10 @@ const PlayerAccountSummary = ({ agentId, print }) => {
       )}
       {!loading && players.length > 0 && (
         <div className="mt-8 w-full">
-          <div className="overflow-x-auto mt-8 mb-8 max-w-4xl mx-auto">
+          <div
+            ref={contentRef}
+            className="overflow-x-auto mt-8 mb-8 max-w-4xl mx-auto"
+          >
             <div className="overflow-x-auto my-4 bg-gray-900 bg-opacity-80 rounded-lg shadow-md ring-2 ring-yellow-500 p-6 text-center">
               {/* Flex container to position title and button */}
               <div className="flex justify-between items-center mb-6">
@@ -514,25 +517,35 @@ const PlayerAccountSummary = ({ agentId, print }) => {
                 </h2>
 
                 {/* Button container (pushed to the right) */}
-                <div>
-                  {print && (
-                    <button
-                      onClick={() =>
-                        handleSummaryPrint(
-                          agent,
-                          date,
-                          threeUp,
-                          downGame,
-                          moneyCal,
-                          totalWins
-                        )
-                      }
-                      className="py-2 px-4 rounded bg-purple-600 hover:bg-purple-700 transition"
-                      title="Print Summary"
-                    >
-                      🖨️ Print
-                    </button>
-                  )}
+                <div className="flex items-center gap-4 mt-4">
+                  <button
+                    onClick={handleDownloadPdf}
+                    className="p-2 rounded-xl bg-yellow-400 hover:bg-yellow-500 transition duration-300 flex items-center justify-center"
+                    title="Download Player Info"
+                  >
+                    <img
+                      src="/download.svg"
+                      alt="Download"
+                      className="w-8 h-8" // Equivalent to width: 32px, height: 32px
+                    />
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      handleSummaryPrint(
+                        agent,
+                        date,
+                        threeUp,
+                        downGame,
+                        moneyCal,
+                        totalWins
+                      )
+                    }
+                    className="py-2 px-4 rounded-xl bg-purple-600 text-white hover:bg-purple-700 transition duration-300 text-lg font-medium"
+                    title="Print Summary"
+                  >
+                    🖨️ Print
+                  </button>
                 </div>
               </div>
               <table className="overflow-x-auto w-full border-collapse font-mono text-sm rounded-lg overflow-hidden shadow-lg">

@@ -89,7 +89,8 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 <!-- **error in player account summary** -->
 <!-- **ব্যাংকার পাবে** -->
 
-**error in downloading the pdf**
+<!-- **error in downloading the pdf** -->
+
 **add download on admin account summary page**
 **add extra cell to the admin account summary**
 
@@ -104,5 +105,7 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 <!-- **agent name and id on the homepage of the agent** -->
 
 **add print on admin and agent page**
+
 <!-- **print input number organized by their type like 3up, down and single** -->
+
 **make all the printing style like small printer**
