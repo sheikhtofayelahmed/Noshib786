@@ -17,13 +17,13 @@ export default function AdminAgentPage() {
   const [entryCounts, setEntryCounts] = useState({});
   const [loading, setLoading] = useState(true);
   const [iPercentages, setIPercentages] = useState({
-    threeD: "",
-    twoD: "",
-    oneD: "",
-    str: "",
-    rumble: "",
-    down: "",
-    single: "",
+    threeD: 40,
+    twoD: 30,
+    oneD: 0,
+    str: 400,
+    rumble: 80,
+    down: 60,
+    single: 3,
   });
 
   const [percentages, setPercentages] = useState({
@@ -331,9 +331,9 @@ export default function AdminAgentPage() {
             />
             {Object.entries(iPercentages).map(([key, value]) => (
               <div key={key} className="mb-3">
-                {/* <label className="block capitalize text-sm text-yellow-400 mb-1">
-                {key}
-              </label> */}
+                <label className="block capitalize text-sm text-yellow-400 mb-1">
+                  {key}
+                </label>
                 <input
                   type="number"
                   placeholder={key}

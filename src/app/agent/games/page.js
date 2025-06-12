@@ -1,16 +1,12 @@
 "use client";
-import PlayerAccountSummary from "@/components/PlayerAccountSummary";
+import AgentGameSummary from "@/components/AgentGameSummary";
 import { AgentProvider, useAgent } from "@/context/AgentContext";
-import { useEffect, useState } from "react";
 
 const Reports = () => {
   const { agentId } = useAgent();
   return (
     <AgentProvider>
-      <PlayerAccountSummary
-        agentId={agentId}
-        print={false}
-      ></PlayerAccountSummary>
+      <AgentGameSummary agentId={agentId}></AgentGameSummary>
     </AgentProvider>
   );
 };

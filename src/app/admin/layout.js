@@ -9,11 +9,15 @@ import Breadcrumb from "@/components/Breadcrumb"; // adjust path if needed
 
 export default function AdminLayout({ children }) {
   const [pendingPlayers, setPendingPlayers] = useState([]);
+  const [entryCounts, setEntryCounts] = useState();
   const navItems = [
     { name: "Home", path: "/admin" },
     { name: "Game Control", path: "/admin/game-control" },
     { name: "Agent", path: "/admin/agent" },
-    { name: "Voucher", path: "/admin/voucher" },
+    {
+      name: `Voucher ${entryCounts !== undefined ? ` (${entryCounts})` : ""}`,
+      path: "/admin/voucher",
+    },
     { name: "Account", path: "/admin/account" },
     { name: "HNY- 3UP", path: "/admin/hny-3up" },
     { name: "HNY- DOUBLE", path: "/admin/hny-double" },
@@ -88,6 +92,29 @@ export default function AdminLayout({ children }) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchTotalCount = async () => {
+      try {
+        const res = await fetch("/api/getVoucherQnt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setEntryCounts(data.count); // assuming setEntryCounts is used for the total count
+        } else {
+          console.error("Failed to fetch count:", data.message);
+        }
+      } catch (err) {
+        console.error("Error fetching count:", err);
+      }
+    };
+
+    fetchTotalCount();
+  }, []);
 
   useEffect(() => {
     fetchPendingPlayers();

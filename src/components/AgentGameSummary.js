@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import React, { useRef } from "react";
 // import html2pdf from "html2pdf.js";
 
-const PlayerAccountSummary = ({ agentId }) => {
+const AgentGameSummary = ({ agentId }) => {
   const [loading, setLoading] = useState(true);
   const [fetched, setFetched] = useState(false);
   const [isGameOn, setIsGameOn] = useState(null);
@@ -19,6 +19,7 @@ const PlayerAccountSummary = ({ agentId }) => {
   const hasUploadedRef = useRef(false); // to prevent duplicate uploads
   const contentRef = useRef(null);
   const playerRefs = useRef({});
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -37,7 +38,7 @@ const PlayerAccountSummary = ({ agentId }) => {
 
   useEffect(() => {
     if (!agentId) return;
-
+    console.log(agentId);
     const fetchAgent = async () => {
       try {
         const res = await fetch(`/api/getAgentById?agentId=${agentId}`);
@@ -234,43 +235,6 @@ const PlayerAccountSummary = ({ agentId }) => {
       });
     }
   }, [totalWins, agent?.percentage, players]);
-  useEffect(() => {
-    const uploadSummary = async () => {
-      if (!moneyCal || Object.keys(moneyCal).length === 0) return;
-
-      const res = await fetch("/api/save-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          agentId: agentId,
-          date: date,
-          summary: moneyCal,
-        }),
-      });
-
-      const result = await res.json();
-      if (result.success) {
-        console.log("✅ Summary saved");
-      } else {
-        console.log("⚠️ Summary not saved:", result.message || result.error);
-      }
-    };
-    if (
-      (moneyCal.afterThreeD,
-      moneyCal.afterTwoD,
-      moneyCal.afterOneD,
-      moneyCal.afterSTR,
-      moneyCal.afterRUMBLE,
-      moneyCal.afterDOWN,
-      moneyCal.afterSINGLE,
-      moneyCal.totalGame,
-      moneyCal.totalWin,
-      moneyCal.totalAmounts,
-      moneyCal.WL)
-    ) {
-      uploadSummary();
-    }
-  }, [moneyCal, agentId, date]);
 
   const handleSummaryPrint = (
     agent,
@@ -636,7 +600,7 @@ const PlayerAccountSummary = ({ agentId }) => {
           // *** THIS IS THE KEY: Force a white background for the PDF rendering ***
           background: "#ffffff", // Explicitly set white background for the canvas
         },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
       };
       html2pdf().set(options).from(element).save();
     } else {
@@ -728,64 +692,64 @@ const PlayerAccountSummary = ({ agentId }) => {
               </div>
               <table className="overflow-x-auto w-full border-collapse font-mono text-sm rounded-lg overflow-hidden shadow-lg">
                 <tbody>
+                  {/* Header Row */}
                   <tr className="bg-black border border-yellow-700">
                     <td
-                      colSpan="2"
-                      className="px-6 py-4 text-base sm:text-lg md:text-2xl lg:text-3xl  font-extrabold text-yellow-500 tracking-widest"
+                      colSpan={2}
+                      className="px-6 py-4 text-base sm:text-lg md:text-2xl lg:text-3xl font-extrabold text-yellow-500 tracking-widest"
                     >
                       {agent?.name}
                     </td>
-
                     <td
-                      colSpan="2"
+                      colSpan={2}
                       className="px-6 py-4 text-xl font-bold text-white"
                     >
                       {date}
                     </td>
                     <td
-                      colSpan="2"
+                      colSpan={2}
                       className="px-6 py-4 text-4xl font-extrabold text-yellow-500 tracking-widest"
                     >
                       {threeUp || "XXX"}
                     </td>
                     <td
-                      colSpan="2"
+                      colSpan={2}
                       className="px-6 py-4 text-4xl font-extrabold text-pink-500 tracking-widest"
                     >
                       {downGame || "XX"}
                     </td>
                   </tr>
 
-                  {/* All Players Total Summary Section */}
-
+                  {/* Total Summary Header */}
                   <tr className="bg-green-800 text-white text-lg">
-                    <th className="border border-gray-700 px-4 py-3 text-center">
+                    <th className="border border-gray-700 p-2 text-center">
                       Category
                     </th>
-                    <th className="border border-gray-700 px-4 py-3 text-center">
+                    <th className="border border-gray-700 p-2 text-center">
                       🎯 3D
                     </th>
-                    <th className="border border-gray-700 px-4 py-3 text-center">
+                    <th className="border border-gray-700 p-2 text-center">
                       🎯 2D
                     </th>
-                    <th className="border border-gray-700 px-4 py-3 text-center">
+                    <th className="border border-gray-700 p-2 text-center">
                       🎯 1D
                     </th>
-                    <th className="border bg-yellow-800 border-gray-700 px-4 py-3 text-center">
+                    <th className="border bg-yellow-800 border-gray-700 p-2 text-center">
                       STR
                     </th>
-                    <th className="border bg-yellow-800 border-gray-700 px-4 py-3 text-center">
+                    <th className="border bg-yellow-800 border-gray-700 p-2 text-center">
                       RUMBLE
                     </th>
-                    <th className="border bg-yellow-800 border-gray-700 px-4 py-3 text-center">
+                    <th className="border bg-yellow-800 border-gray-700 p-2 text-center">
                       DOWN
                     </th>
-                    <th className="border bg-yellow-800 border-gray-700 px-4 py-3 text-center">
+                    <th className="border bg-yellow-800 border-gray-700 p-2 text-center">
                       SINGLE
                     </th>
                   </tr>
 
-                  <tr className="bg-gray-800 text-green-400">
+                  {/* Total Amounts */}
+                  <tr className="bg-gray-800 text-green-400 text-lg">
                     <td className="border border-gray-700 px-4 py-2 font-semibold">
                       Total
                     </td>
@@ -801,7 +765,7 @@ const PlayerAccountSummary = ({ agentId }) => {
                     <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                       {totalWins?.STR3D || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500 ">
+                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
                       {totalWins?.RUMBLE3D || 0}
                     </td>
                     <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
@@ -812,7 +776,8 @@ const PlayerAccountSummary = ({ agentId }) => {
                     </td>
                   </tr>
 
-                  <tr className="bg-gray-800 text-green-400">
+                  {/* Percentage */}
+                  <tr className="bg-gray-800 text-green-400 text-lg">
                     <td className="border border-gray-700 px-4 py-2 font-semibold">
                       % / -
                     </td>
@@ -839,7 +804,8 @@ const PlayerAccountSummary = ({ agentId }) => {
                     </td>
                   </tr>
 
-                  <tr className="bg-gray-700 text-green-400">
+                  {/* After Deduction */}
+                  <tr className="bg-gray-700 text-green-400 text-lg">
                     <td className="border border-gray-700 px-4 py-2 font-semibold">
                       After Deduction
                     </td>
@@ -866,6 +832,7 @@ const PlayerAccountSummary = ({ agentId }) => {
                     </td>
                   </tr>
 
+                  {/* Total Game Row */}
                   <tr className="bg-gray-900 font-bold text-lg text-white">
                     <td
                       colSpan={2}
@@ -875,12 +842,13 @@ const PlayerAccountSummary = ({ agentId }) => {
                     </td>
                     <td
                       colSpan={2}
-                      className="border border-gray-700 px-4 py-2 "
+                      className="border border-gray-700 px-4 py-2"
                     >
                       {moneyCal?.totalGame || 0}
                     </td>
                   </tr>
 
+                  {/* Total Win Row */}
                   <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
                     <td
                       colSpan={2}
@@ -895,6 +863,8 @@ const PlayerAccountSummary = ({ agentId }) => {
                       {moneyCal?.totalWin || 0}
                     </td>
                   </tr>
+
+                  {/* Admin Gets Row */}
                   <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
                     <td
                       colSpan={2}
@@ -911,6 +881,8 @@ const PlayerAccountSummary = ({ agentId }) => {
                         : 0}
                     </td>
                   </tr>
+
+                  {/* Agent Gets Row */}
                   <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
                     <td
                       colSpan={2}
@@ -927,6 +899,8 @@ const PlayerAccountSummary = ({ agentId }) => {
                         : 0}
                     </td>
                   </tr>
+
+                  {/* Joma Record Section */}
                 </tbody>
               </table>
             </div>
@@ -999,16 +973,67 @@ const PlayerAccountSummary = ({ agentId }) => {
                         const maxRows = Math.max(col1.length, col2.length);
                         const rows = [];
 
+                        // Helper function to render a cell with highlighting
+                        function renderCell(entry) {
+                          if (!entry) return "";
+
+                          const { match, type } = getMatchType(
+                            entry.input,
+                            threeUp,
+                            downGame
+                          );
+                          const parts = entry.input.split(".");
+                          const number = parts[0];
+                          const amounts = parts.slice(1);
+
+                          return (
+                            <span>
+                              <span
+                                className={
+                                  match ? "text-red-500 font-bold text-xl" : ""
+                                }
+                              >
+                                {number}
+                              </span>
+                              {amounts.map((amt, i) => {
+                                const highlightAll =
+                                  type === "str" || type === "down";
+                                const highlightOne =
+                                  type === "rumble" || type === "single";
+
+                                const shouldHighlight =
+                                  (highlightAll && match) ||
+                                  (highlightOne &&
+                                    match &&
+                                    i === amounts.length - 1);
+
+                                return (
+                                  <span key={i}>
+                                    {"."}
+                                    <span
+                                      className={
+                                        shouldHighlight
+                                          ? "text-red-500 font-bold text-xl"
+                                          : ""
+                                      }
+                                    >
+                                      {amt}
+                                    </span>
+                                  </span>
+                                );
+                              })}
+                            </span>
+                          );
+                        }
+
                         for (let i = 0; i < maxRows; i++) {
-                          const c1 = col1[i]?.input || "";
-                          const c2 = col2[i]?.input || "";
                           rows.push(
                             <tr key={i}>
                               <td className="bg-white border px-2 py-1 print:p-1">
-                                {c1}
+                                {renderCell(col1[i])}
                               </td>
                               <td className="bg-white border px-2 py-1 print:p-1">
-                                {c2}
+                                {renderCell(col2[i])}
                               </td>
                             </tr>
                           );
@@ -1097,4 +1122,4 @@ const PlayerAccountSummary = ({ agentId }) => {
   );
 };
 
-export default PlayerAccountSummary;
+export default AgentGameSummary;

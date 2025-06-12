@@ -1,10 +1,7 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
-import { Menu, X } from "lucide-react";
-import PlayerAccountSummary from "@/components/PlayerAccountSummary";
+import AgentGameSummaryAdmin from "@/components/AgentGameSummaryAdmin";
+import { useState } from "react";
 
 export default function AgentGames() {
   const { agentId } = useParams();
@@ -13,9 +10,5 @@ export default function AgentGames() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-
-
-  return (
-    <PlayerAccountSummary agentId={agentId} print={true} className="w-full" />
-  );
+  return <AgentGameSummaryAdmin agentId={agentId} className="w-full" />;
 }

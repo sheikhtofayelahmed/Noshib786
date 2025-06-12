@@ -84,15 +84,15 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 
 <!-- **delete instead of inactive agent** -->
 
-**add download to agent client page**
+<!-- **add download to agent client page** -->
 
 <!-- **error in player account summary** -->
 <!-- **ব্যাংকার পাবে** -->
 
 <!-- **error in downloading the pdf** -->
 
-**add download on admin account summary page**
-**add extra cell to the admin account summary**
+<!-- **add download on admin account summary page** -->
+<!-- **add extra cell to the admin account summary** -->
 
 <!-- **divide happy new year** -->
 
@@ -104,8 +104,8 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 
 <!-- **agent name and id on the homepage of the agent** -->
 
-**add print on admin and agent page**
+<!-- **add print on admin and agent page** -->
 
 <!-- **print input number organized by their type like 3up, down and single** -->
 
-**make all the printing style like small printer**
+<!-- **make all the printing style like small printer** -->
