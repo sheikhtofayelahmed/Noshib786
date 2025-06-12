@@ -18,6 +18,7 @@ const PlayerAccountSummary = ({ agentId }) => {
   const [uploadStatus, setUploadStatus] = useState(null);
   const hasUploadedRef = useRef(false); // to prevent duplicate uploads
   const contentRef = useRef(null);
+  const playerRefs = useRef({});
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -463,6 +464,164 @@ const PlayerAccountSummary = ({ agentId }) => {
     win.print();
     win.close();
   };
+  const handlePrint = (player) => {
+    const amountPlayed = player.amountPlayed || { OneD: 0, TwoD: 0, ThreeD: 0 };
+
+    const win = window.open("", "_blank");
+    win.document.write(`
+    <html>
+      <head>
+        <title>Player Data</title>
+        <style>
+          @page {
+            size: 80mm;
+            margin: 0;
+          }
+
+          body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #000;
+            padding: 4px;
+            margin: 0;
+          }
+
+          .container {
+            width: 100%;
+          }
+
+          h2 {
+            font-size: 16px;
+            margin: 4px 0;
+            text-align: center;
+            font-weight: bold;
+          }
+
+          p {
+            font-size: 14px;
+            text-align: center;
+            margin: 4px 0;
+          }
+
+          .input-table {
+            width: 100%;
+            margin-top: 8px;
+            border-collapse: collapse;
+            font-size: 14px;
+          }
+
+          .input-table td {
+            border: 1px solid #000;
+            padding: 2px 4px;
+            width: 50%;
+          }
+
+          .totals-table {
+            width: 100%;
+            margin-top: 12px;
+            border-collapse: collapse;
+            font-size: 14px;
+          }
+
+          .totals-table th,
+          .totals-table td {
+            border: 1px solid #000;
+            padding: 4px;
+            text-align: center;
+          }
+
+          .totals-table th {
+            background: #f8f8f8;
+            font-weight: bold;
+          }
+
+          .grand-total {
+            font-weight: bold;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h2>${player.voucher || ""}</h2>
+          <h2>Player: ${player.name || ""} || Sub Agent: ${
+      player.SAId || ""
+    }</h2>
+          <p>Date: ${new Date(player.time).toLocaleString()}</p>
+
+          <table class="input-table">
+            <tbody>
+              ${(() => {
+                const sortedData = [...player.entries].sort((a, b) => {
+                  const aPrefix = a.input.split(".")[0];
+                  const bPrefix = b.input.split(".")[0];
+                  return bPrefix.length - aPrefix.length;
+                });
+
+                const half = Math.ceil(sortedData.length / 2);
+                const col1 = sortedData.slice(0, half);
+                const col2 = sortedData.slice(half);
+
+                const maxRows = Math.max(col1.length, col2.length);
+                const rows = [];
+
+                for (let i = 0; i < maxRows; i++) {
+                  const c1 = col1[i]?.input || "";
+                  const c2 = col2[i]?.input || "";
+                  rows.push(`<tr><td>${c1}</td><td>${c2}</td></tr>`);
+                }
+
+                return rows.join("");
+              })()}
+            </tbody>
+          </table>
+
+          <table class="totals-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>After Deduction</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>3D Total</td>
+                <td>${amountPlayed?.ThreeD}</td>
+                <td>${(amountPlayed?.ThreeD * 0.6).toFixed(0)}</td>
+              </tr>
+              <tr>
+                <td>2D Total</td>
+                <td>${amountPlayed?.TwoD}</td>
+                <td>${(amountPlayed?.TwoD * 0.8).toFixed(0)}</td>
+              </tr>
+              <tr>
+                <td>1D Total</td>
+                <td>${amountPlayed?.OneD}</td>
+                <td>${amountPlayed?.OneD.toFixed(0)}</td>
+              </tr>
+              <tr class="grand-total">
+                <td>Grand Total</td>
+                <td>${(
+                  amountPlayed?.ThreeD +
+                  amountPlayed?.TwoD +
+                  amountPlayed?.OneD
+                ).toFixed(0)}</td>
+                <td>${(
+                  amountPlayed?.ThreeD * 0.6 +
+                  amountPlayed?.TwoD * 0.8 +
+                  amountPlayed?.OneD
+                ).toFixed(0)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </body>
+    </html>
+  `);
+
+    win.document.close();
+    win.print();
+  };
 
   const handleDownloadPdf = async () => {
     const html2pdf = (await import("html2pdf.js")).default;
@@ -482,6 +641,25 @@ const PlayerAccountSummary = ({ agentId }) => {
       html2pdf().set(options).from(element).save();
     } else {
       console.error("Content div not found!");
+    }
+  };
+  const handlePlayerDownloadPdf = async (voucher) => {
+    const html2pdf = (await import("html2pdf.js")).default;
+    const element = playerRefs.current[voucher]?.current; // get the correct ref element
+    if (element) {
+      const options = {
+        margin: 10,
+        filename: `${voucher}.${agent?.name}.${agentId}.${date}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          background: "#ffffff",
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
+      html2pdf().set(options).from(element).save();
+    } else {
+      console.error("Content div not found for voucher:", voucher);
     }
   };
 
@@ -504,11 +682,11 @@ const PlayerAccountSummary = ({ agentId }) => {
       )}
       {!loading && players.length > 0 && (
         <div className="mt-8 w-full">
-          <div
-            ref={contentRef}
-            className="overflow-x-auto mt-8 mb-8 max-w-4xl mx-auto"
-          >
-            <div className="overflow-x-auto my-4 bg-gray-900 bg-opacity-80 rounded-lg shadow-md ring-2 ring-yellow-500 p-6 text-center">
+          <div className="overflow-x-auto mt-8 mb-8 max-w-4xl mx-auto">
+            <div
+              ref={contentRef}
+              className="overflow-x-auto my-4 bg-gray-900 bg-opacity-80 rounded-lg shadow-md ring-2 ring-yellow-500 p-6 text-center"
+            >
               {/* Flex container to position title and button */}
               <div className="flex justify-between items-center mb-6">
                 {/* Title (pushed to the left) */}
@@ -520,7 +698,7 @@ const PlayerAccountSummary = ({ agentId }) => {
                 <div className="flex items-center gap-4 mt-4">
                   <button
                     onClick={handleDownloadPdf}
-                    className="p-2 rounded-xl bg-yellow-400 hover:bg-yellow-500 transition duration-300 flex items-center justify-center"
+                    className="p-2 rounded-xl bg-white transition duration-300 flex items-center justify-center"
                     title="Download Player Info"
                   >
                     <img
@@ -541,10 +719,10 @@ const PlayerAccountSummary = ({ agentId }) => {
                         totalWins
                       )
                     }
-                    className="py-2 px-4 rounded-xl bg-purple-600 text-white hover:bg-purple-700 transition duration-300 text-lg font-medium"
+                    className="py-2 px-2 bg-white rounded-xl transition duration-300 text-2xl font-medium"
                     title="Print Summary"
                   >
-                    🖨️ Print
+                    🖨️
                   </button>
                 </div>
               </div>
@@ -757,11 +935,19 @@ const PlayerAccountSummary = ({ agentId }) => {
           <h3 className="text-2xl text-yellow-400 mb-6 font-semibold text-center">
             🎉 Player Summary 🎉
           </h3>
+          <div className="mt-8 max-w-4xl mx-auto space-y-12">
+            {players.forEach((player) => {
+              if (!playerRefs.current[player.voucher]) {
+                playerRefs.current[player.voucher] = React.createRef();
+              }
+            })}
 
-          <div ref={contentRef} className=" mt-8 max-w-4xl mx-auto space-y-12">
             {players.map((player, idx) => (
               <React.Fragment key={idx}>
-                <div className="relative bg-white rounded-lg border shadow-md text-black p-4 print:p-1 print:text-black print:shadow-none print:border-none print:rounded-none">
+                <div
+                  ref={playerRefs.current[player.voucher]}
+                  className="relative bg-white rounded-lg border shadow-md text-black p-4 print:p-1 print:text-black print:shadow-none print:border-none print:rounded-none"
+                >
                   {/* Header */}
                   <h2 className="text-lg font-bold text-center mb-2 print:mb-1">
                     {player.voucher || ""}
@@ -773,16 +959,23 @@ const PlayerAccountSummary = ({ agentId }) => {
                   <p className="text-center text-sm print:text-xs mb-2">
                     Date: {new Date(player.time).toLocaleString()}
                   </p>
-                  <div className="absolute top-2 right-2 print:hidden">
+
+                  <div className="absolute top-2 right-2 print:hidden flex gap-2">
                     <button
-                      onClick={handleDownloadPdf}
-                      className="py-1 px-3 rounded  text-white text-sm hover:bg-yellow-600"
+                      onClick={() => handlePlayerDownloadPdf(player.voucher)}
+                      className="w-14 h-14 flex items-center justify-center rounded"
                     >
                       <img
                         src="/download.svg"
                         alt="Download"
-                        className="w-10 h-10" // Equivalent to width: 32px, height: 32px
+                        className="w-8 h-8"
                       />
+                    </button>
+                    <button
+                      onClick={() => handlePrint(player)}
+                      className="w-14 h-14 flex items-center justify-center rounded text-white text-2xl"
+                    >
+                      🖨️
                     </button>
                   </div>
 
@@ -810,7 +1003,7 @@ const PlayerAccountSummary = ({ agentId }) => {
                           const c1 = col1[i]?.input || "";
                           const c2 = col2[i]?.input || "";
                           rows.push(
-                            <tr className="" key={i}>
+                            <tr key={i}>
                               <td className="bg-white border px-2 py-1 print:p-1">
                                 {c1}
                               </td>
