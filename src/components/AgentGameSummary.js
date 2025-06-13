@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import React, { useRef } from "react";
 // import html2pdf from "html2pdf.js";
+import { parseISO, format, isValid } from "date-fns";
 
 const AgentGameSummary = ({ agentId }) => {
   const [loading, setLoading] = useState(true);
@@ -704,7 +705,7 @@ const AgentGameSummary = ({ agentId }) => {
                       colSpan={2}
                       className="px-6 py-4 text-xl font-bold text-white"
                     >
-                      {date}
+                      {format(parseISO(date), "dd/MM/yyyy")}
                     </td>
                     <td
                       colSpan={2}

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import React, { useRef } from "react";
 // import html2pdf from "html2pdf.js";
+import { parseISO, format, isValid } from "date-fns";
 
 const AgentGameSummaryAdmin = ({ agentId }) => {
   const [loading, setLoading] = useState(true);
@@ -789,7 +790,7 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
                       colSpan={2}
                       className="px-6 py-4 text-xl font-bold text-white"
                     >
-                      {date}
+                      {format(parseISO(date), "dd/MM/yyyy")}
                     </td>
                     <td
                       colSpan={2}
@@ -1079,12 +1080,14 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
                       className="text-sm px-4 py-2 border border-gray-700"
                     >
                       <ol>
-                        {summaryData?.joma?.map((entry, index) => (
-                          <li key={index}>
-                            📅 {entry.date} 💰{" "}
-                            {entry.amount.toLocaleString("en-US")}
-                          </li>
-                        ))}
+                        {summaryData?.joma
+                          ?.filter((entry) => entry.amount !== 0)
+                          .map((entry, index) => (
+                            <li key={index}>
+                              📅 {entry.date} 💰{" "}
+                              {entry.amount.toLocaleString("en-US")}
+                            </li>
+                          ))}
                       </ol>
                     </td>
 

@@ -23,7 +23,7 @@ export default function AgentLayout({ children }) {
     },
     { name: "Sub Agent Games", path: "/agent/subAgentGames" },
     {
-      name: `Waiting Entry ${
+      name: `Pending-পেন্ডিং ${
         waitingEntryCount !== undefined ? ` (${waitingEntryCount})` : ""
       }`,
       path: "/agent/waitingData",
@@ -78,7 +78,7 @@ export default function AgentLayout({ children }) {
             Name: {agent?.name}
           </p>
 
-          <nav className="space-y-3">
+          <nav className="space-y-3 font-bangla          ">
             {navItems.map((item) => (
               <Link key={item.path} href={item.path}>
                 <div
