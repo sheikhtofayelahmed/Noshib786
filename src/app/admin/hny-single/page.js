@@ -36,21 +36,19 @@ const NumberTable = ({ rows, data, title }) => (
                 const cellClasses = `
                   relative p-4 text-3xl font-extrabold uppercase select-none
                   border border-gray-700 transition-all duration-300 ease-in-out
-                  ${
-                    isHot
-                      ? "bg-gradient-to-br from-yellow-600 to-red-700 text-white shadow-xl transform scale-105"
-                      : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
-                  }
+                  
                 `;
 
                 return (
                   <td key={j} className={cellClasses}>
-                    {num}
-                    {isHot && (
-                      <div className="absolute bottom-1 right-2 text-xl font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md">
-                        {played}
-                      </div>
-                    )}
+                    <div className="relative flex flex-col items-center justify-center w-full h-full space-y-1">
+                      <span className="text-3xl leading-none">{num}</span>
+                      {isHot && (
+                        <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md min-w-[1.5rem] text-center">
+                          {played}
+                        </div>
+                      )}
+                    </div>
                   </td>
                 );
               })}

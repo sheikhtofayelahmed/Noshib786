@@ -18,17 +18,17 @@ export default function AdminLayout({ children }) {
       name: `ভাউচার ${entryCounts !== undefined ? ` (${entryCounts})` : ""}`,
       path: "/admin/voucher",
     },
-    { name: "হিসাব", path: "/admin/account" },
-    { name: "HNY- 3UP", path: "/admin/hny-3up" },
-    { name: "HNY- DOUBLE", path: "/admin/hny-double" },
-    { name: "HNY- DOWN", path: "/admin/hny-down" },
-    { name: "HNY- SINGLE", path: "/admin/hny-single" },
     {
       name: `পেন্ডিং ভাউচার ${
         pendingPlayers !== undefined ? ` (${pendingPlayers})` : ""
       }`,
       path: "/admin/waitingData",
     },
+    { name: "হিসাব-নিকাশ", path: "/admin/account" },
+    { name: "HNY- 3UP", path: "/admin/hny-3up" },
+    { name: "HNY- DOUBLE", path: "/admin/hny-double" },
+    { name: "HNY- DOWN", path: "/admin/hny-down" },
+    { name: "HNY- SINGLE", path: "/admin/hny-single" },
     { name: "এজেন্ট (বাতিল)", path: "/admin/inactive-agent" },
     { name: "MFA Settings", path: "/admin/mfa-settings" }, // NEW: Link to MFA settings
   ];

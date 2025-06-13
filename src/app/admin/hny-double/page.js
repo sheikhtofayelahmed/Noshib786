@@ -43,12 +43,14 @@ const NumberTable = ({ rows, data, title }) => (
 
                 return (
                   <td key={j} className={cellClasses}>
-                    {num}
-                    {isHot && (
-                      <div className="absolute bottom-1 right-2 text-xl font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md">
-                        {played}
-                      </div>
-                    )}
+                    <div className="relative flex flex-col items-center justify-center w-full h-full space-y-1">
+                      <span className="text-3xl leading-none">{num}</span>
+                      {isHot && (
+                        <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md min-w-[1.5rem] text-center">
+                          {played}
+                        </div>
+                      )}
+                    </div>
                   </td>
                 );
               })}
