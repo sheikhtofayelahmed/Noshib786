@@ -116,9 +116,9 @@ export default function HappyNewYear() {
   }, {});
 
   const patternData = {
-    xxx: [],
-    xxy: [],
-    xyy: [],
+    // xxx: [],
+    // xxy: [],
+    // xyy: [],
     xyx: [],
   };
 
@@ -140,18 +140,21 @@ export default function HappyNewYear() {
     if (numStr.length === 3 && played > 100) {
       const [a, b, c] = numStr;
       let type = null;
-      if (a === b && b === c) {
-        type = "xxx"; // All digits are the same (e.g., 111, 222)
-      } else if (a === b && b !== c) {
-        type = "xxy"; // First two are the same, third is different (e.g., 112, 330)
-      } else if (a !== b && b === c) {
-        type = "xyy"; // Last two are the same, first is different (e.g., 122, 455)
-      } else if (a === c && a !== b) {
-        // This covers "xyx" where middle is different
-        type = "xyx"; // First and third are the same, middle is different (e.g., 121, 050)
+      // if (a === b && b === c) {
+      //   type = "xxx"; // All digits are the same (e.g., 111, 222)
+      // } else if (a === b && b !== c) {
+      //   type = "xxy"; // First two are the same, third is different (e.g., 112, 330)
+      // } else if (a !== b && b === c) {
+      //   type = "xyy"; // Last two are the same, first is different (e.g., 122, 455)
+      // } else if (a === c && a !== b) {
+      //   // This covers "xyx" where middle is different
+      //   type = "xyx"; // First and third are the same, middle is different (e.g., 121, 050)
+      // }
+      if (!(a !== b && b !== c && a !== c)) {
+        type = "xyx"; // All digits are the same (e.g., 111, 222)
       }
+
       if (type) {
-        console.log(numStr, played, a, b, c, type);
         patternData[type].push({ number: numStr, played });
       }
     }
