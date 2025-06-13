@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { format, parse } from "date-fns";
 
 export default function AdminGameControl() {
   const [isGameOn, setIsGameOn] = useState(false);
@@ -205,14 +208,18 @@ export default function AdminGameControl() {
         {/* Game Start Date/Time */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div className="flex flex-col w-full">
-            <label className="block mb-1 font-semibold text-yellow-400">
-              🗓️ Game Start Date & Time
+            <label className="font-bangla block mb-1 font-semibold text-yellow-400">
+              🗓️ এন্ট্রি দেওয়ার শেষ সময়
             </label>
-            <input
-              type="datetime-local"
-              value={targetDateTime}
-              onChange={(e) => setTargetDateTime(e.target.value)}
-              className="w-full px-4 py-2 rounded bg-gray-800 border border-gray-500 text-white focus:outline-none"
+
+            <DatePicker
+              selected={targetDateTime}
+              onChange={(date) => setTargetDateTime(date)}
+              showTimeSelect
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="dd/MM/yyyy HH:mm"
+              className="px-4 py-2 rounded bg-gray-800 border border-gray-500 text-white"
             />
           </div>
           <button
@@ -255,14 +262,14 @@ export default function AdminGameControl() {
 
         {/* Game Date */}
         <div>
-          <label className="block mb-1 font-semibold">
-            🗓️ Game Date (Past)
+          <label className="font-bangla block mb-1 font-semibold">
+            🗓️ গেমের তারিখ
           </label>
-          <input
-            type="date"
-            value={gameDate}
-            onChange={(e) => setGameDate(e.target.value)}
-            className="w-full px-4 py-2 rounded bg-gray-800 border border-gray-500 focus:outline-none"
+          <DatePicker
+            selected={gameDate}
+            onChange={(date) => setGameDate(date)}
+            dateFormat="dd/MM/yyyy"
+            className="px-4 py-2 rounded bg-gray-800 border border-gray-500 text-white"
           />
         </div>
 

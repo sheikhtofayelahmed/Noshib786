@@ -1,11 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
 
 export default function Account() {
   const [summaries, setSummaries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
 
   useEffect(() => {
     async function fetchSummaries() {
@@ -22,7 +25,7 @@ export default function Account() {
           setMessage("");
 
           if (sortedSummaries.length > 0) {
-            setSelectedDate(sortedSummaries[0].date); // 🟡 Set the most recent date
+            setSelectedDate(new Date(sortedSummaries[0].date));
           }
         } else {
           console.error("Failed to fetch summaries:", data.message);
@@ -40,12 +43,15 @@ export default function Account() {
   }, []);
 
   const filteredByDate = selectedDate
-    ? summaries.filter((item) => item.date === selectedDate)
+    ? summaries.filter((item) => {
+        const itemDate = new Date(item.date);
+        return itemDate.toDateString() === selectedDate.toDateString();
+      })
     : [];
 
   const yearlyTotals = summaries.reduce((acc, item) => {
-    const { agentId } = item;
-    if (!agentId) return acc;
+    const { agentId, summary } = item;
+    if (!agentId || !summary) return acc;
 
     const keys = [
       "afterThreeD",
@@ -57,7 +63,6 @@ export default function Account() {
       "afterSINGLE",
       "totalGame",
       "totalWin",
-      "totalAmounts",
     ];
 
     if (!acc[agentId]) {
@@ -72,13 +77,12 @@ export default function Account() {
         afterSINGLE: 0,
         totalGame: 0,
         totalWin: 0,
-        totalAmounts: 0,
       };
     }
 
     for (const key of keys) {
-      if (typeof item[key] === "number") {
-        acc[agentId][key] += item[key];
+      if (typeof summary[key] === "number") {
+        acc[agentId][key] += summary[key];
       }
     }
 
@@ -90,26 +94,28 @@ export default function Account() {
     WL: item.totalGame - item.totalWin,
   }));
 
+  if (loading) {
+    return <div className="text-center text-yellow-300 py-10">Loading...</div>;
+  }
+
   return (
     <div className="p-4 min-h-screen text-white font-mono">
-      {/* Date Selector */}
       <div className="mb-6">
         <label className="block mb-2 text-lg font-bold text-yellow-400">
           Select Date
         </label>
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          className="px-4 py-2 rounded bg-gray-800 border border-gray-500"
+        <DatePicker
+          selected={selectedDate}
+          onChange={(date) => setSelectedDate(date)}
+          dateFormat="dd/MM/yyyy"
+          className="px-4 py-2 rounded bg-gray-800 border border-gray-500 text-white"
         />
       </div>
 
-      {/* Table for Selected Date */}
       {selectedDate && filteredByDate.length > 0 ? (
         <div className="mb-12 overflow-x-auto border border-yellow-600 rounded-xl">
           <h2 className="text-xl font-bold text-yellow-300 py-3 text-center">
-            Summary for {selectedDate}
+            Summary for {format(selectedDate, "dd/MM/yyyy")}
           </h2>
           <table className="w-full text-sm bg-gray-900 border border-collapse text-green-200 text-center">
             <thead className="bg-gray-800 text-yellow-300">
@@ -131,16 +137,19 @@ export default function Account() {
               {filteredByDate.map((item, idx) => (
                 <tr key={idx} className="hover:bg-gray-700">
                   <td className="p-2">{item.agentId}</td>
-                  <td className="p-2">{item.afterThreeD}</td>
-                  <td className="p-2">{item.afterTwoD}</td>
-                  <td className="p-2">{item.afterOneD}</td>
-                  <td className="p-2">{item.afterSTR}</td>
-                  <td className="p-2">{item.afterRUMBLE}</td>
-                  <td className="p-2">{item.afterDOWN}</td>
-                  <td className="p-2">{item.afterSINGLE}</td>
-                  <td className="p-2">{item.totalGame}</td>
-                  <td className="p-2">{item.totalWin}</td>
-                  <td className="p-2">{item.totalGame - item.totalWin}</td>
+                  <td className="p-2">{item.summary?.afterThreeD ?? 0}</td>
+                  <td className="p-2">{item.summary?.afterTwoD ?? 0}</td>
+                  <td className="p-2">{item.summary?.afterOneD ?? 0}</td>
+                  <td className="p-2">{item.summary?.afterSTR ?? 0}</td>
+                  <td className="p-2">{item.summary?.afterRUMBLE ?? 0}</td>
+                  <td className="p-2">{item.summary?.afterDOWN ?? 0}</td>
+                  <td className="p-2">{item.summary?.afterSINGLE ?? 0}</td>
+                  <td className="p-2">{item.summary?.totalGame ?? 0}</td>
+                  <td className="p-2">{item.summary?.totalWin ?? 0}</td>
+                  <td className="p-2">
+                    {(item.summary?.totalGame ?? 0) -
+                      (item.summary?.totalWin ?? 0)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -149,14 +158,13 @@ export default function Account() {
       ) : (
         selectedDate && (
           <p className="text-yellow-400 text-center font-bold py-5 text-2xl">
-            No data found for {selectedDate}
+            No data found for {format(selectedDate, "dd/MM/yyyy")}
           </p>
         )
       )}
 
-      {/* Yearly Summary */}
       <div className="overflow-x-auto border border-pink-600 rounded-xl">
-        <h2 className="text-xl font-bold text-pink-400  py-3 text-center">
+        <h2 className="text-xl font-bold text-pink-400 py-3 text-center">
           Yearly Total by Agent
         </h2>
         <table className="w-full text-sm bg-gray-900 border border-collapse text-green-200 text-center">

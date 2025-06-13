@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -12,6 +12,8 @@ export default function AgentLayout({ children }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const { agentId, loading } = useAgent();
+  const [agent, setAgent] = useState();
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const navItems = [
     { name: "Home", path: "/" },
@@ -27,6 +29,29 @@ export default function AgentLayout({ children }) {
       path: "/agent/waitingData",
     },
   ];
+  useEffect(() => {
+    if (!agentId) return;
+
+    const fetchAgent = async () => {
+      try {
+        const res = await fetch(`/api/getAgentById?agentId=${agentId}`);
+
+        // Check status and log for debug
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Response not OK:", res.status, text);
+          throw new Error("Failed to fetch agent data");
+        }
+
+        const data = await res.json();
+        setAgent(data.agent);
+      } catch (error) {
+        console.error("Error fetching agent:", error.message);
+      }
+    };
+
+    fetchAgent();
+  }, [agentId]);
 
   return (
     <div className="min-h-screen font-mono bg-gradient-to-br from-black to-red-900 text-white flex flex-col md:flex-row">
@@ -48,6 +73,10 @@ export default function AgentLayout({ children }) {
           <h2 className="text-2xl font-extrabold mb-6 text-yellow-400 hidden md:block">
             🎯 Agent Panel
           </h2>
+          <p className="text-lg font-bold text-red-400 mb-1">ID: {agentId}</p>
+          <p className="text-lg font-bold text-red-400 mb-1">
+            Name: {agent?.name}
+          </p>
 
           <nav className="space-y-3">
             {navItems.map((item) => (

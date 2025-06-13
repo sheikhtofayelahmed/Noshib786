@@ -12,24 +12,24 @@ export default function AdminLayout({ children }) {
   const [entryCounts, setEntryCounts] = useState();
   const navItems = [
     { name: "Home", path: "/admin" },
-    { name: "Game Control", path: "/admin/game-control" },
-    { name: "Agent", path: "/admin/agent" },
+    { name: "গেম কন্ট্রোল", path: "/admin/game-control" },
+    { name: "এজেন্ট", path: "/admin/agent" },
     {
-      name: `Voucher ${entryCounts !== undefined ? ` (${entryCounts})` : ""}`,
+      name: `ভাউচার ${entryCounts !== undefined ? ` (${entryCounts})` : ""}`,
       path: "/admin/voucher",
     },
-    { name: "Account", path: "/admin/account" },
+    { name: "হিসাব", path: "/admin/account" },
     { name: "HNY- 3UP", path: "/admin/hny-3up" },
     { name: "HNY- DOUBLE", path: "/admin/hny-double" },
     { name: "HNY- DOWN", path: "/admin/hny-down" },
     { name: "HNY- SINGLE", path: "/admin/hny-single" },
     {
-      name: `Waiting Data ${
+      name: `পেন্ডিং ভাউচার ${
         pendingPlayers !== undefined ? ` (${pendingPlayers})` : ""
       }`,
       path: "/admin/waitingData",
     },
-    { name: "Inactive Agent", path: "/admin/inactive-agent" },
+    { name: "এজেন্ট (বাতিল)", path: "/admin/inactive-agent" },
     { name: "MFA Settings", path: "/admin/mfa-settings" }, // NEW: Link to MFA settings
   ];
 
@@ -140,7 +140,7 @@ export default function AdminLayout({ children }) {
             🎰 Game Admin
           </h2>
 
-          <nav className="space-y-3">
+          <nav className="space-y-3 font-bangla">
             {navItems.map((item) => (
               <Link key={item.path} href={item.path}>
                 <div
