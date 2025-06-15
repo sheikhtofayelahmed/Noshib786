@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useRef } from "react";
 
 import { useState, useEffect } from "react";
 import { useAgent } from "src/context/AgentContext";
@@ -21,6 +21,8 @@ export default function PlayerInput() {
   const [isCompleted, setIsCompleted] = useState(true);
   const [print, setPrint] = useState(false);
   const [agent, setAgent] = useState();
+  const playerRefs = useRef({});
+
   // console.log(subAgentId);
   useEffect(() => {
     const fetchTarget = async () => {
@@ -97,6 +99,7 @@ export default function PlayerInput() {
       total3D = 0;
 
     players.forEach((player) => {
+      console.log(player);
       player.data.forEach((entry) => {
         const parts = entry.input.split(".");
         const num = parts[0];
@@ -178,7 +181,7 @@ export default function PlayerInput() {
       data: newEntries,
     };
 
-    setPlayers([newPlayer, ...players]);
+    setPlayers([newPlayer]);
     setName("");
     setInputs(Array(20).fill(""));
     setErrors(Array(20).fill(false));
@@ -557,7 +560,60 @@ export default function PlayerInput() {
   // const agentId = 'YOUR_AGENT_ID';
 
   const handlePrint = (player) => {
-    const amountPlayed = player.amountPlayed || { OneD: 0, TwoD: 0, ThreeD: 0 }; // make sure amountPlayed exists
+    const dataEntries = player.data || player.entries || [];
+
+    const parsedData = dataEntries.map((entry) => ({ input: entry.input }));
+
+    let total1D = 0;
+    let total2D = 0;
+    let total3D = 0;
+
+    // Calculate total amounts per digit type
+    dataEntries.forEach((entry) => {
+      // Basic input validation for each entry
+      if (
+        !entry.input ||
+        typeof entry.input !== "string" ||
+        !entry.input.includes(".")
+      ) {
+        console.warn(
+          `Skipping malformed entry input: ${JSON.stringify(
+            entry
+          )}. Expected format "NUM=AMOUNT".`
+        );
+        return; // Skip this entry
+      }
+
+      const parts = entry.input.split(".");
+      const num = parts[0];
+      // Filter for valid numbers and positive amounts
+      const amounts = parts
+        .slice(1)
+        .map(Number)
+        .filter((n) => !isNaN(n) && n > 0);
+
+      if (amounts.length === 0) {
+        console.warn(
+          `No valid positive amounts found for entry: ${entry.input}. Skipping total calculation.`
+        );
+        return;
+      }
+
+      const sum = amounts.reduce((a, b) => a + b, 0);
+
+      if (/^\d$/.test(num)) {
+        total1D += sum;
+      } else if (/^\d{2}$/.test(num)) {
+        total2D += sum;
+      } else if (/^\d{3}$/.test(num)) {
+        total3D += sum;
+      } else {
+        console.warn(
+          `Unrecognized number format "${num}" for entry: ${entry.input}. Skipping total calculation for this.`
+        );
+      }
+    });
+    // make sure amountPlayed exists
 
     const win = window.open("", "_blank");
     win.document.write(`
@@ -682,33 +738,36 @@ display: flex;
           <tbody>
             <tr>
               <td>3D Total</td>
-              <td>${amountPlayed?.ThreeD}</td>
-              <td>${(amountPlayed?.ThreeD * 0.6).toFixed(0)}</td>
+              <td>${total3D}</td>
+              <td>${(
+                total3D *
+                ((100 - agent.cPercentages.threeD) / 100)
+              ).toFixed(0)}</td>
             </tr>
             <tr>
               <td>2D Total</td>
-              <td>${amountPlayed?.TwoD}</td>
-              <td>${(amountPlayed?.TwoD * 0.8).toFixed(0)}</td>
+              <td>${total2D}</td>
+              <td>${(total2D * ((100 - agent.cPercentages.twoD) / 100)).toFixed(
+                0
+              )}</td>
             </tr>
             <tr>
               <td>1D Total</td>
-              <td>${amountPlayed?.OneD}</td>
-              <td>${amountPlayed?.OneD.toFixed(0)}</td>
+              <td>${total1D}</td>
+              <td>${(total1D * ((100 - agent.cPercentages.oneD) / 100)).toFixed(
+                0
+              )}</td>
             </tr>
             <tr class="grand-total">
               <td>Grand Total</td>
               <td>
-                ${(
-                  amountPlayed?.ThreeD +
-                  amountPlayed?.TwoD +
-                  amountPlayed?.OneD
-                ).toFixed(0)}
+                ${(total3D + total2D + total1D).toFixed(0)}
               </td>
               <td>
                 ${(
-                  amountPlayed?.ThreeD * 0.6 +
-                  amountPlayed?.TwoD * 0.8 +
-                  amountPlayed?.OneD
+                  total3D * ((100 - agent.cPercentages.threeD) / 100) +
+                  total2D * ((100 - agent.cPercentages.twoD) / 100) +
+                  total1D * ((100 - agent.cPercentages.oneD) / 100)
                 ).toFixed(0)}
               </td>
             </tr>
@@ -722,7 +781,25 @@ display: flex;
     win.document.close();
     win.print();
   };
-
+  const handlePlayerDownloadPdf = async (voucher) => {
+    const html2pdf = (await import("html2pdf.js")).default;
+    const element = playerRefs.current[voucher]?.current; // get the correct ref element
+    if (element) {
+      const options = {
+        margin: 10,
+        filename: `${voucher}.${agent?.name}.${agentId}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          background: "#ffffff",
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
+      html2pdf().set(options).from(element).save();
+    } else {
+      console.error("Content div not found for voucher:", voucher);
+    }
+  };
   return (
     <div className="min-h-screen  text-white p-6 ">
       <div
@@ -809,9 +886,18 @@ display: flex;
             <h3 className="text-2xl text-yellow-400 mb-4 font-semibold text-center">
               🎉 Player Summary 🎉
             </h3>
+            {players.forEach((player) => {
+              if (!playerRefs.current[player.voucher]) {
+                playerRefs.current[player.voucher] = React.createRef();
+              }
+            })}
+
             {players.map((player, idx) => (
               <React.Fragment key={idx}>
-                <div className="my-16 bg-gray-800 p-5 rounded-xl border border-yellow-500 shadow hover:shadow-yellow-500 transition-shadow">
+                <div
+                  ref={playerRefs.current[player.voucher]}
+                  className="relative my-16 bg-gray-800 p-5 rounded-xl border border-yellow-500 shadow hover:shadow-yellow-500 transition-shadow"
+                >
                   <p className="text-yellow-300 font-bold text-xl text-center">
                     Voucher:{" "}
                     <span className="font-mono">{player.voucher || "N/A"}</span>
@@ -832,13 +918,28 @@ display: flex;
                         Entries: {player.data.length}
                       </p>
                     </div>
+
                     {player.submitted ? (
-                      <button
-                        onClick={() => handlePrint(player)}
-                        className="bg-purple-600 hover:bg-purple-700 py-2 px-4 rounded font-semibold text-white transition"
-                      >
-                        🖨️ Print
-                      </button>
+                      <div className="absolute top-2 right-2  flex gap-2">
+                        <button
+                          onClick={() =>
+                            handlePlayerDownloadPdf(player.voucher)
+                          }
+                          className="bg-white w-14 h-14 flex items-center justify-center rounded"
+                        >
+                          <img
+                            src="/download.svg"
+                            alt="Download"
+                            className="w-8 h-8"
+                          />
+                        </button>
+                        <button
+                          onClick={() => handlePrint(player, amountPlayed)}
+                          className="bg-white w-14 h-14 flex items-center justify-center rounded text-white text-2xl"
+                        >
+                          🖨️
+                        </button>
+                      </div>
                     ) : (
                       <button
                         onClick={() => handleSubmitAndPrint(player)}
@@ -911,7 +1012,7 @@ display: flex;
                                 entry.input
                               )}
                             </td>
-                            <td className="border px-3 py-0 space-x-2">
+                            <td className="border px-3 py-2 space-x-2">
                               <>
                                 {entry.isEditing ? (
                                   <button
@@ -969,50 +1070,68 @@ display: flex;
                             🎯 3D Total
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-green-400">
-                            {amountPlayed?.ThreeD}
+                            {amountPlayed?.ThreeD?.toFixed(0) || "0"}
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-green-400">
-                            {(amountPlayed?.ThreeD * 0.6).toFixed(0)}
+                            {(
+                              (amountPlayed?.ThreeD || 0) *
+                              ((100 - (agent?.cPercentages?.threeD || 0)) / 100)
+                            ).toFixed(0)}
                           </td>
                         </tr>
+
                         <tr className="bg-gray-900">
                           <td className="border border-gray-600 px-4 py-2">
                             🎯 2D Total
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-green-400">
-                            {amountPlayed?.TwoD}
+                            {amountPlayed?.TwoD?.toFixed(0) || "0"}
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-green-400">
-                            {(amountPlayed?.TwoD * 0.8).toFixed(0)}
+                            {(
+                              (amountPlayed?.TwoD || 0) *
+                              ((100 - (agent?.cPercentages?.twoD || 0)) / 100)
+                            ).toFixed(0)}
                           </td>
                         </tr>
+
                         <tr className="bg-gray-800">
                           <td className="border border-gray-600 px-4 py-2">
                             🎯 1D Total
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-green-400">
-                            {amountPlayed?.OneD}
+                            {amountPlayed?.OneD?.toFixed(0) || "0"}
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-green-400">
-                            {amountPlayed?.OneD.toFixed(0)}
+                            {(
+                              (amountPlayed?.OneD || 0) *
+                              ((100 - (agent?.cPercentages?.oneD || 0)) / 100)
+                            ).toFixed(0)}
                           </td>
                         </tr>
+
                         <tr className="bg-gray-900 font-bold text-lg">
                           <td className="border border-gray-600 px-4 py-2">
                             🔢 Grand Total
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-yellow-300">
                             {(
-                              amountPlayed?.ThreeD +
-                              amountPlayed?.TwoD +
-                              amountPlayed?.OneD
+                              (amountPlayed?.ThreeD || 0) +
+                              (amountPlayed?.TwoD || 0) +
+                              (amountPlayed?.OneD || 0)
                             ).toFixed(0)}
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-yellow-300">
                             {(
-                              amountPlayed?.ThreeD * 0.6 +
-                              amountPlayed?.TwoD * 0.8 +
-                              amountPlayed?.OneD
+                              ((amountPlayed?.ThreeD || 0) *
+                                (100 - (agent?.cPercentages?.threeD || 0))) /
+                                100 +
+                              ((amountPlayed?.TwoD || 0) *
+                                (100 - (agent?.cPercentages?.twoD || 0))) /
+                                100 +
+                              ((amountPlayed?.OneD || 0) *
+                                (100 - (agent?.cPercentages?.oneD || 0))) /
+                                100
                             ).toFixed(0)}
                           </td>
                         </tr>

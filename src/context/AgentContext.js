@@ -130,6 +130,8 @@ export function AgentProvider({ children }) {
         subAgentId,
         entryCount,
         waitingEntryCount,
+        fetchEntryCount,
+        fetchWaitingPlayers,
         login,
         logout,
         loginError,
