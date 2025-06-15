@@ -5,15 +5,25 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { oldAgentId, agentId, name, password, percentage } = req.body;
-
+  const {
+    oldAgentId,
+    agentId,
+    name,
+    password,
+    percentages,
+    subAgents,
+    cPercentages,
+    expense,
+    tenPercent,
+  } = req.body;
+  console.log(expense, tenPercent);
   // Basic validation
   if (
     !oldAgentId ||
     !agentId ||
     !name ||
     !password ||
-    typeof percentage !== "object"
+    typeof percentages !== "object"
   ) {
     return res.status(400).json({ message: "Missing or invalid fields" });
   }
@@ -38,7 +48,12 @@ export default async function handler(req, res) {
           agentId,
           name,
           password,
-          percentage,
+          percentages,
+          subAgents,
+
+          cPercentages,
+          expense,
+          tenPercent,
         },
       }
     );

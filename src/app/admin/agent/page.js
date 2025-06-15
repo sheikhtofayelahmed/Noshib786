@@ -6,6 +6,12 @@ import { Eye, EyeOff } from "lucide-react";
 export default function AdminAgentPage() {
   const router = useRouter();
   const [onlineAgentIds, setOnlineAgentIds] = useState(new Set());
+  const [subAgents, setSubAgents] = useState(Array(10).fill("")); // Up to 10 sub-agents
+  const [subUpdateAgents, setSubUpdateAgents] = useState(Array(10).fill("")); // Up to 10 sub-agents
+  const [expense, setExpense] = useState(false);
+  const [updateExpense, setUpdateExpense] = useState(false);
+  const [tenPercent, setTenPercent] = useState(false);
+  const [updateTenPercent, setUpdateTenPercent] = useState(false);
 
   const [agents, setAgents] = useState([]);
   const [loadingAgents, setLoadingAgents] = useState(false);
@@ -31,6 +37,16 @@ export default function AdminAgentPage() {
     rumble: 80,
     down: 60,
     single: 3,
+  });
+  const [cPercentages, setCPercentages] = useState({
+    threeD: 40,
+    twoD: 30,
+    oneD: 0,
+  });
+  const [cUpdatePercentages, setCUpdatePercentages] = useState({
+    threeD: 40,
+    twoD: 30,
+    oneD: 0,
   });
   const [formError, setFormError] = useState("");
 
@@ -67,15 +83,15 @@ export default function AdminAgentPage() {
       setLoadingAgents(false);
     }
   };
-
   // When clicking % button, open modal and load agent percentages
   const handleEditClick = (agent) => {
+    console.log(agent, "handle edit check");
     setEditingAgent(agent);
     setAgentId(agent.agentId);
     setName(agent.name);
     setPassword(agent.password);
     setPercentages(
-      agent.percentage || {
+      agent.percentages || {
         threeD: 0,
         twoD: 0,
         oneD: 0,
@@ -85,12 +101,27 @@ export default function AdminAgentPage() {
         single: 0,
       }
     );
+    setCUpdatePercentages(
+      agent.cPercentages || {
+        threeD: 0,
+        twoD: 0,
+        oneD: 0,
+      }
+    );
+    setSubUpdateAgents(
+      Array(10)
+        .fill("")
+        .map((_, i) => agent.subAgents?.[i] || "")
+    );
+    setUpdateExpense(agent.expense);
+    setUpdateTenPercent(agent.tenPercent);
     setEditingModal(true);
   };
 
   const handleAddAgent = async (e) => {
     e.preventDefault();
-    if (!agentId || !password || !name || !iPercentages) {
+    console.log(expense, tenPercent);
+    if (!agentId || !password || !name || !iPercentages || !cPercentages) {
       setError("Please fill all fields");
       return;
     }
@@ -107,6 +138,10 @@ export default function AdminAgentPage() {
           password,
           name,
           percentages: iPercentages,
+          cPercentages: cPercentages,
+          subAgents: subAgents.filter((n) => n.trim() !== ""),
+          expense: expense,
+          tenPercent: tenPercent,
         }),
       });
       const data = await res.json();
@@ -116,6 +151,7 @@ export default function AdminAgentPage() {
         setAgentId("");
         setPassword("");
         setName("");
+        alert("saved");
       } else {
         setError(data.message || "Failed to add agent");
       }
@@ -174,13 +210,18 @@ export default function AdminAgentPage() {
           agentId,
           name,
           password,
-          percentage: percentages,
+          subAgents: subUpdateAgents.filter((n) => n.trim() !== ""),
+          percentages: percentages,
+          cPercentages: cUpdatePercentages,
+          expense: updateExpense,
+          tenPercent: updateTenPercent,
         }),
       });
 
       const data = await res.json();
       if (res.ok) {
         await fetchAgents();
+        alert("saved");
         setEditingModal(false);
         setEditingAgent(null);
       } else {
@@ -253,7 +294,6 @@ export default function AdminAgentPage() {
     const interval = setInterval(fetchOnlineAgents, 60000);
     return () => clearInterval(interval);
   }, []);
-
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black to-red-900 min-h-screen">
       {/* <h1 className="text-4xl mb-6 text-yellow-400 font-bold">
@@ -280,7 +320,15 @@ export default function AdminAgentPage() {
                   <th className="border border-yellow-400 p-2">Password</th>
                   <th className="border border-yellow-400 p-2">Status</th>
                   <th className="border border-yellow-400 p-2">Voucher</th>
-                  <th className="border border-yellow-400 p-2">%</th>
+                  <th className="font-bangla border border-yellow-400 p-2">
+                    <span>ব্যাংকার - এজেন্ট </span>
+                  </th>
+                  <th className="font-bangla border border-yellow-400 p-2">
+                    <span> এজেন্ট - কাস্টমার</span>
+                  </th>
+                  <th className="font-bangla border border-yellow-400 p-2">
+                    সুবিধা
+                  </th>
                   <th colSpan={3} className="border border-yellow-400 p-2">
                     Actions
                   </th>
@@ -298,7 +346,20 @@ export default function AdminAgentPage() {
                   </tr>
                 )}
                 {agents.map(
-                  ({ agentId, name, password, active, percentage }, i) => (
+                  (
+                    {
+                      agentId,
+                      name,
+                      password,
+                      active,
+                      percentages,
+                      cPercentages,
+                      subAgents,
+                      expense,
+                      tenPercent,
+                    },
+                    i
+                  ) => (
                     <tr
                       key={agentId}
                       className="odd:bg-gray-800 even:bg-gray-900"
@@ -325,30 +386,59 @@ export default function AdminAgentPage() {
                           <div className="space-x-1">
                             <span className="inline-block align-middle w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
                             <span className="inline-block align-middle">
-                              Online
+                              On
                             </span>
                           </div>
                         ) : (
                           <div className="space-x-1">
                             <span className="inline-block align-middle w-3 h-3 rounded-full bg-gray-400"></span>
                             <span className="inline-block align-middle">
-                              Offline
+                              Off
                             </span>
                           </div>
                         )}
                       </td>
-
                       <td className="border border-yellow-400 p-2 space-x-2 text-green-400">
                         {entryCounts[agentId] !== undefined
                           ? entryCounts[agentId]
                           : "Loading..."}
                       </td>
-                      <td className="border border-yellow-400 p-2 space-x-2 text-green-400">
-                        {Object.values(percentage ?? {}).length > 0
-                          ? Object.values(percentage).join(", ")
-                          : "—"}
+                      <td className="border border-yellow-400 p-2 space-x-2 ">
+                        <span className="text-green-400">
+                          {Object.values(percentages ?? {}).length > 0
+                            ? Object.values(percentages).join(", ")
+                            : "—"}
+                        </span>
                       </td>
-
+                      <td className="border border-yellow-400 p-2 space-x-2 ">
+                        <span className="text-red-400">
+                          {Object.values(cPercentages ?? {}).length > 0
+                            ? Object.values(cPercentages).join(", ")
+                            : "—"}
+                        </span>
+                      </td>
+                      <td className=" border font-bangla border-yellow-400 text-sm">
+                        <label className="flex items-center space-x-2 text-white">
+                          <input
+                            type="checkbox"
+                            checked={expense}
+                            onChange={(e) => setExpense(e.target.checked)}
+                            disabled={adding}
+                            className="accent-yellow-500"
+                          />
+                          <span>খরচ</span>
+                        </label>
+                        <label className="flex items-center space-x-2 text-white">
+                          <input
+                            type="checkbox"
+                            checked={tenPercent}
+                            onChange={(e) => setTenPercent(e.target.checked)}
+                            disabled={adding}
+                            className="accent-yellow-500"
+                          />
+                          <span>আন্ডার 10%</span>
+                        </label>
+                      </td>
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <button
                           onClick={() =>
@@ -366,7 +456,11 @@ export default function AdminAgentPage() {
                               agentId,
                               name,
                               password,
-                              percentage,
+                              percentages,
+                              cPercentages,
+                              subAgents,
+                              expense,
+                              tenPercent,
                             })
                           }
                           className="px-3 py-1 rounded  text-yellow-400 font-semibold"
@@ -427,27 +521,105 @@ export default function AdminAgentPage() {
               className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
               disabled={adding}
             />
-            {Object.entries(iPercentages).map(([key, value]) => (
-              <div key={key} className="mb-3">
-                <label className="block capitalize text-sm text-yellow-400 mb-1">
-                  {key}
-                </label>
+            <div className="mb-4">
+              <label className=" font-bangla block text-yellow-400 text-lg mt-5">
+                সাব এজেন্ট
+              </label>
+              {subAgents.map((subAgent, index) => (
                 <input
-                  type="number"
-                  placeholder={key}
-                  value={value}
-                  onChange={(e) =>
-                    setIPercentages((prev) => ({
-                      ...prev,
-                      [key]: parseFloat(e.target.value) || 0,
-                    }))
-                  }
-                  className="w-full p-3 rounded bg-black border border-yellow-400 text-yellow-300 placeholder-yellow-600"
+                  key={index}
+                  type="text"
+                  placeholder={`Sub Agent ${index + 1}`}
+                  value={subAgent}
+                  onChange={(e) => {
+                    const updated = [...subAgents];
+                    updated[index] = e.target.value;
+                    setSubAgents(updated);
+                  }}
+                  className="w-full mb-2 p-3 rounded bg-black border border-yellow-400 text-yellow-300 placeholder-yellow-600"
                   disabled={adding}
-                  required
                 />
+              ))}
+            </div>
+            <div className="mb-4">
+              <label className="font-banla block text-yellow-400 text-lg mt-5">
+                এজেন্ট - ব্যাংকার %
+              </label>
+              {Object.entries(iPercentages).map(([key, value]) => (
+                <div key={key} className="mb-3">
+                  <label className="block capitalize text-sm text-yellow-400 mb-1">
+                    {key}
+                  </label>
+                  <input
+                    type="number"
+                    placeholder={key}
+                    value={value}
+                    onChange={(e) =>
+                      setIPercentages((prev) => ({
+                        ...prev,
+                        [key]: parseFloat(e.target.value) || 0,
+                      }))
+                    }
+                    className="w-full p-3 rounded bg-black border border-yellow-400 text-yellow-300 placeholder-yellow-600"
+                    disabled={adding}
+                    required
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="mb-4">
+              <label className="font-bangla block text-yellow-400 text-lg mt-5">
+                এজেন্ট - কাস্টমার %
+              </label>
+              {Object.entries(cPercentages).map(([key, value]) => (
+                <div key={key} className="mb-3">
+                  <label className="block capitalize text-sm text-yellow-400 mb-1">
+                    {key}
+                  </label>
+                  <input
+                    type="number"
+                    placeholder={key}
+                    value={value}
+                    onChange={(e) =>
+                      setCPercentages((prev) => ({
+                        ...prev,
+                        [key]: parseFloat(e.target.value) || 0,
+                      }))
+                    }
+                    className="w-full p-3 rounded bg-black border border-yellow-400 text-yellow-300 placeholder-yellow-600"
+                    disabled={adding}
+                    required
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="mb-4">
+              <label className="font-bangla block text-yellow-400 text-lg mt-5">
+                সিলেকশন
+              </label>
+              <div className="font-bangla  flex items-center space-x-4 mt-2">
+                <label className="flex items-center space-x-2 text-yellow-300">
+                  <input
+                    type="checkbox"
+                    checked={expense}
+                    onChange={(e) => setExpense(e.target.checked)}
+                    disabled={adding}
+                    className="accent-yellow-500"
+                  />
+                  <span>খরচ</span>
+                </label>
+                <label className="flex items-center space-x-2 text-yellow-300">
+                  <input
+                    type="checkbox"
+                    checked={tenPercent}
+                    onChange={(e) => setTenPercent(e.target.checked)}
+                    disabled={adding}
+                    className="accent-yellow-500"
+                  />
+                  <span>আন্ডার 10%</span>
+                </label>
               </div>
-            ))}
+            </div>
 
             <button
               type="submit"
@@ -508,6 +680,24 @@ export default function AdminAgentPage() {
 
             {/* Percentages */}
             <div className="mb-3 mt-4">
+              <h3 className="text-yellow-400 font-semibold mb-2">Sub Agents</h3>
+              {subUpdateAgents.map((value, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  placeholder={`Sub Agent ${index + 1}`}
+                  className="w-full mb-2 p-2 bg-black border border-yellow-400 rounded text-yellow-300 placeholder-yellow-600"
+                  value={value}
+                  onChange={(e) => {
+                    const updated = [...subUpdateAgents];
+                    updated[index] = e.target.value;
+                    setSubUpdateAgents(updated);
+                  }}
+                />
+              ))}
+            </div>
+
+            <div className="mb-3 mt-4">
               <h3 className="text-yellow-400 font-semibold mb-2">
                 Percentages
               </h3>
@@ -527,6 +717,54 @@ export default function AdminAgentPage() {
                   />
                 </div>
               ))}
+            </div>
+            <div className="mb-3 mt-4">
+              <h3 className="text-yellow-400 font-semibold mb-2">
+                Percentages
+              </h3>
+              {Object.entries(cUpdatePercentages).map(([key, value]) => (
+                <div key={key} className="mb-2">
+                  <label className="block capitalize text-sm">{key}</label>
+                  <input
+                    type="number"
+                    className="w-full p-2 bg-black border border-yellow-400 rounded text-yellow-300"
+                    value={value}
+                    onChange={(e) =>
+                      setCUpdatePercentages((prev) => ({
+                        ...prev,
+                        [key]: parseFloat(e.target.value) || "",
+                      }))
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="mb-4">
+              <label className="font-bangla block text-yellow-400 text-lg mt-5">
+                সিলেকশন
+              </label>
+              <div className="flex items-center space-x-4 mt-2">
+                <label className="flex items-center space-x-2 text-yellow-300">
+                  <input
+                    type="checkbox"
+                    checked={updateExpense}
+                    onChange={(e) => setUpdateExpense(e.target.checked)}
+                    disabled={adding}
+                    className="accent-yellow-500"
+                  />
+                  <span>খরচ</span>
+                </label>
+                <label className="flex items-center space-x-2 text-yellow-300">
+                  <input
+                    type="checkbox"
+                    checked={updateTenPercent}
+                    onChange={(e) => setUpdateTenPercent(e.target.checked)}
+                    disabled={adding}
+                    className="accent-yellow-500"
+                  />
+                  <span>আন্ডার 10%</span>
+                </label>
+              </div>
             </div>
 
             <div className="flex justify-end space-x-2 mt-4">

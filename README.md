@@ -125,7 +125,7 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 <!-- **name should come first** -->
 <!-- **serial on agent page** -->
 
-**agent active status**
+<!-- **agent active status** -->
 **make a button to submit all agent data to be saved to game summary**
 **serial , winning number on hisab nikas**
 **agent account history on hisab nikash**
