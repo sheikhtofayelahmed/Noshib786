@@ -85,7 +85,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-white">
+    <div className="min-h-screen -mt-32 flex items-center justify-center  text-white">
       <div className="bg-gray-900 p-6 rounded shadow-lg border border-yellow-500">
         <h1 className="text-2xl font-bold text-yellow-400 mb-4 font-mono">
           🎰 Admin Login

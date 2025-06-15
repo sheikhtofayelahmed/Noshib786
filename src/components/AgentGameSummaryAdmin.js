@@ -24,6 +24,12 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
   const [selectedOption, setSelectedOption] = useState("");
   const [numberInput, setNumberInput] = useState(0);
   const [jomaInput, setJomaInput] = useState("");
+
+  function safeDate(dateStr) {
+    if (!dateStr) return "Invalid Date";
+    const parsed = parseISO(dateStr);
+    return isValid(parsed) ? format(parsed, "dd/MM/yyyy") : "Invalid Date";
+  }
   useEffect(() => {
     async function fetchSummary() {
       try {
@@ -477,7 +483,7 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
                    <td colSpan="2"><td/>
               </tr>
               <tr class="total-row">
-                <td colSpan="1" class="final-calc"> (এডমিন পাবে)</td>
+                <td colSpan="1" class="final-calc"> (ব্যাংকার পাবে)</td>
                 <td colSpan="1">${Math.max(
                   0,
                   safeMoneyCal.totalGame - safeMoneyCal.totalWin
@@ -728,246 +734,169 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
           <div className="overflow-x-auto mt-8 mb-8 max-w-4xl mx-auto">
             <div
               ref={contentRef}
-              className="overflow-x-auto my-4 bg-gray-900 bg-opacity-80 rounded-lg shadow-md ring-2 ring-yellow-500 p-6 text-center"
+              className="overflow-x-auto my-4 rounded-lg shadow-md ring-2 ring-gray-400 bg-white p-6 text-center"
             >
-              {/* Flex container to position title and button */}
               <div className="flex justify-between items-center mb-6">
-                {/* Title (pushed to the left) */}
-                <h2 className="text-base sm:text-lg md:text-2xl lg:text-3xl  font-bold text-yellow-400 animate-pulse">
+                <h2 className="text-lg md:text-2xl font-bold text-gray-800">
                   📊 Game & Player Summary
                 </h2>
 
-                {/* Button container (pushed to the right) */}
                 <div className="flex items-center gap-4 mt-4">
                   <button
                     onClick={handleDownloadPdf}
-                    className="p-2 rounded-xl bg-white transition duration-300 flex items-center justify-center"
+                    className="p-2 rounded-xl bg-gray-200 transition duration-300"
                     title="Download Player Info"
                   >
                     <img
                       src="/download.svg"
                       alt="Download"
-                      className="w-8 h-8" // Equivalent to width: 32px, height: 32px
+                      className="w-8 h-8"
                     />
                   </button>
-
                   <button
                     onClick={uploadSummary}
-                    className="py-2 px-2 border bg-white text-black  rounded-xl transition duration-300 text-2xl font-medium"
-                    title="Print Summary"
+                    className="py-2 px-2 bg-gray-200 text-black rounded-xl transition duration-300 text-lg font-medium"
                   >
                     Save
                   </button>
-                  {/* <button
-                    onClick={() =>
-                      handleSummaryPrint(
-                        agent,
-                        date,
-                        threeUp,
-                        downGame,
-                        moneyCal,
-                        totalWins
-                      )
-                    }
-                    className="py-2 px-2 bg-white rounded-xl transition duration-300 text-2xl font-medium"
-                    title="Print Summary"
-                  >
-                    🖨️
-                  </button> */}
                 </div>
               </div>
-              <table className="overflow-x-auto w-full border-collapse font-mono text-sm rounded-lg overflow-hidden shadow-lg">
+
+              <table className="w-full border-collapse font-mono text-sm rounded-lg shadow border border-gray-400">
                 <tbody>
-                  {/* Header Row */}
-                  <tr className="bg-black border border-yellow-700">
-                    <td
-                      colSpan={2}
-                      className="px-6 py-4 text-base sm:text-lg md:text-2xl lg:text-3xl font-extrabold text-yellow-500 tracking-widest"
-                    >
+                  <tr className="bg-gray-100 text-gray-800">
+                    <td colSpan={2} className="px-6 py-4 text-2xl font-bold">
                       {agent?.name}
                     </td>
-                    <td
-                      colSpan={2}
-                      className="px-6 py-4 text-xl font-bold text-white"
-                    >
-                      {format(parseISO(date), "dd/MM/yyyy")}
+                    <td colSpan={2} className="px-6 py-4 text-xl">
+                      {safeDate(date)}
                     </td>
-                    <td
-                      colSpan={2}
-                      className="px-6 py-4 text-4xl font-extrabold text-yellow-500 tracking-widest"
-                    >
+                    <td colSpan={2} className="px-6 py-4 text-2xl">
                       {threeUp || "XXX"}
                     </td>
-                    <td
-                      colSpan={2}
-                      className="px-6 py-4 text-4xl font-extrabold text-pink-500 tracking-widest"
-                    >
+                    <td colSpan={2} className="px-6 py-4 text-2xl">
                       {downGame || "XX"}
                     </td>
                   </tr>
 
-                  {/* Total Summary Header */}
-                  <tr className="bg-green-800 text-white text-lg">
-                    <th className="border border-gray-700 p-2 text-center">
-                      Category
-                    </th>
-                    <th className="border border-gray-700 p-2 text-center">
-                      🎯 3D
-                    </th>
-                    <th className="border border-gray-700 p-2 text-center">
-                      🎯 2D
-                    </th>
-                    <th className="border border-gray-700 p-2 text-center">
-                      🎯 1D
-                    </th>
-                    <th className="border bg-yellow-800 border-gray-700 p-2 text-center">
-                      STR
-                    </th>
-                    <th className="border bg-yellow-800 border-gray-700 p-2 text-center">
-                      RUMBLE
-                    </th>
-                    <th className="border bg-yellow-800 border-gray-700 p-2 text-center">
-                      DOWN
-                    </th>
-                    <th className="border bg-yellow-800 border-gray-700 p-2 text-center">
-                      SINGLE
-                    </th>
+                  {/* Headers */}
+                  <tr className="bg-gray-200 text-gray-900 font-semibold text-sm">
+                    <th className="border p-2">Category</th>
+                    <th className="border p-2">🎯 3D</th>
+                    <th className="border p-2">🎯 2D</th>
+                    <th className="border p-2">🎯 1D</th>
+                    <th className="border p-2">STR</th>
+                    <th className="border p-2">RUMBLE</th>
+                    <th className="border p-2">DOWN</th>
+                    <th className="border p-2">SINGLE</th>
                   </tr>
 
                   {/* Total Amounts */}
-                  <tr className="bg-gray-800 text-green-400 text-lg">
-                    <td className="border border-gray-700 px-4 py-2 font-semibold">
-                      Total
-                    </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                  <tr className="bg-gray-50 text-green-700">
+                    <td className="border px-4 py-2 font-semibold">Total</td>
+                    <td className="border text-center">
                       {moneyCal?.totalAmounts?.ThreeD.toFixed(0)}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border text-center">
                       {moneyCal?.totalAmounts?.TwoD.toFixed(0)}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border text-center">
                       {moneyCal?.totalAmounts?.OneD.toFixed(0)}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border text-center">
                       {totalWins?.STR3D || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border text-center">
                       {totalWins?.RUMBLE3D || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border text-center">
                       {totalWins?.DOWN || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border text-center">
                       {totalWins?.SINGLE || 0}
                     </td>
                   </tr>
 
-                  {/* Percentage */}
-                  <tr className="bg-gray-800 text-green-400 text-lg">
-                    <td className="border border-gray-700 px-4 py-2 font-semibold">
-                      % / -
-                    </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                  {/* Percentages */}
+                  <tr className="bg-gray-50 text-gray-700">
+                    <td className="border px-4 py-2 font-semibold">% / -</td>
+                    <td className="border text-center">
                       {agent?.percentage?.threeD || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border text-center">
                       {agent?.percentage?.twoD || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border text-center">
                       {agent?.percentage?.oneD || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border text-center">
                       {agent?.percentage?.str || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border text-center">
                       {agent?.percentage?.rumble || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border text-center">
                       {agent?.percentage?.down || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border text-center">
                       {agent?.percentage?.single || 0}
                     </td>
                   </tr>
 
                   {/* After Deduction */}
-                  <tr className="bg-gray-700 text-green-400 text-lg">
-                    <td className="border border-gray-700 px-4 py-2 font-semibold">
+                  <tr className="bg-gray-50 text-gray-800">
+                    <td className="border px-4 py-2 font-semibold">
                       After Deduction
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border text-center">
                       {moneyCal?.afterThreeD || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border text-center">
                       {moneyCal?.afterTwoD || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border text-center">
                       {moneyCal?.afterOneD || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border text-center">
                       {moneyCal?.afterSTR || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border text-center">
                       {moneyCal?.afterRUMBLE || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border text-center">
                       {moneyCal?.afterDOWN || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border text-center">
                       {moneyCal?.afterSINGLE || 0}
                     </td>
                   </tr>
 
-                  {/* Total Game Row */}
-                  <tr className="bg-gray-900 font-bold text-lg text-white">
-                    <td
-                      colSpan={2}
-                      className="border border-gray-700 px-4 py-2"
-                    >
+                  {/* Total Game and Win */}
+                  <tr className="bg-gray-100 font-bold text-gray-900">
+                    <td colSpan={2} className="border px-4 py-2">
                       Total Game
                     </td>
-                    <td
-                      colSpan={2}
-                      className="border border-gray-700 px-4 py-2"
-                    >
+                    <td colSpan={2} className="border px-4 py-2">
                       {moneyCal?.totalGame || 0}
                     </td>
-                    <td
-                      colSpan={4}
-                      className="font-bangla border border-gray-700 px-4 py-2"
-                    >
+                    <td colSpan={4} className="border px-4 py-2 font-bangla">
                       সর্বমোট হিসাব
                     </td>
                   </tr>
 
-                  {/* Total Win Row */}
-                  <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
-                    <td
-                      colSpan={2}
-                      className="border border-gray-700 px-4 py-2 text-yellow-300"
-                    >
+                  <tr className="bg-gray-100 font-bold text-gray-900">
+                    <td colSpan={2} className="border px-4 py-2">
                       Total Win
                     </td>
-                    <td
-                      colSpan={2}
-                      className="border border-gray-700 px-4 py-2 text-yellow-300"
-                    >
+                    <td colSpan={2} className="border px-4 py-2">
                       {moneyCal?.totalWin || 0}
                     </td>
-
-                    <td
-                      colSpan={2}
-                      className="font-bangla border border-gray-700 px-4 py-2 text-yellow-300"
-                    >
+                    <td colSpan={3} className="border px-4 py-2 font-bangla">
                       {moneyCal?.totalGame > moneyCal?.totalWin
-                        ? "ব্যাংকার+"
-                        : "এজেন্ট+"}
+                        ? "গেম এ ব্যাংকার পাবে"
+                        : "গেম এ এজেন্ট পাবে"}
                     </td>
-
-                    <td
-                      colSpan={2}
-                      className="font-bangla border border-gray-700 px-4 py-2 text-red-400"
-                    >
+                    <td className="border px-4 py-2 text-red-600">
                       {Math.abs(
                         (moneyCal?.totalGame || 0) - (moneyCal?.totalWin || 0)
                       )}
@@ -975,61 +904,43 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
                   </tr>
 
                   {/* Admin Gets Row */}
-                  <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
-                    <td
-                      colSpan={2}
-                      className="font-bangla border border-gray-700 px-4 py-2 text-red-400"
-                    >
-                      এডমিন পাবে
+                  <tr className="bg-gray-100 text-gray-800">
+                    <td colSpan={2} className="border px-4 py-2 font-bangla">
+                      ব্যাংকার পাবে
                     </td>
-                    <td
-                      colSpan={2}
-                      className="border border-gray-700 px-4 py-2 text-red-400"
-                    >
+                    <td colSpan={2} className="border px-4 py-2">
                       {moneyCal?.totalGame - moneyCal?.totalWin >= 0
                         ? moneyCal?.totalGame - moneyCal?.totalWin
                         : 0}
                     </td>
-                    <td
-                      colSpan={2}
-                      className="border border-gray-700 px-4 py-2"
-                    >
+                    <td colSpan={3} className="border px-4 py-2">
                       <select
                         value={selectedOption}
                         onChange={(e) => setSelectedOption(e.target.value)}
-                        className="w-full font-bangla bg-gray-900 text-yellow-300"
+                        className="w-full bg-white border px-2 py-1 text-center"
                       >
                         <option value="option">সাবেক</option>
                         <option value="adminEx">ব্যাংকার সাবেক</option>
                         <option value="agentEx">এজেন্ট সাবেক</option>
                       </select>
                     </td>
-                    <td
-                      colSpan={2}
-                      className="font-bangla border text-white border-gray-700 px-4 py-2"
-                    >
+                    <td colSpan={2} className="border px-4 py-2">
                       <input
                         type="number"
-                        placeholder="পরিমাণ"
                         value={numberInput}
                         onChange={(e) => setNumberInput(e.target.value)}
-                        className="w-full bg-gray-700 text-white text-center px-2 py-1"
+                        placeholder="পরিমাণ"
+                        className="w-full font-bangla bg-gray-100 border text-center px-2 py-1"
                       />
                     </td>
                   </tr>
 
-                  {/* Agent Gets Row */}
-                  <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
-                    <td
-                      colSpan={2}
-                      className="font-bangla border border-gray-700 px-4 py-2 text-white"
-                    >
+                  {/* Agent Gets and Summary Logic */}
+                  <tr className="bg-gray-100 text-gray-800">
+                    <td colSpan={2} className="border px-4 py-2 font-bangla">
                       এজেন্ট পাবে
                     </td>
-                    <td
-                      colSpan={2}
-                      className="border border-gray-700 px-4 py-2 text-white"
-                    >
+                    <td colSpan={2} className="border px-4 py-2">
                       {moneyCal?.totalWin - moneyCal?.totalGame >= 0
                         ? moneyCal?.totalWin - moneyCal?.totalGame
                         : 0}
@@ -1037,109 +948,85 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
                     {(() => {
                       const game = moneyCal?.totalGame || 0;
                       const win = moneyCal?.totalWin || 0;
-                      const netNow = game - win; // বর্তমান গেমে কার পাওনা
-
-                      const previous = Number(numberInput) || 0; // পুরাতন পাওনা
+                      const netNow = game - win;
+                      const previous = Number(numberInput) || 0;
                       let finalNet = 0;
 
-                      if (selectedOption === "adminEx") {
-                        finalNet = netNow + previous; // admin ছিল পাওনাদার, এখনো হতে পারে
-                      } else if (selectedOption === "agentEx") {
-                        finalNet = netNow - previous; // agent ছিল পাওনাদার, এখনো হতে পারে
-                      }
-
-                      const whoGets =
-                        finalNet > 0 ? "এডমিন বর্তমান" : "এজেন্ট বর্তমান";
-                      const howMuch = Math.abs(finalNet);
+                      if (selectedOption === "adminEx")
+                        finalNet = netNow + previous;
+                      else if (selectedOption === "agentEx")
+                        finalNet = netNow - previous;
 
                       return (
                         <>
                           <td
-                            colSpan={2}
-                            className="font-bangla border border-gray-700 px-4 py-2 text-yellow-300"
+                            colSpan={3}
+                            className="border px-4 py-2 font-bangla"
                           >
-                            {whoGets}
+                            {finalNet > 0
+                              ? "ব্যাংকার বর্তমান"
+                              : "এজেন্ট বর্তমান"}
                           </td>
-                          <td
-                            colSpan={2}
-                            className="border border-gray-700 px-4 py-2 text-white"
-                          >
-                            {howMuch}
+                          <td colSpan={3} className="border px-4 py-2">
+                            {Math.abs(finalNet)}
                           </td>
                         </>
                       );
                     })()}
                   </tr>
 
-                  {/* Joma Record Section */}
-
-                  <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
+                  {/* Joma Record */}
+                  <tr className="bg-gray-100 text-gray-800">
                     <td
                       colSpan={4}
                       rowSpan={2}
-                      className="text-sm px-4 py-2 border border-gray-700"
+                      className="text-sm px-4 py-2 border"
                     >
                       <ol>
                         {summaryData?.joma
                           ?.filter((entry) => entry.amount !== 0)
-                          .map((entry, index) => (
-                            <li key={index}>
+                          .map((entry, i) => (
+                            <li key={i}>
                               📅 {entry.date} 💰{" "}
                               {entry.amount.toLocaleString("en-US")}
                             </li>
                           ))}
                       </ol>
                     </td>
-
-                    <td
-                      colSpan={2}
-                      className="font-bangla border border-gray-700 px-4 py-2 text-red-400"
-                    >
+                    <td colSpan={3} className="border px-4 py-2 font-bangla">
                       জমা
                     </td>
-                    <td
-                      colSpan={2}
-                      className="font-bangla border text-white border-gray-700 px-4 py-2"
-                    >
+                    <td colSpan={2} className="border px-4 py-2">
                       <input
                         type="number"
-                        placeholder="পরিমাণ"
                         value={jomaInput}
                         onChange={(e) => setJomaInput(e.target.value)}
-                        className="w-full bg-gray-700 text-white text-center px-2 py-1"
+                        placeholder="পরিমাণ"
+                        className="w-full font-bangla bg-gray-100 border text-center px-2 py-1"
                       />
                     </td>
                   </tr>
-                  {/* Final Summary Row */}
-                  <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
-                    <td
-                      colSpan={2}
-                      className="font-bangla border border-gray-700 px-4 py-2 text-white"
-                    >
+
+                  {/* Final Summary */}
+                  <tr className="bg-gray-100 text-gray-900 font-bold">
+                    <td colSpan={3} className="border px-4 py-2 font-bangla">
                       ফাইনাল হিসাব
                     </td>
-                    <td
-                      colSpan={2}
-                      className="font-bangla border text-white border-gray-700 px-4 py-2"
-                    >
+                    <td colSpan={2} className="border px-4 py-2">
                       {(() => {
                         const game = moneyCal?.totalGame || 0;
                         const win = moneyCal?.totalWin || 0;
                         const netNow = game - win;
-
                         const previous = Number(numberInput) || 0;
                         const joma = Number(jomaInput) || 0;
                         let finalNet = 0;
 
-                        if (selectedOption === "adminEx") {
+                        if (selectedOption === "adminEx")
                           finalNet = netNow + previous;
-                        } else if (selectedOption === "agentEx") {
+                        else if (selectedOption === "agentEx")
                           finalNet = netNow - previous;
-                        }
 
-                        const afterJoma = finalNet - joma;
-
-                        return afterJoma;
+                        return finalNet - joma;
                       })()}
                     </td>
                   </tr>
@@ -1168,7 +1055,7 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
                   <h2 className="text-lg font-bold text-center mb-2 print:mb-1">
                     {player.voucher || ""}
                   </h2>
-                  <h2 className="text-lg font-semibold text-center mb-1 print:mb-1">
+                  <h2 className="text-lg font-bangla font-semibold text-center mb-1 print:mb-1">
                     Player: {player.name || ""} || Sub Agent:{" "}
                     {player.SAId || ""}
                   </h2>
@@ -1329,16 +1216,19 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
                         </td>
                       </tr>
                       <tr className="font-bold">
-                        <td className="bg-white px-2 py-1 border">
+                        <td
+                          colSpan={2}
+                          className="bg-white px-2 py-1 border text-right"
+                        >
                           Grand Total
                         </td>
-                        <td className="bg-white px-2 py-1 border">
+                        {/* <td className="bg-white px-2 py-1 border">
                           {(
                             player?.amountPlayed?.ThreeD +
                             player?.amountPlayed?.TwoD +
                             player?.amountPlayed?.OneD
                           ).toFixed(0)}
-                        </td>
+                        </td> */}
                         <td className="bg-white px-2 py-1 border">
                           {(
                             player?.amountPlayed?.ThreeD * 0.6 +

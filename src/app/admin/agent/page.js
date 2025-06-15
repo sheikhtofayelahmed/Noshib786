@@ -2,14 +2,21 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
+import { Eye, EyeOff } from "lucide-react";
 export default function AdminAgentPage() {
   const router = useRouter();
+  const [onlineAgentIds, setOnlineAgentIds] = useState(new Set());
 
   const [agents, setAgents] = useState([]);
   const [loadingAgents, setLoadingAgents] = useState(false);
   const [error, setError] = useState("");
-
+  const [visiblePasswords, setVisiblePasswords] = useState({});
+  const toggleVisible = (agentId) => {
+    setVisiblePasswords((prev) => ({
+      ...prev,
+      [agentId]: !prev[agentId],
+    }));
+  };
   const [agentId, setAgentId] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -25,6 +32,7 @@ export default function AdminAgentPage() {
     down: 60,
     single: 3,
   });
+  const [formError, setFormError] = useState("");
 
   const [percentages, setPercentages] = useState({
     threeD: 0,
@@ -36,7 +44,7 @@ export default function AdminAgentPage() {
     single: 0,
   });
   const [editingAgent, setEditingAgent] = useState(null);
-  const [showPercentageModal, setShowPercentageModal] = useState(false);
+  const [editingModal, setEditingModal] = useState(false);
   const [modal, setModal] = useState(false);
   useEffect(() => {
     fetchAgents();
@@ -63,6 +71,9 @@ export default function AdminAgentPage() {
   // When clicking % button, open modal and load agent percentages
   const handleEditClick = (agent) => {
     setEditingAgent(agent);
+    setAgentId(agent.agentId);
+    setName(agent.name);
+    setPassword(agent.password);
     setPercentages(
       agent.percentage || {
         threeD: 0,
@@ -74,7 +85,7 @@ export default function AdminAgentPage() {
         single: 0,
       }
     );
-    setShowPercentageModal(true);
+    setEditingModal(true);
   };
 
   const handleAddAgent = async (e) => {
@@ -116,6 +127,12 @@ export default function AdminAgentPage() {
   };
 
   const toggleActive = async (agentId, currentActive) => {
+    const confirmed = confirm("Are you sure you want to delete this agent?");
+
+    if (!confirmed) {
+      alert("Deletion cancelled.");
+      return;
+    }
     setError("");
     try {
       const res = await fetch("/api/toggleAgentActive", {
@@ -139,31 +156,39 @@ export default function AdminAgentPage() {
     }
   };
 
-  const savePercentages = async () => {
-    setError("");
+  const updateAgent = async () => {
+    setFormError(""); // reset
+
+    // Basic frontend validation
+    if (!agentId || !name || !password) {
+      setFormError("Agent ID, Name, and Password are required.");
+      return;
+    }
+
     try {
-      const res = await fetch("/api/updateAgentPercentages", {
+      const res = await fetch("/api/updateAgent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          agentId: editingAgent.agentId,
+          oldAgentId: editingAgent.agentId,
+          agentId,
+          name,
+          password,
           percentage: percentages,
         }),
       });
 
       const data = await res.json();
-
       if (res.ok) {
-        alert("Percentages updated successfully!");
-        setShowPercentageModal(false);
+        await fetchAgents();
+        setEditingModal(false);
         setEditingAgent(null);
-        fetchAgents(); // Refresh the list
       } else {
-        setError(data.message || "Failed to update percentages");
+        setFormError(data.message || "Update failed");
       }
     } catch (err) {
-      console.error("Error updating percentages:", err);
-      setError("Failed to update percentages");
+      console.error("Failed to update agent:", err);
+      setFormError("Server error. Please try again.");
     }
   };
 
@@ -197,12 +222,43 @@ export default function AdminAgentPage() {
       fetchCountsForAgents();
     }
   }, [agents]);
+  // Send heartbeat for current logged-in agent
+
+  const fetchOnlineAgents = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/getOnlineAgents");
+      const data = await res.json();
+      if (res.ok) {
+        // data.agents is an array of online agents, extract IDs
+        const onlineIds = new Set(data.agents.map((a) => a.agentId));
+        setOnlineAgentIds(onlineIds);
+      } else {
+        setError(data.message || "Failed to fetch online agents");
+        setOnlineAgentIds(new Set());
+      }
+    } catch {
+      setError("Failed to fetch online agents");
+      setOnlineAgentIds(new Set());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOnlineAgents();
+
+    // Optional: refresh every 1 minute to keep list updated
+    const interval = setInterval(fetchOnlineAgents, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black to-red-900 min-h-screen">
-      <h1 className="text-4xl mb-6 text-yellow-400 font-bold">
+      {/* <h1 className="text-4xl mb-6 text-yellow-400 font-bold">
         🎰 Admin Agent Management
-      </h1>
+      </h1> */}
 
       {/* Add Agent Form */}
 
@@ -218,10 +274,13 @@ export default function AdminAgentPage() {
             <table className="min-w-full text-yellow-300 border-collapse font-mono">
               <thead>
                 <tr className="bg-yellow-700 text-white">
-                  <th className="border border-yellow-400 p-2">Agent ID</th>
+                  <th className="border border-yellow-400 p-2">#</th>
                   <th className="border border-yellow-400 p-2">Name</th>
+                  <th className="border border-yellow-400 p-2">Agent ID</th>
                   <th className="border border-yellow-400 p-2">Password</th>
+                  <th className="border border-yellow-400 p-2">Status</th>
                   <th className="border border-yellow-400 p-2">Voucher</th>
+                  <th className="border border-yellow-400 p-2">%</th>
                   <th colSpan={3} className="border border-yellow-400 p-2">
                     Actions
                   </th>
@@ -239,23 +298,57 @@ export default function AdminAgentPage() {
                   </tr>
                 )}
                 {agents.map(
-                  ({ agentId, name, password, active, percentage }) => (
+                  ({ agentId, name, password, active, percentage }, i) => (
                     <tr
                       key={agentId}
                       className="odd:bg-gray-800 even:bg-gray-900"
                     >
+                      <td className="border border-yellow-400 p-2">{i + 1}</td>
+                      <td className="border border-yellow-400 p-2">{name}</td>
                       <td className="border border-yellow-400 p-2">
                         {agentId}
                       </td>
-                      <td className="border border-yellow-400 p-2">{name}</td>
-                      <td className="border border-yellow-400 p-2">
-                        {password}
+                      <td className="border border-yellow-400 p-2 ">
+                        <span className="text-white px-4">
+                          {visiblePasswords[agentId] ? password : "********"}
+                        </span>
+                        <button onClick={() => toggleVisible(agentId)}>
+                          {visiblePasswords[agentId] ? (
+                            <EyeOff size={18} className="text-yellow-400" />
+                          ) : (
+                            <Eye size={18} className="text-yellow-400" />
+                          )}
+                        </button>
                       </td>
+                      <td className="border px-3 py-2">
+                        {onlineAgentIds.has(agentId) ? (
+                          <div className="space-x-1">
+                            <span className="inline-block align-middle w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+                            <span className="inline-block align-middle">
+                              Online
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="space-x-1">
+                            <span className="inline-block align-middle w-3 h-3 rounded-full bg-gray-400"></span>
+                            <span className="inline-block align-middle">
+                              Offline
+                            </span>
+                          </div>
+                        )}
+                      </td>
+
                       <td className="border border-yellow-400 p-2 space-x-2 text-green-400">
                         {entryCounts[agentId] !== undefined
                           ? entryCounts[agentId]
                           : "Loading..."}
                       </td>
+                      <td className="border border-yellow-400 p-2 space-x-2 text-green-400">
+                        {Object.values(percentage ?? {}).length > 0
+                          ? Object.values(percentage).join(", ")
+                          : "—"}
+                      </td>
+
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <button
                           onClick={() =>
@@ -269,11 +362,16 @@ export default function AdminAgentPage() {
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <button
                           onClick={() =>
-                            handleEditClick({ agentId, name, percentage })
+                            handleEditClick({
+                              agentId,
+                              name,
+                              password,
+                              percentage,
+                            })
                           }
                           className="px-3 py-1 rounded  text-yellow-400 font-semibold"
                         >
-                          %
+                          Edit
                         </button>
                       </td>
                       <td className="border border-yellow-400 p-2 space-x-2">
@@ -363,35 +461,78 @@ export default function AdminAgentPage() {
         )}
       </section>
 
-      {/* Percentage Edit Modal */}
-      {showPercentageModal && editingAgent && (
+      {editingModal && editingAgent && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded-lg text-white w-[90%] max-w-md">
+          <div className="bg-gray-900 p-6 rounded-lg text-white w-[90%] max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4 text-yellow-400">
-              Edit Percentages for {editingAgent.name}
+              Edit Agent: {editingAgent.name}
             </h2>
+            {formError && (
+              <p className="text-red-400 text-sm mb-3 text-center">
+                {formError}
+              </p>
+            )}
 
-            {Object.entries(percentages).map(([key, value]) => (
-              <div key={key} className="mb-3">
-                <label className="block capitalize text-sm">{key}</label>
-                <input
-                  type="number"
-                  className="w-full p-2 bg-black border border-yellow-400 rounded text-yellow-300"
-                  value={value}
-                  onChange={(e) =>
-                    setPercentages((prev) => ({
-                      ...prev,
-                      [key]: parseFloat(e.target.value) || "",
-                    }))
-                  }
-                />
-              </div>
-            ))}
+            {/* Agent ID */}
+            <div className="mb-3">
+              <label className="block text-sm">Agent ID</label>
+              <input
+                type="text"
+                className="w-full p-2 bg-black border border-yellow-400 rounded text-yellow-300"
+                value={agentId}
+                onChange={(e) => setAgentId(e.target.value)}
+              />
+            </div>
+
+            {/* Name */}
+            <div className="mb-3">
+              <label className="block text-sm">Name</label>
+              <input
+                type="text"
+                className="w-full p-2 bg-black border border-yellow-400 rounded text-yellow-300"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            {/* Password */}
+            <div className="mb-3">
+              <label className="block text-sm">Password</label>
+              <input
+                type="text"
+                className="w-full p-2 bg-black border border-yellow-400 rounded text-yellow-300"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            {/* Percentages */}
+            <div className="mb-3 mt-4">
+              <h3 className="text-yellow-400 font-semibold mb-2">
+                Percentages
+              </h3>
+              {Object.entries(percentages).map(([key, value]) => (
+                <div key={key} className="mb-2">
+                  <label className="block capitalize text-sm">{key}</label>
+                  <input
+                    type="number"
+                    className="w-full p-2 bg-black border border-yellow-400 rounded text-yellow-300"
+                    value={value}
+                    onChange={(e) =>
+                      setPercentages((prev) => ({
+                        ...prev,
+                        [key]: parseFloat(e.target.value) || "",
+                      }))
+                    }
+                  />
+                </div>
+              ))}
+            </div>
 
             <div className="flex justify-end space-x-2 mt-4">
               <button
                 onClick={() => {
-                  setShowPercentageModal(false);
+                  setEditingModal(false);
                   setEditingAgent(null);
                 }}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
@@ -399,7 +540,7 @@ export default function AdminAgentPage() {
                 Cancel
               </button>
               <button
-                onClick={savePercentages}
+                onClick={updateAgent}
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
               >
                 Save

@@ -51,7 +51,8 @@ const SubAgentSummary = () => {
     return <p>No players found for this agent.</p>;
 
   const groupedBySAId = players.reduce((acc, player) => {
-    const key = player.SAId || "Unknown";
+    if (!player.SAId) return acc; // skip players with no SAId
+    const key = player.SAId;
     if (!acc[key]) acc[key] = [];
     acc[key].push(player);
     return acc;

@@ -20,7 +20,11 @@ const AgentGameSummary = ({ agentId }) => {
   const hasUploadedRef = useRef(false); // to prevent duplicate uploads
   const contentRef = useRef(null);
   const playerRefs = useRef({});
-
+  function safeDate(dateStr) {
+    if (!dateStr) return "Invalid Date";
+    const parsed = parseISO(dateStr);
+    return isValid(parsed) ? format(parsed, "dd/MM/yyyy") : "Invalid Date";
+  }
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -39,7 +43,7 @@ const AgentGameSummary = ({ agentId }) => {
 
   useEffect(() => {
     if (!agentId) return;
-    console.log(agentId);
+    // console.log(agentId);
     const fetchAgent = async () => {
       try {
         const res = await fetch(`/api/getAgentById?agentId=${agentId}`);
@@ -399,7 +403,7 @@ const AgentGameSummary = ({ agentId }) => {
                    <td colSpan="2"><td/>
               </tr>
               <tr class="total-row">
-                <td colSpan="1" class="final-calc"> (এডমিন পাবে)</td>
+                <td colSpan="1" class="final-calc"> (ব্যাংকার পাবে)</td>
                 <td colSpan="1">${Math.max(
                   0,
                   safeMoneyCal.totalGame - safeMoneyCal.totalWin
@@ -650,29 +654,25 @@ const AgentGameSummary = ({ agentId }) => {
           <div className="overflow-x-auto mt-8 mb-8 max-w-4xl mx-auto">
             <div
               ref={contentRef}
-              className="overflow-x-auto my-4 bg-gray-900 bg-opacity-80 rounded-lg shadow-md ring-2 ring-yellow-500 p-6 text-center"
+              className="overflow-x-auto my-4 bg-white rounded-lg shadow-md border border-gray-300 p-6 text-center"
             >
-              {/* Flex container to position title and button */}
+              {/* Header */}
               <div className="flex justify-between items-center mb-6">
-                {/* Title (pushed to the left) */}
-                <h2 className="text-base sm:text-lg md:text-2xl lg:text-3xl  font-bold text-yellow-400 animate-pulse">
+                <h2 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold text-gray-900">
                   📊 Game & Player Summary
                 </h2>
-
-                {/* Button container (pushed to the right) */}
                 <div className="flex items-center gap-4 mt-4">
                   <button
                     onClick={handleDownloadPdf}
-                    className="p-2 rounded-xl bg-white transition duration-300 flex items-center justify-center"
+                    className="p-2 rounded-xl bg-white border border-gray-300 flex items-center justify-center"
                     title="Download Player Info"
                   >
                     <img
                       src="/download.svg"
                       alt="Download"
-                      className="w-8 h-8" // Equivalent to width: 32px, height: 32px
+                      className="w-8 h-8"
                     />
                   </button>
-
                   <button
                     onClick={() =>
                       handleSummaryPrint(
@@ -684,198 +684,181 @@ const AgentGameSummary = ({ agentId }) => {
                         totalWins
                       )
                     }
-                    className="py-2 px-2 bg-white rounded-xl transition duration-300 text-2xl font-medium"
+                    className="py-2 px-2 bg-white border border-gray-300 rounded-xl text-2xl font-medium "
                     title="Print Summary"
                   >
                     🖨️
                   </button>
                 </div>
               </div>
-              <table className="overflow-x-auto w-full border-collapse font-mono text-sm rounded-lg overflow-hidden shadow-lg">
+
+              <table className="w-full border-collapse font-mono text-sm rounded-lg overflow-hidden">
                 <tbody>
-                  {/* Header Row */}
-                  <tr className="bg-black border border-yellow-700">
+                  {/* Agent Info Row */}
+                  <tr className="bg-gray-100 border border-yellow-300">
                     <td
                       colSpan={2}
-                      className="px-6 py-4 text-base sm:text-lg md:text-2xl lg:text-3xl font-extrabold text-yellow-500 tracking-widest"
+                      className="px-6 py-4 text-2xl font-extrabold text-gray-800"
                     >
                       {agent?.name}
                     </td>
                     <td
                       colSpan={2}
-                      className="px-6 py-4 text-xl font-bold text-white"
+                      className="px-6 py-4 text-xl font-bold text-gray-700"
                     >
-                      {format(parseISO(date), "dd/MM/yyyy")}
+                      {safeDate(date)}
                     </td>
                     <td
                       colSpan={2}
-                      className="px-6 py-4 text-4xl font-extrabold text-yellow-500 tracking-widest"
+                      className="px-6 py-4 text-4xl font-extrabold text-gray-800"
                     >
                       {threeUp || "XXX"}
                     </td>
                     <td
                       colSpan={2}
-                      className="px-6 py-4 text-4xl font-extrabold text-pink-500 tracking-widest"
+                      className="px-6 py-4 text-4xl font-extrabold text-gray-800"
                     >
                       {downGame || "XX"}
                     </td>
                   </tr>
 
-                  {/* Total Summary Header */}
-                  <tr className="bg-green-800 text-white text-lg">
-                    <th className="border border-gray-700 p-2 text-center">
-                      Category
-                    </th>
-                    <th className="border border-gray-700 p-2 text-center">
-                      🎯 3D
-                    </th>
-                    <th className="border border-gray-700 p-2 text-center">
-                      🎯 2D
-                    </th>
-                    <th className="border border-gray-700 p-2 text-center">
-                      🎯 1D
-                    </th>
-                    <th className="border bg-yellow-800 border-gray-700 p-2 text-center">
-                      STR
-                    </th>
-                    <th className="border bg-yellow-800 border-gray-700 p-2 text-center">
-                      RUMBLE
-                    </th>
-                    <th className="border bg-yellow-800 border-gray-700 p-2 text-center">
-                      DOWN
-                    </th>
-                    <th className="border bg-yellow-800 border-gray-700 p-2 text-center">
-                      SINGLE
-                    </th>
+                  {/* Summary Header */}
+                  <tr className="bg-gray-100 text-black text-lg">
+                    <th className="border border-gray-300 p-2">Category</th>
+                    <th className="border border-gray-300 p-2">🎯 3D</th>
+                    <th className="border border-gray-300 p-2">🎯 2D</th>
+                    <th className="border border-gray-300 p-2">🎯 1D</th>
+                    <th className="border border-gray-300 p-2">STR</th>
+                    <th className="border border-gray-300 p-2">RUMBLE</th>
+                    <th className="border border-gray-300 p-2">DOWN</th>
+                    <th className="border border-gray-300 p-2">SINGLE</th>
                   </tr>
 
                   {/* Total Amounts */}
-                  <tr className="bg-gray-800 text-green-400 text-lg">
-                    <td className="border border-gray-700 px-4 py-2 font-semibold">
+                  <tr className="bg-white text-gray-800 text-lg">
+                    <td className="border border-gray-300 px-4 py-2 font-semibold">
                       Total
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {moneyCal?.totalAmounts?.ThreeD.toFixed(0)}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {moneyCal?.totalAmounts?.TwoD.toFixed(0)}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {moneyCal?.totalAmounts?.OneD.toFixed(0)}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {totalWins?.STR3D || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {totalWins?.RUMBLE3D || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {totalWins?.DOWN || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {totalWins?.SINGLE || 0}
                     </td>
                   </tr>
 
-                  {/* Percentage */}
-                  <tr className="bg-gray-800 text-green-400 text-lg">
-                    <td className="border border-gray-700 px-4 py-2 font-semibold">
+                  {/* Percentages */}
+                  <tr className="bg-white text-gray-800 text-lg">
+                    <td className="border border-gray-300 px-4 py-2 font-semibold">
                       % / -
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {agent?.percentage?.threeD || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {agent?.percentage?.twoD || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {agent?.percentage?.oneD || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {agent?.percentage?.str || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {agent?.percentage?.rumble || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {agent?.percentage?.down || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {agent?.percentage?.single || 0}
                     </td>
                   </tr>
 
                   {/* After Deduction */}
-                  <tr className="bg-gray-700 text-green-400 text-lg">
-                    <td className="border border-gray-700 px-4 py-2 font-semibold">
+                  <tr className="bg-gray-100 text-gray-800 text-lg">
+                    <td className="border border-gray-300 px-4 py-2 font-semibold">
                       After Deduction
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {moneyCal?.afterThreeD || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {moneyCal?.afterTwoD || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {moneyCal?.afterOneD || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {moneyCal?.afterSTR || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {moneyCal?.afterRUMBLE || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {moneyCal?.afterDOWN || 0}
                     </td>
-                    <td className="border border-gray-700 px-4 py-2 text-center text-yellow-500">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {moneyCal?.afterSINGLE || 0}
                     </td>
                   </tr>
 
-                  {/* Total Game Row */}
-                  <tr className="bg-gray-900 font-bold text-lg text-white">
+                  {/* Totals and Agent/Admin Payouts */}
+                  <tr className="bg-gray-100 font-bold text-lg text-black">
                     <td
                       colSpan={2}
-                      className="border border-gray-700 px-4 py-2"
+                      className="border border-gray-300 px-4 py-2"
                     >
                       Total Game
                     </td>
                     <td
                       colSpan={2}
-                      className="border border-gray-700 px-4 py-2"
+                      className="border border-gray-300 px-4 py-2"
                     >
                       {moneyCal?.totalGame || 0}
                     </td>
                   </tr>
 
-                  {/* Total Win Row */}
-                  <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
+                  <tr className="bg-gray-100 font-bold text-lg text-black">
                     <td
                       colSpan={2}
-                      className="border border-gray-700 px-4 py-2 text-yellow-300"
+                      className="border border-gray-300 px-4 py-2"
                     >
                       Total Win
                     </td>
                     <td
                       colSpan={2}
-                      className="border border-gray-700 px-4 py-2 text-yellow-300"
+                      className="border border-gray-300 px-4 py-2"
                     >
                       {moneyCal?.totalWin || 0}
                     </td>
                   </tr>
 
-                  {/* Admin Gets Row */}
-                  <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
+                  <tr className="bg-white font-bold text-lg text-red-500">
                     <td
                       colSpan={2}
-                      className="font-bangla border border-gray-700 px-4 py-2 text-red-400"
+                      className="font-bangla border border-gray-300 px-4 py-2"
                     >
-                      এডমিন পাবে
+                      ব্যাংকার পাবে
                     </td>
                     <td
                       colSpan={2}
-                      className="border border-gray-700 px-4 py-2 text-red-400"
+                      className="border border-gray-300 px-4 py-2"
                     >
                       {moneyCal?.totalGame - moneyCal?.totalWin >= 0
                         ? moneyCal?.totalGame - moneyCal?.totalWin
@@ -883,25 +866,22 @@ const AgentGameSummary = ({ agentId }) => {
                     </td>
                   </tr>
 
-                  {/* Agent Gets Row */}
-                  <tr className="bg-gray-900 font-bold text-lg text-yellow-300">
+                  <tr className="bg-white font-bold text-lg text-green-700">
                     <td
                       colSpan={2}
-                      className="font-bangla border border-gray-700 px-4 py-2 text-white"
+                      className="font-bangla border border-gray-300 px-4 py-2"
                     >
                       এজেন্ট পাবে
                     </td>
                     <td
                       colSpan={2}
-                      className="border border-gray-700 px-4 py-2 text-white"
+                      className="border border-gray-300 px-4 py-2"
                     >
                       {moneyCal?.totalWin - moneyCal?.totalGame >= 0
                         ? moneyCal?.totalWin - moneyCal?.totalGame
                         : 0}
                     </td>
                   </tr>
-
-                  {/* Joma Record Section */}
                 </tbody>
               </table>
             </div>
@@ -927,7 +907,7 @@ const AgentGameSummary = ({ agentId }) => {
                   <h2 className="text-lg font-bold text-center mb-2 print:mb-1">
                     {player.voucher || ""}
                   </h2>
-                  <h2 className="text-lg font-semibold text-center mb-1 print:mb-1">
+                  <h2 className="text-lg font-bangla font-semibold text-center mb-1 print:mb-1">
                     Player: {player.name || ""} || Sub Agent:{" "}
                     {player.SAId || ""}
                   </h2>

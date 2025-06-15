@@ -52,7 +52,18 @@ export default function AgentLayout({ children }) {
 
     fetchAgent();
   }, [agentId]);
+  useEffect(() => {
+    if (!agentId) return;
 
+    const interval = setInterval(() => {
+      fetch("/api/heartbeat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agentId }),
+      });
+    }, 30000); // every 30 seconds
+    return () => clearInterval(interval); // cleanup on unmount
+  }, [agentId]);
   return (
     <div className="min-h-screen font-mono bg-gradient-to-br from-black to-red-900 text-white flex flex-col md:flex-row">
       {/* Mobile Header */}
@@ -73,6 +84,7 @@ export default function AgentLayout({ children }) {
           <h2 className="text-2xl font-extrabold mb-6 text-yellow-400 hidden md:block">
             🎯 Agent Panel
           </h2>
+
           <p className="text-lg font-bold text-red-400 mb-1">ID: {agentId}</p>
           <p className="text-lg font-bold text-red-400 mb-1">
             Name: {agent?.name}
@@ -95,7 +107,16 @@ export default function AgentLayout({ children }) {
             ))}
           </nav>
         </div>
-
+        <div className="text-center mt-10">
+          <h1 className="font-bangla text-xl md:text-xl font-bold mb-4 text-yellow-400 drop-shadow-lg animate-flicker">
+            🔥 আল্লাহ ভরসা 🔥
+          </h1>
+          <img
+            src="dowa.png"
+            alt="Dowa"
+            className="mx-auto w-40 md:w-72 drop-shadow-2xl animate-pulse"
+          />
+        </div>
         <div className="pt-6 border-t border-yellow-600 mt-6">
           <button
             onClick={() => {

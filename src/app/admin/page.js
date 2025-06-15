@@ -17,12 +17,18 @@ export default async function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen  text-white flex items-center justify-center">
+    <main className="min-h-screen -mt-32 text-white flex items-center justify-center">
       <div className="text-center">
-        <h1 className="font-bangla text-5xl font-bold mb-4 animate-fire text-yellow-400 drop-shadow-lg">
-          🔥 মিঃ ওয়াহেদ, Welcome to Admin Dashboard 🔥
-        </h1>
-        
+        <div className="text-center">
+          <h1 className="font-bangla text-2xl md:text-7xl font-bold mb-4 text-yellow-400 drop-shadow-lg animate-flicker">
+            🔥 আল্লাহ ভরসা 🔥
+          </h1>
+          <img
+            src="dowa.png"
+            alt="Dowa"
+            className="mx-auto pt-10 w-64 md:w-96 drop-shadow-2xl animate-pulse"
+          />
+        </div>
       </div>
     </main>
   );

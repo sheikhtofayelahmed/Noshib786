@@ -768,6 +768,18 @@ display: flex;
             className={`w-full p-2 mb-2 rounded bg-black border-2 text-white ${
               errors[i] ? "border-red-500 bg-red-900" : "border-yellow-400"
             }`}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault(); // prevent form submit if inside a form
+                const nextInput = document.querySelector(
+                  `input[name='input-${i + 1}']`
+                );
+                if (nextInput) {
+                  nextInput.focus();
+                }
+              }
+            }}
+            name={`input-${i}`}
           />
         ))}
 

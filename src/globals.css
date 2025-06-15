@@ -18,10 +18,6 @@ tr {
   transition: background-color 0.3s ease;
 }
 
-tr:nth-child(odd) {
-  background-color: #1f2937; /* Tailwind bg-gray-800 */
-}
-
 /* Table cells padding and relative positioning */
 td,
 th {

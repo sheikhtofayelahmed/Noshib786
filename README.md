@@ -109,3 +109,45 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 <!-- **print input number organized by their type like 3up, down and single** -->
 
 <!-- **make all the printing style like small printer** -->
+
+<!-- **https://thai-lottery-agent.vercel.app/admin/agent-games/wahid error** -->
+
+**winning on down should not show str or rumble. just one will show.**
+**single win will be 3up er digit gula win**
+**played game amount original should be removed and discount will show**
+
+<!-- **admin replaced banker** -->
+
+**খরচ , আন্ডার**
+
+<!-- **del agent** -->
+<!-- **pss hide, edit on agent** -->
+<!-- **name should come first** -->
+<!-- **serial on agent page** -->
+
+**agent active status**
+**make a button to submit all agent data to be saved to game summary**
+**serial , winning number on hisab nikas**
+**agent account history on hisab nikash**
+**add extra thing to hisab nikash like yearly and indivual agent account for the all game**
+
+<!-- **add enter to make entry** -->
+
+**if possible then add auto fillup in the input entry**
+**mobile responsive**
+**add download to input**
+
+<!-- **sub agent don't show unknown** -->
+
+**add subagent login system**
+**add 10 subagent**
+**agent edit system**
+**percentage system on the agent list**
+
+<!-- **allah vorosa and picture** -->
+
+**add agent - customer percentage system**
+**total game calculation with percentage**
+**css or color system on hisab nikash**
+
+<!-- **remove background from game account summary** -->

@@ -23,6 +23,10 @@ module.exports = {
           "0%": { transform: "translateX(100%)" },
           "100%": { transform: "translateX(-100%)" },
         },
+        flicker: {
+          "0%, 100%": { opacity: 1 },
+          "50%": { opacity: 0.5 },
+        },
         fire: {
           "0%, 100%": { color: "#ff6600", transform: "scale(1)" },
           "50%": { color: "#ffc266", transform: "scale(1.05)" },
@@ -44,6 +48,7 @@ module.exports = {
         fire: "fire 1.5s ease-in-out infinite",
         marquee: "marquee 20s linear infinite",
         "pulse-light": "pulse-light 3s infinite alternate",
+        flicker: "flicker 2s infinite",
       },
     },
   },
