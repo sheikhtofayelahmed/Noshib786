@@ -3,6 +3,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 
 export default async function AdminPage() {
   // CORRECTED: Await the cookies() function call.
@@ -23,10 +24,12 @@ export default async function AdminPage() {
           <h1 className="font-bangla text-2xl md:text-7xl font-bold mb-4 text-yellow-400 drop-shadow-lg animate-flicker">
             🔥 আল্লাহ ভরসা 🔥
           </h1>
-          <img
-            src="dowa.png"
+          <Image
+            src="/dowa.png"
             alt="Dowa"
-            className="mx-auto pt-10 w-64 md:w-96 drop-shadow-2xl animate-pulse"
+            width={288} // adjust based on your layout
+            height={288}
+            className="mx-auto drop-shadow-2xl animate-pulse"
           />
         </div>
       </div>

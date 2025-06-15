@@ -6,29 +6,46 @@ const AgentContext = createContext();
 
 export function AgentProvider({ children }) {
   const [agentId, setAgentId] = useState(null);
+  const [loginAs, setLoginAs] = useState("agent");
+  const [subAgentId, setSubAgentId] = useState(null);
   const [loginError, setLoginError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [entryCount, setEntryCount] = useState(0);
   const [waitingEntryCount, setWaitingEntryCount] = useState(0);
 
-  // On mount, load agentId from localStorage if exists
+  // Load from localStorage (only on client)
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const storedAgentId = localStorage.getItem("agentId");
-    if (storedAgentId) {
-      setAgentId(storedAgentId);
-    }
+    const storedLoginAs = localStorage.getItem("loginAs");
+    const storedSubAgentId = localStorage.getItem("subAgentId");
+
+    if (storedAgentId) setAgentId(storedAgentId);
+    if (storedLoginAs) setLoginAs(storedLoginAs);
+    if (storedSubAgentId) setSubAgentId(storedSubAgentId);
+
     setLoading(false);
   }, []);
 
   // Login function
-  async function login(inputAgentId, password) {
+  async function login(
+    inputAgentId,
+    password,
+    loginAsType = "agent",
+    subId = null
+  ) {
     setLoginError(null);
-    // Call your login API here - example:
     try {
       const res = await fetch("/api/agent-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId: inputAgentId, password }),
+        body: JSON.stringify({
+          agentId: inputAgentId,
+          password,
+          loginAs: loginAsType,
+          subAgentId: subId,
+        }),
       });
 
       if (!res.ok) {
@@ -37,9 +54,20 @@ export function AgentProvider({ children }) {
         return false;
       }
 
-      // Login success
-      setAgentId(inputAgentId);
+      // Save to localStorage
       localStorage.setItem("agentId", inputAgentId);
+      localStorage.setItem("loginAs", loginAsType);
+      if (loginAsType === "subagent" && subId) {
+        localStorage.setItem("subAgentId", subId);
+        setSubAgentId(subId);
+      } else {
+        localStorage.removeItem("subAgentId");
+        setSubAgentId(null);
+      }
+
+      setAgentId(inputAgentId);
+      setLoginAs(loginAsType);
+
       return true;
     } catch (error) {
       setLoginError("Network error");
@@ -47,94 +75,61 @@ export function AgentProvider({ children }) {
     }
   }
 
-  // Logout function
+  // Logout
   function logout() {
     setAgentId(null);
+    setLoginAs("agent");
+    setSubAgentId(null);
     localStorage.removeItem("agentId");
-    // Optionally redirect or handle post logout steps
+    localStorage.removeItem("loginAs");
+    localStorage.removeItem("subAgentId");
   }
+
+  // Fetch data
   const fetchEntryCount = async (agentId) => {
     try {
       const res = await fetch("/api/getVoucherQntByAgentId", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agentId }),
       });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Failed to fetch entry count");
-      }
-
+      if (!res.ok) throw new Error("Failed to fetch entry count");
       const data = await res.json();
       setEntryCount(data.count);
     } catch (err) {
-      console.error("Error fetching entry count:", err);
-      setErrorCount(err.message);
+      console.error("Entry count error:", err);
     }
   };
+
   const fetchWaitingPlayers = async (agentId) => {
-    if (!agentId) {
-      setError("Agent ID is missing. Cannot fetch waiting players.");
-      setLoading(false);
-      return;
-    }
-
     try {
-      setLoading(true);
-
-      // Fetch data from your new API endpoint
-      const response = await fetch(
-        `/api/getWaitingPlayersByAgentId`, // No query params in URL
-        {
-          method: "POST", // Specify POST method
-          headers: {
-            "Content-Type": "application/json", // Tell server we're sending JSON
-          },
-          body: JSON.stringify({ agentId }), // Send agentId in the request body as JSON
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message ||
-            `Failed to fetch waiting players: ${response.statusText}`
-        );
-      }
-
-      const data = await response.json();
+      const res = await fetch("/api/getWaitingPlayersByAgentId", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agentId }),
+      });
+      if (!res.ok) throw new Error("Failed to fetch waiting players");
+      const data = await res.json();
       setWaitingEntryCount(data.players.length);
-      // ...
-    } catch (e) {
-      console.error("Error fetching waiting players:", e);
-      setError(
-        e.message || "Failed to load waiting players. Please try again."
-      );
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error("Waiting players error:", err);
     }
   };
+
   useEffect(() => {
     if (!agentId) return;
-
-    if (agentId) {
-      fetchEntryCount(agentId);
-
-      fetchWaitingPlayers(agentId);
-    }
+    fetchEntryCount(agentId);
+    fetchWaitingPlayers(agentId);
   }, [agentId]);
 
   return (
     <AgentContext.Provider
       value={{
         agentId,
+        loginAs,
+        subAgentId,
         entryCount,
-        fetchEntryCount,
         waitingEntryCount,
-        fetchWaitingPlayers,
         login,
         logout,
         loginError,

@@ -329,6 +329,9 @@ export default function AdminAgentPage() {
                   <th className="font-bangla border border-yellow-400 p-2">
                     সুবিধা
                   </th>
+                  <th className="font-bangla border border-yellow-400 p-2">
+                    Sub Agent
+                  </th>
                   <th colSpan={3} className="border border-yellow-400 p-2">
                     Actions
                   </th>
@@ -357,6 +360,7 @@ export default function AdminAgentPage() {
                       subAgents,
                       expense,
                       tenPercent,
+                      hasSubAgents,
                     },
                     i
                   ) => (
@@ -439,6 +443,14 @@ export default function AdminAgentPage() {
                           <span>আন্ডার 10%</span>
                         </label>
                       </td>
+                      <td className="border border-yellow-400 p-2 text-center">
+                        {hasSubAgents ? (
+                          <span className="text-green-400 text-xl">✔️</span>
+                        ) : (
+                          <span className="text-red-500 text-xl">❌</span>
+                        )}
+                      </td>
+
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <button
                           onClick={() =>

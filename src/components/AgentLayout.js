@@ -6,9 +6,10 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import Breadcrumb from "./Breadcrumb"; // adjust path if needed
 import { useAgent } from "@/context/AgentContext";
+import Image from "next/image";
 
 export default function AgentLayout({ children }) {
-  const { entryCount, waitingEntryCount, logout } = useAgent();
+  const { loginAs, entryCount, waitingEntryCount, logout } = useAgent();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -17,11 +18,19 @@ export default function AgentLayout({ children }) {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const navItems = [
     { name: "Home", path: "/" },
-    {
-      name: `Games${entryCount !== undefined ? ` (${entryCount})` : ""}`,
-      path: "/agent/games",
+    // Only show Games if loginAs is 'agent'
+    ...(loginAs === "agent"
+      ? [
+          {
+            name: `Games${entryCount !== undefined ? ` (${entryCount})` : ""}`,
+            path: "/agent/games",
+          },
+        ]
+      : []),
+    agent?.hasSubAgents && {
+      name: "Sub Agent Games",
+      path: "/agent/subAgentGames",
     },
-    { name: "Sub Agent Games", path: "/agent/subAgentGames" },
     {
       name: `Pending-পেন্ডিং ${
         waitingEntryCount !== undefined ? ` (${waitingEntryCount})` : ""
@@ -91,30 +100,34 @@ export default function AgentLayout({ children }) {
           </p>
 
           <nav className="space-y-3 font-bangla          ">
-            {navItems.map((item) => (
-              <Link key={item.path} href={item.path}>
-                <div
-                  onClick={() => setSidebarOpen(false)}
-                  className={`block px-4 py-2 rounded border border-yellow-400 hover:bg-yellow-500 hover:text-black transition ${
-                    pathname === item.path
-                      ? "bg-yellow-600 text-black font-bold shadow-lg"
-                      : "text-yellow-300"
-                  }`}
-                >
-                  {item.name}
-                </div>
-              </Link>
-            ))}
+            {navItems
+              .filter((item) => item && item.path) // ensure item and item.path exist
+              .map((item) => (
+                <Link href={item.path} key={item.path}>
+                  <div
+                    onClick={() => setSidebarOpen(false)}
+                    className={`block px-4 py-2 rounded border border-yellow-400 hover:bg-yellow-500 hover:text-black transition ${
+                      pathname === item.path
+                        ? "bg-yellow-600 text-black font-bold shadow-lg"
+                        : "text-yellow-300"
+                    }`}
+                  >
+                    {item.name}
+                  </div>
+                </Link>
+              ))}
           </nav>
         </div>
         <div className="text-center mt-10">
           <h1 className="font-bangla text-xl md:text-xl font-bold mb-4 text-yellow-400 drop-shadow-lg animate-flicker">
             🔥 আল্লাহ ভরসা 🔥
           </h1>
-          <img
-            src="dowa.png"
+          <Image
+            src="/dowa.png"
             alt="Dowa"
-            className="mx-auto w-40 md:w-72 drop-shadow-2xl animate-pulse"
+            width={288} // adjust based on your layout
+            height={288}
+            className="mx-auto drop-shadow-2xl animate-pulse"
           />
         </div>
         <div className="pt-6 border-t border-yellow-600 mt-6">
