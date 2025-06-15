@@ -381,7 +381,7 @@ export default function AdminAgentPage() {
                           )}
                         </button>
                       </td>
-                      <td className="border px-3 py-2">
+                      <td className="border border-yellow-400 px-3 py-2">
                         {onlineAgentIds.has(agentId) ? (
                           <div className="space-x-1">
                             <span className="inline-block align-middle w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>

@@ -140,9 +140,9 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 <!-- **sub agent don't show unknown** -->
 
 **add subagent login system**
-**add 10 subagent**
-**agent edit system**
-**percentage system on the agent list**
+<!-- **add 10 subagent** -->
+<!-- **agent edit system** -->
+<!-- **percentage system on the agent list** -->
 
 <!-- **allah vorosa and picture** -->
 

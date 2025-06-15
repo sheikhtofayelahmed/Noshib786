@@ -39,7 +39,8 @@ export default async function handler(req, res) {
         return res.status(409).json({ message: "Agent ID already exists." });
       }
     }
-
+    const cleanedSubAgents = subAgents.filter((n) => n.trim() !== "");
+    const hasSubAgents = cleanedSubAgents.length > 0;
     // Update the agent
     const result = await db.collection("agents").updateOne(
       { agentId: oldAgentId },
@@ -54,6 +55,7 @@ export default async function handler(req, res) {
           cPercentages,
           expense,
           tenPercent,
+          hasSubAgents,
         },
       }
     );

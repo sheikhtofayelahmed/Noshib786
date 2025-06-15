@@ -36,7 +36,8 @@ export default async function handler(req, res) {
     if (existingAgent) {
       return res.status(409).json({ message: "Agent ID already exists" });
     }
-
+    const cleanedSubAgents = subAgents.filter((n) => n.trim() !== "");
+    const hasSubAgents = cleanedSubAgents.length > 0;
     const newAgent = {
       agentId,
       password,
@@ -46,6 +47,7 @@ export default async function handler(req, res) {
       subAgents,
       expense,
       tenPercent,
+      hasSubAgents,
       active: true,
     };
     await db.collection("agents").insertOne(newAgent);
