@@ -112,9 +112,9 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 
 <!-- **https://thai-lottery-agent.vercel.app/admin/agent-games/wahid error** -->
 
-**winning on down should not show str or rumble. just one will show.**
-**single win will be 3up er digit gula win**
-**played game amount original should be removed and discount will show**
+<!-- **winning on down should not show str or rumble. just one will show.** -->
+<!-- **single win will be 3up er digit gula win** -->
+<!-- **played game amount original should be removed and discount will show** -->
 
 <!-- **admin replaced banker** -->
 
@@ -150,6 +150,7 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 
 <!-- **add agent - customer percentage system**
 **total game calculation with percentage** -->
+
 **css or color system on hisab nikash**
 
 <!-- **remove background from game account summary** -->

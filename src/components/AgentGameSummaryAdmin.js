@@ -1030,13 +1030,16 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
                                 {number}
                               </span>
                               {amounts.map((amt, i) => {
-                                const highlightAll =
-                                  type === "str" || type === "down";
+                                const highlightAll = type === "str";
+                                const highlightDown = type === "down";
                                 const highlightOne =
                                   type === "rumble" || type === "single";
 
                                 const shouldHighlight =
                                   (highlightAll && match) ||
+                                  (highlightDown &&
+                                    match &&
+                                    i === amounts.length - 2) ||
                                   (highlightOne &&
                                     match &&
                                     i === amounts.length - 1);
