@@ -192,7 +192,7 @@ const AgentGameSummary = ({ agentId }) => {
     return { match: false, type: null };
   };
   useEffect(() => {
-    if (totalWins && agent?.percentage) {
+    if (totalWins && agent?.percentages) {
       const totalAmounts = players.reduce(
         (acc, player) => {
           acc.ThreeD += player.amountPlayed.ThreeD || 0;
@@ -204,21 +204,21 @@ const AgentGameSummary = ({ agentId }) => {
       );
 
       const afterThreeD = Math.floor(
-        totalAmounts.ThreeD * (1 - agent.percentage.threeD / 100)
+        totalAmounts.ThreeD * (1 - agent.percentages.threeD / 100)
       );
       const afterTwoD = Math.floor(
-        totalAmounts.TwoD * (1 - agent.percentage.twoD / 100)
+        totalAmounts.TwoD * (1 - agent.percentages.twoD / 100)
       );
       const afterOneD = Math.floor(
-        totalAmounts.OneD * (1 - agent.percentage.oneD / 100)
+        totalAmounts.OneD * (1 - agent.percentages.oneD / 100)
       );
-      const afterSTR = Math.floor(totalWins.STR3D * agent.percentage.str);
+      const afterSTR = Math.floor(totalWins.STR3D * agent.percentages.str);
       const afterRUMBLE = Math.floor(
-        totalWins.RUMBLE3D * agent.percentage.rumble
+        totalWins.RUMBLE3D * agent.percentages.rumble
       );
-      const afterDOWN = Math.floor(totalWins.DOWN * agent.percentage.down);
+      const afterDOWN = Math.floor(totalWins.DOWN * agent.percentages.down);
       const afterSINGLE = Math.floor(
-        totalWins.SINGLE * agent.percentage.single
+        totalWins.SINGLE * agent.percentages.single
       );
 
       const totalGame = afterThreeD + afterTwoD + afterOneD;
@@ -239,7 +239,7 @@ const AgentGameSummary = ({ agentId }) => {
         WL,
       });
     }
-  }, [totalWins, agent?.percentage, players]);
+  }, [totalWins, agent?.percentages, players]);
 
   const handleSummaryPrint = (
     agent,
@@ -250,7 +250,7 @@ const AgentGameSummary = ({ agentId }) => {
     totalWins
   ) => {
     // Default empty objects to prevent errors if data is null or undefined
-    const safeAgent = agent || { name: "", percentage: {} };
+    const safeAgent = agent || { name: "", percentages: {} };
     const safeMoneyCal = moneyCal || {
       totalAmounts: { ThreeD: 0, TwoD: 0, OneD: 0 },
       totalGame: 0,
@@ -363,13 +363,13 @@ const AgentGameSummary = ({ agentId }) => {
               </tr>
               <tr>
                 <td class="category-header">% / -</td>
-                <td>${safeAgent.percentage?.threeD || 0}</td>
-                <td>${safeAgent.percentage?.twoD || 0}</td>
-                <td>${safeAgent.percentage?.oneD || 0}</td>
-                <td class="highlight">${safeAgent.percentage?.str || 0}</td>
-                <td class="highlight">${safeAgent.percentage?.rumble || 0}</td>
-                <td class="highlight">${safeAgent.percentage?.down || 0}</td>
-                <td class="highlight">${safeAgent.percentage?.single || 0}</td>
+                <td>${safeAgent.percentages?.threeD || 0}</td>
+                <td>${safeAgent.percentages?.twoD || 0}</td>
+                <td>${safeAgent.percentages?.oneD || 0}</td>
+                <td class="highlight">${safeAgent.percentages?.str || 0}</td>
+                <td class="highlight">${safeAgent.percentages?.rumble || 0}</td>
+                <td class="highlight">${safeAgent.percentages?.down || 0}</td>
+                <td class="highlight">${safeAgent.percentages?.single || 0}</td>
               </tr>
               <tr>
                 <td class="category-header">After Ded.</td>
@@ -762,31 +762,31 @@ const AgentGameSummary = ({ agentId }) => {
                     </td>
                   </tr>
 
-                  {/* Percentages */}
+                  {/* Percentagess */}
                   <tr className="bg-white text-gray-800 text-lg">
                     <td className="border border-gray-300 px-4 py-2 font-semibold">
                       % / -
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-center">
-                      {agent?.percentage?.threeD || 0}
+                      {agent?.percentages?.threeD || 0}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-center">
-                      {agent?.percentage?.twoD || 0}
+                      {agent?.percentages?.twoD || 0}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-center">
-                      {agent?.percentage?.oneD || 0}
+                      {agent?.percentages?.oneD || 0}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-center">
-                      {agent?.percentage?.str || 0}
+                      {agent?.percentages?.str || 0}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-center">
-                      {agent?.percentage?.rumble || 0}
+                      {agent?.percentages?.rumble || 0}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-center">
-                      {agent?.percentage?.down || 0}
+                      {agent?.percentages?.down || 0}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-center">
-                      {agent?.percentage?.single || 0}
+                      {agent?.percentages?.single || 0}
                     </td>
                   </tr>
 

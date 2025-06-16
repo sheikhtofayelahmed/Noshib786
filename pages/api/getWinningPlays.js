@@ -37,12 +37,7 @@ export default async function handler(req, res) {
     const permutations3D = getPermutations(str3D);
     const str2D = downGame;
     const reversed2D = downGame.split("").reverse().join("");
-    const singleDigit = (
-      threeUp
-        .split("")
-        .map(Number)
-        .reduce((a, b) => a + b, 0) % 10
-    ).toString();
+    const singleDigits = threeUp.split(""); // New SINGLE logic
 
     const client = await clientPromise;
     const db = client.db("thai-agent-lottery");
@@ -119,7 +114,11 @@ export default async function handler(req, res) {
       }
 
       // SINGLE
-      if (number.length === 1 && number === singleDigit && amount(0) > 0) {
+      if (
+        number.length === 1 &&
+        singleDigits.includes(number) &&
+        amount(0) > 0
+      ) {
         matchTypes.push({ type: "SINGLE", amount: amount(0) });
       }
 
