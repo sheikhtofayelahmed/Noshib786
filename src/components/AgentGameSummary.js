@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import React, { useRef } from "react";
 // import html2pdf from "html2pdf.js";
 import { parseISO, format, isValid } from "date-fns";
-
 const AgentGameSummary = ({ agentId }) => {
   const [loading, setLoading] = useState(true);
   const [fetched, setFetched] = useState(false);
@@ -17,133 +16,158 @@ const AgentGameSummary = ({ agentId }) => {
   const [error, setError] = useState("");
   const [moneyCal, setMoneyCal] = useState({});
   const [uploadStatus, setUploadStatus] = useState(null);
-  const hasUploadedRef = useRef(false); // to prevent duplicate uploads
+  const hasUploadedRef = useRef(false);
   const contentRef = useRef(null);
   const playerRefs = useRef({});
-  function safeDate(dateStr) {
+  const [summaryData, setSummaryData] = useState({});
+  const [selectedOption, setSelectedOption] = useState("");
+  const [numberInput, setNumberInput] = useState(0);
+  const [jomaInput, setJomaInput] = useState("");
+
+  const safeDate = (dateStr) => {
     if (!dateStr) return "Invalid Date";
     const parsed = parseISO(dateStr);
     return isValid(parsed) ? format(parsed, "dd/MM/yyyy") : "Invalid Date";
-  }
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch("/api/win-status");
-        const data = await res.json();
-        setThreeUp(data.threeUp);
-        setDownGame(data.downGame);
-        setDate(data.date);
-      } catch (error) {
-        console.error("Error fetching winning numbers:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    if (!agentId) return;
-    // console.log(agentId);
-    const fetchAgent = async () => {
-      try {
-        const res = await fetch(`/api/getAgentById?agentId=${agentId}`);
-
-        // Check status and log for debug
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Response not OK:", res.status, text);
-          throw new Error("Failed to fetch agent data");
-        }
-
-        const data = await res.json();
-        setAgent(data.agent);
-      } catch (error) {
-        console.error("Error fetching agent:", error.message);
-      }
-    };
-
-    fetchAgent();
-  }, [agentId]);
-
-  const fetchPlayersByAgentId = async (agentId) => {
-    setLoading(true);
-    setFetched(false);
-
-    try {
-      const res = await fetch("/api/getPlayersByAgentId", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setPlayers(data.players || []);
-      } else {
-        console.error(data.message || "Failed to fetch players.");
-        setPlayers([]);
-      }
-    } catch (error) {
-      console.error("Failed to fetch:", error);
-      setPlayers([]);
-    } finally {
-      setLoading(false);
-      setFetched(true);
-    }
   };
 
+  // Single useEffect to fetch all initial data that depends on agentId
   useEffect(() => {
-    const fetchGameStatus = async () => {
+    if (!agentId) return;
+
+    setLoading(true);
+    setFetched(false);
+    setError("");
+
+    const fetchAllData = async () => {
       try {
-        const res = await fetch("/api/game-status");
-        const data = await res.json();
-        setIsGameOn(data.isGameOn);
-      } catch (error) {
-        console.error("Failed to fetch game status:", error);
+        // 1. Fetch game status and winning numbers in parallel
+        const [gameStatusRes, winStatusRes] = await Promise.all([
+          fetch("/api/game-status"),
+          fetch("/api/win-status"),
+        ]);
+        const gameStatusData = await gameStatusRes.json();
+        const winStatusData = await winStatusRes.json();
+
+        setIsGameOn(gameStatusData.isGameOn);
+        setThreeUp(winStatusData.threeUp);
+        setDownGame(winStatusData.downGame);
+        setDate(winStatusData.date);
+
+        // 2. Fetch agent info
+        const agentRes = await fetch(`/api/getAgentById?agentId=${agentId}`);
+        if (!agentRes.ok) throw new Error("Failed to fetch agent data");
+        const agentData = await agentRes.json();
+        setAgent(agentData.agent);
+
+        // 3. Fetch summary (depends on agentId and date from winning numbers)
+        const summaryRes = await fetch(
+          `/api/getSummary?agentId=${agentId}&date=${winStatusData.date}`
+        );
+        if (summaryRes.ok) {
+          const summaryJson = await summaryRes.json();
+          setSummaryData(summaryJson);
+        }
+
+        // 4. Fetch players by agentId
+        const playersRes = await fetch("/api/getPlayersByAgentId", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agentId }),
+        });
+        if (!playersRes.ok) throw new Error("Failed to fetch players");
+        const playersJson = await playersRes.json();
+        setPlayers(playersJson.players || []);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError(err.message);
       } finally {
         setLoading(false);
+        setFetched(true);
       }
     };
 
-    fetchGameStatus();
-  }, []);
-
-  useEffect(() => {
-    if (agentId) {
-      fetchPlayersByAgentId(agentId);
-    }
+    fetchAllData();
   }, [agentId]);
 
+  // Fetch total wins whenever agentId, threeUp, downGame change
   useEffect(() => {
-    async function fetchWins() {
-      if (agentId && threeUp && downGame) {
-        try {
-          const res = await fetch("/api/getWinningPlays", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ agentId, threeUp, downGame }),
-          });
+    if (!agentId || !threeUp || !downGame) return;
 
-          if (!res.ok) throw new Error("Failed to fetch wins");
-
-          const data = await res.json();
-          setTotalWins(data.totalWins);
-        } catch (err) {
-          setError(err.message);
-        }
+    const fetchTotalWins = async () => {
+      try {
+        const res = await fetch("/api/getWinningPlays", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agentId, threeUp, downGame }),
+        });
+        if (!res.ok) throw new Error("Failed to fetch wins");
+        const data = await res.json();
+        setTotalWins(data.totalWins);
+      } catch (err) {
+        setError(err.message);
       }
-    }
-    fetchWins();
+    };
+
+    fetchTotalWins();
   }, [agentId, threeUp, downGame]);
 
+  // Calculate money after totalWins, agent, or players change
+  useEffect(() => {
+    if (!totalWins || !agent?.percentages) return;
+
+    const totalAmounts = players.reduce(
+      (acc, p) => {
+        acc.ThreeD += p.amountPlayed?.ThreeD || 0;
+        acc.TwoD += p.amountPlayed?.TwoD || 0;
+        acc.OneD += p.amountPlayed?.OneD || 0;
+        return acc;
+      },
+      { ThreeD: 0, TwoD: 0, OneD: 0 }
+    );
+
+    const afterThreeD = Math.floor(
+      totalAmounts.ThreeD * (1 - agent.percentages.threeD / 100)
+    );
+    const afterTwoD = Math.floor(
+      totalAmounts.TwoD * (1 - agent.percentages.twoD / 100)
+    );
+    const afterOneD = Math.floor(
+      totalAmounts.OneD * (1 - agent.percentages.oneD / 100)
+    );
+    const afterSTR = Math.floor(totalWins.STR3D * agent.percentages.str);
+    const afterRUMBLE = Math.floor(
+      totalWins.RUMBLE3D * agent.percentages.rumble
+    );
+    const afterDOWN = Math.floor(totalWins.DOWN * agent.percentages.down);
+    const afterSINGLE = Math.floor(totalWins.SINGLE * agent.percentages.single);
+
+    const totalGame = afterThreeD + afterTwoD + afterOneD;
+    const totalWin = afterSTR + afterRUMBLE + afterDOWN + afterSINGLE;
+    const WL = totalGame - totalWin;
+
+    setMoneyCal({
+      afterThreeD,
+      afterTwoD,
+      afterOneD,
+      afterSTR,
+      afterRUMBLE,
+      afterDOWN,
+      afterSINGLE,
+      totalGame,
+      totalWin,
+      totalAmounts,
+      WL,
+    });
+  }, [totalWins, agent?.percentages, players]);
+
+  // Helpers remain unchanged:
   const getPermutations = (str) => {
     if (!str || str.length <= 1) return [str || ""];
-    let perms = [];
+    const perms = [];
     for (let i = 0; i < str.length; i++) {
       const char = str[i];
-      const remaining = str.slice(0, i) + str.slice(i + 1);
-      for (const perm of getPermutations(remaining)) {
+      const rest = str.slice(0, i) + str.slice(i + 1);
+      for (const perm of getPermutations(rest)) {
         perms.push(char + perm);
       }
     }
@@ -151,95 +175,31 @@ const AgentGameSummary = ({ agentId }) => {
   };
 
   const getMatchType = (input, threeUp, downGame) => {
-    if (!input || !threeUp || !downGame) {
-      return { match: false, type: null };
-    }
-    const parts = input.split(".");
-    const number = parts[0];
-    const amounts = parts.slice(1).map(Number);
+    if (!input || !threeUp || !downGame) return { match: false, type: null };
 
+    const [number, ...amounts] = input.split(".");
+    const numAmounts = amounts.map(Number);
     const permutations = getPermutations(threeUp);
     const reversedDown = downGame?.split("").reverse().join("");
-    const sumOfDigits = threeUp
-      .split("")
-      .reduce((sum, d) => sum + parseInt(d), 0);
-    const lastDigitOfSum = sumOfDigits % 10;
 
     if (number.length === 3) {
-      if (number === threeUp) {
-        return { match: true, type: "str" };
-      }
-      if (permutations.includes(number) && amounts.length >= 2) {
+      if (number === threeUp) return { match: true, type: "str" };
+      if (permutations.includes(number) && numAmounts.length >= 2)
         return { match: true, type: "rumble" };
-      }
     }
 
     if (number.length === 2) {
-      if (number === downGame) {
-        return { match: true, type: "down" };
-      }
-      if (number === reversedDown && amounts.length >= 2) {
+      if (number === downGame) return { match: true, type: "down" };
+      if (number === reversedDown && numAmounts.length >= 2)
         return { match: true, type: "rumble" };
-      }
     }
 
-    if (number.length === 1) {
-      if (parseInt(number) === lastDigitOfSum) {
-        return { match: true, type: "single" };
-      }
+    if (number.length === 1 && threeUp.includes(number)) {
+      return { match: true, type: "single" };
     }
 
     return { match: false, type: null };
   };
-  useEffect(() => {
-    if (totalWins && agent?.percentages) {
-      const totalAmounts = players.reduce(
-        (acc, player) => {
-          acc.ThreeD += player.amountPlayed.ThreeD || 0;
-          acc.TwoD += player.amountPlayed.TwoD || 0;
-          acc.OneD += player.amountPlayed.OneD || 0;
-          return acc;
-        },
-        { ThreeD: 0, TwoD: 0, OneD: 0 }
-      );
-
-      const afterThreeD = Math.floor(
-        totalAmounts.ThreeD * (1 - agent.percentages.threeD / 100)
-      );
-      const afterTwoD = Math.floor(
-        totalAmounts.TwoD * (1 - agent.percentages.twoD / 100)
-      );
-      const afterOneD = Math.floor(
-        totalAmounts.OneD * (1 - agent.percentages.oneD / 100)
-      );
-      const afterSTR = Math.floor(totalWins.STR3D * agent.percentages.str);
-      const afterRUMBLE = Math.floor(
-        totalWins.RUMBLE3D * agent.percentages.rumble
-      );
-      const afterDOWN = Math.floor(totalWins.DOWN * agent.percentages.down);
-      const afterSINGLE = Math.floor(
-        totalWins.SINGLE * agent.percentages.single
-      );
-
-      const totalGame = afterThreeD + afterTwoD + afterOneD;
-      const totalWin = afterSTR + afterRUMBLE + afterDOWN + afterSINGLE;
-      const WL = totalGame - totalWin;
-
-      setMoneyCal({
-        afterThreeD,
-        afterTwoD,
-        afterOneD,
-        afterSTR,
-        afterRUMBLE,
-        afterDOWN,
-        afterSINGLE,
-        totalGame,
-        totalWin,
-        totalAmounts,
-        WL,
-      });
-    }
-  }, [totalWins, agent?.percentages, players]);
 
   const handleSummaryPrint = (
     agent,
