@@ -148,8 +148,8 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 
 <!-- **allah vorosa and picture** -->
 
-**add agent - customer percentage system**
-**total game calculation with percentage**
+<!-- **add agent - customer percentage system**
+**total game calculation with percentage** -->
 **css or color system on hisab nikash**
 
 <!-- **remove background from game account summary** -->

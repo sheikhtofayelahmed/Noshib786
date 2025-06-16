@@ -121,9 +121,6 @@ export default function Account() {
             <thead className="bg-gray-800 text-yellow-300">
               <tr>
                 <th className="p-2">Agent ID</th>
-                <th className="p-2">3D</th>
-                <th className="p-2">2D</th>
-                <th className="p-2">1D</th>
                 <th className="p-2">STR</th>
                 <th className="p-2">RUMBLE</th>
                 <th className="p-2">DOWN</th>
@@ -137,9 +134,6 @@ export default function Account() {
               {filteredByDate.map((item, idx) => (
                 <tr key={idx} className="hover:bg-gray-700">
                   <td className="p-2">{item.agentId}</td>
-                  <td className="p-2">{item.summary?.afterThreeD ?? 0}</td>
-                  <td className="p-2">{item.summary?.afterTwoD ?? 0}</td>
-                  <td className="p-2">{item.summary?.afterOneD ?? 0}</td>
                   <td className="p-2">{item.summary?.afterSTR ?? 0}</td>
                   <td className="p-2">{item.summary?.afterRUMBLE ?? 0}</td>
                   <td className="p-2">{item.summary?.afterDOWN ?? 0}</td>
@@ -171,9 +165,6 @@ export default function Account() {
           <thead className="bg-gray-800 text-pink-300">
             <tr>
               <th className="p-2">Agent ID</th>
-              <th className="p-2">3D</th>
-              <th className="p-2">2D</th>
-              <th className="p-2">1D</th>
               <th className="p-2">STR</th>
               <th className="p-2">RUMBLE</th>
               <th className="p-2">DOWN</th>
@@ -187,9 +178,6 @@ export default function Account() {
             {yearlyData.map((item, idx) => (
               <tr key={idx} className="hover:bg-gray-700">
                 <td className="p-2">{item.agentId}</td>
-                <td className="p-2">{item.afterThreeD}</td>
-                <td className="p-2">{item.afterTwoD}</td>
-                <td className="p-2">{item.afterOneD}</td>
                 <td className="p-2">{item.afterSTR}</td>
                 <td className="p-2">{item.afterRUMBLE}</td>
                 <td className="p-2">{item.afterDOWN}</td>
