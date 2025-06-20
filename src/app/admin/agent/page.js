@@ -12,6 +12,10 @@ export default function AdminAgentPage() {
   const [updateExpense, setUpdateExpense] = useState(false);
   const [tenPercent, setTenPercent] = useState(false);
   const [updateTenPercent, setUpdateTenPercent] = useState(false);
+  const [expenseAmt, setExpenseAmt] = useState(0);
+  const [updateExpenseAmt, setUpdateExpenseAmt] = useState(0);
+  const [tenPercentAmt, setTenPercentAmt] = useState(0);
+  const [updateTenPercentAmt, setUpdateTenPercentAmt] = useState(0);
 
   const [agents, setAgents] = useState([]);
   const [loadingAgents, setLoadingAgents] = useState(false);
@@ -30,26 +34,14 @@ export default function AdminAgentPage() {
   const [entryCounts, setEntryCounts] = useState({});
   const [loading, setLoading] = useState(true);
   const [iPercentages, setIPercentages] = useState({
-    threeD: 40,
-    twoD: 30,
+    threeD: 45,
+    twoD: 25,
     oneD: 0,
     str: 400,
     rumble: 80,
     down: 60,
     single: 3,
   });
-  const [cPercentages, setCPercentages] = useState({
-    threeD: 40,
-    twoD: 30,
-    oneD: 0,
-  });
-  const [cUpdatePercentages, setCUpdatePercentages] = useState({
-    threeD: 40,
-    twoD: 30,
-    oneD: 0,
-  });
-  const [formError, setFormError] = useState("");
-
   const [percentages, setPercentages] = useState({
     threeD: 0,
     twoD: 0,
@@ -59,6 +51,26 @@ export default function AdminAgentPage() {
     down: 0,
     single: 0,
   });
+  const [cPercentages, setCPercentages] = useState({
+    threeD: 40,
+    twoD: 20,
+    oneD: 0,
+    str: 350,
+    rumble: 70,
+    down: 50,
+    single: 3,
+  });
+  const [cUpdatePercentages, setCUpdatePercentages] = useState({
+    threeD: 0,
+    twoD: 0,
+    oneD: 0,
+    str: 0,
+    rumble: 0,
+    down: 0,
+    single: 0,
+  });
+  const [formError, setFormError] = useState("");
+
   const [editingAgent, setEditingAgent] = useState(null);
   const [editingModal, setEditingModal] = useState(false);
   const [modal, setModal] = useState(false);
@@ -106,6 +118,10 @@ export default function AdminAgentPage() {
         threeD: 0,
         twoD: 0,
         oneD: 0,
+        str: 0,
+        rumble: 0,
+        down: 0,
+        single: 0,
       }
     );
     setSubUpdateAgents(
@@ -115,6 +131,8 @@ export default function AdminAgentPage() {
     );
     setUpdateExpense(agent.expense);
     setUpdateTenPercent(agent.tenPercent);
+    setUpdateExpenseAmt(agent.expenseAmt);
+    setUpdateTenPercentAmt(agent.tenPercentAmt);
     setEditingModal(true);
   };
 
@@ -141,7 +159,9 @@ export default function AdminAgentPage() {
           cPercentages: cPercentages,
           subAgents: subAgents.filter((n) => n.trim() !== ""),
           expense: expense,
+          expenseAmt: expenseAmt,
           tenPercent: tenPercent,
+          tenPercentAmt: tenPercentAmt,
         }),
       });
       const data = await res.json();
@@ -215,6 +235,8 @@ export default function AdminAgentPage() {
           cPercentages: cUpdatePercentages,
           expense: updateExpense,
           tenPercent: updateTenPercent,
+          expenseAmt: updateExpenseAmt,
+          tenPercentAmt: updateTenPercentAmt,
         }),
       });
 
@@ -294,6 +316,8 @@ export default function AdminAgentPage() {
     const interval = setInterval(fetchOnlineAgents, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  console.log(agents);
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black to-red-900 min-h-screen">
       {/* <h1 className="text-4xl mb-6 text-yellow-400 font-bold">
@@ -320,11 +344,14 @@ export default function AdminAgentPage() {
                   <th className="border border-yellow-400 p-2">Password</th>
                   <th className="border border-yellow-400 p-2">Status</th>
                   <th className="border border-yellow-400 p-2">Voucher</th>
-                  <th className="font-bangla border border-yellow-400 p-2">
+                  {/* <th className="font-bangla border border-yellow-400 p-2">
                     <span>ব্যাংকার - এজেন্ট </span>
                   </th>
                   <th className="font-bangla border border-yellow-400 p-2">
                     <span> এজেন্ট - কাস্টমার</span>
+                  </th> */}
+                  <th className="font-bangla border border-yellow-400 p-2">
+                    <span> ডিসকাঊন্ট</span>
                   </th>
                   <th className="font-bangla border border-yellow-400 p-2">
                     সুবিধা
@@ -360,6 +387,8 @@ export default function AdminAgentPage() {
                       subAgents,
                       expense,
                       tenPercent,
+                      expenseAmt,
+                      tenPercentAmt,
                       hasSubAgents,
                     },
                     i
@@ -390,14 +419,14 @@ export default function AdminAgentPage() {
                           <div className="space-x-1">
                             <span className="inline-block align-middle w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
                             <span className="inline-block align-middle">
-                              On
+                              Online
                             </span>
                           </div>
                         ) : (
                           <div className="space-x-1">
                             <span className="inline-block align-middle w-3 h-3 rounded-full bg-gray-400"></span>
                             <span className="inline-block align-middle">
-                              Off
+                              Offline
                             </span>
                           </div>
                         )}
@@ -407,20 +436,25 @@ export default function AdminAgentPage() {
                           ? entryCounts[agentId]
                           : "Loading..."}
                       </td>
-                      <td className="border border-yellow-400 p-2 space-x-2 ">
-                        <span className="text-green-400">
+                      <td className="border border-yellow-400 p-2 sm:min-w-[10rem] max-w-full">
+                        <div className="text-green-400 truncate">
                           {Object.values(percentages ?? {}).length > 0
                             ? Object.values(percentages).join(", ")
                             : "—"}
-                        </span>
+                        </div>
+                        <div className="text-red-400 truncate">
+                          {Object.values(cPercentages ?? {}).length > 0
+                            ? Object.values(cPercentages).join(", ")
+                            : "—"}
+                        </div>
                       </td>
-                      <td className="border border-yellow-400 p-2 space-x-2 ">
+                      {/* <td className="border border-yellow-400 p-2 space-x-2 ">
                         <span className="text-red-400">
                           {Object.values(cPercentages ?? {}).length > 0
                             ? Object.values(cPercentages).join(", ")
                             : "—"}
                         </span>
-                      </td>
+                      </td> */}
                       <td className=" border font-bangla border-yellow-400 text-sm">
                         <label className="flex items-center space-x-2 text-white">
                           <input
@@ -430,7 +464,12 @@ export default function AdminAgentPage() {
                             disabled={adding}
                             className="accent-yellow-500"
                           />
-                          <span>খরচ</span>
+                          <span>
+                            খরচ
+                            <span className="text-red-400 px-1">
+                              {expenseAmt}
+                            </span>
+                          </span>
                         </label>
                         <label className="flex items-center space-x-2 text-white">
                           <input
@@ -440,7 +479,12 @@ export default function AdminAgentPage() {
                             disabled={adding}
                             className="accent-yellow-500"
                           />
-                          <span>আন্ডার 10%</span>
+                          <span>
+                            আন্ডার
+                            <span className="text-red-400 px-1">
+                              {tenPercentAmt} %
+                            </span>
+                          </span>
                         </label>
                       </td>
                       <td className="border border-yellow-400 p-2 text-center">
@@ -473,6 +517,8 @@ export default function AdminAgentPage() {
                               subAgents,
                               expense,
                               tenPercent,
+                              expenseAmt,
+                              tenPercentAmt,
                             })
                           }
                           className="px-3 py-1 rounded  text-yellow-400 font-semibold"
@@ -534,7 +580,7 @@ export default function AdminAgentPage() {
               disabled={adding}
             />
             <div className="mb-4">
-              <label className=" font-bangla block text-yellow-400 text-lg mt-5">
+              <label className=" font-bangla block text-green-400 text-lg mt-5">
                 সাব এজেন্ট
               </label>
               {subAgents.map((subAgent, index) => (
@@ -548,14 +594,14 @@ export default function AdminAgentPage() {
                     updated[index] = e.target.value;
                     setSubAgents(updated);
                   }}
-                  className="w-full mb-2 p-3 rounded bg-black border border-yellow-400 text-yellow-300 placeholder-yellow-600"
+                  className="w-full mb-2 p-3 rounded bg-black border border-green-400 text-green-300 placeholder-green-600"
                   disabled={adding}
                 />
               ))}
             </div>
             <div className="mb-4">
-              <label className="font-banla block text-yellow-400 text-lg mt-5">
-                এজেন্ট - ব্যাংকার %
+              <label className="font-bangla block text-yellow-400 text-lg mt-5">
+                ব্যাংকার ডিসকাঊন্ট
               </label>
               {Object.entries(iPercentages).map(([key, value]) => (
                 <div key={key} className="mb-3">
@@ -579,13 +625,13 @@ export default function AdminAgentPage() {
                 </div>
               ))}
             </div>
-            <div className="mb-4">
-              <label className="font-bangla block text-yellow-400 text-lg mt-5">
-                এজেন্ট - কাস্টমার %
+            <div className="mb-4 ">
+              <label className="font-bangla block text-red-500 text-lg mt-5">
+                কাস্টমার ডিসকাঊন্ট
               </label>
               {Object.entries(cPercentages).map(([key, value]) => (
                 <div key={key} className="mb-3">
-                  <label className="block capitalize text-sm text-yellow-400 mb-1">
+                  <label className="block capitalize text-sm text-red-500 mb-1">
                     {key}
                   </label>
                   <input
@@ -598,7 +644,7 @@ export default function AdminAgentPage() {
                         [key]: parseFloat(e.target.value) || 0,
                       }))
                     }
-                    className="w-full p-3 rounded bg-black border border-yellow-400 text-yellow-300 placeholder-yellow-600"
+                    className="w-full p-3 rounded bg-black border border-red-500 text-red-500 placeholder-red-900"
                     disabled={adding}
                     required
                   />
@@ -631,6 +677,48 @@ export default function AdminAgentPage() {
                   <span>আন্ডার 10%</span>
                 </label>
               </div>
+            </div>
+            <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              {/* Expense Amount */}
+              {expense && (
+                <div>
+                  <label className="font-bangla block text-yellow-400 text-lg mb-2">
+                    খরচের পরিমাণ
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="খরচ"
+                    value={expenseAmt}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      if (!isNaN(val)) setExpenseAmt(val);
+                    }}
+                    disabled={adding}
+                    className="w-full p-3 rounded bg-black border border-yellow-400 text-yellow-300 font-bangla"
+                  />
+                </div>
+              )}
+
+              {/* 10% Amount */}
+              {tenPercent && (
+                <div>
+                  <label className="font-bangla block text-yellow-400 text-lg mb-2">
+                    আন্ডার 10% পরিমাণ
+                  </label>
+                  <select
+                    value={tenPercentAmt}
+                    onChange={(e) => setTenPercentAmt(Number(e.target.value))}
+                    disabled={adding}
+                    className="w-full p-3 rounded bg-black border border-yellow-400 text-yellow-300 text-center font-bangla focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  >
+                    {Array.from({ length: 11 }, (_, i) => (
+                      <option key={i} value={i}>
+                        {i}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             <button
@@ -692,13 +780,13 @@ export default function AdminAgentPage() {
 
             {/* Percentages */}
             <div className="mb-3 mt-4">
-              <h3 className="text-yellow-400 font-semibold mb-2">Sub Agents</h3>
+              <h3 className="text-green-400 font-semibold mb-2">Sub Agents</h3>
               {subUpdateAgents.map((value, index) => (
                 <input
                   key={index}
                   type="text"
                   placeholder={`Sub Agent ${index + 1}`}
-                  className="w-full mb-2 p-2 bg-black border border-yellow-400 rounded text-yellow-300 placeholder-yellow-600"
+                  className="w-full mb-2 p-2 bg-black border border-green-400 rounded text-green-300 placeholder-green-600"
                   value={value}
                   onChange={(e) => {
                     const updated = [...subUpdateAgents];
@@ -710,8 +798,8 @@ export default function AdminAgentPage() {
             </div>
 
             <div className="mb-3 mt-4">
-              <h3 className="text-yellow-400 font-semibold mb-2">
-                Percentages
+              <h3 className=" font-bangla text-yellow-400 font-semibold mb-2">
+                ব্যাংকার ডিসকাঊন্ট
               </h3>
               {Object.entries(percentages).map(([key, value]) => (
                 <div key={key} className="mb-2">
@@ -731,15 +819,15 @@ export default function AdminAgentPage() {
               ))}
             </div>
             <div className="mb-3 mt-4">
-              <h3 className="text-yellow-400 font-semibold mb-2">
-                Percentages
+              <h3 className=" font-bangla text-red-400 font-semibold mb-2">
+                কাস্টমার ডিসকাঊন্ট
               </h3>
               {Object.entries(cUpdatePercentages).map(([key, value]) => (
                 <div key={key} className="mb-2">
                   <label className="block capitalize text-sm">{key}</label>
                   <input
                     type="number"
-                    className="w-full p-2 bg-black border border-yellow-400 rounded text-yellow-300"
+                    className="w-full p-2 bg-black border border-red-400 rounded text-red-300"
                     value={value}
                     onChange={(e) =>
                       setCUpdatePercentages((prev) => ({
@@ -778,7 +866,47 @@ export default function AdminAgentPage() {
                 </label>
               </div>
             </div>
+            <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              {/* Expense Amount */}
+              {updateExpense && (
+                <div>
+                  <label className="font-bangla block text-yellow-400 text-lg mb-2">
+                    খরচের পরিমাণ
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="খরচ"
+                    value={updateExpenseAmt}
+                    onChange={(e) => setUpdateExpenseAmt(e.target.value)}
+                    disabled={adding}
+                    className="w-full p-3 rounded bg-black border border-yellow-400 text-yellow-300 font-bangla"
+                  />
+                </div>
+              )}
 
+              {/* 10% Amount */}
+              {updateTenPercent && (
+                <div>
+                  <label className="font-bangla block text-yellow-400 text-lg mb-2">
+                    আন্ডার 10% পরিমাণ
+                  </label>
+                  <select
+                    value={updateTenPercentAmt}
+                    onChange={(e) =>
+                      setUpdateTenPercentAmt(Number(e.target.value))
+                    }
+                    disabled={adding}
+                    className="w-full p-3 rounded bg-black border border-yellow-400 text-yellow-300 text-center font-bangla focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  >
+                    {Array.from({ length: 11 }, (_, i) => (
+                      <option key={i} value={i}>
+                        {i}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
             <div className="flex justify-end space-x-2 mt-4">
               <button
                 onClick={() => {

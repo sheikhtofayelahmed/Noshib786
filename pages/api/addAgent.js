@@ -15,6 +15,8 @@ export default async function handler(req, res) {
     subAgents,
     expense,
     tenPercent,
+    expenseAmt,
+    tenPercentAmt,
   } = req.body;
   if (
     !agentId ||
@@ -47,6 +49,8 @@ export default async function handler(req, res) {
       subAgents,
       expense,
       tenPercent,
+      expenseAmt,
+      tenPercentAmt,
       hasSubAgents,
       active: true,
     };

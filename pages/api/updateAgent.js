@@ -15,6 +15,8 @@ export default async function handler(req, res) {
     cPercentages,
     expense,
     tenPercent,
+    expenseAmt,
+    tenPercentAmt,
   } = req.body;
   console.log(expense, tenPercent);
   // Basic validation
@@ -51,10 +53,11 @@ export default async function handler(req, res) {
           password,
           percentages,
           subAgents,
-
           cPercentages,
           expense,
           tenPercent,
+          expenseAmt,
+          tenPercentAmt,
           hasSubAgents,
         },
       }
