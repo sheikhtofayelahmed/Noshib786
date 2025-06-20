@@ -1,64 +1,65 @@
 "use client";
 
+import NumberTable from "@/components/NumberTable";
 import { useEffect, useState } from "react";
 
 // Ticker Component - Modernized with a richer neon glow
 
 // NumberTable Component - Transformed into a visually striking casino grid
-const NumberTable = ({ rows, data, title }) => (
-  <div className="mb-16 bg-gray-900 rounded-xl shadow-2xl overflow-hidden border-2 border-red-800">
-    <div className="p-6 overflow-x-auto">
-      <h3 className="text-3xl font-bold text-yellow-400 mb-8 text-center uppercase tracking-wider bg-black py-4 rounded-lg shadow-inner">
-        {title} Game Board
-      </h3>
-      <table className="w-full border-collapse text-center text-white font-mono">
-        <tbody>
-          {title !== "Single" && (
-            <tr>
-              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((row, i) => (
-                <td
-                  key={i}
-                  className="text-5xl text-green-600 p-4 border border-gray-500"
-                >
-                  {row}
-                </td>
-              ))}
-            </tr>
-          )}
+// const NumberTable = ({ rows, data, title }) => (
+//   <div className="mb-16 bg-gray-900 rounded-xl shadow-2xl overflow-hidden border-2 border-red-800">
+//     <div className="p-6 overflow-x-auto">
+//       <h3 className="text-3xl font-bold text-yellow-400 mb-8 text-center uppercase tracking-wider bg-black py-4 rounded-lg shadow-inner">
+//         {title} Game Board
+//       </h3>
+//       <table className="w-full border-collapse text-center text-white font-mono">
+//         <tbody>
+//           {title !== "Single" && (
+//             <tr>
+//               {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((row, i) => (
+//                 <td
+//                   key={i}
+//                   className="text-5xl text-green-600 p-4 border border-gray-500"
+//                 >
+//                   {row}
+//                 </td>
+//               ))}
+//             </tr>
+//           )}
 
-          {rows.map((row, i) => (
-            <tr key={i}>
-              {row.map((num, j) => {
-                const found = data.find((d) => d._id === String(num));
-                const played = found?.totalPlayed || 0;
+//           {rows.map((row, i) => (
+//             <tr key={i}>
+//               {row.map((num, j) => {
+//                 const found = data.find((d) => d._id === String(num));
+//                 const played = found?.totalPlayed || 0;
 
-                const isHot = played > 0;
-                const cellClasses = `
-                  relative p-4 text-3xl font-extrabold uppercase select-none
-                  border border-gray-700 transition-all duration-300 ease-in-out
-                  
-                `;
+//                 const isHot = played > 0;
+//                 const cellClasses = `
+//                   relative p-4 text-3xl font-extrabold uppercase select-none
+//                   border border-gray-700 transition-all duration-300 ease-in-out
 
-                return (
-                  <td key={j} className={cellClasses}>
-                    <div className="relative flex flex-col items-center justify-center w-full h-full space-y-1">
-                      <span className="text-3xl leading-none">{num}</span>
-                      {isHot && (
-                        <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md min-w-[1.5rem] text-center">
-                          {played}
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
+//                 `;
+
+//                 return (
+//                   <td key={j} className={cellClasses}>
+//                     <div className="relative flex flex-col items-center justify-center w-full h-full space-y-1">
+//                       <span className="text-3xl leading-none">{num}</span>
+//                       {isHot && (
+//                         <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md min-w-[1.5rem] text-center">
+//                           {played}
+//                         </div>
+//                       )}
+//                     </div>
+//                   </td>
+//                 );
+//               })}
+//             </tr>
+//           ))}
+//         </tbody>
+//       </table>
+//     </div>
+//   </div>
+// );
 
 // Main Page Component - Overall casino lounge feel
 export default function HappyNewYear() {
@@ -107,7 +108,12 @@ export default function HappyNewYear() {
         🎰 Thai Lottery Agent 🎲
       </h1>
 
-      <NumberTable title="Single" rows={singleRows} data={numberData} />
+      <NumberTable
+        title="Single"
+        rows={singleRows}
+        data={numberData}
+        single={true}
+      />
 
       {/* Tailwind CSS custom animations and colors (add to your global CSS or tailwind.config.js) */}
     </div>

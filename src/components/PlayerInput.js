@@ -3,6 +3,7 @@ import React, { useRef } from "react";
 
 import { useState, useEffect } from "react";
 import { useAgent } from "src/context/AgentContext";
+import AllahBhorosha from "./Allah";
 
 export default function PlayerInput() {
   const [name, setName] = useState("");
@@ -810,6 +811,7 @@ display: flex;
         }`}
       >
         ⏳ Time Remaining: <p className="font-bold">{timeLeft?.text}</p>
+      <AllahBhorosha></AllahBhorosha>
       </div>
 
       <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-red-500 shadow-2xl p-6">

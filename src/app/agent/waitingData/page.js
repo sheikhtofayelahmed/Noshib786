@@ -1,4 +1,5 @@
 "use client";
+import AllahBhorosha from "@/components/Allah";
 import { useAgent } from "@/context/AgentContext";
 import React, { useState, useEffect } from "react";
 
@@ -89,6 +90,7 @@ const WaitingPlayerInput = () => {
 
   return (
     <div className="p-4">
+      <AllahBhorosha></AllahBhorosha>
       <h3 className="text-2xl text-yellow-400 mb-6 font-semibold text-center">
         ⏳ Waiting Player Submissions ⏳
       </h3>

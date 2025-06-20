@@ -1,3 +1,5 @@
+// pages/api/analyzeTopNumbers.js
+
 import clientPromise from "lib/mongodb";
 
 export default async function handler(req, res) {
@@ -20,34 +22,36 @@ export default async function handler(req, res) {
       {
         $project: {
           number: { $arrayElemAt: ["$splitInput", 0] },
-          amounts: {
-            $map: {
-              input: { $slice: ["$splitInput", 1, 10] },
-              as: "amt",
-              in: { $toInt: "$$amt" },
-            },
+          strAmount: {
+            $cond: [
+              { $gte: [{ $size: "$splitInput" }, 2] },
+              { $toInt: { $arrayElemAt: ["$splitInput", 1] } },
+              0,
+            ],
           },
-        },
-      },
-      {
-        $addFields: {
-          totalAmount: { $sum: "$amounts" },
+          rumbleAmount: {
+            $cond: [
+              { $gte: [{ $size: "$splitInput" }, 3] },
+              { $toInt: { $arrayElemAt: ["$splitInput", 2] } },
+              0,
+            ],
+          },
         },
       },
       {
         $group: {
           _id: "$number",
-          totalPlayed: { $sum: "$totalAmount" },
+          totalStr: { $sum: "$strAmount" },
+          totalRumble: { $sum: "$rumbleAmount" },
         },
       },
-      { $sort: { totalPlayed: -1 } },
-      // { $limit: 3 },
+      { $sort: { totalStr: -1 } },
     ]);
 
     const result = await cursor.toArray();
-    res.status(200).json(result); // ✅ FIXED: Return the array
+    res.status(200).json(result);
   } catch (error) {
-    console.error("Error analyzing top number:", error);
+    console.error("Error analyzing numbers:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 }

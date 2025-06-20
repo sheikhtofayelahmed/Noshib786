@@ -642,29 +642,25 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
               className="overflow-x-auto my-4 rounded-lg shadow-md ring-2 ring-gray-400 bg-white p-6 text-center"
             >
               <div className="flex justify-between items-center mb-6">
+                {/* <div className="flex items-center gap-4 mt-4"> */}
+                <button
+                  onClick={handleDownloadPdf}
+                  className="p-2 rounded-xl bg-gray-200 transition duration-300"
+                  title="Download Player Info"
+                >
+                  <img src="/download.svg" alt="Download" className="w-8 h-8" />
+                </button>
+
                 <h2 className="text-lg md:text-2xl font-bold text-gray-800">
                   📊 Game & Player Summary
                 </h2>
-
-                <div className="flex items-center gap-4 mt-4">
-                  <button
-                    onClick={handleDownloadPdf}
-                    className="p-2 rounded-xl bg-gray-200 transition duration-300"
-                    title="Download Player Info"
-                  >
-                    <img
-                      src="/download.svg"
-                      alt="Download"
-                      className="w-8 h-8"
-                    />
-                  </button>
-                  <button
-                    onClick={uploadSummary}
-                    className="py-2 px-2 bg-gray-200 text-black rounded-xl transition duration-300 text-lg font-medium"
-                  >
-                    Save
-                  </button>
-                </div>
+                <button
+                  onClick={uploadSummary}
+                  className="py-2 px-2 bg-gray-200 text-black rounded-xl transition duration-300 text-lg font-medium"
+                >
+                  Save
+                </button>
+                {/* </div> */}
               </div>
 
               <table className="w-full border-collapse font-mono text-sm rounded-lg shadow border border-gray-400">
@@ -954,21 +950,9 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
               <React.Fragment key={idx}>
                 <div
                   ref={playerRefs.current[player.voucher]}
-                  className="relative bg-white rounded-lg border shadow-md text-black p-4 print:p-1 print:text-black print:shadow-none print:border-none print:rounded-none"
+                  className="bg-white rounded-lg border shadow-md text-black p-4 "
                 >
-                  {/* Header */}
-                  <h2 className="text-lg font-bold text-center mb-2 print:mb-1">
-                    {player.voucher || ""}
-                  </h2>
-                  <h2 className="text-lg font-bangla font-semibold text-center mb-1 print:mb-1">
-                    Player: {player.name || ""} || Sub Agent:{" "}
-                    {player.SAId || ""}
-                  </h2>
-                  <p className="text-center text-sm print:text-xs mb-2">
-                    Date: {new Date(player.time).toLocaleString()}
-                  </p>
-
-                  <div className="absolute top-2 right-2 print:hidden flex gap-2">
+                  <div className="flex items-center justify-between">
                     <button
                       onClick={() => handlePlayerDownloadPdf(player.voucher)}
                       className="w-14 h-14 flex items-center justify-center rounded"
@@ -979,6 +963,9 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
                         className="w-8 h-8"
                       />
                     </button>
+                    <h2 className="text-lg font-bold text-center ">
+                      {player.voucher || ""}
+                    </h2>{" "}
                     <button
                       onClick={() => handlePrint(player)}
                       className="w-14 h-14 flex items-center justify-center rounded text-white text-2xl"
@@ -986,10 +973,16 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
                       🖨️
                     </button>
                   </div>
-
+                  <h2 className="text-lg font-bangla font-semibold text-center mb-1 ">
+                    Player: {player.name || ""} || Sub Agent:{" "}
+                    {player.SAId || ""}
+                  </h2>
+                  <p className="text-center text-sm mb-2">
+                    Date: {new Date(player.time).toLocaleString()}
+                  </p>
                   {/* Entries Table */}
                   <table
-                    className="w-full text-sm border border-black print:text-xs print:border-collapse print:w-full"
+                    className="w-full text-sm border border-black "
                     border="1"
                   >
                     <tbody>
@@ -1066,10 +1059,10 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
                         for (let i = 0; i < maxRows; i++) {
                           rows.push(
                             <tr key={i}>
-                              <td className="bg-white border px-2 py-1 print:p-1">
+                              <td className="bg-white border px-2 py-1 ">
                                 {renderCell(col1[i])}
                               </td>
-                              <td className="bg-white border px-2 py-1 print:p-1">
+                              <td className="bg-white border px-2 py-1 ">
                                 {renderCell(col2[i])}
                               </td>
                             </tr>
@@ -1080,10 +1073,9 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
                       })()}
                     </tbody>
                   </table>
-
                   {/* Totals */}
                   <table
-                    className="w-full mt-4 border border-black border-collapse text-sm print:text-xs"
+                    className="w-full mt-4 border border-black border-collapse text-sm "
                     border="1"
                   >
                     <thead>
@@ -1151,7 +1143,7 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
 
                 {/* Divider */}
                 {idx !== players.length - 1 && (
-                  <div className="h-2 w-full my-12 bg-gradient-to-r from-pink-500 via-yellow-500 to-pink-500 rounded-full shadow-[0_0_15px_rgba(236,72,153,0.5)] animate-pulse print:hidden" />
+                  <div className="h-2 w-full my-12 bg-gradient-to-r from-pink-500 via-yellow-500 to-pink-500 rounded-full shadow-[0_0_15px_rgba(236,72,153,0.5)] animate-pulse " />
                 )}
               </React.Fragment>
             ))}

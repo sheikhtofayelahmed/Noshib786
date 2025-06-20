@@ -5,6 +5,7 @@ import { useAgent } from "@/context/AgentContext";
 import { useRouter } from "next/navigation";
 import AgentLayout from "@/components/AgentLayout";
 import PlayerInput from "@/components/PlayerInput";
+import AllahBhorosha from "@/components/Allah";
 
 export default function AgentDashboard() {
   const { agentId, loading } = useAgent();
@@ -62,20 +63,7 @@ export default function AgentDashboard() {
 
   return (
     <AgentLayout>
-      {gameActive ? (
-        <PlayerInput />
-      ) : (
-        <>
-          <h1 className="font-bangla text-4xl md:text-7xl font-bold mb-4 text-yellow-400 drop-shadow-lg animate-flicker">
-            🔥 আল্লাহ ভরসা 🔥
-          </h1>
-          <img
-            src="dowa.png"
-            alt="Dowa"
-            className="mx-auto w-40 md:w-96 drop-shadow-2xl animate-pulse"
-          />
-        </>
-      )}
+      {gameActive ? <PlayerInput /> : <AllahBhorosha></AllahBhorosha>}
     </AgentLayout>
   );
 }

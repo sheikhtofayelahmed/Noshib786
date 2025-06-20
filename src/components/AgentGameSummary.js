@@ -618,38 +618,34 @@ const AgentGameSummary = ({ agentId }) => {
             >
               {/* Header */}
               <div className="flex justify-between items-center mb-6">
+                {/* <div className="flex items-center gap-4 mt-4"> */}
+                <button
+                  onClick={handleDownloadPdf}
+                  className="p-2 rounded-xl bg-white border border-gray-300 flex items-center justify-center"
+                  title="Download Player Info"
+                >
+                  <img src="/download.svg" alt="Download" className="w-8 h-8" />
+                </button>
                 <h2 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold text-gray-900">
                   📊 Game & Player Summary
                 </h2>
-                <div className="flex items-center gap-4 mt-4">
-                  <button
-                    onClick={handleDownloadPdf}
-                    className="p-2 rounded-xl bg-white border border-gray-300 flex items-center justify-center"
-                    title="Download Player Info"
-                  >
-                    <img
-                      src="/download.svg"
-                      alt="Download"
-                      className="w-8 h-8"
-                    />
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleSummaryPrint(
-                        agent,
-                        date,
-                        threeUp,
-                        downGame,
-                        moneyCal,
-                        totalWins
-                      )
-                    }
-                    className="py-2 px-2 bg-white border border-gray-300 rounded-xl text-2xl font-medium "
-                    title="Print Summary"
-                  >
-                    🖨️
-                  </button>
-                </div>
+                <button
+                  onClick={() =>
+                    handleSummaryPrint(
+                      agent,
+                      date,
+                      threeUp,
+                      downGame,
+                      moneyCal,
+                      totalWins
+                    )
+                  }
+                  className="py-2 px-2 bg-white border border-gray-300 rounded-xl text-2xl font-medium "
+                  title="Print Summary"
+                >
+                  🖨️
+                </button>
+                {/* </div> */}
               </div>
 
               <table className="w-full border-collapse font-mono text-sm rounded-lg overflow-hidden">
@@ -861,21 +857,9 @@ const AgentGameSummary = ({ agentId }) => {
               <React.Fragment key={idx}>
                 <div
                   ref={playerRefs.current[player.voucher]}
-                  className="relative bg-white rounded-lg border shadow-md text-black p-4 print:p-1 print:text-black print:shadow-none print:border-none print:rounded-none"
+                  className=" bg-white rounded-lg border shadow-md text-black p-4 "
                 >
-                  {/* Header */}
-                  <h2 className="text-lg font-bold text-center mb-2 print:mb-1">
-                    {player.voucher || ""}
-                  </h2>
-                  <h2 className="text-lg font-bangla font-semibold text-center mb-1 print:mb-1">
-                    Player: {player.name || ""} || Sub Agent:{" "}
-                    {player.SAId || ""}
-                  </h2>
-                  <p className="text-center text-sm print:text-xs mb-2">
-                    Date: {new Date(player.time).toLocaleString()}
-                  </p>
-
-                  <div className="absolute top-2 right-2 print:hidden flex gap-2">
+                  <div className="flex items-center justify-between">
                     <button
                       onClick={() => handlePlayerDownloadPdf(player.voucher)}
                       className="w-14 h-14 flex items-center justify-center rounded"
@@ -886,6 +870,9 @@ const AgentGameSummary = ({ agentId }) => {
                         className="w-8 h-8"
                       />
                     </button>
+                    <h2 className="text-lg font-bold text-center ">
+                      {player.voucher || ""}
+                    </h2>{" "}
                     <button
                       onClick={() => handlePrint(player)}
                       className="w-14 h-14 flex items-center justify-center rounded text-white text-2xl"
@@ -893,10 +880,17 @@ const AgentGameSummary = ({ agentId }) => {
                       🖨️
                     </button>
                   </div>
+                  <h2 className="text-lg font-bangla font-semibold text-center mb-1 ">
+                    Player: {player.name || ""} || Sub Agent:{" "}
+                    {player.SAId || ""}
+                  </h2>
+                  <p className="text-center text-sm  mb-2">
+                    Date: {new Date(player.time).toLocaleString()}
+                  </p>
 
                   {/* Entries Table */}
                   <table
-                    className="w-full text-sm border border-black print:text-xs print:border-collapse print:w-full"
+                    className="w-full text-sm border border-black "
                     border="1"
                   >
                     <tbody>
@@ -973,10 +967,10 @@ const AgentGameSummary = ({ agentId }) => {
                         for (let i = 0; i < maxRows; i++) {
                           rows.push(
                             <tr key={i}>
-                              <td className="bg-white border px-2 py-1 print:p-1">
+                              <td className="bg-white border px-2 py-1 ">
                                 {renderCell(col1[i])}
                               </td>
-                              <td className="bg-white border px-2 py-1 print:p-1">
+                              <td className="bg-white border px-2 py-1 ">
                                 {renderCell(col2[i])}
                               </td>
                             </tr>
@@ -990,7 +984,7 @@ const AgentGameSummary = ({ agentId }) => {
 
                   {/* Totals */}
                   <table
-                    className="w-full mt-4 border border-black border-collapse text-sm print:text-xs"
+                    className="w-full mt-4 border border-black border-collapse text-sm "
                     border="1"
                   >
                     <thead>
@@ -1055,7 +1049,7 @@ const AgentGameSummary = ({ agentId }) => {
 
                 {/* Divider */}
                 {idx !== players.length - 1 && (
-                  <div className="h-2 w-full my-12 bg-gradient-to-r from-pink-500 via-yellow-500 to-pink-500 rounded-full shadow-[0_0_15px_rgba(236,72,153,0.5)] animate-pulse print:hidden" />
+                  <div className="h-2 w-full my-12 bg-gradient-to-r from-pink-500 via-yellow-500 to-pink-500 rounded-full shadow-[0_0_15px_rgba(236,72,153,0.5)] animate-pulse " />
                 )}
               </React.Fragment>
             ))}
