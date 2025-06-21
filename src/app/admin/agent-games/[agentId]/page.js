@@ -1,9 +1,10 @@
 "use client";
 import { useParams } from "next/navigation";
-import AgentGameSummaryAdmin from "@/components/AgentGameSummaryAdmin";
+
+import GameSummary from "@/components/GameSummary";
 
 export default function AgentGames() {
   const { agentId } = useParams();
 
-  return <AgentGameSummaryAdmin agentId={agentId} className="w-full" />;
+  return <GameSummary agentId={agentId} className="w-full" />;
 }

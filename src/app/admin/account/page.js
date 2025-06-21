@@ -5,35 +5,79 @@ import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 
 export default function Account() {
-  const [summaries, setSummaries] = useState([]);
+  const [threeUp, setThreeUp] = useState("");
+  const [downGame, setDownGame] = useState("");
+  const [gameDate, setGameDate] = useState(null);
+  const [toast, setToast] = useState({ type: "", message: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [allSummaries, setAllSummaries] = useState([]);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedAgent, setSelectedAgent] = useState("");
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null);
+
+  useEffect(() => {
+    if (toast.message) {
+      const timer = setTimeout(() => setToast({ type: "", message: "" }), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  const handleCalculate = async () => {
+    if (!threeUp || !downGame || !gameDate) {
+      setToast({ type: "error", message: "All fields are required." });
+      return;
+    }
+
+    setSubmitting(true);
+    setToast({ type: "", message: "" });
+
+    try {
+      const res = await fetch("/api/calculate-all-agents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          threeUp,
+          downGame,
+          gameDate: format(gameDate, "yyyy-MM-dd"),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Calculation failed");
+
+      setToast({
+        type: "success",
+        message: `✅ ${data.summaries.length} summaries generated.`,
+      });
+
+      setThreeUp("");
+      setDownGame("");
+      setGameDate(null);
+    } catch (err) {
+      setToast({ type: "error", message: err.message || "Unexpected error." });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     async function fetchSummaries() {
       try {
-        const res = await fetch(`/api/get-summaries`);
+        const res = await fetch("/api/get-summaries");
         const data = await res.json();
-
         if (data.success) {
-          const sortedSummaries = [...data.summaries].sort(
-            (a, b) => new Date(b.date) - new Date(a.date)
+          setAllSummaries(data.summaries);
+          const dates = data.summaries.map((s) =>
+            new Date(s.gameDate).toDateString()
           );
-
-          setSummaries(sortedSummaries);
-          setMessage("");
-
-          if (sortedSummaries.length > 0) {
-            setSelectedDate(new Date(sortedSummaries[0].date));
+          const sortedDates = [...new Set(dates)].sort(
+            (a, b) => new Date(b) - new Date(a)
+          );
+          if (sortedDates.length > 0) {
+            setSelectedDate(sortedDates[0]);
           }
-        } else {
-          console.error("Failed to fetch summaries:", data.message);
-          setMessage("Failed to load summaries. Please try again.");
         }
-      } catch (error) {
-        console.error("Error fetching summaries:", error);
-        setMessage("An error occurred while fetching data.");
+      } catch (err) {
+        console.error("Failed to fetch summaries:", err);
       } finally {
         setLoading(false);
       }
@@ -42,84 +86,141 @@ export default function Account() {
     fetchSummaries();
   }, []);
 
-  const filteredByDate = selectedDate
-    ? summaries.filter((item) => {
-        const itemDate = new Date(item.date);
-        return itemDate.toDateString() === selectedDate.toDateString();
-      })
-    : [];
+  const uniqueDates = [
+    ...new Set(allSummaries.map((s) => new Date(s.gameDate).toDateString())),
+  ].sort((a, b) => new Date(b) - new Date(a));
 
-  const yearlyTotals = summaries.reduce((acc, item) => {
-    const { agentId, summary } = item;
-    if (!agentId || !summary) return acc;
+  const uniqueAgents = [
+    ...new Map(
+      allSummaries.map((s) => [s.agentId, { agentId: s.agentId, name: s.name }])
+    ).values(),
+  ].sort((a, b) => a.agentId.localeCompare(b.agentId));
 
-    const keys = [
-      "afterThreeD",
-      "afterTwoD",
-      "afterOneD",
-      "afterSTR",
-      "afterRUMBLE",
-      "afterDOWN",
-      "afterSINGLE",
-      "totalGame",
-      "totalWin",
-    ];
+  const filteredSummaries = allSummaries.filter(
+    (s) => new Date(s.gameDate).toDateString() === selectedDate
+  );
 
-    if (!acc[agentId]) {
-      acc[agentId] = {
-        agentId,
-        afterThreeD: 0,
-        afterTwoD: 0,
-        afterOneD: 0,
-        afterSTR: 0,
-        afterRUMBLE: 0,
-        afterDOWN: 0,
-        afterSINGLE: 0,
-        totalGame: 0,
-        totalWin: 0,
-      };
-    }
-
-    for (const key of keys) {
-      if (typeof summary[key] === "number") {
-        acc[agentId][key] += summary[key];
-      }
-    }
-
-    return acc;
-  }, {});
-
-  const yearlyData = Object.values(yearlyTotals).map((item) => ({
-    ...item,
-    WL: item.totalGame - item.totalWin,
-  }));
-
-  if (loading) {
-    return <div className="text-center text-yellow-300 py-10">Loading...</div>;
-  }
+  const filteredAgentSummaries = allSummaries
+    .filter((s) => s.agentId === selectedAgent)
+    .sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate));
 
   return (
-    <div className="p-4 min-h-screen text-white font-mono">
-      <div className="mb-6">
-        <label className="block mb-2 text-lg font-bold text-yellow-400">
-          Select Date
-        </label>
-        <DatePicker
-          selected={selectedDate}
-          onChange={(date) => setSelectedDate(date)}
-          dateFormat="dd/MM/yyyy"
-          className="px-4 py-2 rounded bg-gray-800 border border-gray-500 text-white"
-        />
+    <div className="p-4 min-h-screen text-white font-mono space-y-10">
+      {/* Summary Runner */}
+      <div className="max-w-3xl mx-auto bg-gray-900 p-6 rounded-lg ring-2 ring-cyan-400 text-white shadow-lg">
+        <h2 className="text-2xl font-bold text-lime-400 text-center">
+          🧮 All-Agent Summary Runner
+        </h2>
+
+        {toast.message && (
+          <div
+            className={`rounded mt-4 p-3 text-sm font-semibold ${
+              toast.type === "success"
+                ? "bg-green-700 text-green-100 border border-green-400"
+                : "bg-red-700 text-red-100 border border-red-400"
+            }`}
+          >
+            {toast.message}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+          <div>
+            <label className="block mb-1 font-semibold text-yellow-300">
+              🎯 3UP Number
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="\d{3}"
+              value={threeUp}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, "").slice(0, 3);
+                setThreeUp(val);
+              }}
+              className="w-full px-4 py-2 rounded bg-gray-800 border border-yellow-500"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-semibold text-pink-300">
+              💥 DOWN Number
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="\d{2}"
+              value={downGame}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+                setDownGame(val);
+              }}
+              className="w-full px-4 py-2 rounded bg-gray-800 border border-pink-500"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-semibold text-cyan-300 font-bangla">
+              🗓️ গেমের তারিখ
+            </label>
+            <DatePicker
+              selected={gameDate}
+              onChange={(date) => setGameDate(date)}
+              dateFormat="dd/MM/yyyy"
+              className="w-full px-4 py-2 rounded bg-gray-800 border border-cyan-500 text-white"
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={handleCalculate}
+          disabled={submitting}
+          className={`mt-6 w-full sm:w-auto px-6 py-2 font-bold rounded shadow transition ${
+            submitting
+              ? "bg-gray-600 cursor-not-allowed"
+              : "bg-green-500 hover:bg-lime-500 text-black"
+          }`}
+        >
+          {submitting ? "Calculating..." : "Calculate All Agents"}
+        </button>
       </div>
 
-      {selectedDate && filteredByDate.length > 0 ? (
-        <div className="mb-12 overflow-x-auto border border-yellow-600 rounded-xl">
+      {/* Select Game Date */}
+      <div>
+        <label className="block mb-2 font-bold text-yellow-300">
+          Select Game Date
+        </label>
+        <select
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="px-4 py-2 bg-gray-800 border border-cyan-500 rounded text-white"
+        >
+          {uniqueDates.map((date) => (
+            <option key={date} value={date}>
+              {date}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Summary Table by Date */}
+      {loading ? (
+        <p className="text-yellow-400">Loading summaries...</p>
+      ) : filteredSummaries.length > 0 ? (
+        <div className="overflow-x-auto border border-yellow-600 rounded-xl">
           <h2 className="text-xl font-bold text-yellow-300 py-3 text-center">
-            Summary for {format(selectedDate, "dd/MM/yyyy")}
+            {selectedDate}
+            <span className="text-white text-xl">
+              {filteredSummaries[0].threeUp &&
+                ` , ${filteredSummaries[0].threeUp}=${filteredSummaries[0].downGame}`}
+            </span>
           </h2>
-          <table className="w-full text-sm bg-gray-900 border border-collapse text-green-200 text-center">
+
+          <table className="w-full text-sm bg-gray-900 border-collapse text-green-200 text-center">
             <thead className="bg-gray-800 text-yellow-300">
               <tr>
+                <th className="p-2">#</th>
+                <th className="p-2">Name</th>
                 <th className="p-2">Agent ID</th>
                 <th className="p-2">STR</th>
                 <th className="p-2">RUMBLE</th>
@@ -131,18 +232,25 @@ export default function Account() {
               </tr>
             </thead>
             <tbody>
-              {filteredByDate.map((item, idx) => (
+              {filteredSummaries.map((item, idx) => (
                 <tr key={idx} className="hover:bg-gray-700">
+                  <td className="p-2">{idx + 1}</td>
+                  <td className="p-2">{item.name}</td>
                   <td className="p-2">{item.agentId}</td>
-                  <td className="p-2">{item.summary?.afterSTR ?? 0}</td>
-                  <td className="p-2">{item.summary?.afterRUMBLE ?? 0}</td>
-                  <td className="p-2">{item.summary?.afterDOWN ?? 0}</td>
-                  <td className="p-2">{item.summary?.afterSINGLE ?? 0}</td>
-                  <td className="p-2">{item.summary?.totalGame ?? 0}</td>
-                  <td className="p-2">{item.summary?.totalWin ?? 0}</td>
-                  <td className="p-2">
-                    {(item.summary?.totalGame ?? 0) -
-                      (item.summary?.totalWin ?? 0)}
+                  <td className="p-2">{item.afterSTR}</td>
+                  <td className="p-2">{item.afterRUMBLE}</td>
+                  <td className="p-2">{item.afterDOWN}</td>
+                  <td className="p-2">{item.afterSINGLE}</td>
+                  <td className="p-2">{item.totalGame}</td>
+                  <td className="p-2">{item.totalWin}</td>
+                  <td
+                    className={`p-2 ${
+                      item.totalGame - item.totalWin < 0
+                        ? "text-red-500 font-bold"
+                        : ""
+                    }`}
+                  >
+                    {item.totalGame - item.totalWin}
                   </td>
                 </tr>
               ))}
@@ -150,52 +258,154 @@ export default function Account() {
           </table>
         </div>
       ) : (
-        selectedDate && (
-          <p className="text-yellow-400 text-center font-bold py-5 text-2xl">
-            No data found for {format(selectedDate, "dd/MM/yyyy")}
-          </p>
-        )
+        <p className="text-center text-pink-400 font-bold">
+          No data found for {selectedDate}
+        </p>
       )}
 
-      <div className="overflow-x-auto border border-pink-600 rounded-xl">
-        <h2 className="text-xl font-bold text-pink-400 py-3 text-center">
-          Yearly Total by Agent
-        </h2>
-        <table className="w-full text-sm bg-gray-900 border border-collapse text-green-200 text-center">
-          <thead className="bg-gray-800 text-pink-300">
-            <tr>
-              <th className="p-2">Agent ID</th>
-              <th className="p-2">STR</th>
-              <th className="p-2">RUMBLE</th>
-              <th className="p-2">DOWN</th>
-              <th className="p-2">SINGLE</th>
-              <th className="p-2">Total Game</th>
-              <th className="p-2">Total Win</th>
-              <th className="p-2">W/L</th>
-            </tr>
-          </thead>
-          <tbody>
-            {yearlyData.map((item, idx) => (
-              <tr key={idx} className="hover:bg-gray-700">
-                <td className="p-2">{item.agentId}</td>
-                <td className="p-2">{item.afterSTR}</td>
-                <td className="p-2">{item.afterRUMBLE}</td>
-                <td className="p-2">{item.afterDOWN}</td>
-                <td className="p-2">{item.afterSINGLE}</td>
-                <td className="p-2">{item.totalGame}</td>
-                <td className="p-2">{item.totalWin}</td>
-                <td
-                  className={`p-2 ${
-                    item.WL < 0 ? "text-red-500 font-bold" : ""
-                  }`}
-                >
-                  {item.WL}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Agent Selector */}
+      <div>
+        <label className="block mb-2 font-bold text-pink-300">
+          Select Agent ID
+        </label>
+        <select
+          value={selectedAgent}
+          onChange={(e) => setSelectedAgent(e.target.value)}
+          className="px-4 py-2 bg-gray-800 border border-pink-500 rounded text-white"
+        >
+          <option value="">-- Choose an agent --</option>
+          {uniqueAgents.map((agent) => (
+            <option key={agent.agentId} value={agent.agentId}>
+              {agent.name ? `${agent.name} (${agent.agentId})` : agent.agentId}
+            </option>
+          ))}
+        </select>
       </div>
+
+      {/* Agent-Specific Summary Table */}
+      {selectedAgent && filteredAgentSummaries.length > 0 && (
+        <div className="overflow-x-auto border border-cyan-500 rounded-xl">
+          <h2 className="text-xl font-bold text-cyan-300 py-3 text-center">
+            {selectedAgent}
+          </h2>
+          <table className="w-full text-sm bg-gray-900 border-collapse text-green-200 text-center">
+            <thead className="bg-gray-800 text-pink-300">
+              <tr>
+                <th className="p-2">#</th>
+                <th className="p-2">Date</th>
+                <th className="p-2">GAME</th>
+                <th className="p-2">STR</th>
+                <th className="p-2">RUMBLE</th>
+                <th className="p-2">DOWN</th>
+                <th className="p-2">SINGLE</th>
+                <th className="p-2">Total Game</th>
+                <th className="p-2">Total Win</th>
+                <th className="p-2">W/L</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredAgentSummaries.map((item, idx) => (
+                <tr key={idx} className="hover:bg-gray-700">
+                  <td className="p-2">{idx + 1}</td>
+                  <td className="p-2">
+                    {format(new Date(item.gameDate), "dd/MM/yyyy")}
+                  </td>
+                  <td className="p-2">
+                    {item.threeUp} = {item.downGame}
+                  </td>
+                  <td className="p-2">{item.afterSTR}</td>
+                  <td className="p-2">{item.afterRUMBLE}</td>
+                  <td className="p-2">{item.afterDOWN}</td>
+                  <td className="p-2">{item.afterSINGLE}</td>
+                  <td className="p-2">{item.totalGame}</td>
+                  <td className="p-2">{item.totalWin}</td>
+                  <td
+                    className={`p-2 ${
+                      item.totalGame - item.totalWin < 0
+                        ? "text-red-500 font-bold"
+                        : ""
+                    }`}
+                  >
+                    {item.totalGame - item.totalWin}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {/* Daily Totals Table */}
+      {uniqueDates.length > 0 && (
+        <div className="overflow-x-auto border border-lime-500 rounded-xl mt-10">
+          <h2 className="text-xl font-bold text-lime-400 py-3 text-center">
+            📊 Yearly Total Summary
+          </h2>
+          <table className="w-full text-sm bg-gray-900 border-collapse text-green-200 text-center">
+            <thead className="bg-gray-800 text-lime-300">
+              <tr>
+                <th className="p-2">#</th>
+                <th className="p-2">Date</th>
+                <th className="p-2">STR</th>
+                <th className="p-2">RUMBLE</th>
+                <th className="p-2">DOWN</th>
+                <th className="p-2">SINGLE</th>
+                <th className="p-2">Total Game</th>
+                <th className="p-2">Total Win</th>
+                <th className="p-2">W/L</th>
+              </tr>
+            </thead>
+            <tbody>
+              {uniqueDates.map((dateStr, idx) => {
+                const summariesForDate = allSummaries.filter(
+                  (s) => new Date(s.gameDate).toDateString() === dateStr
+                );
+
+                const totals = summariesForDate.reduce(
+                  (acc, item) => {
+                    acc.STR += item.afterSTR || 0;
+                    acc.RUMBLE += item.afterRUMBLE || 0;
+                    acc.DOWN += item.afterDOWN || 0;
+                    acc.SINGLE += item.afterSINGLE || 0;
+                    acc.totalGame += item.totalGame || 0;
+                    acc.totalWin += item.totalWin || 0;
+                    return acc;
+                  },
+                  {
+                    STR: 0,
+                    RUMBLE: 0,
+                    DOWN: 0,
+                    SINGLE: 0,
+                    totalGame: 0,
+                    totalWin: 0,
+                  }
+                );
+
+                return (
+                  <tr key={idx} className="hover:bg-gray-700">
+                    <td className="p-2">{idx + 1}</td>
+                    <td className="p-2">{dateStr}</td>
+                    <td className="p-2">{totals.STR}</td>
+                    <td className="p-2">{totals.RUMBLE}</td>
+                    <td className="p-2">{totals.DOWN}</td>
+                    <td className="p-2">{totals.SINGLE}</td>
+                    <td className="p-2">{totals.totalGame}</td>
+                    <td className="p-2">{totals.totalWin}</td>
+                    <td
+                      className={`p-2 ${
+                        totals.totalGame - totals.totalWin < 0
+                          ? "text-red-500 font-bold"
+                          : ""
+                      }`}
+                    >
+                      {totals.totalGame - totals.totalWin}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

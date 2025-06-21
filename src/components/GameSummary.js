@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import React, { useRef } from "react";
 // import html2pdf from "html2pdf.js";
 import { parseISO, format, isValid } from "date-fns";
-const AgentGameSummaryAdmin = ({ agentId }) => {
+const GameSummary = ({ agentId }) => {
   const [loading, setLoading] = useState(true);
   const [fetched, setFetched] = useState(false);
   const [isGameOn, setIsGameOn] = useState(null);
@@ -1154,4 +1154,4 @@ const AgentGameSummaryAdmin = ({ agentId }) => {
   );
 };
 
-export default AgentGameSummaryAdmin;
+export default GameSummary;
