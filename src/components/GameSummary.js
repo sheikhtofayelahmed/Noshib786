@@ -725,6 +725,24 @@ const GameSummary = ({ agentId }) => {
                   <tr className="bg-gray-100 font-bold text-gray-900">
                     <td colSpan={2} className="border px-4 py-2">
                       Total Win
+                      {agent.expense && (
+                        <p className="font-bangla">খরচ {agent?.expenseAmt}</p>
+                      )}
+                      {agent.tenPercent && (
+                        <p className="font-bangla">
+                          আন্ডার ({agent?.tenPercentAmt ?? 0}%) =
+                          {agent
+                            ? (
+                                summaryData.totalWin -
+                                (agent.expenseAmt || 0) -
+                                (summaryData.afterDOWN || 0) -
+                                (summaryData.afterSTR || 0) -
+                                (summaryData.afterSINGLE || 0) -
+                                (summaryData.afterRUMBLE || 0)
+                              ).toFixed(0)
+                            : "0"}
+                        </p>
+                      )}
                     </td>
                     <td colSpan={2} className="border px-4 py-2">
                       {summaryData?.totalWin || 0}
