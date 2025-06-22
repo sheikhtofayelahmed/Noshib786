@@ -58,15 +58,24 @@ const GameSummary = ({ agentId }) => {
         if (!agentRes.ok) throw new Error("Failed to fetch agent data");
         const agentData = await agentRes.json();
         setAgent(agentData.agent);
-
         // 3. Fetch summary (depends on agentId and date from winning numbers)
-        const summaryRes = await fetch(
-          `/api/getSummary?agentId=${agentId}&date=${winStatusData.date}`
-        );
-        if (summaryRes.ok) {
-          const summaryJson = await summaryRes.json();
-          setSummaryData(summaryJson);
+        const formattedDate = new Date(winStatusData.date)
+          .toISOString()
+          .split("T")[0]; // e.g. "2025-06-22"
+
+        const query = new URLSearchParams({
+          agentId,
+          gameDate: formattedDate,
+        }).toString();
+
+        const summaryRes = await fetch(`/api/get-summaries-id-date?${query}`);
+
+        if (!summaryRes.ok) {
+          throw new Error("Failed to fetch summary");
         }
+
+        const { summary } = await summaryRes.json();
+        setSummaryData(summary || {});
 
         // 4. Fetch players by agentId
         const playersRes = await fetch("/api/getPlayersByAgentId", {
@@ -89,78 +98,6 @@ const GameSummary = ({ agentId }) => {
     fetchAllData();
   }, [agentId]);
 
-  // Fetch total wins whenever agentId, threeUp, downGame change
-  useEffect(() => {
-    if (!agentId || !threeUp || !downGame) return;
-
-    const fetchTotalWins = async () => {
-      try {
-        const res = await fetch("/api/getWinningPlays", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ agentId, threeUp, downGame }),
-        });
-        if (!res.ok) throw new Error("Failed to fetch wins");
-        const data = await res.json();
-        setTotalWins(data.totalWins);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-
-    fetchTotalWins();
-  }, [agentId, threeUp, downGame]);
-
-  // Calculate money after totalWins, agent, or players change
-  useEffect(() => {
-    if (!totalWins || !agent?.percentages) return;
-
-    const totalAmounts = players.reduce(
-      (acc, p) => {
-        acc.ThreeD += p.amountPlayed?.ThreeD || 0;
-        acc.TwoD += p.amountPlayed?.TwoD || 0;
-        acc.OneD += p.amountPlayed?.OneD || 0;
-        return acc;
-      },
-      { ThreeD: 0, TwoD: 0, OneD: 0 }
-    );
-
-    const afterThreeD = Math.floor(
-      totalAmounts.ThreeD * (1 - agent.percentages.threeD / 100)
-    );
-    const afterTwoD = Math.floor(
-      totalAmounts.TwoD * (1 - agent.percentages.twoD / 100)
-    );
-    const afterOneD = Math.floor(
-      totalAmounts.OneD * (1 - agent.percentages.oneD / 100)
-    );
-    const afterSTR = Math.floor(totalWins.STR3D * agent.percentages.str);
-    const afterRUMBLE = Math.floor(
-      totalWins.RUMBLE3D * agent.percentages.rumble
-    );
-    const afterDOWN = Math.floor(totalWins.DOWN * agent.percentages.down);
-    const afterSINGLE = Math.floor(totalWins.SINGLE * agent.percentages.single);
-
-    const totalGame = afterThreeD + afterTwoD + afterOneD;
-    const totalWin = afterSTR + afterRUMBLE + afterDOWN + afterSINGLE;
-    const WL = totalGame - totalWin;
-
-    setMoneyCal({
-      afterThreeD,
-      afterTwoD,
-      afterOneD,
-      afterSTR,
-      afterRUMBLE,
-      afterDOWN,
-      afterSINGLE,
-      totalGame,
-      totalWin,
-      totalAmounts,
-      WL,
-    });
-  }, [totalWins, agent?.percentages, players]);
-
-  // Helpers remain unchanged:
   const getPermutations = (str) => {
     if (!str || str.length <= 1) return [str || ""];
     const perms = [];
@@ -616,7 +553,7 @@ const GameSummary = ({ agentId }) => {
       console.error("Content div not found for voucher:", voucher);
     }
   };
-
+  console.log(summaryData);
   if (loading) return <p>Loading...</p>;
   if (fetched && players.length === 0)
     return <p>No players found for this agent.</p>;
@@ -696,25 +633,25 @@ const GameSummary = ({ agentId }) => {
                   <tr className="bg-gray-50 text-green-700">
                     <td className="border px-4 py-2 font-semibold">Total</td>
                     <td className="border text-center">
-                      {moneyCal?.totalAmounts?.ThreeD.toFixed(0)}
+                      {summaryData?.totalAmounts?.ThreeD.toFixed(0)}
                     </td>
                     <td className="border text-center">
-                      {moneyCal?.totalAmounts?.TwoD.toFixed(0)}
+                      {summaryData?.totalAmounts?.TwoD.toFixed(0)}
                     </td>
                     <td className="border text-center">
-                      {moneyCal?.totalAmounts?.OneD.toFixed(0)}
+                      {summaryData?.totalAmounts?.OneD.toFixed(0)}
                     </td>
                     <td className="border text-center">
-                      {totalWins?.STR3D || 0}
+                      {summaryData?.totalWins?.STR3D || 0}
                     </td>
                     <td className="border text-center">
-                      {totalWins?.RUMBLE3D || 0}
+                      {summaryData?.totalWins?.RUMBLE3D || 0}
                     </td>
                     <td className="border text-center">
-                      {totalWins?.DOWN || 0}
+                      {summaryData?.totalWins?.DOWN || 0}
                     </td>
                     <td className="border text-center">
-                      {totalWins?.SINGLE || 0}
+                      {summaryData?.totalWins?.SINGLE || 0}
                     </td>
                   </tr>
 
@@ -750,25 +687,25 @@ const GameSummary = ({ agentId }) => {
                       After Deduction
                     </td>
                     <td className="border text-center">
-                      {moneyCal?.afterThreeD || 0}
+                      {summaryData?.afterThreeD || 0}
                     </td>
                     <td className="border text-center">
-                      {moneyCal?.afterTwoD || 0}
+                      {summaryData?.afterTwoD || 0}
                     </td>
                     <td className="border text-center">
-                      {moneyCal?.afterOneD || 0}
+                      {summaryData?.afterOneD || 0}
                     </td>
                     <td className="border text-center">
-                      {moneyCal?.afterSTR || 0}
+                      {summaryData?.afterSTR || 0}
                     </td>
                     <td className="border text-center">
-                      {moneyCal?.afterRUMBLE || 0}
+                      {summaryData?.afterRUMBLE || 0}
                     </td>
                     <td className="border text-center">
-                      {moneyCal?.afterDOWN || 0}
+                      {summaryData?.afterDOWN || 0}
                     </td>
                     <td className="border text-center">
-                      {moneyCal?.afterSINGLE || 0}
+                      {summaryData?.afterSINGLE || 0}
                     </td>
                   </tr>
 
@@ -778,7 +715,7 @@ const GameSummary = ({ agentId }) => {
                       Total Game
                     </td>
                     <td colSpan={2} className="border px-4 py-2">
-                      {moneyCal?.totalGame || 0}
+                      {summaryData?.totalGame || 0}
                     </td>
                     <td colSpan={4} className="border px-4 py-2 font-bangla">
                       সর্বমোট হিসাব
@@ -790,7 +727,7 @@ const GameSummary = ({ agentId }) => {
                       Total Win
                     </td>
                     <td colSpan={2} className="border px-4 py-2">
-                      {moneyCal?.totalWin || 0}
+                      {summaryData?.totalWin || 0}
                     </td>
                     <td colSpan={3} className="border px-4 py-2 font-bangla">
                       {moneyCal?.totalGame > moneyCal?.totalWin
