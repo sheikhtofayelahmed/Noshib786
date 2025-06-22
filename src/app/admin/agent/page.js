@@ -317,7 +317,6 @@ export default function AdminAgentPage() {
     return () => clearInterval(interval);
   }, []);
 
-  console.log(agents);
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black to-red-900 min-h-screen">
       {/* <h1 className="text-4xl mb-6 text-yellow-400 font-bold">

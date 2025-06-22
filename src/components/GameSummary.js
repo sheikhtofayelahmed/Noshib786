@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import React, { useRef } from "react";
 // import html2pdf from "html2pdf.js";
 import { parseISO, format, isValid } from "date-fns";
+import Loading from "./Loading";
 const GameSummary = ({ agentId }) => {
   const [loading, setLoading] = useState(true);
   const [fetched, setFetched] = useState(false);
@@ -554,7 +555,7 @@ const GameSummary = ({ agentId }) => {
     }
   };
   console.log(summaryData);
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loading></Loading>;
   if (fetched && players.length === 0)
     return <p>No players found for this agent.</p>;
 

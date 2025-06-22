@@ -1,5 +1,6 @@
 "use client";
 
+import Loading from "@/components/Loading";
 import NumberTable from "@/components/NumberTable";
 import { useEffect, useState } from "react";
 
@@ -67,6 +68,7 @@ export default function HappyNewYear() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const res = await fetch("/api/happyNewYear");
       if (!res.ok) {
         console.error("Failed to fetch number stats:", res.statusText);
@@ -74,6 +76,7 @@ export default function HappyNewYear() {
       }
       const data = await res.json();
       setNumberData(data);
+      setLoading(false);
     };
     fetchData();
   }, []);
@@ -101,7 +104,10 @@ export default function HappyNewYear() {
       columnData[columnKey].push({ number: numStr, played });
     }
   }); // ✅ <-- fixed missing parenthesis
-
+  const [loading, setLoading] = useState(false);
+  if (loading) {
+    return <Loading></Loading>;
+  }
   return (
     <div className="w-full p-8 bg-gradient-to-b from-black to-red-950 min-h-screen font-sans text-gray-100 select-none overflow-x-hidden">
       <h1 className="text-center text-6xl font-extrabold mb-16 uppercase tracking-widest text-red-500 drop-shadow-lg animate-pulse-light">
