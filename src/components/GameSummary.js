@@ -907,7 +907,7 @@ const GameSummary = ({ agentId }) => {
                   ref={playerRefs.current[player.voucher]}
                   className="bg-white rounded-lg border shadow-md text-black p-4 "
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="sm:w-80 mx-auto flex items-center justify-between">
                     <button
                       onClick={() => handlePlayerDownloadPdf(player.voucher)}
                       className="w-14 h-14 flex items-center justify-center rounded"
@@ -937,7 +937,7 @@ const GameSummary = ({ agentId }) => {
                   </p>
                   {/* Entries Table */}
                   <table
-                    className="w-full text-sm border border-black "
+                    className="w-full sm:w-80 text-sm border border-black mx-auto"
                     border="1"
                   >
                     <tbody>
@@ -1030,7 +1030,7 @@ const GameSummary = ({ agentId }) => {
                   </table>
                   {/* Totals */}
                   <table
-                    className="w-full mt-4 border border-black border-collapse text-sm "
+                    className="w-full sm:w-80 mx-auto mt-4 border border-black border-collapse text-sm "
                     border="1"
                   >
                     <thead>
