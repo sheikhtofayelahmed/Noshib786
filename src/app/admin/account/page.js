@@ -14,6 +14,34 @@ export default function Account() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedAgent, setSelectedAgent] = useState("");
   const [loading, setLoading] = useState(true);
+  const [fetched, setFetched] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    setFetched(false);
+    setError("");
+
+    const fetchAllData = async () => {
+      try {
+        // 1. Fetch game status and winning numbers in parallel
+        const [winStatusRes] = await Promise.all([fetch("/api/win-status")]);
+        const winStatusData = await winStatusRes.json();
+
+        setThreeUp(winStatusData.threeUp);
+        setDownGame(winStatusData.downGame);
+        setGameDate(winStatusData.date);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+        setFetched(true);
+      }
+    };
+
+    fetchAllData();
+  }, []);
 
   useEffect(() => {
     if (toast.message) {
@@ -27,6 +55,10 @@ export default function Account() {
       setToast({ type: "error", message: "All fields are required." });
       return;
     }
+    const confirmed = window.confirm(
+      "Are you sure you want to proceed with the calculation?"
+    );
+    if (!confirmed) return;
 
     setSubmitting(true);
     setToast({ type: "", message: "" });
@@ -134,10 +166,8 @@ export default function Account() {
               inputMode="numeric"
               pattern="\d{3}"
               value={threeUp}
-              onChange={(e) => {
-                const val = e.target.value.replace(/\D/g, "").slice(0, 3);
-                setThreeUp(val);
-              }}
+              readOnly
+              disabled
               className="w-full px-4 py-2 rounded bg-gray-800 border border-yellow-500"
             />
           </div>
@@ -151,10 +181,8 @@ export default function Account() {
               inputMode="numeric"
               pattern="\d{2}"
               value={downGame}
-              onChange={(e) => {
-                const val = e.target.value.replace(/\D/g, "").slice(0, 2);
-                setDownGame(val);
-              }}
+              readOnly
+              disabled
               className="w-full px-4 py-2 rounded bg-gray-800 border border-pink-500"
             />
           </div>
@@ -165,7 +193,8 @@ export default function Account() {
             </label>
             <DatePicker
               selected={gameDate}
-              onChange={(date) => setGameDate(date)}
+              readOnly
+              disabled
               dateFormat="dd/MM/yyyy"
               className="w-full px-4 py-2 rounded bg-gray-800 border border-cyan-500 text-white"
             />
