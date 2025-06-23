@@ -554,7 +554,7 @@ const GameSummary = ({ agentId }) => {
       console.error("Content div not found for voucher:", voucher);
     }
   };
-  console.log(summaryData);
+
   if (loading) return <Loading></Loading>;
   if (fetched && players.length === 0)
     return <p>No players found for this agent.</p>;
@@ -749,13 +749,14 @@ const GameSummary = ({ agentId }) => {
                       {summaryData?.totalWin || 0}
                     </td>
                     <td colSpan={3} className="border px-4 py-2 font-bangla">
-                      {moneyCal?.totalGame > moneyCal?.totalWin
+                      {summaryData?.totalGame > summaryData?.totalWin
                         ? "গেম এ ব্যাংকার পাবে"
                         : "গেম এ এজেন্ট পাবে"}
                     </td>
                     <td className="border px-4 py-2 text-red-600">
                       {Math.abs(
-                        (moneyCal?.totalGame || 0) - (moneyCal?.totalWin || 0)
+                        (summaryData?.totalGame || 0) -
+                          (summaryData?.totalWin || 0)
                       )}
                     </td>
                   </tr>
@@ -766,8 +767,8 @@ const GameSummary = ({ agentId }) => {
                       ব্যাংকার পাবে
                     </td>
                     <td colSpan={2} className="border px-4 py-2">
-                      {moneyCal?.totalGame - moneyCal?.totalWin >= 0
-                        ? moneyCal?.totalGame - moneyCal?.totalWin
+                      {summaryData?.totalGame - summaryData?.totalWin >= 0
+                        ? summaryData?.totalGame - summaryData?.totalWin
                         : 0}
                     </td>
                     <td colSpan={3} className="border px-4 py-2">
@@ -798,13 +799,13 @@ const GameSummary = ({ agentId }) => {
                       এজেন্ট পাবে
                     </td>
                     <td colSpan={2} className="border px-4 py-2">
-                      {moneyCal?.totalWin - moneyCal?.totalGame >= 0
-                        ? moneyCal?.totalWin - moneyCal?.totalGame
+                      {summaryData?.totalWin - summaryData?.totalGame >= 0
+                        ? summaryData?.totalWin - summaryData?.totalGame
                         : 0}
                     </td>
                     {(() => {
-                      const game = moneyCal?.totalGame || 0;
-                      const win = moneyCal?.totalWin || 0;
+                      const game = summaryData?.totalGame || 0;
+                      const win = summaryData?.totalWin || 0;
                       const netNow = game - win;
                       const previous = Number(numberInput) || 0;
                       let finalNet = 0;
@@ -885,6 +886,158 @@ const GameSummary = ({ agentId }) => {
 
                         return finalNet - joma;
                       })()}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            {/* Agent-Customer */}
+            <div
+              ref={contentRef}
+              className="overflow-x-auto my-4 rounded-lg shadow-md ring-2 ring-gray-400 bg-white p-6 text-center"
+            >
+              <table className="w-full border-collapse font-mono text-sm rounded-lg shadow border ">
+                <tbody>
+                  {/* Headers */}
+                  <tr className="bg-yellow-200 text-gray-900 font-semibold text-sm">
+                    <th className="border p-2">Category</th>
+                    <th className="border p-2">🎯 3D</th>
+                    <th className="border p-2">🎯 2D</th>
+                    <th className="border p-2">🎯 1D</th>
+                    <th className="border p-2">STR</th>
+                    <th className="border p-2">RUMBLE</th>
+                    <th className="border p-2">DOWN</th>
+                    <th className="border p-2">SINGLE</th>
+                  </tr>
+                  {/* Total Amounts */}
+                  <tr className="bg-gray-50 text-green-700">
+                    <td className="border px-4 py-2 font-semibold">Total</td>
+                    <td className="border text-center">
+                      {summaryData?.totalAmounts?.ThreeD.toFixed(0)}
+                    </td>
+                    <td className="border text-center">
+                      {summaryData?.totalAmounts?.TwoD.toFixed(0)}
+                    </td>
+                    <td className="border text-center">
+                      {summaryData?.totalAmounts?.OneD.toFixed(0)}
+                    </td>
+                    <td className="border text-center">
+                      {summaryData?.totalWins?.STR3D || 0}
+                    </td>
+                    <td className="border text-center">
+                      {summaryData?.totalWins?.RUMBLE3D || 0}
+                    </td>
+                    <td className="border text-center">
+                      {summaryData?.totalWins?.DOWN || 0}
+                    </td>
+                    <td className="border text-center">
+                      {summaryData?.totalWins?.SINGLE || 0}
+                    </td>
+                  </tr>
+                  {/* Percentagess */}
+                  <tr className="bg-gray-50 text-gray-700">
+                    <td className="border px-4 py-2 font-semibold">% / -</td>
+                    <td className="border text-center">
+                      {agent?.cPercentages?.threeD || 0}
+                    </td>
+                    <td className="border text-center">
+                      {agent?.cPercentages?.twoD || 0}
+                    </td>
+                    <td className="border text-center">
+                      {agent?.cPercentages?.oneD || 0}
+                    </td>
+                    <td className="border text-center">
+                      {agent?.cPercentages?.str || 0}
+                    </td>
+                    <td className="border text-center">
+                      {agent?.cPercentages?.rumble || 0}
+                    </td>
+                    <td className="border text-center">
+                      {agent?.cPercentages?.down || 0}
+                    </td>
+                    <td className="border text-center">
+                      {agent?.cPercentages?.single || 0}
+                    </td>
+                  </tr>
+                  {/* After Deduction */}
+                  <tr className="bg-gray-50 text-gray-800">
+                    <td className="border px-4 py-2 font-semibold">
+                      After Deduction
+                    </td>
+                    <td className="border text-center">
+                      {(
+                        summaryData?.totalAmounts?.ThreeD *
+                        (1 - agent?.cPercentages?.threeD / 100)
+                      ).toFixed(0)}
+                    </td>
+                    <td className="border text-center">
+                      {(
+                        summaryData?.totalAmounts?.TwoD *
+                        (1 - agent?.cPercentages?.twoD / 100)
+                      ).toFixed(0)}
+                    </td>
+                    <td className="border text-center">
+                      {(
+                        summaryData?.totalAmounts?.OneD *
+                        (1 - agent?.cPercentages?.oneD / 100)
+                      ).toFixed(0)}
+                    </td>
+                    <td className="border text-center">
+                      {(
+                        (summaryData?.totalWins?.STR3D || 0) *
+                        (agent?.cPercentages?.str || 0)
+                      ).toFixed(0)}
+                    </td>
+                    <td className="border text-center">
+                      {(
+                        (summaryData?.totalWins?.RUMBLE3D || 0) *
+                        (agent?.cPercentages?.rumble || 0)
+                      ).toFixed(0)}
+                    </td>
+                    <td className="border text-center">
+                      {(
+                        (summaryData?.totalWins?.DOWN || 0) *
+                        (agent?.cPercentages?.down || 0)
+                      ).toFixed(0)}
+                    </td>
+                    <td className="border text-center">
+                      {(
+                        (summaryData?.totalWins?.SINGLE || 0) *
+                        (agent?.cPercentages?.single || 0)
+                      ).toFixed(0)}
+                    </td>
+                  </tr>
+                  {/* Total Game and Win */}
+                  <tr className="bg-gray-100 font-bold text-gray-900">
+                    <td colSpan={2} className="border px-4 py-2">
+                      Total Game
+                    </td>
+                    <td colSpan={2} className="border px-4 py-2">
+                      {(
+                        summaryData?.totalAmounts?.ThreeD *
+                          (1 - agent?.cPercentages?.threeD / 100) +
+                        summaryData?.totalAmounts?.TwoD *
+                          (1 - agent?.cPercentages?.twoD / 100) +
+                        summaryData?.totalAmounts?.OneD *
+                          (1 - agent?.cPercentages?.oneD / 100)
+                      ).toFixed(0)}
+                    </td>
+                  </tr>
+                  <tr className="bg-gray-100 font-bold text-gray-900">
+                    <td colSpan={2} className="border px-4 py-2">
+                      Total Win
+                    </td>
+                    <td colSpan={2} className="border px-4 py-2">
+                      {(
+                        (summaryData?.totalWins?.STR3D || 0) *
+                          (agent?.cPercentages?.str || 0) +
+                        (summaryData?.totalWins?.RUMBLE3D || 0) *
+                          (agent?.cPercentages?.rumble || 0) +
+                        (summaryData?.totalWins?.DOWN || 0) *
+                          (agent?.cPercentages?.down || 0) +
+                        (summaryData?.totalWins?.SINGLE || 0) *
+                          (agent?.cPercentages?.single || 0)
+                      ).toFixed(0)}
                     </td>
                   </tr>
                 </tbody>
