@@ -726,10 +726,10 @@ const GameSummary = ({ agentId }) => {
                   <tr className="bg-gray-100 font-bold text-gray-900">
                     <td colSpan={2} className="border px-4 py-2">
                       Total Win
-                      {agent.expense && (
+                      {agent.expense && item.totalWin > 0 && (
                         <p className="font-bangla">খরচ {agent?.expenseAmt}</p>
                       )}
-                      {agent.tenPercent && (
+                      {agent.tenPercent && item.totalWin > 0 && (
                         <p className="font-bangla">
                           আন্ডার ({agent?.tenPercentAmt ?? 0}%) =
                           {agent

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
+import GameSummary from "@/components/GameSummaryModal";
 
 export default function Account() {
   const [threeUp, setThreeUp] = useState("");
@@ -16,6 +17,10 @@ export default function Account() {
   const [loading, setLoading] = useState(true);
   const [fetched, setFetched] = useState(false);
   const [error, setError] = useState("");
+  const [summaryModal, setSummaryModal] = useState(false);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedSummaryItem, setSelectedSummaryItem] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -107,6 +112,12 @@ export default function Account() {
           if (sortedDates.length > 0) {
             setSelectedDate(sortedDates[0]);
           }
+          const agents = Array.from(
+            new Map(data.summaries.map((s) => [s.agentId, s])).values()
+          );
+          if (agents.length > 0) {
+            setSelectedAgent(agents[0].agentId);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch summaries:", err);
@@ -135,6 +146,13 @@ export default function Account() {
   const filteredAgentSummaries = allSummaries
     .filter((s) => s.agentId === selectedAgent)
     .sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate));
+  //game summary modal
+  const handleOpenModal = (agentId, gameDate) => {
+    // Pass this info to your modal or state manager
+    console.log("Open modal for:", agentId, gameDate);
+    // Example: setModalData({ agentId, gameDate }); setShowModal(true);
+    setSummaryModal(true);
+  };
 
   return (
     <div className="p-4 min-h-screen text-white font-mono space-y-10">
@@ -330,6 +348,7 @@ export default function Account() {
                 <th className="p-2">Total Game</th>
                 <th className="p-2">Total Win</th>
                 <th className="p-2">W/L</th>
+                <th className="p-2">Voucher</th>
               </tr>
             </thead>
             <tbody>
@@ -356,6 +375,16 @@ export default function Account() {
                     }`}
                   >
                     {item.totalGame - item.totalWin}
+                  </td>
+                  <td className="p-2 text-yellow-300">
+                    <button
+                      onClick={() => {
+                        setSelectedSummaryItem(item);
+                        setModalVisible(true);
+                      }}
+                    >
+                      View 
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -434,6 +463,14 @@ export default function Account() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {modalVisible && (
+        <GameSummary
+          // visible={modalVisible}
+          item={selectedSummaryItem}
+          onClose={() => setModalVisible(false)}
+        />
       )}
     </div>
   );
