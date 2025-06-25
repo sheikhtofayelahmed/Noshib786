@@ -86,8 +86,9 @@ const GameSummary = ({ agentId }) => {
           if (!summaryRes.ok) {
             console.warn("⚠️ Could not fetch summary");
           } else {
-            const summaryData = await summaryRes.json();
-            setSummaryData(summaryData || {});
+            const res = await summaryRes.json();
+            const data = res.summary;
+            setSummaryData(data || {});
           }
         } catch (summaryErr) {
           console.error("❌ Error fetching summary:", summaryErr);
@@ -184,7 +185,6 @@ const GameSummary = ({ agentId }) => {
   };
 
   const uploadSummary = async () => {
-    // Prepare the calculation object
     const cal = {
       thisGame,
       thisGameAmt: Number(thisGameAmt),
@@ -231,12 +231,12 @@ const GameSummary = ({ agentId }) => {
     setThisGameAmt(summaryData?.calculation?.thisGameAmt);
     setExGame(summaryData?.calculation?.exGame);
     setExGameAmt(summaryData?.calculation?.exGameAmt);
-    setCurrentGame(summaryData?.calculation?.currentGame);
-    setCurrentGameAmt(summaryData?.calculation?.currentGameAmt);
-    setCurrentGameOperation(summaryData?.calculation?.currentGameOperation);
-    setFinalCalType(summaryData?.calculation?.finalCalType);
-    setFinalCalAmt(summaryData?.calculation?.finalCalAmt);
-    setFinalCalOperation(summaryData?.calculation?.finalCalOperation);
+    setCurrentGame(summaryData?.calculation?.finalCalType);
+    setCurrentGameAmt(summaryData?.calculation?.finalCalAmt);
+    // setCurrentGameOperation(summaryData?.calculation?.currentGameOperation);
+    // setFinalCalType(summaryData?.calculation?.finalCalType);
+    // setFinalCalAmt(summaryData?.calculation?.finalCalAmt);
+    // setFinalCalOperation(summaryData?.calculation?.finalCalOperation);
   }, [summaryData]);
   const handleSummaryPrint = (
     agent,
@@ -629,20 +629,20 @@ const GameSummary = ({ agentId }) => {
     }
   };
 
-  useEffect(() => {
-    // Step 1: বর্তমান হিসাব নির্ণয় (currentGameAmt)
-    const thisGame = parseFloat(thisGameAmt) || 0;
-    const exGame = parseFloat(exGameAmt) || 0;
-    let currentResult = 0;
+  // useEffect(() => {
+  //   // Step 1: বর্তমান হিসাব নির্ণয় (currentGameAmt)
+  //   const thisGame = parseFloat(thisGameAmt) || 0;
+  //   const exGame = parseFloat(exGameAmt) || 0;
+  //   let currentResult = 0;
 
-    if (currentGameOperation === "plusCurrent") {
-      currentResult = thisGame + exGame;
-    } else if (currentGameOperation === "minusCurrent") {
-      currentResult = thisGame - exGame;
-    }
+  //   if (currentGameOperation === "plusCurrent") {
+  //     currentResult = thisGame + exGame;
+  //   } else if (currentGameOperation === "minusCurrent") {
+  //     currentResult = thisGame - exGame;
+  //   }
 
-    setCurrentGameAmt(currentResult.toFixed(0));
-  }, [thisGameAmt, exGameAmt, currentGameOperation]);
+  //   setCurrentGameAmt(currentResult.toFixed(0));
+  // }, [thisGameAmt, exGameAmt, currentGameOperation]);
 
   useEffect(() => {
     // Step 2: ফাইনাল হিসাব নির্ণয় (finalCalAmt)
@@ -661,8 +661,8 @@ const GameSummary = ({ agentId }) => {
 
   console.log(moneyCal);
   if (loading) return <Loading></Loading>;
-  // if (fetched && players.length === 0)
-  //   return <p>No players found for this agent.</p>;
+  if (fetched && players.length === 0)
+    return <p>No players found for this agent.</p>;
 
   return (
     <div className=" min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
@@ -670,13 +670,13 @@ const GameSummary = ({ agentId }) => {
         <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>
       )}
 
-      {/* {!loading && fetched && players.length === 0 && (
+      {!loading && fetched && players.length === 0 && (
         <div className="flex items-center justify-center h-[60vh]">
           <p className="text-pink-400 text-3xl font-bold text-center">
             😕 No player data found for this agent.
           </p>
         </div>
-      )} */}
+      )}
       {!loading && players.length >= 0 && (
         <div className="mt-8 w-full">
           <div className="overflow-x-auto mt-8 mb-8 max-w-4xl mx-auto">
@@ -915,37 +915,63 @@ const GameSummary = ({ agentId }) => {
                         : 0}
                     </td>
 
-                    <td colSpan={3} className="font-bangla border px-4 py-2">
-                      <select
-                        value={currentGame}
-                        onChange={(e) => setCurrentGame(e.target.value)}
-                        className="w-full bg-white border px-2 py-1 text-center"
-                      >
-                        <option value="option">বর্তমান</option>
-                        <option value="adminCurrent">
-                          বর্তমানে ব্যাংকার পাবে
-                        </option>
-                        <option value="agentCurrent">
-                          ব্তমানে এজেন্ট পাবে
-                        </option>
-                      </select>
-                    </td>
-                    <td className="border px-4 py-2 font-bangla">
-                      <select
-                        value={currentGameOperation}
-                        onChange={(e) =>
-                          setCurrentGameOperation(e.target.value)
-                        }
-                        className="w-full bg-white border py-1 text-center"
-                      >
-                        <option value="option">+/-</option>
-                        <option value="plusCurrent">+</option>
-                        <option value="minusCurrent">-</option>
-                      </select>
-                    </td>
-                    <td className="border px-4 py-2 font-bangla">
-                      {currentGameAmt}
-                    </td>
+                    {summaryData?.calculation ? (
+                      finalCalAmt && (
+                        <>
+                          <td
+                            colSpan={3}
+                            className="font-bangla border px-4 py-2 text-red-700 font-bold"
+                          >
+                            {currentGame === "finalCalBanker"
+                              ? "বর্তমানে ব্যাংকার পাবে"
+                              : currentGame === "finalCalAgent"
+                              ? "বর্তমানে এজেন্ট পাবে"
+                              : ""}
+                          </td>
+                          <td className="border px-4 py-2 font-bangla"></td>
+                          <td className="border px-4 py-2 font-bangla">
+                            {currentGameAmt}
+                          </td>
+                        </>
+                      )
+                    ) : (
+                      <>
+                        <td
+                          colSpan={3}
+                          className="font-bangla border px-4 py-2"
+                        >
+                          <select
+                            value={currentGame}
+                            onChange={(e) => setCurrentGame(e.target.value)}
+                            className="w-full bg-white border px-2 py-1 text-center"
+                          >
+                            <option value="option">বর্তমান</option>
+                            <option value="adminCurrent">
+                              বর্তমানে ব্যাংকার পাবে
+                            </option>
+                            <option value="agentCurrent">
+                              বর্তমানে এজেন্ট পাবে
+                            </option>
+                          </select>
+                        </td>
+                        <td className="border px-4 py-2 font-bangla">
+                          <select
+                            value={currentGameOperation}
+                            onChange={(e) =>
+                              setCurrentGameOperation(e.target.value)
+                            }
+                            className="w-full bg-white border py-1 text-center"
+                          >
+                            <option value="option">+/-</option>
+                            <option value="plusCurrent">+</option>
+                            <option value="minusCurrent">-</option>
+                          </select>
+                        </td>
+                        <td className="border px-4 py-2 font-bangla">
+                          {currentGameAmt}
+                        </td>
+                      </>
+                    )}
                   </tr>
 
                   {/* Joma Record */}
@@ -980,7 +1006,7 @@ const GameSummary = ({ agentId }) => {
                         onChange={(e) => setJomaType(e.target.value)}
                         className="w-full bg-white border px-2 py-1 text-center"
                       >
-                        <option value="joma">জমার ধরণ</option>
+                        <option value="option">জমার ধরণ</option>
                         <option value="jomaRegular">জমা</option>
                         <option value="jomaWin">উইন জমা</option>
                         <option value="jomaCash">নগদ জমা</option>
@@ -1008,8 +1034,10 @@ const GameSummary = ({ agentId }) => {
                         className="w-full bg-white border px-2 py-1 text-center"
                       >
                         <option value="option">মোট বর্তমান হিসাব</option>
-                        <option value="finalCal">ব্যাংকার মোট পাবে</option>
-                        <option value="finalCal">এজেন্ট মোট পাবে</option>
+                        <option value="finalCalBanker">
+                          ব্যাংকার মোট পাবে
+                        </option>
+                        <option value="finalCalAgent">এজেন্ট মোট পাবে</option>
                       </select>
                     </td>
                     <td className="border px-4 py-2 text-red-600">
