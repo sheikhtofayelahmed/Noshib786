@@ -8,7 +8,7 @@ const SubAgentSummary = () => {
   const [loading, setLoading] = useState(true);
   const [fetched, setFetched] = useState(false);
   const [players, setPlayers] = useState([]);
-  const { agentId } = useAgent();
+  const { agentId, subAgentId, loginAs } = useAgent();
 
   const fetchPlayersByAgentId = async (agentId) => {
     setLoading(true);
@@ -24,10 +24,17 @@ const SubAgentSummary = () => {
       const data = await res.json();
 
       if (res.ok) {
-        const sortedPlayers = (data.players || []).sort(
-          (a, b) => parseInt(a.SAId) - parseInt(b.SAId)
-        );
-        setPlayers(sortedPlayers);
+        if (subAgentId && loginAs !== "agent") {
+          const filteredPlayer = (data.players || []).filter(
+            (p) => String(p.SAId) === String(subAgentId)
+          );
+          setPlayers(filteredPlayer);
+        } else {
+          const sortedPlayers = (data.players || []).sort(
+            (a, b) => parseInt(a.SAId) - parseInt(b.SAId)
+          );
+          setPlayers(sortedPlayers);
+        }
       } else {
         console.error(data.message || "Failed to fetch players.");
         setPlayers([]);
