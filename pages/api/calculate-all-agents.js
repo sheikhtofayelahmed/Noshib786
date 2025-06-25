@@ -176,19 +176,27 @@ export default async function handler(req, res) {
 
       const totalGame = afterThreeD + afterTwoD + afterOneD;
       let totalWin = afterSTR + afterRUMBLE + afterDOWN + afterSINGLE;
+
+      let underPercentage = 0;
+      let Expense = 0;
+
       if (totalWin < totalGame) {
         if (agent.tenPercent) {
-          totalWin += Math.floor(totalWin * (agent.tenPercentAmt / 100));
+          underPercentage = Math.floor(totalWin * (agent.tenPercentAmt / 100));
+          totalWin += underPercentage;
         }
         if (agent.expense) {
-          totalWin += Number(agent.expenseAmt);
+          Expense = Number(agent.expenseAmt);
+          totalWin += Expense;
         }
       }
+
       const WL = totalGame - totalWin;
 
       const summary = {
         agentId,
         name,
+        percentages,
         totalAmounts,
         totalWins,
         afterThreeD,
@@ -200,6 +208,11 @@ export default async function handler(req, res) {
         afterSINGLE,
         totalGame,
         totalWin,
+        expense: agent.expense,
+        tenPercent: agent.tenPercent,
+        tenPercentAmt: agent.tenPercentAmt,
+        underPercentage,
+        Expense,
         WL,
         gameDate,
         threeUp,

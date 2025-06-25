@@ -5,7 +5,7 @@ import { parseISO, format, isValid } from "date-fns";
 import Loading from "./Loading";
 
 const GameSummary = ({ item, visible, onClose }) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
   const [isGameOn, setIsGameOn] = useState(null);
   const [players, setPlayers] = useState([]);
@@ -29,33 +29,6 @@ const GameSummary = ({ item, visible, onClose }) => {
     return isValid(parsed) ? format(parsed, "dd/MM/yyyy") : "Invalid Date";
   };
 
-  useEffect(() => {
-    if (!item.agentId || !item.gameDate) return;
-
-    setLoading(true);
-    setFetched(false);
-    setError("");
-
-    const fetchAllData = async () => {
-      try {
-        const agentRes = await fetch(
-          `/api/getAgentById?agentId=${item.agentId}`
-        );
-        if (!agentRes.ok) throw new Error("Failed to fetch agent data");
-        const agentData = await agentRes.json();
-        setAgent(agentData.agent);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-        setFetched(true);
-      }
-    };
-
-    fetchAllData();
-  }, [item.agentId, item.gameDate]);
   const handleDownloadPdf = async (agentId, name, date) => {
     const html2pdf = (await import("html2pdf.js")).default;
     const element = contentRef.current;
@@ -77,6 +50,8 @@ const GameSummary = ({ item, visible, onClose }) => {
     }
   };
   // -- render remains unchanged --
+
+  console.log(item);
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center">
       <div className="relative bg-gradient-to-br from-black to-red-900 text-white font-mono rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
@@ -96,9 +71,12 @@ const GameSummary = ({ item, visible, onClose }) => {
               >
                 <div className="flex justify-between items-center mb-6">
                   {/* <div className="flex items-center gap-4 mt-4"> */}
+                  <h2 className="text-lg md:text-2xl font-bold text-gray-800">
+                    📊 Game & Player Summary
+                  </h2>{" "}
                   <button
                     onClick={() =>
-                      handleDownloadPdf(item.agentId, agent.name, item.gameDate)
+                      handleDownloadPdf(item.agentId, item.name, item.gameDate)
                     }
                     className="p-2 rounded-xl bg-gray-200 transition duration-300"
                     title="Download Player Info"
@@ -109,11 +87,6 @@ const GameSummary = ({ item, visible, onClose }) => {
                       className="w-8 h-8"
                     />
                   </button>
-
-                  <h2 className="text-lg md:text-2xl font-bold text-gray-800">
-                    📊 Game & Player Summary
-                  </h2>
-
                   {/* </div> */}
                 </div>
 
@@ -121,7 +94,7 @@ const GameSummary = ({ item, visible, onClose }) => {
                   <tbody>
                     <tr className="bg-gray-100 text-gray-800">
                       <td colSpan={2} className="px-6 py-4 text-2xl font-bold">
-                        {item.agent?.name}
+                        {item?.name}
                       </td>
                       <td colSpan={2} className="px-6 py-4 text-xl">
                         {safeDate(item.gameDate)}
@@ -176,25 +149,25 @@ const GameSummary = ({ item, visible, onClose }) => {
                     <tr className="bg-gray-50 text-gray-700">
                       <td className="border px-4 py-2 font-semibold">% / -</td>
                       <td className="border text-center">
-                        {agent?.percentages?.threeD || 0}
+                        {item?.percentages?.threeD || 0}
                       </td>
                       <td className="border text-center">
-                        {agent?.percentages?.twoD || 0}
+                        {item?.percentages?.twoD || 0}
                       </td>
                       <td className="border text-center">
-                        {agent?.percentages?.oneD || 0}
+                        {item?.percentages?.oneD || 0}
                       </td>
                       <td className="border text-center">
-                        {agent?.percentages?.str || 0}
+                        {item?.percentages?.str || 0}
                       </td>
                       <td className="border text-center">
-                        {agent?.percentages?.rumble || 0}
+                        {item?.percentages?.rumble || 0}
                       </td>
                       <td className="border text-center">
-                        {agent?.percentages?.down || 0}
+                        {item?.percentages?.down || 0}
                       </td>
                       <td className="border text-center">
-                        {agent?.percentages?.single || 0}
+                        {item?.percentages?.single || 0}
                       </td>
                     </tr>
 
@@ -242,22 +215,13 @@ const GameSummary = ({ item, visible, onClose }) => {
                     <tr className="bg-gray-100 font-bold text-gray-900">
                       <td colSpan={2} className="border px-4 py-2">
                         Total Win
-                        {agent.expense && item.totalWin > 0 && (
-                          <p className="font-bangla">খরচ {agent?.expenseAmt}</p>
+                        {item.expense && item.totalWin > 0 && (
+                          <p className="font-bangla">খরচ {item.Expense}</p>
                         )}
-                        {agent.tenPercent && item.totalWin > 0 && (
+                        {item.tenPercent && item.totalWin > 0 && (
                           <p className="font-bangla">
-                            আন্ডার ({agent?.tenPercentAmt ?? 0}%) =
-                            {agent
-                              ? (
-                                  item.totalWin -
-                                  (agent.expenseAmt || 0) -
-                                  (item.afterDOWN || 0) -
-                                  (item.afterSTR || 0) -
-                                  (item.afterSINGLE || 0) -
-                                  (item.afterRUMBLE || 0)
-                                ).toFixed(0)
-                              : "0"}
+                            আন্ডার ({item?.tenPercentAmt ?? 0}%) =
+                            {item ? item?.underPercentage.toFixed(0) : "0"}
                           </p>
                         )}
                       </td>

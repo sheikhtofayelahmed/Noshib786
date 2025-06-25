@@ -311,14 +311,14 @@ export default function Account() {
       )}
 
       {/* Agent Selector */}
-      <div>
+      <div className="w-full max-w-xs sm:max-w-sm">
         <label className="block mb-2 font-bold text-pink-300">
           Select Agent ID
         </label>
         <select
           value={selectedAgent}
           onChange={(e) => setSelectedAgent(e.target.value)}
-          className="px-4 py-2 bg-gray-800 border border-pink-500 rounded text-white"
+          className="w-full px-4 py-2 bg-gray-800 border border-pink-500 rounded text-white"
         >
           <option value="">-- Choose an agent --</option>
           {uniqueAgents.map((agent) => (
@@ -383,7 +383,7 @@ export default function Account() {
                         setModalVisible(true);
                       }}
                     >
-                      View 
+                      View
                     </button>
                   </td>
                 </tr>

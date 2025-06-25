@@ -20,10 +20,21 @@ const GameSummary = ({ agentId }) => {
   const hasUploadedRef = useRef(false);
   const contentRef = useRef(null);
   const playerRefs = useRef({});
-  const [summaryData, setSummaryData] = useState({});
+  const [summaryData, setSummaryData] = useState(null);
   const [selectedOption, setSelectedOption] = useState("");
   const [numberInput, setNumberInput] = useState(0);
-  const [jomaInput, setJomaInput] = useState("");
+  const [thisGame, setThisGame] = useState("");
+  const [thisGameAmt, setThisGameAmt] = useState("");
+  const [exGame, setExGame] = useState("");
+  const [exGameAmt, setExGameAmt] = useState("");
+  const [currentGame, setCurrentGame] = useState("");
+  const [currentGameOperation, setCurrentGameOperation] = useState("");
+  const [currentGameAmt, setCurrentGameAmt] = useState("");
+  const [jomaType, setJomaType] = useState("");
+  const [jomaAmt, setJomaAmt] = useState("");
+  const [finalCalType, setFinalCalType] = useState("");
+  const [finalCalAmt, setFinalCalAmt] = useState("");
+  const [finalCalOperation, setFinalCalOperation] = useState("");
 
   const safeDate = (dateStr) => {
     if (!dateStr) return "Invalid Date";
@@ -46,6 +57,7 @@ const GameSummary = ({ agentId }) => {
           fetch("/api/game-status"),
           fetch("/api/win-status"),
         ]);
+
         const gameStatusData = await gameStatusRes.json();
         const winStatusData = await winStatusRes.json();
 
@@ -59,37 +71,52 @@ const GameSummary = ({ agentId }) => {
         if (!agentRes.ok) throw new Error("Failed to fetch agent data");
         const agentData = await agentRes.json();
         setAgent(agentData.agent);
-        // 3. Fetch summary (depends on agentId and date from winning numbers)
+
+        // 3. Fetch summary
         const formattedDate = new Date(winStatusData.date)
           .toISOString()
-          .split("T")[0]; // e.g. "2025-06-22"
-
+          .split("T")[0]; // "YYYY-MM-DD"
         const query = new URLSearchParams({
           agentId,
           gameDate: formattedDate,
         }).toString();
 
-        const summaryRes = await fetch(`/api/get-summaries-id-date?${query}`);
-
-        if (!summaryRes.ok) {
-          throw new Error("Failed to fetch summary");
+        try {
+          const summaryRes = await fetch(`/api/get-summaries-id-date?${query}`);
+          if (!summaryRes.ok) {
+            console.warn("⚠️ Could not fetch summary");
+          } else {
+            const summaryData = await summaryRes.json();
+            setSummaryData(summaryData || {});
+          }
+        } catch (summaryErr) {
+          console.error("❌ Error fetching summary:", summaryErr);
         }
 
-        const { summary } = await summaryRes.json();
-        setSummaryData(summary || {});
+        // 4. Fetch players
+        try {
+          const playersRes = await fetch("/api/getPlayersByAgentId", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ agentId }),
+          });
 
-        // 4. Fetch players by agentId
-        const playersRes = await fetch("/api/getPlayersByAgentId", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ agentId }),
-        });
-        if (!playersRes.ok) throw new Error("Failed to fetch players");
-        const playersJson = await playersRes.json();
-        setPlayers(playersJson.players || []);
+          if (!playersRes.ok) {
+            const errMsg = await playersRes.text();
+            setError("⚠️ Could not load players: " + errMsg);
+            setPlayers([]);
+            return;
+          }
+
+          const playersJson = await playersRes.json();
+          setPlayers(playersJson.players || []);
+        } catch (err) {
+          console.error("❌ Error fetching players:", err);
+          setError("❌ Network error: " + err.message);
+        }
       } catch (err) {
-        console.error("Error fetching data:", err);
-        setError(err.message);
+        console.error("❌ Error in fetchAllData:", err);
+        setError("❌ Unexpected error occurred");
       } finally {
         setLoading(false);
         setFetched(true);
@@ -99,6 +126,23 @@ const GameSummary = ({ agentId }) => {
     fetchAllData();
   }, [agentId]);
 
+  useEffect(() => {
+    if (!players) return;
+
+    const totalAmounts = players.reduce(
+      (acc, p) => {
+        acc.ThreeD += p.amountPlayed?.ThreeD || 0;
+        acc.TwoD += p.amountPlayed?.TwoD || 0;
+        acc.OneD += p.amountPlayed?.OneD || 0;
+        return acc;
+      },
+      { ThreeD: 0, TwoD: 0, OneD: 0 }
+    );
+
+    setMoneyCal({
+      totalAmounts,
+    });
+  }, [players]);
   const getPermutations = (str) => {
     if (!str || str.length <= 1) return [str || ""];
     const perms = [];
@@ -140,30 +184,60 @@ const GameSummary = ({ agentId }) => {
   };
 
   const uploadSummary = async () => {
-    if (!moneyCal || Object.keys(moneyCal).length === 0) return;
+    // Prepare the calculation object
+    const cal = {
+      thisGame,
+      thisGameAmt: Number(thisGameAmt),
+      exGame,
+      exGameAmt: Number(exGameAmt),
+      currentGame,
+      currentGameAmt: Number(currentGameAmt),
+      currentGameOperation,
+      joma: {
+        date: new Date().toISOString().split("T")[0],
+        jomaType,
+        jomaAmt: Number(jomaAmt),
+      },
+      finalCalType,
+      finalCalAmt: Number(finalCalAmt),
+      finalCalOperation,
+    };
 
-    const joma = Number(jomaInput);
-    const jomaDate = new Date().toISOString().split("T")[0];
+    // Make the API call
+    try {
+      const res = await fetch("/api/save-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          agentId,
+          gameDate: date,
+          cal,
+        }),
+      });
 
-    const res = await fetch("/api/save-summary", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        agentId,
-        date,
-        summary: moneyCal,
-        joma: { joma, jomaDate },
-      }),
-    });
+      const result = await res.json();
 
-    const result = await res.json();
-    if (result.success) {
-      alert("✅ Summary saved or updated");
-    } else {
-      alert("⚠️ Summary not saved: " + (result.message || result.error));
+      if (result.success) {
+        alert("✅ Summary saved or updated");
+      } else {
+        alert("⚠️ Summary not saved: " + (result.message || result.error));
+      }
+    } catch (error) {
+      alert("❌ Network error: " + error.message);
     }
   };
-
+  useEffect(() => {
+    setThisGame(summaryData?.calculation?.thisGame);
+    setThisGameAmt(summaryData?.calculation?.thisGameAmt);
+    setExGame(summaryData?.calculation?.exGame);
+    setExGameAmt(summaryData?.calculation?.exGameAmt);
+    setCurrentGame(summaryData?.calculation?.currentGame);
+    setCurrentGameAmt(summaryData?.calculation?.currentGameAmt);
+    setCurrentGameOperation(summaryData?.calculation?.currentGameOperation);
+    setFinalCalType(summaryData?.calculation?.finalCalType);
+    setFinalCalAmt(summaryData?.calculation?.finalCalAmt);
+    setFinalCalOperation(summaryData?.calculation?.finalCalOperation);
+  }, [summaryData]);
   const handleSummaryPrint = (
     agent,
     date,
@@ -555,9 +629,40 @@ const GameSummary = ({ agentId }) => {
     }
   };
 
+  useEffect(() => {
+    // Step 1: বর্তমান হিসাব নির্ণয় (currentGameAmt)
+    const thisGame = parseFloat(thisGameAmt) || 0;
+    const exGame = parseFloat(exGameAmt) || 0;
+    let currentResult = 0;
+
+    if (currentGameOperation === "plusCurrent") {
+      currentResult = thisGame + exGame;
+    } else if (currentGameOperation === "minusCurrent") {
+      currentResult = thisGame - exGame;
+    }
+
+    setCurrentGameAmt(currentResult.toFixed(0));
+  }, [thisGameAmt, exGameAmt, currentGameOperation]);
+
+  useEffect(() => {
+    // Step 2: ফাইনাল হিসাব নির্ণয় (finalCalAmt)
+    const current = parseFloat(currentGameAmt) || 0;
+    const joma = parseFloat(jomaAmt) || 0;
+    let finalResult = 0;
+
+    if (finalCalOperation === "plusFinal") {
+      finalResult = current + joma;
+    } else if (finalCalOperation === "minusFinal") {
+      finalResult = current - joma;
+    }
+
+    setFinalCalAmt(finalResult.toFixed(0));
+  }, [currentGameAmt, jomaAmt, finalCalOperation]);
+
+  console.log(moneyCal);
   if (loading) return <Loading></Loading>;
-  if (fetched && players.length === 0)
-    return <p>No players found for this agent.</p>;
+  // if (fetched && players.length === 0)
+  //   return <p>No players found for this agent.</p>;
 
   return (
     <div className=" min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
@@ -565,14 +670,14 @@ const GameSummary = ({ agentId }) => {
         <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>
       )}
 
-      {!loading && fetched && players.length === 0 && (
+      {/* {!loading && fetched && players.length === 0 && (
         <div className="flex items-center justify-center h-[60vh]">
           <p className="text-pink-400 text-3xl font-bold text-center">
             😕 No player data found for this agent.
           </p>
         </div>
-      )}
-      {!loading && players.length > 0 && (
+      )} */}
+      {!loading && players.length >= 0 && (
         <div className="mt-8 w-full">
           <div className="overflow-x-auto mt-8 mb-8 max-w-4xl mx-auto">
             <div
@@ -634,13 +739,13 @@ const GameSummary = ({ agentId }) => {
                   <tr className="bg-gray-50 text-green-700">
                     <td className="border px-4 py-2 font-semibold">Total</td>
                     <td className="border text-center">
-                      {summaryData?.totalAmounts?.ThreeD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.ThreeD.toFixed(0)}
                     </td>
                     <td className="border text-center">
-                      {summaryData?.totalAmounts?.TwoD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.TwoD.toFixed(0)}
                     </td>
                     <td className="border text-center">
-                      {summaryData?.totalAmounts?.OneD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.OneD.toFixed(0)}
                     </td>
                     <td className="border text-center">
                       {summaryData?.totalWins?.STR3D || 0}
@@ -722,42 +827,46 @@ const GameSummary = ({ agentId }) => {
                       সর্বমোট হিসাব
                     </td>
                   </tr>
-
                   <tr className="bg-gray-100 font-bold text-gray-900">
                     <td colSpan={2} className="border px-4 py-2">
                       Total Win
-                      {agent.expense && item.totalWin > 0 && (
-                        <p className="font-bangla">খরচ {agent?.expenseAmt}</p>
+                      {summaryData?.expense && summaryData?.totalWin > 0 && (
+                        <p className="font-bangla">খরচ {summaryData.Expense}</p>
                       )}
-                      {agent.tenPercent && item.totalWin > 0 && (
+                      {summaryData?.tenPercent && summaryData?.totalWin > 0 && (
                         <p className="font-bangla">
-                          আন্ডার ({agent?.tenPercentAmt ?? 0}%) =
-                          {agent
-                            ? (
-                                summaryData.totalWin -
-                                (agent.expenseAmt || 0) -
-                                (summaryData.afterDOWN || 0) -
-                                (summaryData.afterSTR || 0) -
-                                (summaryData.afterSINGLE || 0) -
-                                (summaryData.afterRUMBLE || 0)
-                              ).toFixed(0)
+                          আন্ডার ({summaryData?.tenPercentAmt ?? 0}%) =
+                          {summaryData
+                            ? summaryData?.underPercentage.toFixed(0)
                             : "0"}
                         </p>
                       )}
                     </td>
-                    <td colSpan={2} className="border px-4 py-2">
+                    <td className="border px-4 py-2">
                       {summaryData?.totalWin || 0}
                     </td>
                     <td colSpan={3} className="border px-4 py-2 font-bangla">
-                      {summaryData?.totalGame > summaryData?.totalWin
-                        ? "গেম এ ব্যাংকার পাবে"
-                        : "গেম এ এজেন্ট পাবে"}
+                      <select
+                        value={thisGame}
+                        onChange={(e) => setThisGame(e.target.value)}
+                        className="w-full bg-white border px-2 py-1 text-center"
+                      >
+                        <option value="option">ই - গেম</option>
+                        <option value="adminTGame">
+                          ই - গেম ব্যাংকার পাবে
+                        </option>
+                        <option value="agentTGame">ই - গেম এজেন্ট পাবে</option>
+                      </select>
                     </td>
+                    <td className="border px-4 py-2 text-red-600"></td>
                     <td className="border px-4 py-2 text-red-600">
-                      {Math.abs(
-                        (summaryData?.totalGame || 0) -
-                          (summaryData?.totalWin || 0)
-                      )}
+                      <input
+                        type="number"
+                        value={thisGameAmt}
+                        onChange={(e) => setThisGameAmt(e.target.value)}
+                        placeholder="পরিমাণ"
+                        className="w-full font-bangla bg-gray-100 border text-center px-2 py-1"
+                      />
                     </td>
                   </tr>
 
@@ -766,15 +875,15 @@ const GameSummary = ({ agentId }) => {
                     <td colSpan={2} className="border px-4 py-2 font-bangla">
                       ব্যাংকার পাবে
                     </td>
-                    <td colSpan={2} className="border px-4 py-2">
+                    <td className="border px-4 py-2">
                       {summaryData?.totalGame - summaryData?.totalWin >= 0
                         ? summaryData?.totalGame - summaryData?.totalWin
                         : 0}
                     </td>
-                    <td colSpan={3} className="border px-4 py-2">
+                    <td colSpan={3} className="font-bangla border px-4 py-2">
                       <select
-                        value={selectedOption}
-                        onChange={(e) => setSelectedOption(e.target.value)}
+                        value={exGame}
+                        onChange={(e) => setExGame(e.target.value)}
                         className="w-full bg-white border px-2 py-1 text-center"
                       >
                         <option value="option">সাবেক</option>
@@ -782,11 +891,13 @@ const GameSummary = ({ agentId }) => {
                         <option value="agentEx">এজেন্ট সাবেক</option>
                       </select>
                     </td>
-                    <td colSpan={2} className="border px-4 py-2">
+                    <td className="border px-4 py-2 text-red-600"></td>
+
+                    <td className="border px-4 py-2">
                       <input
                         type="number"
-                        value={numberInput}
-                        onChange={(e) => setNumberInput(e.target.value)}
+                        value={exGameAmt}
+                        onChange={(e) => setExGameAmt(e.target.value)}
                         placeholder="পরিমাণ"
                         className="w-full font-bangla bg-gray-100 border text-center px-2 py-1"
                       />
@@ -798,67 +909,90 @@ const GameSummary = ({ agentId }) => {
                     <td colSpan={2} className="border px-4 py-2 font-bangla">
                       এজেন্ট পাবে
                     </td>
-                    <td colSpan={2} className="border px-4 py-2">
+                    <td className="border px-4 py-2">
                       {summaryData?.totalWin - summaryData?.totalGame >= 0
                         ? summaryData?.totalWin - summaryData?.totalGame
                         : 0}
                     </td>
-                    {(() => {
-                      const game = summaryData?.totalGame || 0;
-                      const win = summaryData?.totalWin || 0;
-                      const netNow = game - win;
-                      const previous = Number(numberInput) || 0;
-                      let finalNet = 0;
 
-                      if (selectedOption === "adminEx")
-                        finalNet = netNow + previous;
-                      else if (selectedOption === "agentEx")
-                        finalNet = netNow - previous;
-
-                      return (
-                        <>
-                          <td
-                            colSpan={3}
-                            className="border px-4 py-2 font-bangla"
-                          >
-                            {finalNet > 0
-                              ? "ব্যাংকার বর্তমান"
-                              : "এজেন্ট বর্তমান"}
-                          </td>
-                          <td colSpan={3} className="border px-4 py-2">
-                            {Math.abs(finalNet)}
-                          </td>
-                        </>
-                      );
-                    })()}
+                    <td colSpan={3} className="font-bangla border px-4 py-2">
+                      <select
+                        value={currentGame}
+                        onChange={(e) => setCurrentGame(e.target.value)}
+                        className="w-full bg-white border px-2 py-1 text-center"
+                      >
+                        <option value="option">বর্তমান</option>
+                        <option value="adminCurrent">
+                          বর্তমানে ব্যাংকার পাবে
+                        </option>
+                        <option value="agentCurrent">
+                          ব্তমানে এজেন্ট পাবে
+                        </option>
+                      </select>
+                    </td>
+                    <td className="border px-4 py-2 font-bangla">
+                      <select
+                        value={currentGameOperation}
+                        onChange={(e) =>
+                          setCurrentGameOperation(e.target.value)
+                        }
+                        className="w-full bg-white border py-1 text-center"
+                      >
+                        <option value="option">+/-</option>
+                        <option value="plusCurrent">+</option>
+                        <option value="minusCurrent">-</option>
+                      </select>
+                    </td>
+                    <td className="border px-4 py-2 font-bangla">
+                      {currentGameAmt}
+                    </td>
                   </tr>
 
                   {/* Joma Record */}
                   <tr className="bg-gray-100 text-gray-800">
                     <td
-                      colSpan={4}
+                      colSpan={3}
                       rowSpan={2}
-                      className="text-sm px-4 py-2 border"
+                      className="font-bangla text-sm px-4 py-2 border text-left"
                     >
                       <ol>
-                        {summaryData?.joma
-                          ?.filter((entry) => entry.amount !== 0)
+                        {summaryData?.calculation?.joma
+                          ?.filter((entry) => entry.jomaAmt !== 0)
                           .map((entry, i) => (
                             <li key={i}>
-                              📅 {entry.date} 💰{" "}
-                              {entry.amount.toLocaleString("en-US")}
+                              📅 {entry.date} (
+                              {entry.jomaType === "jomaRegular"
+                                ? "জমা"
+                                : entry.jomaType === "jomaWin"
+                                ? "উইন জমা"
+                                : entry.jomaType === "jomaCash"
+                                ? "নগদ জমা"
+                                : ""}
+                              ) 💰 {""}
+                              {entry.jomaAmt.toLocaleString("en-US")}
                             </li>
                           ))}
                       </ol>
                     </td>
                     <td colSpan={3} className="border px-4 py-2 font-bangla">
-                      জমা
+                      <select
+                        value={jomaType}
+                        onChange={(e) => setJomaType(e.target.value)}
+                        className="w-full bg-white border px-2 py-1 text-center"
+                      >
+                        <option value="joma">জমার ধরণ</option>
+                        <option value="jomaRegular">জমা</option>
+                        <option value="jomaWin">উইন জমা</option>
+                        <option value="jomaCash">নগদ জমা</option>
+                      </select>
                     </td>
+                    <td className="border px-4 py-2 text-red-600"></td>
+
                     <td colSpan={2} className="border px-4 py-2">
                       <input
                         type="number"
-                        value={jomaInput}
-                        onChange={(e) => setJomaInput(e.target.value)}
+                        value={jomaAmt}
+                        onChange={(e) => setJomaAmt(e.target.value)}
                         placeholder="পরিমাণ"
                         className="w-full font-bangla bg-gray-100 border text-center px-2 py-1"
                       />
@@ -868,34 +1002,36 @@ const GameSummary = ({ agentId }) => {
                   {/* Final Summary */}
                   <tr className="bg-gray-100 text-gray-900 font-bold">
                     <td colSpan={3} className="border px-4 py-2 font-bangla">
-                      ফাইনাল হিসাব
+                      <select
+                        value={finalCalType}
+                        onChange={(e) => setFinalCalType(e.target.value)}
+                        className="w-full bg-white border px-2 py-1 text-center"
+                      >
+                        <option value="option">মোট বর্তমান হিসাব</option>
+                        <option value="finalCal">ব্যাংকার মোট পাবে</option>
+                        <option value="finalCal">এজেন্ট মোট পাবে</option>
+                      </select>
                     </td>
-                    <td colSpan={2} className="border px-4 py-2">
-                      {(() => {
-                        const game = moneyCal?.totalGame || 0;
-                        const win = moneyCal?.totalWin || 0;
-                        const netNow = game - win;
-                        const previous = Number(numberInput) || 0;
-                        const joma = Number(jomaInput) || 0;
-                        let finalNet = 0;
-
-                        if (selectedOption === "adminEx")
-                          finalNet = netNow + previous;
-                        else if (selectedOption === "agentEx")
-                          finalNet = netNow - previous;
-
-                        return finalNet - joma;
-                      })()}
+                    <td className="border px-4 py-2 text-red-600">
+                      <select
+                        value={finalCalOperation}
+                        onChange={(e) => setFinalCalOperation(e.target.value)}
+                        className="w-full bg-white border py-1 text-center"
+                      >
+                        <option value="option">+/-</option>
+                        <option value="plusFinal">+</option>
+                        <option value="minusFinal">-</option>
+                      </select>
+                    </td>
+                    <td className="border px-4 py-2 text-red-600">
+                      {finalCalAmt}
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
             {/* Agent-Customer */}
-            <div
-              ref={contentRef}
-              className="overflow-x-auto my-4 rounded-lg shadow-md ring-2 ring-gray-400 bg-white p-6 text-center"
-            >
+            <div className="overflow-x-auto my-4 rounded-lg shadow-md ring-2 ring-gray-400 bg-white p-6 text-center">
               <table className="w-full border-collapse font-mono text-sm rounded-lg shadow border ">
                 <tbody>
                   {/* Headers */}
@@ -913,13 +1049,13 @@ const GameSummary = ({ agentId }) => {
                   <tr className="bg-gray-50 text-green-700">
                     <td className="border px-4 py-2 font-semibold">Total</td>
                     <td className="border text-center">
-                      {summaryData?.totalAmounts?.ThreeD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.ThreeD.toFixed(0)}
                     </td>
                     <td className="border text-center">
-                      {summaryData?.totalAmounts?.TwoD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.TwoD.toFixed(0)}
                     </td>
                     <td className="border text-center">
-                      {summaryData?.totalAmounts?.OneD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.OneD.toFixed(0)}
                     </td>
                     <td className="border text-center">
                       {summaryData?.totalWins?.STR3D || 0}
@@ -966,19 +1102,19 @@ const GameSummary = ({ agentId }) => {
                     </td>
                     <td className="border text-center">
                       {(
-                        summaryData?.totalAmounts?.ThreeD *
+                        moneyCal?.totalAmounts?.ThreeD *
                         (1 - agent?.cPercentages?.threeD / 100)
                       ).toFixed(0)}
                     </td>
                     <td className="border text-center">
                       {(
-                        summaryData?.totalAmounts?.TwoD *
+                        moneyCal?.totalAmounts?.TwoD *
                         (1 - agent?.cPercentages?.twoD / 100)
                       ).toFixed(0)}
                     </td>
                     <td className="border text-center">
                       {(
-                        summaryData?.totalAmounts?.OneD *
+                        moneyCal?.totalAmounts?.OneD *
                         (1 - agent?.cPercentages?.oneD / 100)
                       ).toFixed(0)}
                     </td>
@@ -1014,11 +1150,11 @@ const GameSummary = ({ agentId }) => {
                     </td>
                     <td colSpan={2} className="border px-4 py-2">
                       {(
-                        summaryData?.totalAmounts?.ThreeD *
+                        moneyCal?.totalAmounts?.ThreeD *
                           (1 - agent?.cPercentages?.threeD / 100) +
-                        summaryData?.totalAmounts?.TwoD *
+                        moneyCal?.totalAmounts?.TwoD *
                           (1 - agent?.cPercentages?.twoD / 100) +
-                        summaryData?.totalAmounts?.OneD *
+                        moneyCal?.totalAmounts?.OneD *
                           (1 - agent?.cPercentages?.oneD / 100)
                       ).toFixed(0)}
                     </td>

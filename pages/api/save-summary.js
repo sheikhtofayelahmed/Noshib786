@@ -1,59 +1,45 @@
-import clientPromise from "lib/mongodb"; // adjust the path if needed
+import clientPromise from "lib/mongodb";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
+  const { agentId, gameDate, cal } = req.body;
+  if (!agentId || !gameDate || !cal) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
   try {
     const client = await clientPromise;
     const db = client.db("thai-agent-lottery");
-    const collection = db.collection("game_summaries");
+    const dateOnly = new Date(gameDate).toISOString().slice(0, 10);
 
-    const { agentId, date, summary, joma } = req.body;
+    // Separate joma and other calculation fields
+    const { joma, ...otherCalFields } = cal;
 
-    // joma must be an object: { joma, jomaDate }
-    if (
-      !agentId ||
-      !date ||
-      !summary ||
-      !joma ||
-      typeof joma.joma !== "number" ||
-      !joma.jomaDate
-    ) {
-      return res.status(400).json({ error: "Missing required data" });
+    // Prepare $set fields under calculation
+    const calFields = {};
+    for (const key in otherCalFields) {
+      calFields[`calculation.${key}`] = otherCalFields[key];
     }
 
-    const jomaAmount = joma.joma;
-    const jomaDate = joma.jomaDate;
-
-    // Check for existing entry
-    const existing = await collection.findOne({ agentId, date });
-
-    if (!existing) {
-      // First time submission → insert everything
-      await collection.insertOne({
-        agentId,
-        date,
-        summary,
-        joma: [{ amount: jomaAmount, date: jomaDate }],
-        uploadedAt: new Date(),
-      });
-
-      return res.status(200).json({ success: true, message: "Inserted" });
-    }
-
-    // If already exists → append to joma array, don't change summary
-    await collection.updateOne(
-      { agentId, date },
+    // Update the document
+    const result = await db.collection("summaries").updateOne(
+      { agentId, gameDate: dateOnly },
       {
-        $push: {
-          joma: { amount: jomaAmount, date: jomaDate },
-        },
+        $set: calFields,
+        $push: { "calculation.joma": joma },
       }
     );
 
-    return res.status(200).json({ success: true, message: "Updated" });
-  } catch (err) {
-    console.error("❌ Failed to save/update summary", err);
-    res.status(500).json({ error: "Server error" });
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Calculation and joma updated" });
+  } catch (error) {
+    console.error("Save Summary Error:", error);
+    return res.status(500).json({ success: false, error: error.message });
   }
 }
