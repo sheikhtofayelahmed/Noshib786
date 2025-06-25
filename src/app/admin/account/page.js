@@ -4,6 +4,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import GameSummary from "@/components/GameSummaryModal";
+import { FileText } from "lucide-react";
 
 export default function Account() {
   const [threeUp, setThreeUp] = useState("");
@@ -348,7 +349,7 @@ export default function Account() {
                 <th className="p-2">Total Game</th>
                 <th className="p-2">Total Win</th>
                 <th className="p-2">W/L</th>
-                <th className="p-2">Voucher</th>
+                <th className="p-2">Summary</th>
               </tr>
             </thead>
             <tbody>
@@ -383,7 +384,7 @@ export default function Account() {
                         setModalVisible(true);
                       }}
                     >
-                      View
+                      <FileText className="w-4 h-4" />
                     </button>
                   </td>
                 </tr>

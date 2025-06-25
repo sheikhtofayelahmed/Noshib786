@@ -153,15 +153,60 @@ export default function PlayerInput() {
     return false;
   };
 
+  const autofillMiddleEntries = (inputs) => {
+    const entriesWithSuffix = inputs
+      .map((input, idx) => {
+        if (!input) return null;
+        const parts = input.split(".");
+        if (parts.length < 3) return null; // no suffix
+        return {
+          index: idx,
+          firstPart: parts[0],
+          lastPart: parts[parts.length - 1],
+          length: parts[0].length,
+          original: input,
+        };
+      })
+      .filter(Boolean);
+
+    if (entriesWithSuffix.length < 2) return inputs;
+
+    for (let i = 0; i < entriesWithSuffix.length; i++) {
+      for (let j = i + 1; j < entriesWithSuffix.length; j++) {
+        const e1 = entriesWithSuffix[i];
+        const e2 = entriesWithSuffix[j];
+        if (e1.length === e2.length && e1.lastPart === e2.lastPart) {
+          for (let k = e1.index + 1; k < e2.index; k++) {
+            const cur = inputs[k];
+            if (!cur) continue;
+
+            const curFirstPart = cur.split(".")[0];
+            if (
+              curFirstPart.length === e1.length &&
+              cur.split(".").length < 3
+            ) {
+              inputs[k] = `${cur}.${e1.lastPart}`;
+            }
+          }
+        }
+      }
+    }
+    return inputs;
+  };
+
   const handleSavePlayer = () => {
-    const newErrors = inputs.map((input) => !validateEntry(input));
+    // First, autofill middle entries according to your rule
+    const autofilledInputs = autofillMiddleEntries([...inputs]);
+
+    // Validate autofilled inputs
+    const newErrors = autofilledInputs.map((input) => !validateEntry(input));
 
     if (newErrors.includes(true)) {
       setErrors(newErrors);
       return;
     }
 
-    const validEntries = inputs.filter((i) => i.trim() !== "");
+    const validEntries = autofilledInputs.filter((i) => i.trim() !== "");
 
     const newEntries = validEntries.map((input, i) => ({
       id: Date.now() + i,
@@ -178,13 +223,13 @@ export default function PlayerInput() {
       name,
       subAgentId,
       time: new Date().toLocaleString(),
-      voucher: voucher,
+      voucher,
       data: newEntries,
     };
 
     setPlayers([newPlayer]);
     setName("");
-    setInputs(Array(20).fill(""));
+    setInputs(Array(20).fill("")); // reset inputs
     setErrors(Array(20).fill(false));
     setIsCompleted(false);
   };
@@ -811,7 +856,7 @@ display: flex;
         }`}
       >
         ⏳ Time Remaining: <p className="font-bold">{timeLeft?.text}</p>
-      <AllahBhorosha></AllahBhorosha>
+        <AllahBhorosha></AllahBhorosha>
       </div>
 
       <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-red-500 shadow-2xl p-6">
