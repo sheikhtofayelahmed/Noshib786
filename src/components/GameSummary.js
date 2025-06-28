@@ -820,9 +820,17 @@ const GameSummary = ({ agentId }) => {
                     <td colSpan={2} className="border px-4 py-2">
                       Total Game
                     </td>
-                    <td colSpan={2} className="border px-4 py-2">
-                      {summaryData?.totalGame || 0}
-                    </td>
+                    {moneyCal.totalAmounts ? (
+                      <td className="border px-4 py-2">
+                        {moneyCal.totalAmounts.ThreeD +
+                          moneyCal.totalAmounts.TwoD +
+                          moneyCal.totalAmounts.OneD || 0}
+                      </td>
+                    ) : (
+                      <td className="border px-4 py-2">
+                        {summaryData?.totalGame || 0}
+                      </td>
+                    )}
                     <td colSpan={4} className="border px-4 py-2 font-bangla">
                       সর্বমোট হিসাব
                     </td>
