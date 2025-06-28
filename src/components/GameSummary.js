@@ -831,7 +831,7 @@ const GameSummary = ({ agentId }) => {
                         {summaryData?.totalGame || 0}
                       </td>
                     )}
-                    <td colSpan={4} className="border px-4 py-2 font-bangla">
+                    <td colSpan={5} className="border px-4 py-2 font-bangla">
                       সর্বমোট হিসাব
                     </td>
                   </tr>

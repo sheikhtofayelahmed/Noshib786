@@ -155,16 +155,17 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 
 <!-- **remove background from game account summary** -->
 
-
-
-
-
-
-
-
-
-
-
-
-
-**
+**total game calculation**
+**add print option**
+**up and down the top str number in the happy new year**
+**total rumble above the number**
+**change the hot number style as the number table is written**
+**zoom on hover on the happy new year**
+**auto complete issue**
+**player input 3 part**
+**add a line below the total game for manual input**
+**total on the hisab nikash**
+**separate agent hisab nikash sort by year, total for a year and total for lifetime**
+**download button for agent hisab nikash all summary**
+**voucher showing of anytime in the agent hisab nikash**
+**player input duplicate if there is a urgent**
