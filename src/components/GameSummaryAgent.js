@@ -616,7 +616,8 @@ const GameSummaryAgent = ({ agentId }) => {
 
     setFinalCalAmt(finalResult.toFixed(0));
   }, [currentGameAmt, jomaAmt, finalCalOperation]);
-
+  console.log(moneyCal.totalAmounts);
+  console.log(moneyCal);
   if (loading) return <Loading></Loading>;
   if (fetched && players.length === 0)
     return <p>No players found for this agent.</p>;
@@ -769,9 +770,17 @@ const GameSummaryAgent = ({ agentId }) => {
                     <td colSpan={2} className="border px-4 py-2">
                       Total Game
                     </td>
-                    <td className="border px-4 py-2">
-                      {summaryData?.totalGame || 0}
-                    </td>
+                    {moneyCal.totalAmounts ? (
+                      <td className="border px-4 py-2">
+                        {moneyCal.totalAmounts.ThreeD +
+                          moneyCal.totalAmounts.TwoD +
+                          moneyCal.totalAmounts.OneD || 0}
+                      </td>
+                    ) : (
+                      <td className="border px-4 py-2">
+                        {summaryData?.totalGame || 0}
+                      </td>
+                    )}
                     <td colSpan={5} className="border px-4 py-2 font-bangla">
                       সর্বমোট হিসাব
                     </td>
