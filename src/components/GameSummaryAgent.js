@@ -36,12 +36,21 @@ const GameSummaryAgent = ({ agentId }) => {
   const [finalCalAmt, setFinalCalAmt] = useState("");
   const [finalCalOperation, setFinalCalOperation] = useState("");
 
-  const safeDate = (dateStr) => {
-    if (!dateStr) return "Invalid Date";
-    const parsed = parseISO(dateStr);
-    return isValid(parsed) ? format(parsed, "dd/MM/yyyy") : "Invalid Date";
-  };
+  const safeDate = (dateInput) => {
+    if (!dateInput) return "Invalid Date";
 
+    let dateObj;
+
+    if (typeof dateInput === "string") {
+      dateObj = parseISO(dateInput);
+    } else if (dateInput instanceof Date) {
+      dateObj = dateInput;
+    } else {
+      return "Invalid Date";
+    }
+
+    return isValid(dateObj) ? format(dateObj, "dd/MM/yyyy") : "Invalid Date";
+  };
   // Single useEffect to fetch all initial data that depends on agentId
   useEffect(() => {
     if (!agentId) return;
@@ -60,6 +69,9 @@ const GameSummaryAgent = ({ agentId }) => {
 
         const gameStatusData = await gameStatusRes.json();
         const winStatusData = await winStatusRes.json();
+        const winDate = winStatusData.date
+          ? new Date(winStatusData.date)
+          : null;
 
         setIsGameOn(gameStatusData.isGameOn);
         setThreeUp(winStatusData.threeUp);
@@ -73,9 +85,8 @@ const GameSummaryAgent = ({ agentId }) => {
         setAgent(agentData.agent);
 
         // 3. Fetch summary
-        const formattedDate = new Date(winStatusData.date)
-          .toISOString()
-          .split("T")[0]; // "YYYY-MM-DD"
+        const formattedDate = winDate ? format(winDate, "yyyy-MM-dd") : null;
+
         const query = new URLSearchParams({
           agentId,
           gameDate: formattedDate,
@@ -160,11 +171,10 @@ const GameSummaryAgent = ({ agentId }) => {
   const getMatchType = (input, threeUp, downGame) => {
     if (!input || !threeUp || !downGame) return { match: false, type: null };
 
-    const [number, ...amounts] = input.split(".");
-    const numAmounts = amounts.map(Number);
+    const number = input.num;
+    const numAmounts = [Number(input.str || 0), Number(input.rumble || 0)];
     const permutations = getPermutations(threeUp);
     const reversedDown = downGame?.split("").reverse().join("");
-
     if (number.length === 3) {
       if (number === threeUp) return { match: true, type: "str" };
       if (permutations.includes(number) && numAmounts.length >= 2)
@@ -232,7 +242,8 @@ const GameSummaryAgent = ({ agentId }) => {
           }
           .container {
             width: 100%;
-          }
+          } 
+             h1 { font-size: 20px; text-align: center; margin: 2px 0; }
           h2 {
             font-size: 20px;
             margin: 4px 0;
@@ -275,6 +286,11 @@ const GameSummaryAgent = ({ agentId }) => {
           .final-calc {
             text-align: left;
           }
+             .first-container {
+  border: 1px solid #000;
+  padding: 4px;
+  margin-bottom: 4px;
+}
         </style>
       </head>
       <body>
@@ -392,16 +408,42 @@ const GameSummaryAgent = ({ agentId }) => {
     const amountPlayed = player.amountPlayed || { OneD: 0, TwoD: 0, ThreeD: 0 };
 
     const win = window.open("", "_blank");
+
+    const formatRows = () => {
+      const sortedData = [...player.entries].sort((a, b) => {
+        return b.input.num.length - a.input.num.length;
+      });
+
+      const half = Math.ceil(sortedData.length / 2);
+      const col1 = sortedData.slice(0, half);
+      const col2 = sortedData.slice(half);
+
+      const rows = [];
+
+      for (let i = 0; i < Math.max(col1.length, col2.length); i++) {
+        const c1 = col1[i]?.input || {};
+        const c2 = col2[i]?.input || {};
+        rows.push(`
+        <tr>
+          <td>${c1.num || ""}</td><td>${c1.str || ""}</td><td>${
+          c1.rumble || ""
+        }</td><td></td>
+          <td>${c2.num || ""}</td><td>${c2.str || ""}</td><td>${
+          c2.rumble || ""
+        }</td>
+        </tr>
+      `);
+      }
+
+      return rows.join("");
+    };
+
     win.document.write(`
     <html>
       <head>
         <title>Player Data</title>
         <style>
-          @page {
-            size: 80mm;
-            margin: 0;
-          }
-
+ @page { size: 80mm; margin: 0; }
           body {
             font-family: Arial, sans-serif;
             font-size: 14px;
@@ -410,17 +452,20 @@ const GameSummaryAgent = ({ agentId }) => {
             margin: 0;
           }
 
-          .container {
-            width: 100%;
-          }
-
+          .container { width: 100%; }
+ .first-container {
+  border: 1px solid #000;
+  padding: 4px;
+  margin-bottom: 4px;
+}
+     
           h2 {
             font-size: 16px;
             margin: 4px 0;
             text-align: center;
             font-weight: bold;
           }
-
+  h1 { font-size: 20px; text-align: center; margin: 2px 0; }
           p {
             font-size: 14px;
             text-align: center;
@@ -434,10 +479,11 @@ const GameSummaryAgent = ({ agentId }) => {
             font-size: 14px;
           }
 
+          .input-table th,
           .input-table td {
             border: 1px solid #000;
             padding: 2px 4px;
-            width: 50%;
+            text-align: center;
           }
 
           .totals-table {
@@ -459,83 +505,56 @@ const GameSummaryAgent = ({ agentId }) => {
             font-weight: bold;
           }
 
-          .grand-total {
-            font-weight: bold;
-          }
+          .grand-total { font-weight: bold; }
         </style>
       </head>
       <body>
         <div class="container">
-          <h2>${player.voucher || ""}</h2>
-          <h2>Player: ${player.name || ""} || Sub Agent: ${
-      player.SAId || ""
-    }</h2>
-          <p>Date: ${new Date(player.time).toLocaleString()}</p>
-
-          <table class="input-table">
+             <div class="first-container"> 
+       <h2>${new Date(player.time).toLocaleString()}</h2>
+          <h1>${player.voucher || ""}</h1>
+          <p>Player: ${player.name || ""}     </p>
+          <p> Sub Agent: ${player.SAId || ""}</p>
+          </div>
+    <table class="input-table">
+            <thead>
+              <tr>
+                <th>Num</th><th>Str</th><th>Rum.</th><td></td>
+                <th>Num</th><th>Str</th><th>Rum.</th>
+              </tr>
+            </thead>
             <tbody>
-              ${(() => {
-                const sortedData = [...player.entries].sort((a, b) => {
-                  const aPrefix = a.input.split(".")[0];
-                  const bPrefix = b.input.split(".")[0];
-                  return bPrefix.length - aPrefix.length;
-                });
-
-                const half = Math.ceil(sortedData.length / 2);
-                const col1 = sortedData.slice(0, half);
-                const col2 = sortedData.slice(half);
-
-                const maxRows = Math.max(col1.length, col2.length);
-                const rows = [];
-
-                for (let i = 0; i < maxRows; i++) {
-                  const c1 = col1[i]?.input || "";
-                  const c2 = col2[i]?.input || "";
-                  rows.push(`<tr><td>${c1}</td><td>${c2}</td></tr>`);
-                }
-
-                return rows.join("");
-              })()}
+              ${formatRows()}
             </tbody>
           </table>
 
           <table class="totals-table">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Amount</th>
-                <th>After Deduction</th>
-              </tr>
-            </thead>
+           
             <tbody>
               <tr>
                 <td>3D Total</td>
-                <td>${amountPlayed?.ThreeD}</td>
-                <td>${(amountPlayed?.ThreeD * 0.6).toFixed(0)}</td>
+                <td>${amountPlayed.ThreeD}</td>
+                <td>${(amountPlayed.ThreeD * 0.6).toFixed(0)}</td>
               </tr>
               <tr>
                 <td>2D Total</td>
-                <td>${amountPlayed?.TwoD}</td>
-                <td>${(amountPlayed?.TwoD * 0.8).toFixed(0)}</td>
+                <td>${amountPlayed.TwoD}</td>
+                <td>${(amountPlayed.TwoD * 0.8).toFixed(0)}</td>
               </tr>
               <tr>
                 <td>1D Total</td>
-                <td>${amountPlayed?.OneD}</td>
-                <td>${amountPlayed?.OneD.toFixed(0)}</td>
+                <td>${amountPlayed.OneD}</td>
+                <td>${amountPlayed.OneD.toFixed(0)}</td>
               </tr>
               <tr class="grand-total">
-                <td>Grand Total</td>
+                  <td colspan="2">Grand Total</td>
                 <td>${(
-                  amountPlayed?.ThreeD +
-                  amountPlayed?.TwoD +
-                  amountPlayed?.OneD
-                ).toFixed(0)}</td>
-                <td>${(
-                  amountPlayed?.ThreeD * 0.6 +
-                  amountPlayed?.TwoD * 0.8 +
-                  amountPlayed?.OneD
+                  amountPlayed.ThreeD * 0.6 +
+                  amountPlayed.TwoD * 0.8 +
+                  amountPlayed.OneD
                 ).toFixed(0)}</td>
               </tr>
+
             </tbody>
           </table>
         </div>
@@ -697,18 +716,29 @@ const GameSummaryAgent = ({ agentId }) => {
                     <td className="border text-center">
                       {moneyCal?.totalAmounts?.OneD.toFixed(0)}
                     </td>
-                    <td className="border text-center">
-                      {summaryData?.totalWins?.STR3D || 0}
-                    </td>
-                    <td className="border text-center">
-                      {summaryData?.totalWins?.RUMBLE3D || 0}
-                    </td>
-                    <td className="border text-center">
-                      {summaryData?.totalWins?.DOWN || 0}
-                    </td>
-                    <td className="border text-center">
-                      {summaryData?.totalWins?.SINGLE || 0}
-                    </td>
+                    {summaryData ? (
+                      <>
+                        <td className="border text-center">
+                          {summaryData?.totalWins?.STR3D || 0}
+                        </td>
+                        <td className="border text-center">
+                          {summaryData?.totalWins?.RUMBLE3D || 0}
+                        </td>
+                        <td className="border text-center">
+                          {summaryData?.totalWins?.DOWN || 0}
+                        </td>
+                        <td className="border text-center">
+                          {summaryData?.totalWins?.SINGLE || 0}
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="border text-center">-</td>
+                        <td className="border text-center">- </td>
+                        <td className="border text-center">- </td>
+                        <td className="border text-center">- </td>
+                      </>
+                    )}
                   </tr>
 
                   {/* Percentagess */}
@@ -738,32 +768,62 @@ const GameSummaryAgent = ({ agentId }) => {
                   </tr>
 
                   {/* After Deduction */}
-                  <tr className="bg-gray-50 text-gray-800">
-                    <td className="border px-4 py-2 font-semibold">
-                      After Deduction
-                    </td>
-                    <td className="border text-center">
-                      {summaryData?.afterThreeD || 0}
-                    </td>
-                    <td className="border text-center">
-                      {summaryData?.afterTwoD || 0}
-                    </td>
-                    <td className="border text-center">
-                      {summaryData?.afterOneD || 0}
-                    </td>
-                    <td className="border text-center">
-                      {summaryData?.afterSTR || 0}
-                    </td>
-                    <td className="border text-center">
-                      {summaryData?.afterRUMBLE || 0}
-                    </td>
-                    <td className="border text-center">
-                      {summaryData?.afterDOWN || 0}
-                    </td>
-                    <td className="border text-center">
-                      {summaryData?.afterSINGLE || 0}
-                    </td>
-                  </tr>
+                  {summaryData ? (
+                    <tr className="bg-gray-50 text-gray-800">
+                      <td className="border px-4 py-2 font-semibold">
+                        After Deduction
+                      </td>
+                      <td className="border text-center">
+                        {summaryData?.afterThreeD || 0}
+                      </td>
+                      <td className="border text-center">
+                        {summaryData?.afterTwoD || 0}
+                      </td>
+                      <td className="border text-center">
+                        {summaryData?.afterOneD || 0}
+                      </td>
+                      <td className="border text-center">
+                        {summaryData?.afterSTR || 0}
+                      </td>
+                      <td className="border text-center">
+                        {summaryData?.afterRUMBLE || 0}
+                      </td>
+                      <td className="border text-center">
+                        {summaryData?.afterDOWN || 0}
+                      </td>
+                      <td className="border text-center">
+                        {summaryData?.afterSINGLE || 0}
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr className="bg-gray-50 text-gray-800">
+                      <td className="border px-4 py-2 font-semibold">
+                        After Deduction
+                      </td>
+                      <td className="border text-center">
+                        {(
+                          moneyCal?.totalAmounts?.ThreeD *
+                          (1 - agent?.percentages?.threeD / 100)
+                        ).toFixed(0)}
+                      </td>
+                      <td className="border text-center">
+                        {(
+                          moneyCal?.totalAmounts?.TwoD *
+                          (1 - agent?.percentages?.twoD / 100)
+                        ).toFixed(0)}
+                      </td>
+                      <td className="border text-center">
+                        {(
+                          moneyCal?.totalAmounts?.OneD *
+                          (1 - agent?.percentages?.oneD / 100)
+                        ).toFixed(0)}
+                      </td>
+                      <td className="border text-center">- </td>
+                      <td className="border text-center">-</td>
+                      <td className="border text-center">- </td>
+                      <td className="border text-center">-</td>
+                    </tr>
+                  )}
 
                   {/* Total Game and Win */}
                   <tr className="bg-gray-100 font-bold text-gray-900">
@@ -772,9 +832,14 @@ const GameSummaryAgent = ({ agentId }) => {
                     </td>
                     {moneyCal.totalAmounts ? (
                       <td className="border px-4 py-2">
-                        {moneyCal.totalAmounts.ThreeD +
-                          moneyCal.totalAmounts.TwoD +
-                          moneyCal.totalAmounts.OneD || 0}
+                        {(
+                          moneyCal?.totalAmounts?.ThreeD *
+                            (1 - agent?.percentages?.threeD / 100) +
+                          moneyCal?.totalAmounts?.TwoD *
+                            (1 - agent?.percentages?.twoD / 100) +
+                          moneyCal?.totalAmounts?.OneD *
+                            (1 - agent?.percentages?.oneD / 100)
+                        ).toFixed(0)}
                       </td>
                     ) : (
                       <td className="border px-4 py-2">
@@ -1146,89 +1211,90 @@ const GameSummaryAgent = ({ agentId }) => {
                     Date: {new Date(player.time).toLocaleString()}
                   </p>
                   {/* Entries Table */}
-                  <table
-                    className="w-full sm:w-80 text-sm border border-black mx-auto"
-                    border="1"
-                  >
+                  <table className="w-full sm:w-80 text-sm border border-black mx-auto text-center">
+                    <thead>
+                      <tr className="bg-gray-200 ">
+                        <th className="border px-0">Num</th>
+                        <th className="border px-0">Str</th>
+                        <th className="border px-0">Rum.</th>
+                        <th className="bg-gray-200" />
+                        <th className="border px-0">Num</th>
+                        <th className="border px-0">Str</th>
+                        <th className="border px-0">Rum.</th>
+                      </tr>
+                    </thead>
                     <tbody>
                       {(() => {
                         const sortedData = [...player.entries].sort((a, b) => {
-                          const aPrefix = a.input.split(".")[0];
-                          const bPrefix = b.input.split(".")[0];
-                          return bPrefix.length - aPrefix.length;
+                          const lengthA = String(a.input.num).length || 0;
+                          const lengthB = String(b.input.num).length || 0;
+                          return lengthB - lengthA;
                         });
 
                         const half = Math.ceil(sortedData.length / 2);
                         const col1 = sortedData.slice(0, half);
                         const col2 = sortedData.slice(half);
-
                         const maxRows = Math.max(col1.length, col2.length);
                         const rows = [];
 
-                        // Helper function to render a cell with highlighting
-                        function renderCell(entry) {
-                          if (!entry) return "";
+                        const renderCell = (entry, field) => {
+                          if (!entry || !entry.input) return "";
 
+                          const value = entry.input[field];
                           const { match, type } = getMatchType(
                             entry.input,
                             threeUp,
                             downGame
                           );
-                          const parts = entry.input.split(".");
-                          const number = parts[0];
-                          const amounts = parts.slice(1);
+
+                          const shouldHighlight =
+                            match &&
+                            (field === "num" ||
+                              (field === "str" && type === "str") ||
+                              (field === "rumble" &&
+                                (type === "rumble" ||
+                                  type === "down" ||
+                                  type === "single")));
 
                           return (
-                            <span>
-                              <span
-                                className={
-                                  match ? "text-red-500 font-bold text-xl" : ""
-                                }
-                              >
-                                {number}
-                              </span>
-                              {amounts.map((amt, i) => {
-                                const highlightAll = type === "str";
-                                const highlightDown = type === "down";
-                                const highlightOne =
-                                  type === "rumble" || type === "single";
-
-                                const shouldHighlight =
-                                  (highlightAll && match) ||
-                                  (highlightDown &&
-                                    match &&
-                                    i === amounts.length - 2) ||
-                                  (highlightOne &&
-                                    match &&
-                                    i === amounts.length - 1);
-
-                                return (
-                                  <span key={i}>
-                                    {"."}
-                                    <span
-                                      className={
-                                        shouldHighlight
-                                          ? "text-red-500 font-bold text-xl"
-                                          : ""
-                                      }
-                                    >
-                                      {amt}
-                                    </span>
-                                  </span>
-                                );
-                              })}
+                            <span
+                              className={
+                                shouldHighlight
+                                  ? "text-red-500 font-bold text-xl"
+                                  : ""
+                              }
+                            >
+                              {value}
                             </span>
                           );
-                        }
+                        };
 
                         for (let i = 0; i < maxRows; i++) {
                           rows.push(
                             <tr key={i}>
-                              <td className="bg-white border px-2 py-1 ">
-                                {renderCell(col1[i])}
+                              {/* col1 */}
+                              <td className="bg-white border px-2 py-1">
+                                {renderCell(col1[i], "num")}
                               </td>
-                              <td className="bg-white border px-2 py-1 ">
-                                {renderCell(col2[i])}
+                              <td className="bg-white border px-2 py-1">
+                                {renderCell(col1[i], "str")}
+                              </td>
+                              <td className="bg-white border px-2 py-1">
+                                {renderCell(col1[i], "rumble")}
+                              </td>
+
+                              {/* spacer */}
+                              <td className="bg-gray-200 border-hidden" />
+
+                              {/* col2 */}
+                              <td className="bg-white border px-2 py-1">
+                                {renderCell(col2[i], "num")}
+                              </td>
+                              <td className="bg-white border px-2 py-1">
+                                {renderCell(col2[i], "str")}
+                              </td>
+                              <td className="bg-white border px-2 py-1">
+                                {renderCell(col2[i], "rumble")}
                               </td>
                             </tr>
                           );

@@ -146,30 +146,29 @@ const WaitingPlayerInput = () => {
                     <th className="border border-gray-600 px-3 py-2 text-left">
                       #
                     </th>
-                    <th className="border border-gray-600 px-3 py-2 text-left">
+                    <th
+                      colSpan={3}
+                      className="border border-gray-600 px-3 py-2 text-left"
+                    >
                       Input
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {player?.entries?.map((entry, entryIdx) => {
-                    const parts = entry.input.split(".");
-                    const number = parts[0];
-                    const amounts = parts.slice(1);
-
                     return (
                       <tr key={entryIdx} className="bg-gray-900 text-gray-300">
-                        <td className="border border-gray-700 px-3 py-2">
+                        <td className="border border-gray-600 px-3 py-1">
                           {entryIdx + 1}
                         </td>
-                        <td className="border border-gray-700 px-3 py-2">
-                          <span className="text-white">{number}</span>
-                          {amounts.map((amt, i) => (
-                            <span key={i}>
-                              {"."}
-                              <span>{amt}</span>
-                            </span>
-                          ))}
+                        <td className="border border-gray-600 px-3 py-1">
+                          {entry.input.num}
+                        </td>
+                        <td className="border border-gray-600 px-3 py-1">
+                          {entry.input.str}
+                        </td>
+                        <td className="border border-gray-600 px-3 py-1">
+                          {entry.input.rumble}
                         </td>
                       </tr>
                     );

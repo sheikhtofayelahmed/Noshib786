@@ -3,10 +3,11 @@ import clientPromise from "lib/mongodb";
 export default async function handler(req, res) {
   const client = await clientPromise;
   const db = client.db("thai-agent-lottery");
+  const collection = db.collection("gameStatus");
 
   if (req.method === "GET") {
     try {
-      const statusDoc = await db.collection("gameStatus").findOne({});
+      const statusDoc = await collection.findOne({});
       res.status(200).json({
         isGameOn: statusDoc?.isGameOn || false,
         targetDateTime: statusDoc?.targetDateTime || null,
@@ -20,10 +21,7 @@ export default async function handler(req, res) {
       const { isGameOn, targetDateTime } = req.body;
 
       const updateFields = {};
-
-      if (typeof isGameOn === "boolean") {
-        updateFields.isGameOn = isGameOn;
-      }
+      if (typeof isGameOn === "boolean") updateFields.isGameOn = isGameOn;
 
       if (targetDateTime !== undefined) {
         if (isNaN(Date.parse(targetDateTime))) {
@@ -38,13 +36,13 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "No valid fields to update" });
       }
 
-      await db
-        .collection("gameStatus")
-        .updateOne({}, { $set: updateFields }, { upsert: true });
+      await collection.updateOne({}, { $set: updateFields }, { upsert: true });
 
+      // Fetch updated data to return full status
+      const updatedDoc = await collection.findOne({});
       res.status(200).json({
-        isGameOn: updateFields.isGameOn ?? false,
-        targetDateTime: updateFields.targetDateTime ?? null,
+        isGameOn: updatedDoc?.isGameOn || false,
+        targetDateTime: updatedDoc?.targetDateTime || null,
       });
     } catch (error) {
       console.error(error);

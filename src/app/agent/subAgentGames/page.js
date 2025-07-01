@@ -1,13 +1,15 @@
 "use client";
-import AllahBhorosha from "@/components/Allah";
-import { useAgent } from "@/context/AgentContext";
 import { useEffect, useState } from "react";
 import React from "react";
+import AllahBhorosha from "@/components/Allah";
+import { useAgent } from "@/context/AgentContext";
 
 const SubAgentSummary = () => {
   const [loading, setLoading] = useState(true);
   const [fetched, setFetched] = useState(false);
   const [players, setPlayers] = useState([]);
+  const [agent, setAgent] = useState(null);
+
   const { agentId, subAgentId, loginAs } = useAgent();
 
   const fetchPlayersByAgentId = async (agentId) => {
@@ -22,25 +24,18 @@ const SubAgentSummary = () => {
       });
 
       const data = await res.json();
-
       if (res.ok) {
-        if (subAgentId && loginAs !== "agent") {
-          const filteredPlayer = (data.players || []).filter(
-            (p) => String(p.SAId) === String(subAgentId)
-          );
-          setPlayers(filteredPlayer);
-        } else {
-          const sortedPlayers = (data.players || []).sort(
-            (a, b) => parseInt(a.SAId) - parseInt(b.SAId)
-          );
-          setPlayers(sortedPlayers);
-        }
+        const filtered =
+          subAgentId && loginAs !== "agent"
+            ? data.players.filter((p) => String(p.SAId) === String(subAgentId))
+            : data.players.sort((a, b) => parseInt(a.SAId) - parseInt(b.SAId));
+        setPlayers(filtered || []);
       } else {
         console.error(data.message || "Failed to fetch players.");
         setPlayers([]);
       }
     } catch (error) {
-      console.error("Failed to fetch:", error);
+      console.error("Fetch error:", error);
       setPlayers([]);
     } finally {
       setLoading(false);
@@ -48,9 +43,24 @@ const SubAgentSummary = () => {
     }
   };
 
+  const fetchAgent = async () => {
+    try {
+      const res = await fetch(`/api/getAgentById?agentId=${agentId}`);
+      if (!res.ok) {
+        console.error("Agent fetch error:", res.status);
+        return;
+      }
+      const data = await res.json();
+      setAgent(data.agent);
+    } catch (error) {
+      console.error("Error fetching agent:", error.message);
+    }
+  };
+
   useEffect(() => {
     if (agentId) {
       fetchPlayersByAgentId(agentId);
+      fetchAgent();
     }
   }, [agentId]);
 
@@ -59,22 +69,47 @@ const SubAgentSummary = () => {
     return <p>No players found for this agent.</p>;
 
   const groupedBySAId = players.reduce((acc, player) => {
-    if (!player.SAId) return acc; // skip players with no SAId
-    const key = player.SAId;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(player);
+    if (!player.SAId) return acc;
+    if (!acc[player.SAId]) acc[player.SAId] = [];
+    acc[player.SAId].push(player);
     return acc;
   }, {});
 
+  const calculateDeductedTotal = (group) => {
+    const base = group.reduce(
+      (sum, p) => {
+        const a = p.amountPlayed || {};
+        return {
+          OneD: sum.OneD + (a.OneD || 0),
+          TwoD: sum.TwoD + (a.TwoD || 0),
+          ThreeD: sum.ThreeD + (a.ThreeD || 0),
+        };
+      },
+      { OneD: 0, TwoD: 0, ThreeD: 0 }
+    );
+
+    const p = agent?.cPercentages || { oneD: 0, twoD: 0, threeD: 0 };
+    return (
+      base.OneD * ((100 - p.oneD) / 100) +
+      base.TwoD * ((100 - p.twoD) / 100) +
+      base.ThreeD * ((100 - p.threeD) / 100)
+    ).toFixed(0);
+  };
+
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
-      <AllahBhorosha></AllahBhorosha>
+      <AllahBhorosha />
       {Object.entries(groupedBySAId)
         .sort(([a], [b]) => parseInt(a) - parseInt(b))
         .map(([saId, group], groupIndex) => (
           <div key={saId} className="mb-20 max-w-4xl mx-auto">
             <h2 className="text-3xl text-yellow-400 font-extrabold text-center mb-2">
-              🎯 Sub-Agent: {saId} (Vouchers: {group.length})
+              🎯 {saId}-{group.length}
+              <br />
+              💰Total:
+              <span className="text-green-400 font-mono text-3xl">
+                {agent ? calculateDeductedTotal(group) : "—"}
+              </span>
             </h2>
 
             {group.map((player, idx) => (
@@ -102,15 +137,23 @@ const SubAgentSummary = () => {
                   <thead>
                     <tr className="bg-yellow-600 text-white">
                       <th className="border px-3 py-2 text-left">#</th>
-                      <th className="border px-3 py-2 text-left">Input</th>
+                      <th className="border px-3 py-2 text-left">Num</th>
+                      <th className="border px-3 py-2 text-left">Str</th>
+                      <th className="border px-3 py-2 text-left">Rumble</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {player?.entries?.map((entry, entryIdx) => (
+                    {player.entries.map((entry, entryIdx) => (
                       <tr key={entryIdx}>
                         <td className="border px-3 py-2">{entryIdx + 1}</td>
                         <td className="border px-3 py-2 text-white font-bold">
-                          {entry.input}
+                          {entry.input.num || ""}
+                        </td>
+                        <td className="border px-3 py-2 text-white font-bold">
+                          {entry.input.str || ""}
+                        </td>
+                        <td className="border px-3 py-2 text-white font-bold">
+                          {entry.input.rumble || ""}
                         </td>
                       </tr>
                     ))}
@@ -122,34 +165,63 @@ const SubAgentSummary = () => {
                     <tr className="bg-red-700 text-white">
                       <th className="border px-4 py-2 text-left">Category</th>
                       <th className="border px-4 py-2 text-left">Amount</th>
+                      <th className="border px-4 py-2 text-left">
+                        After Deduction
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr className="bg-gray-800">
                       <td className="border px-4 py-2">🎯 3D Total</td>
                       <td className="border px-4 py-2 text-green-400">
-                        {player?.amountPlayed?.ThreeD}
+                        {player?.amountPlayed?.ThreeD ?? 0}
+                      </td>
+                      <td className="border px-4 py-2 text-green-400">
+                        {(
+                          (player?.amountPlayed?.ThreeD || 0) *
+                          ((100 - (agent?.cPercentages?.threeD || 0)) / 100)
+                        ).toFixed(0)}
                       </td>
                     </tr>
                     <tr className="bg-gray-900">
                       <td className="border px-4 py-2">🎯 2D Total</td>
                       <td className="border px-4 py-2 text-green-400">
-                        {player?.amountPlayed?.TwoD}
+                        {player?.amountPlayed?.TwoD ?? 0}
+                      </td>
+                      <td className="border px-4 py-2 text-green-400">
+                        {(
+                          (player?.amountPlayed?.TwoD || 0) *
+                          ((100 - (agent?.cPercentages?.twoD || 0)) / 100)
+                        ).toFixed(0)}
                       </td>
                     </tr>
                     <tr className="bg-gray-800">
                       <td className="border px-4 py-2">🎯 1D Total</td>
                       <td className="border px-4 py-2 text-green-400">
-                        {player?.amountPlayed?.OneD}
+                        {player?.amountPlayed?.OneD ?? 0}
+                      </td>
+                      <td className="border px-4 py-2 text-green-400">
+                        {(
+                          (player?.amountPlayed?.OneD || 0) *
+                          ((100 - (agent?.cPercentages?.oneD || 0)) / 100)
+                        ).toFixed(0)}
                       </td>
                     </tr>
                     <tr className="bg-gray-900 font-bold text-lg">
-                      <td className="border px-4 py-2">🔢 Grand Total</td>
-                      <td className="border px-4 py-2 text-yellow-300">
+                      <td colSpan={2} className="border px-4 py-2 text-center">
+                        🔢 Grand Total
+                      </td>
+                      <td className="border px-4 py-2 text-yellow-400">
                         {(
-                          player?.amountPlayed?.ThreeD +
-                          player?.amountPlayed?.TwoD +
-                          player?.amountPlayed?.OneD
+                          ((player?.amountPlayed?.ThreeD || 0) *
+                            (100 - (agent?.cPercentages?.threeD || 0))) /
+                            100 +
+                          ((player?.amountPlayed?.TwoD || 0) *
+                            (100 - (agent?.cPercentages?.twoD || 0))) /
+                            100 +
+                          ((player?.amountPlayed?.OneD || 0) *
+                            (100 - (agent?.cPercentages?.oneD || 0))) /
+                            100
                         ).toFixed(0)}
                       </td>
                     </tr>

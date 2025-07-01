@@ -81,29 +81,28 @@ export default function HappyNewYear() {
     fetchData();
   }, []);
 
-  const singleRows = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]];
+  const singleRows = [[1, 2, 3, 4, 5, 6, 7, 8, 9,0]];
 
-  const columns = Array.from({ length: 10 }, (_, i) => i); // 0–9 columns
+// const columns = [...Array(9).keys()].map(i => i + 1).concat(0);
+//   const columnData = columns.reduce((acc, col) => {
+//     acc[col] = [];
+//     return acc;
+//   }, {});
 
-  const columnData = columns.reduce((acc, col) => {
-    acc[col] = [];
-    return acc;
-  }, {});
+//   numberData.forEach((item) => {
+//     const numStr = item._id;
+//     const played = item.totalPlayed;
 
-  numberData.forEach((item) => {
-    const numStr = item._id;
-    const played = item.totalPlayed;
+//     if (played > 100) {
+//       const digitSum = numStr
+//         .split("")
+//         .map(Number)
+//         .reduce((a, b) => a + b, 0);
+//       const columnKey = digitSum % 10;
 
-    if (played > 100) {
-      const digitSum = numStr
-        .split("")
-        .map(Number)
-        .reduce((a, b) => a + b, 0);
-      const columnKey = digitSum % 10;
-
-      columnData[columnKey].push({ number: numStr, played });
-    }
-  }); // ✅ <-- fixed missing parenthesis
+//       columnData[columnKey].push({ number: numStr, played });
+//     }
+//   }); // ✅ <-- fixed missing parenthesis
   const [loading, setLoading] = useState(false);
   if (loading) {
     return <Loading></Loading>;

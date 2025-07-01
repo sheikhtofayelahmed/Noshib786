@@ -113,8 +113,7 @@ export default function HappyNewYear() {
     ["XX", "66", "XX", "77", "XX", "88", "XX", "99", "XX", "55"],
   ];
 
-  const columns = Array.from({ length: 10 }, (_, i) => i); // 0–9 columns
-
+  const columns = [...Array(9).keys()].map((i) => i + 1).concat(0);
   const columnData = columns.reduce((acc, col) => {
     acc[col] = [];
     return acc;
@@ -149,13 +148,13 @@ export default function HappyNewYear() {
         <h3 className="text-3xl font-bold text-yellow-400 mb-4 text-center uppercase tracking-wider bg-black py-4 rounded-lg shadow-inner">
           🎯 Hot Numbers
         </h3>
-        <table className="w-full text-center font-mono text-sm md:text-base text-white">
+        <table className="w-full text-center font-mono text-sm md:text-base text-white border-collapse">
           <thead>
             <tr>
               {columns.map((col) => (
                 <th
                   key={col}
-                  className="p-2 bg-red-900 border border-gray-700 text-4xl"
+                  className="p-4 bg-red-900 border border-gray-700 text-4xl"
                 >
                   {col}
                 </th>
@@ -172,10 +171,23 @@ export default function HappyNewYear() {
                   {columnData[col].map(({ number, str, rumble }, idx) => (
                     <div
                       key={idx}
-                      className="text-green-400 font-bold text-2xl mb-1 px-1"
+                      className={`flex flex-col items-center justify-center space-y-1 mb-2 p-2 rounded-lg transition-all duration-300 ease-in-out ${
+                        idx % 2 !== 0
+                          ? "bg-gradient-to-br from-indigo-600 to-sky-700 text-white shadow-xl transform scale-105"
+                          : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
+                      }`}
                     >
-                      <span className="text-white">{number}</span> = {str} ={" "}
-                      <span className="text-red-500">{rumble}</span>
+                      <span className="text-3xl font-extrabold uppercase">
+                        {number}
+                      </span>
+                      <div className="flex justify-center space-x-2">
+                        <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md min-w-[1.5rem] text-center">
+                          {str}
+                        </div>
+                        <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md min-w-[1.5rem] text-center">
+                          {rumble}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </td>

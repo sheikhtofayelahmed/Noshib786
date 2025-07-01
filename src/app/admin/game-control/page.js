@@ -3,22 +3,16 @@
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { format, parse } from "date-fns";
 
 export default function AdminGameControl() {
   const [isGameOn, setIsGameOn] = useState(false);
   const [threeUp, setThreeUp] = useState("");
   const [downGame, setDownGame] = useState("");
-  const [gameDate, setGameDate] = useState("");
+  const [gameDate, setGameDate] = useState(null);
+  const [targetDateTime, setTargetDateTime] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [topPlayedNumbers, setTopPlayedNumbers] = useState([]);
-  const [targetDateTime, setTargetDateTime] = useState("");
 
-  // Function to open the Voucher Modal
-
-  const [countdown, setCountdown] = useState(null);
-  // Fetch initial game status and winning numbers
   useEffect(() => {
     const fetchStatus = async () => {
       try {
@@ -34,32 +28,37 @@ export default function AdminGameControl() {
     };
     fetchStatus();
   }, []);
-  // useEffect(() => {
-  //   const fetchTopNumber = async () => {
-  //     try {
-  //       const res = await fetch("/api/top-numbers"); // Replace with your actual endpoint
-  //       const data = await res.json();
-  //       setTopPlayedNumbers(data);
-  //     } catch (err) {
-  //       console.error("Failed to fetch top number:", err);
-  //     }
-  //   };
 
-  //   fetchTopNumber();
-  // }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/win-status");
+        const data = await res.json();
+        setThreeUp(data.threeUp || "");
+        setDownGame(data.downGame || "");
+
+        if (data.date) {
+          // Convert UTC string to Date object (still in local time)
+          setGameDate(new Date(data.date));
+        }
+      } catch (error) {
+        console.error("Error fetching winning numbers:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const toggleGameStatus = async () => {
     setLoading(true);
-    setError("");
     try {
       const res = await fetch("/api/game-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isGameOn: !isGameOn }),
       });
-      if (!res.ok) throw new Error("Failed to update game status");
       const data = await res.json();
-
+      if (!res.ok) throw new Error("Failed to update game status");
       setIsGameOn(data.isGameOn);
     } catch (err) {
       setError(err.message);
@@ -67,6 +66,7 @@ export default function AdminGameControl() {
       setLoading(false);
     }
   };
+
   const handleCountdown = async () => {
     if (!targetDateTime) {
       setError("Please select a valid date and time.");
@@ -74,13 +74,11 @@ export default function AdminGameControl() {
     }
 
     setLoading(true);
-    setError("");
-
     try {
       const res = await fetch("/api/game-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ targetDateTime }),
+        body: JSON.stringify({ targetDateTime: targetDateTime.toISOString() }), // Always UTC
       });
 
       if (!res.ok) {
@@ -91,29 +89,34 @@ export default function AdminGameControl() {
       }
     } catch (err) {
       setError("An error occurred while submitting.");
-      console.error(err);
     } finally {
       setLoading(false);
     }
   };
+
   const handleSubmit = async () => {
-    console.log(threeUp, downGame, gameDate);
     if (
-      threeUp === "" ||
-      downGame === "" ||
-      gameDate === "" ||
+      !threeUp ||
+      !downGame ||
+      !gameDate ||
       threeUp.length !== 3 ||
       downGame.length !== 2
     ) {
       alert("All fields are required.");
       return;
     }
+
     try {
       const res = await fetch("/api/update-win", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ threeUp, downGame, date: gameDate }),
+        body: JSON.stringify({
+          threeUp,
+          downGame,
+          date: gameDate.toISOString(), // Store UTC
+        }),
       });
+
       const result = await res.json();
       if (res.ok) {
         alert("Winning numbers updated successfully!");
@@ -124,6 +127,7 @@ export default function AdminGameControl() {
       console.error("Update error:", error);
     }
   };
+
   const handleDelete = async () => {
     try {
       const res = await fetch("/api/delete-win", {
@@ -135,43 +139,33 @@ export default function AdminGameControl() {
       if (res.ok) {
         alert("Game reset successfully!");
         setThreeUp("");
-        setDownGame(" ");
-        setGameDate("");
+        setDownGame("");
+        setGameDate(null);
       } else {
-        alert(result.error || "Failed to update.");
+        alert(result.error || "Failed to reset.");
       }
     } catch (error) {
-      console.error("Update error:", error);
+      console.error("Delete error:", error);
     }
   };
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch("/api/win-status");
-        const data = await res.json();
-        setThreeUp(data.threeUp);
-        setDownGame(data.downGame);
-        setGameDate(data.date);
-      } catch (error) {
-        console.error("Error fetching winning numbers:", error);
-      }
-    };
 
-    fetchData();
-  }, []);
   const handleMoveAll = async () => {
     const confirmed = confirm(
       "Are you sure you want to move all entries to history?"
     );
     if (!confirmed) return;
+
     try {
       const res = await fetch("/api/move-entries-to-history", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ date: gameDate, threeUp, downGame }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: gameDate?.toISOString(),
+          threeUp,
+          downGame,
+        }),
       });
+
       if (res.ok) {
         alert("All entries moved to history!");
         handleDelete();
@@ -186,13 +180,12 @@ export default function AdminGameControl() {
 
   return (
     <div className="max-w-2xl mx-auto mt-6 bg-gray-900 bg-opacity-90 p-6 rounded-lg ring-2 ring-red-500 text-white space-y-6">
-      <h2 className="text-2xl font-bold text-yellow-400 mb-2 text-center">
+      <h2 className="text-2xl font-bold text-yellow-400 text-center mb-2">
         🎮 Game Control Panel
       </h2>
 
-      {/* 📦 Table 1: Game Start Controls */}
+      {/* Game Controls */}
       <div className="space-y-4 border border-gray-700 p-4 rounded-lg bg-gray-800 bg-opacity-60">
-        {/* Game On/Off */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <label className="font-semibold mb-1 sm:mb-0">Game Status:</label>
           <button
@@ -205,13 +198,11 @@ export default function AdminGameControl() {
           </button>
         </div>
 
-        {/* Game Start Date/Time */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div className="flex flex-col w-full">
             <label className="font-bangla block mb-1 font-semibold text-yellow-400">
               🗓️ এন্ট্রি দেওয়ার শেষ সময়
             </label>
-
             <DatePicker
               selected={targetDateTime}
               onChange={(date) => setTargetDateTime(date)}
@@ -232,9 +223,8 @@ export default function AdminGameControl() {
         </div>
       </div>
 
-      {/* 🧾 Table 2: Result Controls */}
+      {/* Result Controls */}
       <div className="space-y-4 border border-gray-700 p-4 rounded-lg bg-gray-800 bg-opacity-60">
-        {/* 3UP Winning Number */}
         <div>
           <label className="block mb-1 font-semibold">
             🎯 3UP Winning Number
@@ -243,11 +233,10 @@ export default function AdminGameControl() {
             type="text"
             value={threeUp}
             onChange={(e) => setThreeUp(e.target.value.toUpperCase())}
-            className="w-full px-4 py-2 rounded bg-gray-800 border border-yellow-500 focus:outline-none"
+            className="w-full px-4 py-2 rounded bg-gray-800 border border-yellow-500"
           />
         </div>
 
-        {/* DOWN Number */}
         <div>
           <label className="block mb-1 font-semibold">
             💥 DOWN Game Number
@@ -256,11 +245,10 @@ export default function AdminGameControl() {
             type="text"
             value={downGame}
             onChange={(e) => setDownGame(e.target.value.toUpperCase())}
-            className="w-full px-4 py-2 rounded bg-gray-800 border border-pink-500 focus:outline-none"
+            className="w-full px-4 py-2 rounded bg-gray-800 border border-pink-500"
           />
         </div>
 
-        {/* Game Date */}
         <div>
           <label className="font-bangla block mb-1 font-semibold">
             🗓️ গেমের তারিখ
@@ -273,11 +261,10 @@ export default function AdminGameControl() {
           />
         </div>
 
-        {/* Buttons */}
-        <div className="flex flex-col sm:flex-row sm:justify-between gap-4 mt-4">
+        <div className="flex flex-col sm:flex-row justify-between gap-4 mt-4">
           <button
             onClick={handleSubmit}
-            className="bg-green-500 hover:bg-yellow-600 text-black font-bold px-6 py-2 mx-1 rounded shadow w-full sm:w-auto"
+            className="bg-green-500 hover:bg-yellow-600 text-black font-bold px-6 py-2 rounded shadow w-full sm:w-auto"
           >
             Save
           </button>
@@ -288,7 +275,6 @@ export default function AdminGameControl() {
               const confirmation = prompt(
                 "⚠️ To confirm deletion, please type 'Delete'"
               );
-
               if (confirmation === "Delete") {
                 handleMoveAll();
               } else if (confirmation !== null) {

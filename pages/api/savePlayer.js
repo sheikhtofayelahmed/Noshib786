@@ -5,29 +5,37 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { voucher, agentId, agentName, name, SAId, data, amountPlayed } =
-    req.body;
+  const {
+    voucher,
+    agentId,
+    agentName,
+    name,
+    SAId,
+    data, // Array of { input: { num, str, rumble } }
+    amountPlayed, // { OneD, TwoD, ThreeD }
+  } = req.body;
 
-  // 🔒 Use server-side time only (don't trust client-sent time)
   const serverTime = new Date();
 
-  // Validate required fields
-  if (!voucher || !agentId || !Array.isArray(data) || data.length === 0) {
-    return res
-      .status(400)
-      .json({ message: "Invalid payload, missing or malformed data" });
+  // Basic payload validation
+  if (
+    !voucher ||
+    !agentId ||
+    !Array.isArray(data) ||
+    data.length === 0 ||
+    !amountPlayed
+  ) {
+    return res.status(400).json({ message: "Invalid or incomplete payload" });
   }
 
   try {
     const client = await clientPromise;
     const db = client.db("thai-agent-lottery");
 
-    // Get the latest game status
     const gameStatus = await db
       .collection("gameStatus")
       .findOne({}, { sort: { updatedAt: -1 } });
 
-    // 🔒 Enforce both game switch and time cutoff
     if (
       !gameStatus ||
       !gameStatus.isGameOn ||
@@ -39,33 +47,41 @@ export default async function handler(req, res) {
       });
     }
 
-    // Sanitize inputs
+    // Validate and sanitize entries
     const entries = data
-      .map((entry) => ({ input: entry.input?.trim() || "" }))
-      .filter((entry) => entry.input.length > 0);
+      .map((entry) => {
+        const input = entry.input || {};
+        return {
+          input: {
+            num: String(input.num || "").trim(),
+            str: Number(input.str) || 0,
+            rumble: Number(input.rumble) || 0,
+          },
+        };
+      })
+      .filter((entry) => entry.input.num); // keep entries with a valid num
 
     if (entries.length === 0) {
       return res.status(400).json({ message: "No valid entries to save" });
     }
 
-    // Save to database
-    const playerResult = await db.collection("playersInput").insertOne({
+    const savedPlayer = await db.collection("playersInput").insertOne({
       voucher,
       agentId,
       agentName,
       name,
       SAId,
-      time: serverTime, // 🔐 Save only trusted server timestamp
+      time: serverTime,
       entries,
       amountPlayed,
     });
 
     return res.status(200).json({
       message: "✅ Player and entries saved successfully",
-      playerId: playerResult.insertedId,
+      playerId: savedPlayer.insertedId,
     });
-  } catch (error) {
-    console.error("Database error:", error);
+  } catch (err) {
+    console.error("❌ Error saving player:", err);
     return res.status(500).json({ message: "Internal server error" });
   }
 }

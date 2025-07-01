@@ -239,7 +239,10 @@ const AdminApprovalDashboard = () => {
                         <th className="border border-gray-600 px-3 py-2 text-left w-1/12">
                           #
                         </th>
-                        <th className="border border-gray-600 px-3 py-2 text-left w-11/12">
+                        <th
+                          colSpan={3}
+                          className="border border-gray-600 px-3 py-2 text-left w-11/12"
+                        >
                           Input
                         </th>
                       </tr>
@@ -248,28 +251,22 @@ const AdminApprovalDashboard = () => {
                       {Array.isArray(player.entries) &&
                       player.entries.length > 0 ? (
                         player.entries.map((entry, entryIdx) => {
-                          const parts = entry?.input?.split?.(".") || [
-                            "Invalid input",
-                          ];
-                          const number = parts[0];
-                          const amounts = parts.slice(1);
-
                           return (
                             <tr
                               key={entryIdx}
                               className="bg-gray-900 text-gray-300 hover:bg-gray-700 transition duration-150"
                             >
-                              <td className="border border-gray-700 px-3 py-2">
+                              <td className="border border-gray-600 px-3 py-1">
                                 {entryIdx + 1}
                               </td>
-                              <td className="border border-gray-700 px-3 py-2">
-                                <span className="text-white">{number}</span>
-                                {amounts.map((amt, i) => (
-                                  <span key={i}>
-                                    {"."}
-                                    <span>{amt}</span>
-                                  </span>
-                                ))}
+                              <td className="border border-gray-600 px-3 py-1">
+                                {entry.input.num}
+                              </td>
+                              <td className="border border-gray-600 px-3 py-1">
+                                {entry.input.str}
+                              </td>
+                              <td className="border border-gray-600 px-3 py-1">
+                                {entry.input.rumble}
                               </td>
                             </tr>
                           );

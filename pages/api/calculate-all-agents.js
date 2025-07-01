@@ -1,6 +1,6 @@
 import clientPromise from "lib/mongodb";
 
-// RUMBLE generator
+// Generate all permutations except the original
 function getPermutations(str) {
   if (str.length <= 1) return [str];
   const perms = new Set();
@@ -11,7 +11,7 @@ function getPermutations(str) {
       perms.add(char + perm);
     }
   }
-  perms.delete(str); // exclude original if needed
+  perms.delete(str);
   return [...perms];
 }
 
@@ -32,124 +32,92 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Invalid or missing query params" });
     }
 
-    const str3D = threeUp;
-    const permutations3D = getPermutations(str3D);
-    const str2D = downGame;
-    const reversed2D = str2D.split("").reverse().join("");
-    const singleDigits = str3D.split("");
+    const permutations3D = getPermutations(threeUp);
+    const reversed2D = downGame.split("").reverse().join("");
+    const singleDigits = threeUp.split("");
 
     const client = await clientPromise;
     const db = client.db("thai-agent-lottery");
 
-    // 1. Get only active agents
     const agents = await db
       .collection("agents")
       .find({ active: true })
       .toArray();
-
     const summaries = [];
 
     for (const agent of agents) {
       const { agentId, percentages, name } = agent;
       if (!agentId || !percentages) continue;
 
-      // 2. Fetch player entries for this agent
-      const pipeline = [
-        { $unwind: "$entries" },
-        { $match: { agentId } },
-        {
-          $project: {
-            agentId: 1,
-            name: 1,
-            voucher: 1,
-            input: "$entries.input",
-          },
-        },
-        {
-          $addFields: {
-            splitInput: { $split: ["$input", "."] },
-          },
-        },
-        {
-          $project: {
-            agentId: 1,
-            name: 1,
-            voucher: 1,
-            number: { $arrayElemAt: ["$splitInput", 0] },
-            slots: {
-              $map: {
-                input: { $slice: ["$splitInput", 1, 10] },
-                as: "val",
-                in: { $toInt: "$$val" },
-              },
-            },
-          },
-        },
-      ];
-
-      const docs = await db
+      const players = await db
         .collection("playersInput")
-        .aggregate(pipeline)
+        .find({ agentId })
         .toArray();
 
-      const results = [];
+      const wins = [];
 
-      for (const doc of docs) {
-        const { name, voucher, number, slots } = doc;
-        if (!number || !slots.length) continue;
+      for (const player of players) {
+        for (const entry of player.entries || []) {
+          const input = entry.input || {};
+          const number = input.num;
+          const str = parseInt(input.str || 0);
+          const rumble = parseInt(input.rumble || 0);
 
-        const amount = (i) => slots[i] || 0;
-        const wins = [];
+          if (!number) continue;
 
-        if (number.length === 3 && number === str3D && amount(0) > 0) {
-          wins.push({ type: "STR3D", amount: amount(0) });
-        }
-        if (
-          number.length === 3 &&
-          permutations3D.includes(number) &&
-          amount(1) > 0
-        ) {
-          wins.push({ type: "RUMBLE3D", amount: amount(1) });
-        }
-        if (number.length === 2 && number === str2D && amount(0) > 0) {
-          wins.push({ type: "STR2D", amount: amount(0) });
-        }
-        if (number.length === 2 && number === reversed2D && amount(1) > 0) {
-          wins.push({ type: "RUMBLE2D", amount: amount(1) });
-        }
-        if (
-          number.length === 1 &&
-          singleDigits.includes(number) &&
-          amount(0) > 0
-        ) {
-          wins.push({ type: "SINGLE", amount: amount(0) });
-        }
+          const winDetails = [];
 
-        if (wins.length > 0) {
-          results.push({ agentId, name, voucher, number, slots, wins });
-        }
-      }
+          if (number.length === 3 && number === threeUp && str > 0) {
+            winDetails.push({ type: "STR3D", amount: str });
+          }
+          if (
+            number.length === 3 &&
+            permutations3D.includes(number) &&
+            rumble > 0
+          ) {
+            winDetails.push({ type: "RUMBLE3D", amount: rumble });
+          }
+          if (number.length === 2 && number === downGame && str > 0) {
+            winDetails.push({ type: "STR2D", amount: str });
+          }
+          if (number.length === 2 && number === reversed2D && rumble > 0) {
+            winDetails.push({ type: "RUMBLE2D", amount: rumble });
+          }
+          if (number.length === 1 && singleDigits.includes(number) && str > 0) {
+            winDetails.push({ type: "SINGLE", amount: str });
+          }
 
-      // 3. Compute totalWins and amountPlayed from vouchers
-      const totalWins = { STR3D: 0, RUMBLE3D: 0, SINGLE: 0, DOWN: 0 };
-      for (const entry of results) {
-        for (const win of entry.wins) {
-          if (win.type === "STR2D" || win.type === "RUMBLE2D") {
-            totalWins.DOWN += win.amount;
-          } else if (totalWins.hasOwnProperty(win.type)) {
-            totalWins[win.type] += win.amount;
+          if (winDetails.length > 0) {
+            wins.push({
+              agentId,
+              name: player.name,
+              voucher: player.voucher,
+              number,
+              entry,
+              winDetails,
+            });
           }
         }
       }
 
-      // Optional: pull last 20 vouchers to compute totalAmountPlayed
-      const recentPlays = await db
+      const totalWins = { STR3D: 0, RUMBLE3D: 0, SINGLE: 0, DOWN: 0 };
+      for (const w of wins) {
+        for (const result of w.winDetails) {
+          if (["STR2D", "RUMBLE2D"].includes(result.type)) {
+            totalWins.DOWN += result.amount;
+          } else if (totalWins.hasOwnProperty(result.type)) {
+            totalWins[result.type] += result.amount;
+          }
+        }
+      }
+
+      const recent = await db
         .collection("playersInput")
         .find({ agentId })
         .sort({ time: -1 })
         .toArray();
 
-      const totalAmounts = recentPlays.reduce(
+      const totalAmounts = recent.reduce(
         (acc, p) => {
           acc.ThreeD += p.amountPlayed?.ThreeD || 0;
           acc.TwoD += p.amountPlayed?.TwoD || 0;
@@ -159,7 +127,6 @@ export default async function handler(req, res) {
         { ThreeD: 0, TwoD: 0, OneD: 0 }
       );
 
-      // 4. Apply percentages
       const afterThreeD = Math.floor(
         totalAmounts.ThreeD * (1 - percentages.threeD / 100)
       );
@@ -186,7 +153,7 @@ export default async function handler(req, res) {
           totalWin += underPercentage;
         }
         if (agent.expense) {
-          Expense = Number(agent.expenseAmt);
+          Expense = Number(agent.expenseAmt) || 0;
           totalWin += Expense;
         }
       }

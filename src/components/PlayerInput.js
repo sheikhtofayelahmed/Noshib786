@@ -7,24 +7,19 @@ import AllahBhorosha from "./Allah";
 
 export default function PlayerInput() {
   const [name, setName] = useState("");
-  // const [SAId, setSAId] = useState("");
-  const [inputs, setInputs] = useState(Array(20).fill(""));
+  const [inputs, setInputs] = useState(
+    Array(20).fill({ num: "", str: "", rumble: "" })
+  );
   const [errors, setErrors] = useState(Array(20).fill(false));
   const [players, setPlayers] = useState([]);
-  const [submittedPlayers, setSubmittedPlayers] = useState([]);
   const [amountPlayed, setAmountPlayed] = useState({});
   const { agentId, subAgentId, fetchEntryCount, fetchWaitingPlayers } =
     useAgent();
   const [targetTime, setTargetTime] = useState(null);
   const [timeLeft, setTimeLeft] = useState("");
-  const [error, setError] = useState("");
-  const [isGameOn, setIsGameOn] = useState(null);
-  const [isCompleted, setIsCompleted] = useState(true);
-  const [print, setPrint] = useState(false);
   const [agent, setAgent] = useState();
   const playerRefs = useRef({});
 
-  // console.log(subAgentId);
   useEffect(() => {
     const fetchTarget = async () => {
       try {
@@ -94,77 +89,47 @@ export default function PlayerInput() {
     fetchAgent();
   }, [agentId]);
   // At the top of your component
-  useEffect(() => {
-    let total1D = 0,
-      total2D = 0,
-      total3D = 0;
 
-    players.forEach((player) => {
-      console.log(player);
-      player.data.forEach((entry) => {
-        const parts = entry.input.split(".");
-        const num = parts[0];
-        const amounts = parts
-          .slice(1)
-          .map(Number)
-          .filter((n) => !isNaN(n));
+  const validateEntry = (entry) => {
+    const { num, str, rumble } = entry;
 
-        if (/^\d$/.test(num)) {
-          total1D += amounts.reduce((a, b) => a + b, 0);
-        } else if (/^\d{2}$/.test(num)) {
-          total2D += amounts.reduce((a, b) => a + b, 0);
-        } else if (/^\d{3}$/.test(num)) {
-          total3D += amounts.reduce((a, b) => a + b, 0);
-        }
-      });
-    });
+    // Allow completely empty row
+    if (!num && !str && !rumble) return true;
 
-    setAmountPlayed({ OneD: total1D, TwoD: total2D, ThreeD: total3D });
-  }, [players]); // ✅ Run when players changes
+    // Validate num: 1–3 digits and not "000"
+    if (!/^\d{1,3}$/.test(num) || num === "000") return false;
 
-  const handleInputChange = (index, value) => {
-    setInputs(inputs.map((inp, i) => (i === index ? value : inp)));
-    setErrors(errors.map((err, i) => (i === index ? false : err)));
-  };
+    const numLength = num.length;
+    const isStrValid = /^\d+$/.test(str);
+    const isRumbleValid = /^\d+$/.test(rumble);
 
-  const validateEntry = (input) => {
-    if (!input) return true; // allow empty
-    // if (!/^[\d=]+$/.test(input)) return false;
-    if (!/^[\d.]+$/.test(input)) return false;
-    if (input.startsWith(".")) return false;
-
-    const parts = input.split(".");
-    const first = parts[0];
-
-    if (/^\d$/.test(first)) {
-      // 1-digit number
-      return parts.length === 2 && parts[1].length > 0;
-    } else if (/^\d{2,3}$/.test(first)) {
-      // Reject if first is '000'
-      if (first === "000") return false;
-      // 2 or 3-digit number
-      return (
-        parts.length >= 2 &&
-        parts.length <= 3 &&
-        parts.slice(1).every((p) => p.length > 0)
-      );
+    if (numLength === 1) {
+      // 1D: only str is allowed/required, rumble must be empty
+      if (!isStrValid || rumble) return false;
+    } else if (numLength === 2 || numLength === 3) {
+      // 2D or 3D: allow at least one of str or rumble (or both)
+      if (!str && !rumble) return false;
+      if (str && !isStrValid) return false;
+      if (rumble && !isRumbleValid) return false;
+    } else {
+      return false;
     }
 
-    return false;
+    return true;
   };
 
   const autofillMiddleEntries = (inputs) => {
     const entriesWithSuffix = inputs
       .map((input, idx) => {
-        if (!input) return null;
-        const parts = input.split(".");
-        if (parts.length < 3) return null; // no suffix
+        if (!input?.num) return null;
+        const suffixExists = input.str || input.rumble;
+        if (!suffixExists) return null;
+
         return {
           index: idx,
-          firstPart: parts[0],
-          lastPart: parts[parts.length - 1],
-          length: parts[0].length,
-          original: input,
+          numLength: input.num.length,
+          str: input.str,
+          rumble: input.rumble,
         };
       })
       .filter(Boolean);
@@ -175,49 +140,87 @@ export default function PlayerInput() {
       for (let j = i + 1; j < entriesWithSuffix.length; j++) {
         const e1 = entriesWithSuffix[i];
         const e2 = entriesWithSuffix[j];
-        if (e1.length === e2.length && e1.lastPart === e2.lastPart) {
+
+        if (
+          e1.numLength === e2.numLength &&
+          e1.str === e2.str &&
+          e1.rumble === e2.rumble
+        ) {
           for (let k = e1.index + 1; k < e2.index; k++) {
             const cur = inputs[k];
-            if (!cur) continue;
+            if (!cur?.num || cur.str || cur.rumble) continue;
+            if (cur.num.length !== e1.numLength) continue;
 
-            const curFirstPart = cur.split(".")[0];
-            if (
-              curFirstPart.length === e1.length &&
-              cur.split(".").length < 3
-            ) {
-              inputs[k] = `${cur}.${e1.lastPart}`;
-            }
+            inputs[k] = {
+              ...cur,
+              str: e1.str,
+              rumble: e1.rumble,
+            };
           }
         }
       }
     }
+
     return inputs;
   };
+  const calculateTotals = (entries) => {
+    let total1D = 0,
+      total2D = 0,
+      total3D = 0;
 
+    entries.forEach(({ num, str, rumble }) => {
+      const total = (Number(str) || 0) + (Number(rumble) || 0);
+
+      if (/^\d$/.test(num)) {
+        total1D += total;
+      } else if (/^\d{2}$/.test(num)) {
+        total2D += total;
+      } else if (/^\d{3}$/.test(num)) {
+        total3D += total;
+      }
+    });
+
+    return { OneD: total1D, TwoD: total2D, ThreeD: total3D };
+  };
   const handleSavePlayer = () => {
-    // First, autofill middle entries according to your rule
-    const autofilledInputs = autofillMiddleEntries([...inputs]);
+    const filledInputs = autofillMiddleEntries(inputs); // ✨ autofill logic applied here
 
-    // Validate autofilled inputs
-    const newErrors = autofilledInputs.map((input) => !validateEntry(input));
+    const newErrors = filledInputs.map((entry) => {
+      const isValid = validateEntry(entry);
+      const isEmpty = !entry.num && !entry.str && !entry.rumble;
 
-    if (newErrors.includes(true)) {
-      setErrors(newErrors);
-      return;
-    }
+      return isEmpty
+        ? { num: false, str: false, rumble: false }
+        : !isValid
+        ? { num: true, str: true, rumble: true }
+        : { num: false, str: false, rumble: false };
+    });
 
-    const validEntries = autofilledInputs.filter((i) => i.trim() !== "");
+    setErrors(newErrors);
 
-    const newEntries = validEntries.map((input, i) => ({
+    const hasErrors = newErrors.some((err) =>
+      Object.values(err).some((v) => v)
+    );
+
+    if (hasErrors) return;
+
+    const validEntries = inputs.filter((entry) => {
+      const isValid = validateEntry(entry);
+      const isEmpty = !entry.num && !entry.str && !entry.rumble;
+      return isValid && !isEmpty;
+    });
+
+    const newEntries = validEntries.map((entry, i) => ({
       id: Date.now() + i,
       serial: i + 1,
-      input,
+      input: entry,
       isEditing: false,
-      editValue: input,
+      editValue: { ...entry },
       editError: false,
     }));
 
     const voucher = `${agentId}-${Math.floor(Math.random() * 10000)}`;
+    const totals = calculateTotals(validEntries);
 
     const newPlayer = {
       name,
@@ -228,15 +231,18 @@ export default function PlayerInput() {
     };
 
     setPlayers([newPlayer]);
+    setAmountPlayed(totals);
     setName("");
-    setInputs(Array(20).fill("")); // reset inputs
-    setErrors(Array(20).fill(false));
+    setInputs(Array(20).fill({ num: "", str: "", rumble: "" }));
+    setErrors(Array(20).fill({ num: false, str: false, rumble: false }));
     setIsCompleted(false);
   };
-
   const handleAddInputs = () => {
-    setInputs([...inputs, ...Array(20).fill("")]);
-    setErrors([...errors, ...Array(20).fill(false)]);
+    setInputs([...inputs, ...Array(20).fill({ num: "", str: "", rumble: "" })]);
+    setErrors([
+      ...errors,
+      ...Array(20).fill({ num: false, str: false, rumble: false }),
+    ]);
   };
 
   const handleEdit = (playerIdx, entryIdx) => {
@@ -254,7 +260,7 @@ export default function PlayerInput() {
     );
   };
 
-  const handleEditChange = (playerIdx, entryIdx, value) => {
+  const handleEditChange = (playerIdx, entryIdx, field, value) => {
     setPlayers(
       players.map((player, i) =>
         i === playerIdx
@@ -262,7 +268,14 @@ export default function PlayerInput() {
               ...player,
               data: player.data.map((entry, j) =>
                 j === entryIdx
-                  ? { ...entry, editValue: value, editError: false }
+                  ? {
+                      ...entry,
+                      editValue: {
+                        ...entry.editValue,
+                        [field]: value,
+                      },
+                      editError: false,
+                    }
                   : entry
               ),
             }
@@ -291,50 +304,54 @@ export default function PlayerInput() {
       return;
     }
 
-    setPlayers(
-      players.map((player, i) =>
-        i === playerIdx
-          ? {
-              ...player,
-              data: player.data.map((e, j) =>
-                j === entryIdx
-                  ? {
-                      ...e,
-                      input: e.editValue,
-                      isEditing: false,
-                      editError: false,
-                    }
-                  : e
-              ),
-            }
-          : player
-      )
+    const updatedPlayers = players.map((player, i) =>
+      i === playerIdx
+        ? {
+            ...player,
+            data: player.data.map((e, j) =>
+              j === entryIdx
+                ? {
+                    ...e,
+                    input: { ...e.editValue },
+                    isEditing: false,
+                    editError: false,
+                  }
+                : e
+            ),
+          }
+        : player
     );
-  };
 
+    setPlayers(updatedPlayers);
+
+    const allInputs = updatedPlayers[playerIdx].data.map((e) => e.input);
+    setAmountPlayed(calculateTotals(allInputs));
+  };
   const handleDelete = (playerIdx, entryIdx) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this entry?"
     );
     if (!confirmDelete) return;
-    setPlayers(
-      players.map((player, i) =>
-        i === playerIdx
-          ? {
-              ...player,
-              data: player.data.filter((_, j) => j !== entryIdx),
-            }
-          : player
-      )
+
+    const updatedPlayers = players.map((player, i) =>
+      i === playerIdx
+        ? {
+            ...player,
+            data: player.data.filter((_, j) => j !== entryIdx),
+          }
+        : player
     );
+
+    setPlayers(updatedPlayers);
+
+    const allInputs = updatedPlayers[playerIdx].data.map((e) => e.input);
+    setAmountPlayed(calculateTotals(allInputs));
   };
 
   const handleSubmitAndPrint = async (player) => {
     try {
-      // Fetch current game status
       const statusRes = await fetch("/api/game-status");
       if (!statusRes.ok) {
-        // Handle non-200 responses from game-status API
         throw new Error(`Failed to fetch game status: ${statusRes.statusText}`);
       }
       const statusData = await statusRes.json();
@@ -344,16 +361,13 @@ export default function PlayerInput() {
         ? new Date(statusData.targetDateTime)
         : null;
 
-      // --- Core Logic: Check Game Status and Route Submission ---
       if (!statusData.isGameOn || (targetTime && now > targetTime)) {
         alert(
           "⛔ The game has ended or the time is up. Attempting to save to 'waiting' list."
         );
-        // If game is off or time is up, submit to 'waitingSavePlayer' endpoint
-        await submitToWaitingList(player, statusData.isGameOn, targetTime); // New function to handle this
-        return; // Stop further execution after attempting to save to waiting list
+        await submitToWaitingList(player, statusData.isGameOn, targetTime);
+        return;
       }
-      // --- End Core Logic ---
     } catch (err) {
       console.error("Game status verification error:", err);
       alert(
@@ -363,62 +377,16 @@ export default function PlayerInput() {
       );
       return;
     }
-    const dataEntries = player.data || player.entries || [];
 
-    const parsedData = dataEntries.map((entry) => ({ input: entry.input }));
+    const dataEntries = player.data || [];
 
-    let total1D = 0;
-    let total2D = 0;
-    let total3D = 0;
+    const parsedData = dataEntries.map((entry) => ({
+      input: entry.input,
+    }));
 
-    // Calculate total amounts per digit type
-    dataEntries.forEach((entry) => {
-      // Basic input validation for each entry
-      if (
-        !entry.input ||
-        typeof entry.input !== "string" ||
-        !entry.input.includes(".")
-      ) {
-        console.warn(
-          `Skipping malformed entry input: ${JSON.stringify(
-            entry
-          )}. Expected format "NUM=AMOUNT".`
-        );
-        return; // Skip this entry
-      }
+    const totals = calculateTotals(dataEntries.map((e) => e.input));
 
-      const parts = entry.input.split(".");
-      const num = parts[0];
-      // Filter for valid numbers and positive amounts
-      const amounts = parts
-        .slice(1)
-        .map(Number)
-        .filter((n) => !isNaN(n) && n > 0);
-
-      if (amounts.length === 0) {
-        console.warn(
-          `No valid positive amounts found for entry: ${entry.input}. Skipping total calculation.`
-        );
-        return;
-      }
-
-      const sum = amounts.reduce((a, b) => a + b, 0);
-
-      if (/^\d$/.test(num)) {
-        total1D += sum;
-      } else if (/^\d{2}$/.test(num)) {
-        total2D += sum;
-      } else if (/^\d{3}$/.test(num)) {
-        total3D += sum;
-      } else {
-        console.warn(
-          `Unrecognized number format "${num}" for entry: ${entry.input}. Skipping total calculation for this.`
-        );
-      }
-    });
-
-    // Optional: Prevent submission if total amount played is zero, but entries exist
-    if (total1D === 0 && total2D === 0 && total3D === 0) {
+    if (totals.OneD === 0 && totals.TwoD === 0 && totals.ThreeD === 0) {
       alert(
         "⚠️ Player has entries, but the total played amount is zero or invalid. Not submitting to active game."
       );
@@ -427,16 +395,16 @@ export default function PlayerInput() {
 
     const payload = {
       voucher: player.voucher,
-      agentId: agentId, // Ensure agentId is accessible in this scope (e.g., passed as argument or globally defined)
+      agentId,
       agentName: agent.name,
       name: player.name || "",
       SAId: subAgentId || "",
       data: parsedData,
-      amountPlayed: { OneD: total1D, TwoD: total2D, ThreeD: total3D },
+      amountPlayed: totals,
+      
     };
 
     try {
-      // Send data to backend for active game submission
       const res = await fetch("/api/savePlayer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -445,8 +413,6 @@ export default function PlayerInput() {
 
       if (res.ok) {
         alert("✅ Player data submitted to database!");
-
-        // ✅ Update only the submitted player
         setPlayers((prevPlayers) =>
           prevPlayers.map((p) =>
             p.voucher === player.voucher ? { ...p, submitted: true } : p
@@ -455,17 +421,15 @@ export default function PlayerInput() {
         fetchEntryCount(agentId);
       } else {
         const err = await res.json();
-        const errorMessage =
-          err.message || `Unknown error (Status: ${res.status})`;
-        alert(`❌ Failed to submit to active game: ${errorMessage}`);
-        // Do NOT add to submittedPlayers to allow retry
+        alert(
+          `❌ Failed to submit to active game: ${
+            err.message || `Status: ${res.status}`
+          }`
+        );
       }
     } catch (err) {
-      console.error("Active game submission error:", err);
-      alert(
-        "❌ An error occurred while submitting to the active game. Please check your internet connection and try again."
-      );
-      // Do NOT add to submittedPlayers to allow retry
+      console.error("Submission error:", err);
+      alert("❌ Network issue. Could not submit. Please try again.");
     }
   };
 
@@ -476,7 +440,7 @@ export default function PlayerInput() {
    * @param {Date | null} targetTime - The game end time, if set.
    */
   const submitToWaitingList = async (player, isGameOn, targetTime) => {
-    const dataEntries = player.data || player.entries || [];
+    const dataEntries = player.data || [];
 
     if (dataEntries.length === 0) {
       alert(
@@ -485,68 +449,19 @@ export default function PlayerInput() {
       return;
     }
 
-    // const parsedData = dataEntries.map((entry) => ({ input: entry.input }));
+    const parsedData = dataEntries.map((entry) => ({
+      input: entry.input, // Already an object: { num, str, rumble }
+    }));
 
-    // You might want to include game status info in the waiting payload for context
-    const parsedData = dataEntries.map((entry) => ({ input: entry.input }));
+    const totals = calculateTotals(dataEntries.map((e) => e.input));
 
-    let total1D = 0;
-    let total2D = 0;
-    let total3D = 0;
-
-    // Calculate total amounts per digit type
-    dataEntries.forEach((entry) => {
-      // Basic input validation for each entry
-      if (
-        !entry.input ||
-        typeof entry.input !== "string" ||
-        !entry.input.includes(".")
-      ) {
-        console.warn(
-          `Skipping malformed entry input: ${JSON.stringify(
-            entry
-          )}. Expected format "NUM=AMOUNT".`
-        );
-        return; // Skip this entry
-      }
-
-      const parts = entry.input.split(".");
-      const num = parts[0];
-      // Filter for valid numbers and positive amounts
-      const amounts = parts
-        .slice(1)
-        .map(Number)
-        .filter((n) => !isNaN(n) && n > 0);
-
-      if (amounts.length === 0) {
-        console.warn(
-          `No valid positive amounts found for entry: ${entry.input}. Skipping total calculation.`
-        );
-        return;
-      }
-
-      const sum = amounts.reduce((a, b) => a + b, 0);
-
-      if (/^\d$/.test(num)) {
-        total1D += sum;
-      } else if (/^\d{2}$/.test(num)) {
-        total2D += sum;
-      } else if (/^\d{3}$/.test(num)) {
-        total3D += sum;
-      } else {
-        console.warn(
-          `Unrecognized number format "${num}" for entry: ${entry.input}. Skipping total calculation for this.`
-        );
-      }
-    });
-
-    // Optional: Prevent submission if total amount played is zero, but entries exist
-    if (total1D === 0 && total2D === 0 && total3D === 0) {
+    if (totals.OneD === 0 && totals.TwoD === 0 && totals.ThreeD === 0) {
       alert(
-        "⚠️ Player has entries, but the total played amount is zero or invalid. Not submitting to active game."
+        "⚠️ Player has entries, but the total played amount is zero or invalid. Not submitting."
       );
       return;
     }
+
     const waitingPayload = {
       voucher: player.voucher,
       agentId: agentId,
@@ -554,22 +469,16 @@ export default function PlayerInput() {
       name: player.name || "",
       SAId: subAgentId || "",
       data: parsedData,
-      amountPlayed: { OneD: total1D, TwoD: total2D, ThreeD: total3D },
-      submissionAttemptTime: new Date().toISOString(), // When it tried to submit
+      amountPlayed: totals,
+      submissionAttemptTime: new Date().toISOString(),
       gameStatusAtAttempt: {
         isGameOn: isGameOn,
         targetDateTime: targetTime ? targetTime.toISOString() : null,
       },
-      // You might still calculate amounts if needed for the waiting list,
-      // but it's optional depending on your backend processing for waiting data.
-      // For simplicity, I'm omitting amountPlayed for waitingPayload in this example,
-      // but you could add it back using the same calculation logic.
-      // amountPlayed: { OneD: total1D, TwoD: total2D, ThreeD: total3D },
     };
 
     try {
       const res = await fetch("/api/waitingSavePlayer", {
-        // New endpoint for waiting list
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(waitingPayload),
@@ -578,252 +487,145 @@ export default function PlayerInput() {
       if (res.ok) {
         fetchWaitingPlayers(agentId);
         alert("✅ Player data saved to 'waiting' list successfully!");
-        // You might have a separate `setWaitingPlayers` state or similar
-        // if you want to track players in the waiting list in your UI.
-        // For now, we'll just alert.
-        // No printing here, as it's not a final submission.
       } else {
         const err = await res.json();
-        const errorMessage =
-          err.message || `Unknown error (Status: ${res.status})`;
         alert(
-          `❌ Failed to save player data to 'waiting' list: ${errorMessage}`
+          `❌ Failed to save player to waiting list: ${
+            err.message || `Status: ${res.status}`
+          }`
         );
       }
     } catch (err) {
       console.error("Waiting list submission error:", err);
       alert(
-        "❌ An error occurred while saving to 'waiting' list. Please try again."
+        "❌ Error occurred while saving to waiting list. Please try again."
       );
     }
   };
 
-  // Assuming `submittedPlayers`, `handlePrint`, `setSubmittedPlayers`, and `agentId`
-  // are defined in the scope where `handleSubmitAndPrint` is called.
-  // Example definitions (for context, not part of the function itself):
-  // const [submittedPlayers, setSubmittedPlayers] = useState([]);
-  // const handlePrint = (player) => { /* ... print logic ... */ };
-  // const agentId = 'YOUR_AGENT_ID';
-
-  const handlePrint = (player) => {
-    const dataEntries = player.data || player.entries || [];
-
-    const parsedData = dataEntries.map((entry) => ({ input: entry.input }));
-
-    let total1D = 0;
-    let total2D = 0;
-    let total3D = 0;
-
-    // Calculate total amounts per digit type
-    dataEntries.forEach((entry) => {
-      // Basic input validation for each entry
-      if (
-        !entry.input ||
-        typeof entry.input !== "string" ||
-        !entry.input.includes(".")
-      ) {
-        console.warn(
-          `Skipping malformed entry input: ${JSON.stringify(
-            entry
-          )}. Expected format "NUM=AMOUNT".`
-        );
-        return; // Skip this entry
-      }
-
-      const parts = entry.input.split(".");
-      const num = parts[0];
-      // Filter for valid numbers and positive amounts
-      const amounts = parts
-        .slice(1)
-        .map(Number)
-        .filter((n) => !isNaN(n) && n > 0);
-
-      if (amounts.length === 0) {
-        console.warn(
-          `No valid positive amounts found for entry: ${entry.input}. Skipping total calculation.`
-        );
-        return;
-      }
-
-      const sum = amounts.reduce((a, b) => a + b, 0);
-
-      if (/^\d$/.test(num)) {
-        total1D += sum;
-      } else if (/^\d{2}$/.test(num)) {
-        total2D += sum;
-      } else if (/^\d{3}$/.test(num)) {
-        total3D += sum;
-      } else {
-        console.warn(
-          `Unrecognized number format "${num}" for entry: ${entry.input}. Skipping total calculation for this.`
-        );
-      }
-    });
-    // make sure amountPlayed exists
-
+  const handlePrint = (player, amountPlayed) => {
     const win = window.open("", "_blank");
-    win.document.write(`
-  <html>
-    <head>
-      <title>Player Data</title>
-      <style>
-       @page {
-  size: 80mm;
-  margin: 0;
+
+    const formatDataRows = (dataArray) => {
+      const sortedData = [...dataArray].sort((a, b) => {
+        return b.input.num.length - a.input.num.length;
+      });
+
+      const half = Math.ceil(sortedData.length / 2);
+      const col1 = sortedData.slice(0, half);
+      const col2 = sortedData.slice(half);
+
+      const rows = [];
+      for (let i = 0; i < Math.max(col1.length, col2.length); i++) {
+        const c1 = col1[i]?.input || {};
+        const c2 = col2[i]?.input || {};
+        rows.push(`
+        <tr>
+          <td>${c1.num || ""}</td><td>${c1.str || ""}</td><td>${
+          c1.rumble || ""
+        }</td> <td></td>
+          <td>${c2.num || ""}</td><td>${c2.str || ""}</td><td>${
+          c2.rumble || ""
+        }</td>
+        </tr>
+      `);
+      }
+      return rows.join("");
+    };
+
+    const calculateDeduction = (amount, percent) =>
+      (amount * ((100 - percent) / 100)).toFixed(0);
+
+    const htmlContent = `
+    <html>
+      <head>
+        <title>Player Data</title>
+        <style>
+          @page { size: 80mm; margin: 0; }
+          body { font-family: Arial, sans-serif; font-size: 16px; padding: 4px; margin: 0; color: #000; }
+          .container { width: 100%; }
+          h2, p { font-size: 16px; text-align: center; margin: 2px 0; }
+          h1 { font-size: 20px; text-align: center; margin: 2px 0; }
+          .input-table, .totals-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+          .input-table th, .input-table td,
+          .totals-table th, .totals-table td { border: 1px solid #000; padding: 2px; text-align: center; font-size: 16px; }
+          .grand-total { font-weight: bold; }
+          .first-container {
+  border: 1px solid #000;
+  padding: 4px;
+  margin-bottom: 4px;
 }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+       <div class="first-container"> 
+       <h2>${new Date(player.time).toLocaleString()}</h2>
+          <h1>${player.voucher || ""}</h1>
+          <p>Player: ${player.name || ""}     </p>
+          <p> Sub Agent: ${subAgentId || ""}</p>
+          </div>
 
-        body {
-          font-family: Arial, sans-serif;
-          font-size: 16px;
-          color: #000;
-          padding: 4px;
-          margin: 0;
-        }
+          <table class="input-table">
+            <thead>
+              <tr>
+                <th>Num</th><th>Str</th><th>Rum.</th>
+                <th></th>
+                <th>Num</th><th>Str</th><th>Rum.</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${formatDataRows(player.data)}
+            </tbody>
+          </table>
 
-        .container {
-          width: 100%;
-        }
-.name-subagent{
+          <table class="totals-table">
+            <thead>
+              <tr><th>Category</th><th>Amount</th><th>After Deduction</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>3D Total</td>
+                <td>${amountPlayed.ThreeD}</td>
+                <td>${calculateDeduction(
+                  amountPlayed.ThreeD,
+                  agent.cPercentages.threeD
+                )}</td>
+              </tr>
+              <tr>
+                <td>2D Total</td>
+                <td>${amountPlayed.TwoD}</td>
+                <td>${calculateDeduction(
+                  amountPlayed.TwoD,
+                  agent.cPercentages.twoD
+                )}</td>
+              </tr>
+              <tr>
+                <td>1D Total</td>
+                <td>${amountPlayed.OneD}</td>
+                <td>${calculateDeduction(
+                  amountPlayed.OneD,
+                  agent.cPercentages.oneD
+                )}</td>
+              </tr>
+              <tr class="grand-total">
+                <td colspan="2">Grand Total</td>
+             
+                <td>${(
+                  (amountPlayed.ThreeD * (100 - agent.cPercentages.threeD)) /
+                    100 +
+                  (amountPlayed.TwoD * (100 - agent.cPercentages.twoD)) / 100 +
+                  (amountPlayed.OneD * (100 - agent.cPercentages.oneD)) / 100
+                ).toFixed(0)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </body>
+    </html>
+  `;
 
-display: flex;
-}
-        h2 {
-          font-size: 16px;
-          margin: 2px 0;
-          text-align: center;
-        }
-
-        p {
-          font-size: 16px;
-          text-align: center;
-          margin: 2px 0;
-        }
-
-        .input-table {
-          width: 100%;
-          margin-top: 4px;
-          border-collapse: collapse;
-        }
-
-        .input-table td {
-          width: 50%;
-          padding: 2px;
-          font-size: 16px;
-          text-align: left;
-        }
-
-        .totals-table {
-          width: 100%;
-          margin-top: 6px;
-          border-collapse: collapse;
-        }
-
-        .totals-table th, .totals-table td {
-          border: 1px solid #000;
-          padding: 2px;
-          text-align: center;
-          font-size: 16px;
-        }
-
-        .totals-table th {
-          font-weight: bold;
-        }
-
-        .grand-total {
-          font-weight: bold;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h2>${player.voucher || ""}</h2>
-
-        <h2>Player: ${player.name || ""} || Sub Agent: ${subAgentId || ""}</h2>
-    
- 
-        <p> Date: ${new Date(player.time).toLocaleString()}</p>
-
-       <table class="input-table" style="width: 100%; border-collapse: collapse;" border="1">
- <tbody>
-  ${(() => {
-    const sortedData = [...player?.data].sort((a, b) => {
-      const aPrefix = a.input.split(".")[0];
-      const bPrefix = b.input.split(".")[0];
-      return bPrefix.length - aPrefix.length; // Sort: 3-digit > 2-digit > 1-digit
-    });
-
-    const total = sortedData.length;
-    const half = Math.ceil(total / 2);
-    const col1 = sortedData.slice(0, half);
-    const col2 = sortedData.slice(half, total);
-
-    const maxRows = Math.max(col1.length, col2.length);
-    const rows = [];
-
-    for (let i = 0; i < maxRows; i++) {
-      const c1 = col1[i] ? col1[i].input : "";
-      const c2 = col2[i] ? col2[i].input : "";
-      rows.push(`<tr><td>${c1}</td><td>${c2}</td></tr>`);
-    }
-
-    return rows.join("");
-  })()}
-</tbody>
-
-</table>
-
-
-        <table class="totals-table">
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th>Amount</th>
-              <th>After Deduction</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>3D Total</td>
-              <td>${total3D}</td>
-              <td>${(
-                total3D *
-                ((100 - agent.cPercentages.threeD) / 100)
-              ).toFixed(0)}</td>
-            </tr>
-            <tr>
-              <td>2D Total</td>
-              <td>${total2D}</td>
-              <td>${(total2D * ((100 - agent.cPercentages.twoD) / 100)).toFixed(
-                0
-              )}</td>
-            </tr>
-            <tr>
-              <td>1D Total</td>
-              <td>${total1D}</td>
-              <td>${(total1D * ((100 - agent.cPercentages.oneD) / 100)).toFixed(
-                0
-              )}</td>
-            </tr>
-            <tr class="grand-total">
-              <td>Grand Total</td>
-              <td>
-                ${(total3D + total2D + total1D).toFixed(0)}
-              </td>
-              <td>
-                ${(
-                  total3D * ((100 - agent.cPercentages.threeD) / 100) +
-                  total2D * ((100 - agent.cPercentages.twoD) / 100) +
-                  total1D * ((100 - agent.cPercentages.oneD) / 100)
-                ).toFixed(0)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </body>
-  </html>
-`);
-
+    win.document.write(htmlContent);
     win.document.close();
     win.print();
   };
@@ -846,6 +648,7 @@ display: flex;
       console.error("Content div not found for voucher:", voucher);
     }
   };
+  console.log(players);
   return (
     <div className="min-h-screen  text-white p-6 ">
       <div
@@ -863,14 +666,7 @@ display: flex;
         <h1 className="text-lg lg:text-4xl  font-bold text-center mb-6 text-yellow-400">
           🎰 Player Input 🎰
         </h1>
-        {/* <label className="block mb-2 text-yellow-300 ">Sub Agent:</label>
-        <input
-          type="number"
-          value={SAId}
-          onChange={(e) => setSAId(e.target.value)}
-          placeholder="Your Sub Agent Id"
-          className="w-full p-3 mb-4 rounded bg-black border-2 border-red-700 text-white"
-        /> */}
+
         <label className="block mb-2 text-yellow-300 ">Player Name:</label>
         <input
           type="text"
@@ -881,37 +677,98 @@ display: flex;
         />
 
         <label className="block mb-2 text-yellow-300">Enter Plays:</label>
-        {inputs.map((input, i) => (
-          <input
-            key={i}
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9=]+"
-            value={input}
-            onChange={(e) => handleInputChange(i, e.target.value)}
-            placeholder={`Entry ${i + 1}`}
-            className={`w-full p-2 mb-2 rounded bg-black border-2 text-white ${
-              errors[i] ? "border-red-500 bg-red-900" : "border-yellow-400"
-            }`}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault(); // prevent form submit if inside a form
-                const nextInput = document.querySelector(
-                  `input[name='input-${i + 1}']`
-                );
-                if (nextInput) {
-                  nextInput.focus();
+
+        {inputs.map((entry, i) => (
+          <div key={i} className="grid grid-cols-3 gap-2 mb-2">
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]+"
+              value={entry.num}
+              onChange={(e) => {
+                const updated = [...inputs];
+                updated[i] = { ...updated[i], num: e.target.value };
+                setInputs(updated);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const next = document.querySelector(
+                    `input[name="input-${i + 1}-num"]`
+                  );
+                  if (next) next.focus();
                 }
-              }
-            }}
-            name={`input-${i}`}
-          />
+              }}
+              placeholder="Number"
+              className={`w-full p-2 rounded bg-black border-2 text-white ${
+                errors[i]?.num
+                  ? "border-red-500 bg-red-900"
+                  : "border-yellow-400"
+              }`}
+              name={`input-${i}-num`}
+            />
+
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]+"
+              value={entry.str}
+              onChange={(e) => {
+                const updated = [...inputs];
+                updated[i] = { ...updated[i], str: e.target.value };
+                setInputs(updated);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const next = document.querySelector(
+                    `input[name="input-${i + 1}-str"]`
+                  );
+                  if (next) next.focus();
+                }
+              }}
+              placeholder="STR"
+              className={`w-full p-2 rounded bg-black border-2 text-white ${
+                errors[i]?.str
+                  ? "border-red-500 bg-red-900"
+                  : "border-yellow-400"
+              }`}
+              name={`input-${i}-str`}
+            />
+
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]+"
+              value={entry.rumble}
+              onChange={(e) => {
+                const updated = [...inputs];
+                updated[i] = { ...updated[i], rumble: e.target.value };
+                setInputs(updated);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const next = document.querySelector(
+                    `input[name="input-${i + 1}-rumble"]`
+                  );
+                  if (next) next.focus();
+                }
+              }}
+              placeholder="RUMBLE"
+              className={`w-full p-2 rounded bg-black border-2 text-white ${
+                errors[i]?.rumble
+                  ? "border-red-500 bg-red-900"
+                  : "border-yellow-400"
+              }`}
+              name={`input-${i}-rumble`}
+            />
+          </div>
         ))}
 
-        {errors.some((err) => err) && (
+        {errors.some((err) => Object.values(err).some((v) => v)) && (
           <p className="text-red-400">Please correct the errors.</p>
         )}
-
         <div className="flex flex-wrap gap-2 mt-4">
           <button
             onClick={handleSavePlayer}
@@ -939,17 +796,62 @@ display: flex;
               }
             })}
 
-            {players.map((player, idx) => (
-              <React.Fragment key={idx}>
+            {players.map((player, playerIdx) => (
+              <React.Fragment key={playerIdx}>
                 <div
                   ref={playerRefs.current[player.voucher]}
-                  className="relative my-16 bg-gray-800 p-5 rounded-xl border border-yellow-500 shadow hover:shadow-yellow-500 transition-shadow"
+                  className="my-16 bg-gray-800 p-5 rounded-xl border border-yellow-500 shadow hover:shadow-yellow-500 transition-shadow"
                 >
-                  <p className="text-yellow-300 font-bold text-xl text-center">
-                    Voucher:{" "}
-                    <span className="font-mono">{player.voucher || "N/A"}</span>
-                  </p>
-                  <div className="flex justify-between items-start">
+                  <div className=" w-max sm:w-2/3 mx-auto border-collapse flex justify-between items-start">
+                    {player.submitted ? (
+                      <div className="w-full flex flex-col justify-center items-center">
+                        <p className="text-yellow-300 font-bold sm:text-2xl  text-center my-5">
+                          Voucher:{" "}
+                          <span className="font-mono">
+                            {player.voucher || "N/A"}
+                          </span>
+                        </p>{" "}
+                        <div
+                          div
+                          className="w-full mb-4 flex items-center justify-around "
+                        >
+                          <button
+                            onClick={() =>
+                              handlePlayerDownloadPdf(player.voucher)
+                            }
+                            className="bg-white w-14 h-14 flex items-center justify-center rounded"
+                          >
+                            <img
+                              src="/download.svg"
+                              alt="Download"
+                              className="w-8 h-8"
+                            />
+                          </button>
+                          <button
+                            onClick={() => handlePrint(player, amountPlayed)}
+                            className="bg-white w-14 h-14 flex items-center justify-center rounded text-white text-2xl"
+                          >
+                            🖨️
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="w-full flex flex-col justify-center items-center">
+                        <p className="text-yellow-300 font-bold sm:text-2xl  text-center my-5">
+                          <span className="font-mono">
+                            {player.voucher || "N/A"}
+                          </span>
+                        </p>{" "}
+                        <button
+                          onClick={() => handleSubmitAndPrint(player)}
+                          className="bg-blue-600 hover:bg-blue-700 mb-4 py-2 px-4 rounded font-semibold text-white transition"
+                        >
+                          🚀 Submit
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className=" w-max sm:w-2/3 mx-auto border-collapse flex justify-between items-start">
                     <div>
                       <h4 className="text-xl font-bold mb-1">
                         Sub Agent: {subAgentId}
@@ -965,106 +867,99 @@ display: flex;
                         Entries: {player.data.length}
                       </p>
                     </div>
-
-                    {player.submitted ? (
-                      <div className="absolute top-2 right-2  flex gap-2">
-                        <button
-                          onClick={() =>
-                            handlePlayerDownloadPdf(player.voucher)
-                          }
-                          className="bg-white w-14 h-14 flex items-center justify-center rounded"
-                        >
-                          <img
-                            src="/download.svg"
-                            alt="Download"
-                            className="w-8 h-8"
-                          />
-                        </button>
-                        <button
-                          onClick={() => handlePrint(player, amountPlayed)}
-                          className="bg-white w-14 h-14 flex items-center justify-center rounded text-white text-2xl"
-                        >
-                          🖨️
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => handleSubmitAndPrint(player)}
-                        className="bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded font-semibold text-white transition"
-                      >
-                        🚀 Submit
-                      </button>
-                    )}
                   </div>
 
-                  <table className="w-full mt-4 border-collapse font-mono text-sm">
-                    <thead>
-                      <tr className="bg-yellow-600 text-white">
-                        <th className="border px-3 py-2 text-left">#</th>
-                        <th className="border px-3 py-2 text-left">Input</th>
-                        <th className="border px-3 py-2 text-left">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[...player.data]
-                        // Annotate with original index
-                        .map((entry, originalIdx) => ({
-                          ...entry,
-                          originalIdx,
-                        }))
-                        // Sort by prefix length
-                        .sort((a, b) => {
-                          const prefixA = a.input.split(".")[0];
-                          const prefixB = b.input.split(".")[0];
-                          return prefixB.length - prefixA.length;
-                        })
-                        .map((entry, sortedIdx) => (
-                          <tr
-                            key={entry.id}
-                            className={
-                              sortedIdx % 2 === 0
-                                ? "bg-gray-700"
-                                : "bg-gray-800"
-                            }
-                          >
-                            <td className="border px-3 py-0">
-                              {sortedIdx + 1}
-                            </td>
-                            <td className="border px-3 py-0">
+                  <div className="mt-6 overflow-x-auto w-full">
+                    <table className=" w-max sm:w-2/3 mx-auto  border-collapse font-mono text-sm text-yellow-300">
+                      <thead>
+                        <tr className="bg-yellow-600 text-white">
+                          <th className="border px-3 py-2 text-left">#</th>
+                          <th className="border px-3 py-2 text-center">
+                            Number
+                          </th>
+                          <th className="border px-3 py-2 text-center">STR</th>
+                          <th className="border px-3 py-2 text-center">
+                            RUMBLE
+                          </th>
+                          <th className="border px-3 py-2 text-center">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[...player.data]
+                          .map((entry, originalIdx) => ({
+                            ...entry,
+                            originalIdx,
+                          }))
+                          .sort((a, b) => {
+                            const lengthA = String(a.input.num).length || 0;
+                            const lengthB = String(b.input.num).length || 0;
+                            return lengthB - lengthA;
+                          })
+                          .map((entry, sortedIdx) => (
+                            <tr
+                              key={entry.id}
+                              className={
+                                sortedIdx % 2 === 0
+                                  ? "bg-gray-700"
+                                  : "bg-gray-800"
+                              }
+                            >
+                              <td className="border px-3 py-1 text-white">
+                                {sortedIdx + 1}
+                              </td>
+
                               {entry.isEditing ? (
-                                <div>
-                                  <input
-                                    type="text"
-                                    value={entry.editValue}
-                                    onChange={(e) =>
-                                      handleEditChange(
-                                        idx,
-                                        entry.originalIdx,
-                                        e.target.value
-                                      )
-                                    }
-                                    className={`w-full p-1 bg-black border-2 text-white rounded ${
-                                      entry.editError
-                                        ? "border-red-500"
-                                        : "border-yellow-400"
-                                    }`}
-                                  />
-                                  {entry.editError && (
-                                    <p className="text-red-400 text-xs mt-1">
-                                      Invalid entry format.
-                                    </p>
-                                  )}
-                                </div>
+                                <>
+                                  {["num", "str", "rumble"].map((field) => (
+                                    <td
+                                      key={field}
+                                      className="border px-2 py-1 "
+                                    >
+                                      <input
+                                        type="text"
+                                        value={entry.editValue[field]}
+                                        onChange={(e) =>
+                                          handleEditChange(
+                                            playerIdx,
+                                            entry.originalIdx,
+                                            field,
+                                            e.target.value
+                                          )
+                                        }
+                                        className={`w-full p-1 bg-black border-2 text-white rounded ${
+                                          entry.editError
+                                            ? "border-red-500"
+                                            : "border-yellow-400"
+                                        }`}
+                                        placeholder={field}
+                                      />
+                                    </td>
+                                  ))}
+                                </>
                               ) : (
-                                entry.input
+                                <>
+                                  <td className="border px-3 py-1 ">
+                                    {entry.input.num}
+                                  </td>
+                                  <td className="border px-3 py-1 text-green-400">
+                                    {entry.input.str}
+                                  </td>
+                                  <td className="border px-3 py-1 text-green-400">
+                                    {entry.input.rumble}
+                                  </td>
+                                </>
                               )}
-                            </td>
-                            <td className="border px-3 py-2 space-x-2">
-                              <>
+
+                              <td className="border px-3 py-1 space-x-2 flex items-center justify-center">
                                 {entry.isEditing ? (
                                   <button
                                     onClick={() =>
-                                      handleSaveEdit(idx, entry.originalIdx)
+                                      handleSaveEdit(
+                                        playerIdx,
+                                        entry.originalIdx
+                                      )
                                     }
                                     className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded transition"
                                   >
@@ -1073,31 +968,30 @@ display: flex;
                                 ) : (
                                   <button
                                     onClick={() =>
-                                      handleEdit(idx, entry.originalIdx)
+                                      handleEdit(playerIdx, entry.originalIdx)
                                     }
-                                    className="bg-yellow-500 hover:bg-yellow-600 text-black py-1 px-2 rounded transition"
+                                    className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded transition"
                                   >
                                     ✏️
                                   </button>
                                 )}
                                 <button
                                   onClick={() =>
-                                    handleDelete(idx, entry.originalIdx)
+                                    handleDelete(playerIdx, entry.originalIdx)
                                   }
                                   className="bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded transition"
                                 >
                                   🗑️
                                 </button>
-                              </>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
                   {/* Totals Calculation */}
                   <div className="mt-6 overflow-x-auto w-full">
-                    <table className=" w-max border-collapse font-mono text-sm text-yellow-300">
+                    <table className=" w-max mx-auto sm:w-2/3 border-collapse font-mono text-sm text-yellow-300">
                       <thead>
                         <tr className="bg-red-700 text-white">
                           <th className="border border-gray-600 px-4 py-2 text-left">
@@ -1158,16 +1052,19 @@ display: flex;
                         </tr>
 
                         <tr className="bg-gray-900 font-bold text-lg">
-                          <td className="border border-gray-600 px-4 py-2">
+                          <td
+                            colSpan={2}
+                            className="border border-gray-600 px-4 py-2"
+                          >
                             🔢 Grand Total
                           </td>
-                          <td className="border border-gray-600 px-4 py-2 text-yellow-300">
+                          {/* <td className="border border-gray-600 px-4 py-2 text-yellow-300">
                             {(
                               (amountPlayed?.ThreeD || 0) +
                               (amountPlayed?.TwoD || 0) +
                               (amountPlayed?.OneD || 0)
                             ).toFixed(0)}
-                          </td>
+                          </td> */}
                           <td className="border border-gray-600 px-4 py-2 text-yellow-300">
                             {(
                               ((amountPlayed?.ThreeD || 0) *
@@ -1188,7 +1085,7 @@ display: flex;
                 </div>
 
                 {/* Horizontal animated divider between players (except after last) */}
-                {idx !== players.length - 1 && (
+                {playerIdx !== players.length - 1 && (
                   <div className="h-2 w-full my-12 bg-gradient-to-r from-pink-500 via-yellow-500 to-pink-500 rounded-full shadow-[0_0_15px_rgba(236,72,153,0.5)] animate-pulse" />
                 )}
               </React.Fragment>

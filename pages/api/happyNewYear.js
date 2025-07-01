@@ -1,5 +1,3 @@
-// pages/api/analyzeTopNumbers.js
-
 import clientPromise from "lib/mongodb";
 
 export default async function handler(req, res) {
@@ -15,26 +13,13 @@ export default async function handler(req, res) {
         },
       },
       {
-        $addFields: {
-          splitInput: { $split: ["$input", "."] },
-        },
-      },
-      {
         $project: {
-          number: { $arrayElemAt: ["$splitInput", 0] },
+          number: "$input.num", // assuming the object has a 'num' field
           strAmount: {
-            $cond: [
-              { $gte: [{ $size: "$splitInput" }, 2] },
-              { $toInt: { $arrayElemAt: ["$splitInput", 1] } },
-              0,
-            ],
+            $cond: [{ $ifNull: ["$input.str", false] }, "$input.str", 0],
           },
           rumbleAmount: {
-            $cond: [
-              { $gte: [{ $size: "$splitInput" }, 3] },
-              { $toInt: { $arrayElemAt: ["$splitInput", 2] } },
-              0,
-            ],
+            $cond: [{ $ifNull: ["$input.rumble", false] }, "$input.rumble", 0],
           },
         },
       },

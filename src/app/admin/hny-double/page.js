@@ -124,7 +124,7 @@ export default function HappyNewYear() {
     ["777", "444", "111", "888", "555", "222", "999", "666", "333", "000"],
   ];
 
-  const columns = Array.from({ length: 10 }, (_, i) => i);
+  const columns = [...Array(9).keys()].map((i) => i + 1).concat(0);
   const columnDataBySum = columns.reduce((acc, col) => {
     acc[col] = [];
     return acc;
@@ -206,24 +206,29 @@ export default function HappyNewYear() {
               {columns.map((_, modIndex) => {
                 const matchingNumbers = [];
 
-                // Loop through each pattern type
                 Object.keys(patternData).forEach((patternType) => {
                   patternData[patternType].forEach(
                     ({ number, str, rumble }) => {
                       const digitSumMod =
                         number
-                          .toString()
-                          .split("")
+                          .split("") // assuming number is a string like "123"
                           .reduce((acc, d) => acc + Number(d), 0) % 10;
 
                       if (digitSumMod === modIndex) {
                         matchingNumbers.push(
                           <div
                             key={`${patternType}-${number}`}
-                            className=" text-green-400 font-bold text-2xl mb-1 px-1"
+                            className="text-white text-3xl font-extrabold uppercase bg-gradient-to-br from-indigo-600 to-sky-500 p-2 rounded-lg mb-2 shadow-md transform transition-all duration-300"
                           >
-                            <span className="text-white">{number}</span> = {str}{" "}
-                            = <span className="text-red-500">{rumble}</span>
+                            <span>{number}</span>
+                            <div className="flex justify-center space-x-2 mt-2">
+                              <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md text-center min-w-[1.5rem]">
+                                {str}
+                              </div>
+                              <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md text-center min-w-[1.5rem]">
+                                {rumble}
+                              </div>
+                            </div>
                           </div>
                         );
                       }
@@ -237,9 +242,9 @@ export default function HappyNewYear() {
                     className="bg-gray-900 p-4 rounded-lg border border-gray-700 align-top"
                   >
                     {matchingNumbers.length > 0 && (
-                      <ul className="list-disc list-inside text-white">
+                      <div className="flex flex-col items-center">
                         {matchingNumbers}
-                      </ul>
+                      </div>
                     )}
                   </td>
                 );

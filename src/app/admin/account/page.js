@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
@@ -22,7 +22,7 @@ export default function Account() {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedSummaryItem, setSelectedSummaryItem] = useState(null);
-
+  const [selectedYear, setSelectedYear] = useState(null);
   useEffect(() => {
     setLoading(true);
     setFetched(false);
@@ -154,6 +154,111 @@ export default function Account() {
     // Example: setModalData({ agentId, gameDate }); setShowModal(true);
     setSummaryModal(true);
   };
+  const totalsBD = filteredSummaries.reduce(
+    (acc, item) => {
+      acc.afterSTR += item.afterSTR || 0;
+      acc.afterRUMBLE += item.afterRUMBLE || 0;
+      acc.afterDOWN += item.afterDOWN || 0;
+      acc.afterSINGLE += item.afterSINGLE || 0;
+      acc.totalGame += item.totalGame || 0;
+      acc.totalWin += item.totalWin || 0;
+      return acc;
+    },
+    {
+      afterSTR: 0,
+      afterRUMBLE: 0,
+      afterDOWN: 0,
+      afterSINGLE: 0,
+      totalGame: 0,
+      totalWin: 0,
+    }
+  );
+  const totalsBA = filteredAgentSummaries.reduce(
+    (acc, item) => {
+      acc.afterSTR += item.afterSTR || 0;
+      acc.afterRUMBLE += item.afterRUMBLE || 0;
+      acc.afterDOWN += item.afterDOWN || 0;
+      acc.afterSINGLE += item.afterSINGLE || 0;
+      acc.totalGame += item.totalGame || 0;
+      acc.totalWin += item.totalWin || 0;
+      return acc;
+    },
+    {
+      afterSTR: 0,
+      afterRUMBLE: 0,
+      afterDOWN: 0,
+      afterSINGLE: 0,
+      totalGame: 0,
+      totalWin: 0,
+    }
+  );
+
+  // 1. Remove duplicates (if needed — skip this if already clean)
+  const seenKeys = new Set();
+  const uniqueSummaries = allSummaries.filter((item) => {
+    const key = `${item.agentId}-${item.voucher || ""}-${item.gameDate}`;
+    if (seenKeys.has(key)) return false;
+    seenKeys.add(key);
+    return true;
+  });
+
+  // 2. Get available years
+  const years = Array.from(
+    new Set(uniqueSummaries.map((s) => new Date(s.gameDate).getFullYear()))
+  ).sort((a, b) => b - a);
+
+  // 3. State for selected year (default most recent)
+
+  // 4. Filter summaries by selected year
+  const summariesInYear = uniqueSummaries.filter(
+    (s) => new Date(s.gameDate).getFullYear() === selectedYear
+  );
+
+  // 5. Group by gameDate
+  const groupedByDate = useMemo(() => {
+    const groups = {};
+    for (const entry of summariesInYear) {
+      const dateStr = entry.gameDate;
+      if (!groups[dateStr]) {
+        groups[dateStr] = {
+          STR: 0,
+          RUMBLE: 0,
+          DOWN: 0,
+          SINGLE: 0,
+          totalGame: 0,
+          totalWin: 0,
+        };
+      }
+      groups[dateStr].STR += entry.afterSTR || 0;
+      groups[dateStr].RUMBLE += entry.afterRUMBLE || 0;
+      groups[dateStr].DOWN += entry.afterDOWN || 0;
+      groups[dateStr].SINGLE += entry.afterSINGLE || 0;
+      groups[dateStr].totalGame += entry.totalGame || 0;
+      groups[dateStr].totalWin += entry.totalWin || 0;
+    }
+    return Object.entries(groups).sort(([a], [b]) => new Date(a) - new Date(b));
+  }, [summariesInYear]);
+
+  // 6. Yearly total
+  const yearTotal = groupedByDate.reduce(
+    (acc, [, daily]) => {
+      acc.STR += daily.STR;
+      acc.RUMBLE += daily.RUMBLE;
+      acc.DOWN += daily.DOWN;
+      acc.SINGLE += daily.SINGLE;
+      acc.totalGame += daily.totalGame;
+      acc.totalWin += daily.totalWin;
+      return acc;
+    },
+    {
+      STR: 0,
+      RUMBLE: 0,
+      DOWN: 0,
+      SINGLE: 0,
+      totalGame: 0,
+      totalWin: 0,
+    }
+  );
 
   return (
     <div className="p-4 min-h-screen text-white font-mono space-y-10">
@@ -302,6 +407,26 @@ export default function Account() {
                   </td>
                 </tr>
               ))}
+              <tr className="bg-gray-800 text-yellow-300 font-bold">
+                <td className="p-2" colSpan={3}>
+                  TOTAL
+                </td>
+                <td className="p-2">{totalsBD.afterSTR}</td>
+                <td className="p-2">{totalsBD.afterRUMBLE}</td>
+                <td className="p-2">{totalsBD.afterDOWN}</td>
+                <td className="p-2">{totalsBD.afterSINGLE}</td>
+                <td className="p-2">{totalsBD.totalGame}</td>
+                <td className="p-2">{totalsBD.totalWin}</td>
+                <td
+                  className={`p-2 ${
+                    totalsBD.totalGame - totalsBD.totalWin < 0
+                      ? "text-red-500"
+                      : "text-green-400"
+                  }`}
+                >
+                  {totalsBD.totalGame - totalsBD.totalWin}
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -389,83 +514,112 @@ export default function Account() {
                   </td>
                 </tr>
               ))}
+              <tr className="bg-gray-800 text-yellow-300 font-bold">
+                <td className="p-2" colSpan={3}>
+                  TOTAL
+                </td>
+                <td className="p-2">{totalsBA.afterSTR}</td>
+                <td className="p-2">{totalsBA.afterRUMBLE}</td>
+                <td className="p-2">{totalsBA.afterDOWN}</td>
+                <td className="p-2">{totalsBA.afterSINGLE}</td>
+                <td className="p-2">{totalsBA.totalGame}</td>
+                <td className="p-2">{totalsBA.totalWin}</td>
+                <td
+                  className={`p-2 ${
+                    totalsBA.totalGame - totalsBA.totalWin < 0
+                      ? "text-red-500"
+                      : "text-green-400"
+                  }`}
+                >
+                  {totalsBA.totalGame - totalsBA.totalWin}
+                </td>
+                <td className="p-2">—</td>
+              </tr>
             </tbody>
           </table>
         </div>
       )}
       {/* Daily Totals Table */}
-      {uniqueDates.length > 0 && (
-        <div className="overflow-x-auto border border-lime-500 rounded-xl mt-10">
-          <h2 className="text-xl font-bold text-lime-400 py-3 text-center">
-            📊 Yearly Total Summary
-          </h2>
-          <table className="w-full text-sm bg-gray-900 border-collapse text-green-200 text-center">
-            <thead className="bg-gray-800 text-lime-300">
-              <tr>
-                <th className="p-2">#</th>
-                <th className="p-2">Date</th>
-                <th className="p-2">STR</th>
-                <th className="p-2">RUMBLE</th>
-                <th className="p-2">DOWN</th>
-                <th className="p-2">SINGLE</th>
-                <th className="p-2">Total Game</th>
-                <th className="p-2">Total Win</th>
-                <th className="p-2">W/L</th>
-              </tr>
-            </thead>
-            <tbody>
-              {uniqueDates.map((dateStr, idx) => {
-                const summariesForDate = allSummaries.filter(
-                  (s) => new Date(s.gameDate).toDateString() === dateStr
-                );
+      {/* 🔽 Year Selector */}
+      <div className="mb-4 flex flex-col">
+        <label className="font-bold text-yellow-400 mb-2">Select Year:</label>
+        <select
+          value={selectedYear || ""}
+          onChange={(e) => setSelectedYear(Number(e.target.value))}
+          className="bg-gray-800 text-white px-3 py-1 rounded border border-yellow-500 w-fit"
+        >
+          <option value="" disabled>
+            -- Select Year --
+          </option>
+          {years.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </div>
 
-                const totals = summariesForDate.reduce(
-                  (acc, item) => {
-                    acc.STR += item.afterSTR || 0;
-                    acc.RUMBLE += item.afterRUMBLE || 0;
-                    acc.DOWN += item.afterDOWN || 0;
-                    acc.SINGLE += item.afterSINGLE || 0;
-                    acc.totalGame += item.totalGame || 0;
-                    acc.totalWin += item.totalWin || 0;
-                    return acc;
-                  },
-                  {
-                    STR: 0,
-                    RUMBLE: 0,
-                    DOWN: 0,
-                    SINGLE: 0,
-                    totalGame: 0,
-                    totalWin: 0,
-                  }
-                );
+      {/* 📊 Totals by Date Table */}
+      <table className="w-full border-collapse text-sm font-mono text-center">
+        <thead className="bg-yellow-700 text-white">
+          <tr>
+            <th className="p-2 ">#</th>
+            <th className="p-2 ">Date</th>
+            <th className="p-2">STR</th>
+            <th className="p-2">RUMBLE</th>
+            <th className="p-2">DOWN</th>
+            <th className="p-2">SINGLE</th>
+            <th className="p-2">Total Game</th>
+            <th className="p-2">Total Win</th>
+            <th className="p-2">W/L</th>
+          </tr>
+        </thead>
+        <tbody>
+          {groupedByDate.map(([date, totals], idx) => (
+            <tr key={date} className="hover:bg-gray-800">
+              <td className="p-2">{idx + 1}</td>
+              <td className="p-2">{new Date(date).toDateString()}</td>
+              <td className="p-2">{totals.STR}</td>
+              <td className="p-2">{totals.RUMBLE}</td>
+              <td className="p-2">{totals.DOWN}</td>
+              <td className="p-2">{totals.SINGLE}</td>
+              <td className="p-2">{totals.totalGame}</td>
+              <td className="p-2">{totals.totalWin}</td>
+              <td
+                className={`p-2 font-semibold ${
+                  totals.totalGame - totals.totalWin < 0
+                    ? "text-red-500"
+                    : "text-green-400"
+                }`}
+              >
+                {totals.totalGame - totals.totalWin}
+              </td>
+            </tr>
+          ))}
 
-                return (
-                  <tr key={idx} className="hover:bg-gray-700">
-                    <td className="p-2">{idx + 1}</td>
-                    <td className="p-2">{dateStr}</td>
-                    <td className="p-2">{totals.STR}</td>
-                    <td className="p-2">{totals.RUMBLE}</td>
-                    <td className="p-2">{totals.DOWN}</td>
-                    <td className="p-2">{totals.SINGLE}</td>
-                    <td className="p-2">{totals.totalGame}</td>
-                    <td className="p-2">{totals.totalWin}</td>
-                    <td
-                      className={`p-2 ${
-                        totals.totalGame - totals.totalWin < 0
-                          ? "text-red-500 font-bold"
-                          : ""
-                      }`}
-                    >
-                      {totals.totalGame - totals.totalWin}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
+          {/* 🧾 Final Total Row */}
+          <tr className="bg-gray-900 text-yellow-300 font-bold border-t border-yellow-500">
+            <td className="p-2" colSpan={2}>
+              Year Total — {selectedYear}
+            </td>
+            <td className="p-2">{yearTotal.STR}</td>
+            <td className="p-2">{yearTotal.RUMBLE}</td>
+            <td className="p-2">{yearTotal.DOWN}</td>
+            <td className="p-2">{yearTotal.SINGLE}</td>
+            <td className="p-2">{yearTotal.totalGame}</td>
+            <td className="p-2">{yearTotal.totalWin}</td>
+            <td
+              className={`p-2 ${
+                yearTotal.totalGame - yearTotal.totalWin < 0
+                  ? "text-red-500"
+                  : "text-green-400"
+              }`}
+            >
+              {yearTotal.totalGame - yearTotal.totalWin}
+            </td>
+          </tr>
+        </tbody>
+      </table>
       {modalVisible && (
         <GameSummary
           // visible={modalVisible}
