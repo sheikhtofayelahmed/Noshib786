@@ -12,7 +12,9 @@ export default async function handler(req, res) {
     name,
     SAId,
     data, // Array of { input: { num, str, rumble } }
-    amountPlayed, // { OneD, TwoD, ThreeD }
+    amountPlayed,
+    cPercentages,
+    percentages, // { OneD, TwoD, ThreeD }
   } = req.body;
 
   const serverTime = new Date();
@@ -74,6 +76,8 @@ export default async function handler(req, res) {
       time: serverTime,
       entries,
       amountPlayed,
+      cPercentages,
+      percentages,
     });
 
     return res.status(200).json({

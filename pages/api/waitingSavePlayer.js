@@ -7,7 +7,16 @@ export default async function handler(req, res) {
     });
   }
 
-  const { voucher, agentId, agentName, name, data, amountPlayed } = req.body;
+  const {
+    voucher,
+    agentId,
+    agentName,
+    name,
+    data,
+    amountPlayed,
+    cPercentages,
+    percentages,
+  } = req.body;
   const serverTime = new Date();
 
   if (!voucher || !agentId || !Array.isArray(data) || data.length === 0) {
@@ -57,6 +66,8 @@ export default async function handler(req, res) {
       name,
       entries,
       amountPlayed,
+      cPercentages,
+      percentages,
       submissionTime: serverTime,
       gameStatusAtSubmission: {
         isGameOn,

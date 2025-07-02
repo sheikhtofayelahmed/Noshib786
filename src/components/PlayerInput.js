@@ -401,7 +401,8 @@ export default function PlayerInput() {
       SAId: subAgentId || "",
       data: parsedData,
       amountPlayed: totals,
-      
+      cPercentages: agent.cPercentages,
+      percentages: agent.percentages,
     };
 
     try {
@@ -470,6 +471,8 @@ export default function PlayerInput() {
       SAId: subAgentId || "",
       data: parsedData,
       amountPlayed: totals,
+      cPercentages: agent.cPercentages,
+      percentages: agent.percentages,
       submissionAttemptTime: new Date().toISOString(),
       gameStatusAtAttempt: {
         isGameOn: isGameOn,
@@ -541,7 +544,7 @@ export default function PlayerInput() {
       <head>
         <title>Player Data</title>
         <style>
-          @page { size: 80mm; margin: 0; }
+          @page { size: 80mm auto; margin: 0; }
           body { font-family: Arial, sans-serif; font-size: 16px; padding: 4px; margin: 0; color: #000; }
           .container { width: 100%; }
           h2, p { font-size: 16px; text-align: center; margin: 2px 0; }

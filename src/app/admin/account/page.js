@@ -4,7 +4,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import GameSummary from "@/components/GameSummaryModal";
-import { FileText } from "lucide-react";
+import { AppWindow, FileText } from "lucide-react";
+import ExVoucher from "@/components/ExVoucherModal";
 
 export default function Account() {
   const [threeUp, setThreeUp] = useState("");
@@ -21,6 +22,7 @@ export default function Account() {
   const [summaryModal, setSummaryModal] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [exVoucherModalVisible, setExVoucherModalVisible] = useState(false);
   const [selectedSummaryItem, setSelectedSummaryItem] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
   useEffect(() => {
@@ -475,6 +477,7 @@ export default function Account() {
                 <th className="p-2">Total Win</th>
                 <th className="p-2">W/L</th>
                 <th className="p-2">Summary</th>
+                <th className="p-2">Voucher</th>
               </tr>
             </thead>
             <tbody>
@@ -512,6 +515,16 @@ export default function Account() {
                       <FileText className="w-4 h-4" />
                     </button>
                   </td>
+                  <td className="p-2 text-yellow-300">
+                    <button
+                      onClick={() => {
+                        setSelectedSummaryItem(item);
+                        setExVoucherModalVisible(true);
+                      }}
+                    >
+                      <AppWindow className="w-4 h-4" />
+                    </button>
+                  </td>
                 </tr>
               ))}
               <tr className="bg-gray-800 text-yellow-300 font-bold">
@@ -533,6 +546,7 @@ export default function Account() {
                 >
                   {totalsBA.totalGame - totalsBA.totalWin}
                 </td>
+                <td className="p-2">—</td>
                 <td className="p-2">—</td>
               </tr>
             </tbody>
@@ -625,6 +639,13 @@ export default function Account() {
           // visible={modalVisible}
           item={selectedSummaryItem}
           onClose={() => setModalVisible(false)}
+        />
+      )}
+      {exVoucherModalVisible && (
+        <ExVoucher
+          // visible={modalVisible}
+          item={selectedSummaryItem}
+          onClose={() => setExVoucherModalVisible(false)}
         />
       )}
     </div>
