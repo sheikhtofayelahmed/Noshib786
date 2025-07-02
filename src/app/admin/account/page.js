@@ -261,7 +261,26 @@ export default function Account() {
       totalWin: 0,
     }
   );
-
+  // 7. Ultimate (All Years) Total
+  const ultimateTotal = uniqueSummaries.reduce(
+    (acc, entry) => {
+      acc.STR += entry.afterSTR || 0;
+      acc.RUMBLE += entry.afterRUMBLE || 0;
+      acc.DOWN += entry.afterDOWN || 0;
+      acc.SINGLE += entry.afterSINGLE || 0;
+      acc.totalGame += entry.totalGame || 0;
+      acc.totalWin += entry.totalWin || 0;
+      return acc;
+    },
+    {
+      STR: 0,
+      RUMBLE: 0,
+      DOWN: 0,
+      SINGLE: 0,
+      totalGame: 0,
+      totalWin: 0,
+    }
+  );
   return (
     <div className="p-4 min-h-screen text-white font-mono space-y-10">
       {/* Summary Runner */}
@@ -630,6 +649,26 @@ export default function Account() {
               }`}
             >
               {yearTotal.totalGame - yearTotal.totalWin}
+            </td>
+          </tr>
+          <tr className="bg-yellow-950 text-yellow-200 font-bold border-t border-yellow-500">
+            <td className="p-2" colSpan={2}>
+              Ultimate Total
+            </td>
+            <td className="p-2">{ultimateTotal.STR}</td>
+            <td className="p-2">{ultimateTotal.RUMBLE}</td>
+            <td className="p-2">{ultimateTotal.DOWN}</td>
+            <td className="p-2">{ultimateTotal.SINGLE}</td>
+            <td className="p-2">{ultimateTotal.totalGame}</td>
+            <td className="p-2">{ultimateTotal.totalWin}</td>
+            <td
+              className={`p-2 ${
+                ultimateTotal.totalGame - ultimateTotal.totalWin < 0
+                  ? "text-red-500"
+                  : "text-green-400"
+              }`}
+            >
+              {ultimateTotal.totalGame - ultimateTotal.totalWin}
             </td>
           </tr>
         </tbody>
