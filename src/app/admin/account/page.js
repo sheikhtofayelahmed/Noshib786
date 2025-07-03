@@ -25,14 +25,56 @@ export default function Account() {
   const [exVoucherModalVisible, setExVoucherModalVisible] = useState(false);
   const [selectedSummaryItem, setSelectedSummaryItem] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
-  const contentRef = useRef(null);
+  const currentGameContentRef = useRef(null);
+  const agentContentRef = useRef(null);
+  const yearContentRef = useRef(null);
   const handleDownloadPdf = async () => {
     const html2pdf = (await import("html2pdf.js")).default;
-    const element = contentRef.current;
+    const element = currentGameContentRef.current;
     if (element) {
       const options = {
         margin: 10,
         filename: `${gameDate}.${threeUp}.${downGame}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          // *** THIS IS THE KEY: Force a white background for the PDF rendering ***
+          background: "#ffffff", // Explicitly set white background for the canvas
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+      };
+      html2pdf().set(options).from(element).save();
+    } else {
+      console.error("Content div not found!");
+    }
+  };
+  const handleAgentDownloadPdf = async (selectedAgent) => {
+    const html2pdf = (await import("html2pdf.js")).default;
+    const element = agentContentRef.current;
+    if (element) {
+      const options = {
+        margin: 10,
+        filename: `${selectedAgent}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          // *** THIS IS THE KEY: Force a white background for the PDF rendering ***
+          background: "#ffffff", // Explicitly set white background for the canvas
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+      };
+      html2pdf().set(options).from(element).save();
+    } else {
+      console.error("Content div not found!");
+    }
+  };
+  const handleYearDownloadPdf = async (selectedYear) => {
+    const html2pdf = (await import("html2pdf.js")).default;
+    const element = yearContentRef.current;
+    if (element) {
+      const options = {
+        margin: 10,
+        filename: `${selectedYear}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: {
           scale: 2,
@@ -404,23 +446,25 @@ export default function Account() {
         <p className="text-yellow-400">Loading summaries...</p>
       ) : filteredSummaries.length > 0 ? (
         <div
-          ref={contentRef}
-          className="overflow-x-auto border border-yellow-600 rounded-xl"
+          ref={currentGameContentRef}
+          className="overflow-x-auto border border-yellow-600 rounded-xl bg-gray-900 "
         >
-          <h2 className="text-xl font-bold text-yellow-300 py-3 text-center">
-            {selectedDate}
-            <span className="text-white text-xl">
-              {filteredSummaries[0].threeUp &&
-                ` , ${filteredSummaries[0].threeUp}=${filteredSummaries[0].downGame}`}
-            </span>
+          <div className="flex items-center justify-center">
+            <h2 className="text-xl font-bold text-yellow-300 py-3 text-center">
+              {selectedDate}
+              <span className="text-white text-xl">
+                {filteredSummaries[0].threeUp &&
+                  ` , ${filteredSummaries[0].threeUp}=${filteredSummaries[0].downGame}`}
+              </span>
+            </h2>
             <button
               onClick={handleDownloadPdf}
-              className="p-2 rounded-xl bg-gray-200 transition duration-300"
+              className="p-1 mx-4 rounded-xl bg-gray-200 transition duration-300"
               title="Download Player Info"
             >
               <img src="/download.svg" alt="Download" className="w-8 h-8" />
             </button>
-          </h2>
+          </div>
 
           <table className="w-full text-sm bg-gray-900 border-collapse text-green-200 text-center">
             <thead className="bg-gray-800 text-yellow-300">
@@ -510,10 +554,22 @@ export default function Account() {
 
       {/* Agent-Specific Summary Table */}
       {selectedAgent && filteredAgentSummaries.length > 0 && (
-        <div className="overflow-x-auto border border-cyan-500 rounded-xl">
-          <h2 className="text-xl font-bold text-cyan-300 py-3 text-center">
-            {selectedAgent}
-          </h2>
+        <div
+          ref={agentContentRef}
+          className="overflow-x-auto border border-cyan-500 rounded-xl"
+        >
+          <div className="flex items-center justify-center">
+            <h2 className="text-xl font-bold text-cyan-300 py-3 text-center">
+              {selectedAgent}
+            </h2>
+            <button
+              onClick={() => handleAgentDownloadPdf(selectedAgent)}
+              className="p-1 mx-4 rounded-xl bg-gray-200 transition duration-300"
+              title="Download Player Info"
+            >
+              <img src="/download.svg" alt="Download" className="w-8 h-8" />
+            </button>
+          </div>
           <table className="w-full text-sm bg-gray-900 border-collapse text-green-200 text-center">
             <thead className="bg-gray-800 text-pink-300">
               <tr>
@@ -608,7 +664,8 @@ export default function Account() {
       {/* 🔽 Year Selector */}
       <div className="mb-4 flex flex-col">
         <label className="font-bold text-yellow-400 mb-2">Select Year:</label>
-        <select
+       <div className="flex items-center justify-start">
+         <select
           value={selectedYear || ""}
           onChange={(e) => setSelectedYear(Number(e.target.value))}
           className="bg-gray-800 text-white px-3 py-1 rounded border border-yellow-500 w-fit"
@@ -622,10 +679,22 @@ export default function Account() {
             </option>
           ))}
         </select>
+        <button
+          onClick={() => handleYearDownloadPdf(selectedYear)}
+          className="p-1 mx-4 rounded-xl bg-gray-200 transition duration-300"
+          title="Download Player Info"
+        >
+          <img src="/download.svg" alt="Download" className="w-8 h-8" />
+        </button>
+       </div>
       </div>
 
       {/* 📊 Totals by Date Table */}
-      <table className="w-full border-collapse text-sm font-mono text-center">
+
+      <table
+        ref={yearContentRef}
+        className="w-full border-collapse text-sm font-mono text-center"
+      >
         <thead className="bg-yellow-700 text-white">
           <tr>
             <th className="p-2 ">#</th>
