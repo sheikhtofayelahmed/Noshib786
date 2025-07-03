@@ -168,7 +168,7 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 <!-- **separate agent hisab nikash sort by year, total for a year and total for lifetime** -->
 **download button for agent hisab nikash all summary**
 <!-- **voucher showing of anytime in the agent hisab nikash** -->
-**player input duplicate if there is a urgent**
+<!-- **player input duplicate if there is a urgent** -->
 <!-- **voucher date and voucher name** -->
 <!-- **remove grand total** -->
 <!-- **total game for sub agent** -->
