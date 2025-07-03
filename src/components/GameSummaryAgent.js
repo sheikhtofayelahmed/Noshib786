@@ -1002,9 +1002,7 @@ const GameSummaryAgent = ({ agentId }) => {
                       className="font-bangla text-sm px-4 py-2 border text-left"
                     >
                       <ol>
-                        <p p className="text-center">
-                          জমা বিবরনী
-                        </p>
+                        <p className="text-center">জমা বিবরনী</p>
                         {summaryData?.calculation?.joma
                           ?.filter((entry) => entry.jomaAmt !== 0)
                           .map((entry, i) => (

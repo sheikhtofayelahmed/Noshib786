@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Html5Qrcode } from "html5-qrcode";
+import { useState } from "react";
 import AES from "crypto-js/aes";
 import Utf8 from "crypto-js/enc-utf8";
 
@@ -19,74 +18,43 @@ const decryptVoucher = (encryptedString) => {
 };
 
 export default function VerifyVoucherPage() {
+  const [inputText, setInputText] = useState("");
   const [scannedData, setScannedData] = useState(null);
   const [error, setError] = useState("");
-  const qrRef = useRef(null);
 
-  useEffect(() => {
-    const html5QrCode = new Html5Qrcode("qr-reader");
-
-    Html5Qrcode.getCameras()
-      .then((devices) => {
-        if (devices.length === 0) {
-          setError("❌ No camera device found.");
-          return;
-        }
-
-        const backCamera =
-          devices.find((d) => d.label.toLowerCase().includes("back")) ||
-          devices[0];
-
-        html5QrCode
-          .start(
-            backCamera.id,
-            { fps: 10, qrbox: 250 },
-            (decodedText) => {
-              html5QrCode.stop();
-              const decrypted = decryptVoucher(decodedText);
-              if (decrypted) {
-                setScannedData(decrypted);
-                setError("");
-              } else {
-                setError("❌ Invalid or tampered QR code.");
-                setScannedData(null);
-              }
-            },
-            (scanError) => {
-              console.warn("Scan error:", scanError);
-            }
-          )
-          .catch((err) => {
-            console.error("Camera start failed:", err);
-            setError("⚠️ Camera access denied or unavailable.");
-          });
-
-        qrRef.current = html5QrCode;
-      })
-      .catch((err) => {
-        console.error("Camera listing failed:", err);
-        setError("⚠️ Could not access camera devices.");
-      });
-
-    return () => {
-      if (qrRef.current) {
-        qrRef.current.stop().catch(() => {});
-      }
-    };
-  }, []);
+  const handleSubmit = () => {
+    const decrypted = decryptVoucher(inputText.trim());
+    if (decrypted) {
+      setScannedData(decrypted);
+      setError("");
+    } else {
+      setScannedData(null);
+      setError("❌ Invalid or tampered voucher.");
+    }
+  };
 
   return (
     <div className="p-6 max-w-xl mx-auto text-white bg-gray-900 rounded-xl shadow-lg">
       <h2 className="text-2xl font-bold text-center mb-4">
-        🔍 Scan QR Voucher
+        🔐 Enter Voucher Code
       </h2>
 
-      <div
-        id="qr-reader"
-        className="w-full aspect-square border border-gray-700 rounded-md overflow-hidden"
-      ></div>
+      <textarea
+        value={inputText}
+        onChange={(e) => setInputText(e.target.value)}
+        placeholder="Paste voucher hash here..."
+        className="w-full p-3 text-sm rounded-lg bg-gray-800 border border-gray-700 text-white mb-4"
+        rows={4}
+      />
 
-      {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
+      <button
+        onClick={handleSubmit}
+        className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
+      >
+        🔍 Verify Voucher
+      </button>
+
+      {error && <p className="text-red-400 text-center mt-4">{error}</p>}
 
       {scannedData && (
         <div className="mt-6 bg-gray-800 p-4 rounded-lg">
@@ -97,17 +65,36 @@ export default function VerifyVoucherPage() {
             <strong>Voucher:</strong> {scannedData.voucher}
           </p>
           <p>
-            <strong>Time:</strong> {new Date(scannedData.time).toLocaleString()}
+            <strong>Time:</strong> {scannedData.time}
           </p>
-          <ul className="ml-4 list-disc">
-            <li>1D: {scannedData.amount.OneD}</li>
-            <li>2D: {scannedData.amount.TwoD}</li>
-            <li>3D: {scannedData.amount.ThreeD}</li>
-            <li>Total: {scannedData.amount.total}</li>
-          </ul>
+
           <p className="mt-2">
-            <strong>Entries:</strong> {scannedData.entries.length} numbers
+            <strong>Entries:</strong>
           </p>
+          <table className="w-full text-left mt-2 border border-gray-700 rounded-lg">
+            <thead>
+              <tr className="bg-gray-700">
+                <th className="px-4 py-2 border border-gray-600">Number</th>
+                <th className="px-4 py-2 border border-gray-600">Str</th>
+                <th className="px-4 py-2 border border-gray-600">Rumble</th>
+              </tr>
+            </thead>
+            <tbody>
+              {scannedData.entries.map((entry, i) => (
+                <tr key={i} className="border border-gray-600">
+                  <td className="px-4 py-2 border border-gray-600">
+                    {entry.num}
+                  </td>
+                  <td className="px-4 py-2 border border-gray-600">
+                    {entry.str}
+                  </td>
+                  <td className="px-4 py-2 border border-gray-600">
+                    {entry.rumble || "-"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

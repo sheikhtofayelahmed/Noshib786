@@ -4,6 +4,9 @@ import React, { useRef } from "react";
 import { useState, useEffect } from "react";
 import { useAgent } from "src/context/AgentContext";
 
+import AES from "crypto-js/aes";
+import Utf8 from "crypto-js/enc-utf8";
+import QRCode from "qrcode";
 export default function PlayerInputModal({ onClose }) {
   const [name, setName] = useState("");
   const [inputs, setInputs] = useState(
@@ -235,7 +238,6 @@ export default function PlayerInputModal({ onClose }) {
     setName("");
     setInputs(Array(20).fill({ num: "", str: "", rumble: "" }));
     setErrors(Array(20).fill({ num: false, str: false, rumble: false }));
-    setIsCompleted(false);
   };
   const handleAddInputs = () => {
     setInputs([...inputs, ...Array(20).fill({ num: "", str: "", rumble: "" })]);

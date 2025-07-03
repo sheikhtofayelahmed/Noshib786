@@ -5,6 +5,9 @@ import { useState, useEffect } from "react";
 import { useAgent } from "src/context/AgentContext";
 import AllahBhorosha from "./Allah";
 
+import AES from "crypto-js/aes";
+import Utf8 from "crypto-js/enc-utf8";
+import QRCode from "qrcode";
 export default function PlayerInput() {
   const [name, setName] = useState("");
   const [inputs, setInputs] = useState(
@@ -236,7 +239,6 @@ export default function PlayerInput() {
     setName("");
     setInputs(Array(20).fill({ num: "", str: "", rumble: "" }));
     setErrors(Array(20).fill({ num: false, str: false, rumble: false }));
-    setIsCompleted(false);
   };
   const handleAddInputs = () => {
     setInputs([...inputs, ...Array(20).fill({ num: "", str: "", rumble: "" })]);
@@ -507,7 +509,7 @@ export default function PlayerInput() {
     }
   };
 
-const handlePrint = async (player, amountPlayed) => {
+  const handlePrint = async (player, amountPlayed) => {
     if (typeof window === "undefined") return;
 
     const secret = "thai-lottery-secret-key";

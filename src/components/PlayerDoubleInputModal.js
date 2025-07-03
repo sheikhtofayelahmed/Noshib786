@@ -238,7 +238,6 @@ export default function PlayerDoubleInputModal({ onClose }) {
     setName("");
     setInputs(Array(20).fill({ num: "", str: "", rumble: "" }));
     setErrors(Array(20).fill({ num: false, str: false, rumble: false }));
-    setIsCompleted(false);
   };
   const handleAddInputs = () => {
     setInputs([...inputs, ...Array(20).fill({ num: "", str: "", rumble: "" })]);
