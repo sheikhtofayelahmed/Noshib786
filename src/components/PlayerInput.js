@@ -19,6 +19,7 @@ export default function PlayerInput() {
   const [timeLeft, setTimeLeft] = useState("");
   const [agent, setAgent] = useState();
   const playerRefs = useRef({});
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchTarget = async () => {
