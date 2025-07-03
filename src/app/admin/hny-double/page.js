@@ -4,79 +4,11 @@ import Loading from "@/components/Loading";
 import NumberTable from "@/components/NumberTable";
 import { useEffect, useState } from "react";
 
-// NumberTable Component - Transformed into a visually striking casino grid
-// const NumberTable = ({ rows, data, title }) => (
-//   <div className="mb-16 bg-gray-900 rounded-xl shadow-2xl overflow-hidden border-2 border-red-800">
-//     <div className="p-6 overflow-x-auto">
-//       <h3 className="text-3xl font-bold text-yellow-400 mb-8 text-center uppercase tracking-wider bg-black py-4 rounded-lg shadow-inner">
-//         {title} Game Board
-//       </h3>
-//       <table className="w-full border-collapse text-center text-white font-mono">
-//         <tbody>
-//           {title !== "Single" && (
-//             <tr>
-//               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((row, i) => (
-//                 <td
-//                   key={i}
-//                   className="text-5xl text-green-600 p-4 border border-gray-500"
-//                 >
-//                   {row}
-//                 </td>
-//               ))}
-//             </tr>
-//           )}
-
-//           {rows.map((row, i) => (
-//             <tr
-//               key={i}
-//               className={(i + 1) % 3 === 0 ? "border-b-4 border-red-600" : ""}
-//             >
-//               {row.map((num, j) => {
-//                 const found = data.find((d) => d._id === String(num));
-//                 const str = found?.totalStr || 0;
-//                 const rumble = found?.totalRumble || 0;
-
-//                 const isHot = str > 0 || rumble > 0;
-//                 const cellClasses = `
-//                   relative p-4 text-3xl font-extrabold uppercase select-none
-//                   border border-gray-700 transition-all duration-300 ease-in-out
-//                   ${
-//                     isHot
-//                       ? "bg-gradient-to-br from-yellow-600 to-red-700 text-white shadow-xl transform scale-105"
-//                       : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
-//                   }
-//                 `;
-
-//                 return (
-//                   <td key={j} className={cellClasses}>
-//                     <div className="relative flex flex-col items-center justify-center w-full h-full space-y-1">
-//                       <span className="text-3xl leading-none">{num}</span>
-//                       {isHot && (
-//                         <>
-//                           <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md min-w-[1.5rem] text-center">
-//                             <span> {str}</span>
-//                           </div>
-//                           <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md min-w-[1.5rem] text-center">
-//                             <span> {rumble}</span>
-//                           </div>
-//                         </>
-//                       )}
-//                     </div>
-//                   </td>
-//                 );
-//               })}
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//   </div>
-// );
-
-// Main Page Component - Overall casino lounge feel
 export default function HappyNewYear() {
   const [numberData, setNumberData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [totals, setTotals] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -92,7 +24,34 @@ export default function HappyNewYear() {
     };
     fetchData();
   }, []);
+  const getTotalAmountPlayed = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/getTotalAmountPlayed", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
+      if (!response.ok) {
+        throw new Error("Failed to fetch totals");
+      }
+
+      const data = await response.json();
+      setTotals(data.totals);
+    } catch (err) {
+      console.error("Error fetching totals:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Call it immediately once
+    getTotalAmountPlayed();
+  }, []);
   const doubleRows = [
     ["100", "110", "166", "112", "113", "114", "115", "116", "117", "118"],
     ["010", "101", "616", "121", "131", "141", "151", "161", "171", "181"],
@@ -183,7 +142,32 @@ export default function HappyNewYear() {
       <h1 className="text-center text-6xl font-extrabold mb-16 uppercase tracking-widest text-red-500 drop-shadow-lg animate-pulse-light">
         🎰 Thai Lottery Agent 🎲
       </h1>
+      <div className="max-w-md mx-auto mb-12 p-6 bg-gradient-to-br from-gray-900 via-black to-red-900 rounded-2xl shadow-2xl border-4 border-yellow-500 animate-fade-in">
+        <h2 className="text-3xl font-extrabold text-center text-yellow-400 mb-6 tracking-wide uppercase drop-shadow-md">
+          🎯 Total Amount Played
+        </h2>
 
+        <div className="space-y-4 text-center font-mono text-lg">
+          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
+            <span className="text-red-300 font-bold">3D</span>
+            <span className="text-white">{totals?.ThreeD ?? "—"}</span>
+          </div>
+          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
+            <span className="text-red-300 font-bold">2D</span>
+            <span className="text-white">{totals?.TwoD ?? "—"}</span>
+          </div>
+          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
+            <span className="text-red-300 font-bold">1D</span>
+            <span className="text-white">{totals?.OneD ?? "—"}</span>
+          </div>
+          <div className="flex justify-between px-4 py-3 bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 mt-4">
+            <span className="text-white font-bold text-xl">💰 Total</span>
+            <span className="text-yellow-300 font-extrabold text-xl">
+              {totals?.total ?? "—"}
+            </span>
+          </div>
+        </div>
+      </div>
       <div className="mb-16 bg-gray-950 rounded-xl shadow-2xl border-2 border-yellow-600 overflow-x-auto">
         <h3 className="text-3xl font-bold text-yellow-400 mb-4 text-center uppercase tracking-wider bg-black py-4 rounded-lg shadow-inner">
           🎯 Hot Numbers

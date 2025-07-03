@@ -89,11 +89,17 @@ const SubAgentSummary = () => {
     );
 
     const p = agent?.cPercentages || { oneD: 0, twoD: 0, threeD: 0 };
-    return (
-      base.OneD * ((100 - p.oneD) / 100) +
-      base.TwoD * ((100 - p.twoD) / 100) +
-      base.ThreeD * ((100 - p.threeD) / 100)
-    ).toFixed(0);
+
+    const deducted = {
+      OneD: base.OneD * ((100 - p.oneD) / 100),
+      TwoD: base.TwoD * ((100 - p.twoD) / 100),
+      ThreeD: base.ThreeD * ((100 - p.threeD) / 100),
+    };
+
+    return {
+      ...deducted,
+      total: (deducted.OneD + deducted.TwoD + deducted.ThreeD).toFixed(0),
+    };
   };
 
   return (
@@ -103,14 +109,34 @@ const SubAgentSummary = () => {
         .sort(([a], [b]) => parseInt(a) - parseInt(b))
         .map(([saId, group], groupIndex) => (
           <div key={saId} className="mb-20 max-w-4xl mx-auto">
-            <h2 className="text-3xl text-yellow-400 font-extrabold text-center mb-2">
-              🎯 {saId}-{group.length}
-              <br />
-              💰Total:
-              <span className="text-green-400 font-mono text-3xl">
-                {agent ? calculateDeductedTotal(group) : "—"}
-              </span>
-            </h2>
+            {agent ? (
+              (() => {
+                const { OneD, TwoD, ThreeD, total } =
+                  calculateDeductedTotal(group);
+                return (
+                  <h2 className="text-3xl text-yellow-400 font-extrabold text-center mb-2">
+                    🎯 {saId}-{group.length}
+                    <br />
+                    💰Total:
+                    <span className="text-green-400 font-mono text-3xl">
+                      {total}
+                    </span>
+                    <br />
+                    <span className="text-lg text-white font-mono">
+                      1D: {OneD.toFixed(0)} | 2D: {TwoD.toFixed(0)} | 3D:
+                      {ThreeD.toFixed(0)}
+                    </span>
+                  </h2>
+                );
+              })()
+            ) : (
+              <h2 className="text-3xl text-yellow-400 font-extrabold text-center mb-2">
+                🎯 {saId}-{group.length}
+                <br />
+                💰Total:{" "}
+                <span className="text-green-400 font-mono text-3xl">—</span>
+              </h2>
+            )}
 
             {group.map((player, idx) => (
               <div

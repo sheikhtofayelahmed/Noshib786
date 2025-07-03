@@ -118,7 +118,7 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 
 <!-- **admin replaced banker** -->
 
-**খরচ , আন্ডার**
+<!-- **খরচ , আন্ডার** -->
 
 <!-- **del agent** -->
 <!-- **pss hide, edit on agent** -->
@@ -127,15 +127,15 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 
 <!-- **agent active status** -->
 
-**make a button to submit all agent data to be saved to game summary**
-**serial , winning number on hisab nikas**
-**agent account history on hisab nikash**
-**add extra thing to hisab nikash like yearly and indivual agent account for the all game**
+<!-- **make a button to submit all agent data to be saved to game summary** -->
+<!-- **serial , winning number on hisab nikas** -->
+<!-- **agent account history on hisab nikash** -->
+<!-- **add extra thing to hisab nikash like yearly and indivual agent account for the all game** -->
 
 <!-- **add enter to make entry** -->
 
-**if possible then add auto fillup in the input entry**
-**mobile responsive**
+<!-- **if possible then add auto fillup in the input entry** -->
+<!-- **mobile responsive** -->
 
 <!-- **add download to input** -->
 
@@ -151,13 +151,13 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 <!-- **add agent - customer percentage system**
 **total game calculation with percentage** -->
 
-**css or color system on hisab nikash**
+<!-- **css or color system on hisab nikash** -->
 
 <!-- **remove background from game account summary** -->
 
 <!-- **total game calculation** -->
-**add print option**
-**up and down the top str number in the happy new year**
+<!-- **add print option** -->
+<!-- **up and down the top str number in the happy new year** -->
 <!-- **total rumble above the number** -->
 <!-- **change the hot number style as the number table is written** -->
 <!-- **zoom on hover on the happy new year** -->
@@ -166,7 +166,7 @@ This theme is designed to evoke a **casino-inspired, high-energy environment**, 
 **add a line below the total game for manual input**
 <!-- **total on the hisab nikash** -->
 <!-- **separate agent hisab nikash sort by year, total for a year and total for lifetime** -->
-**download button for agent hisab nikash all summary**
+<!-- **download button for agent hisab nikash all summary** -->
 <!-- **voucher showing of anytime in the agent hisab nikash** -->
 <!-- **player input duplicate if there is a urgent** -->
 <!-- **voucher date and voucher name** -->

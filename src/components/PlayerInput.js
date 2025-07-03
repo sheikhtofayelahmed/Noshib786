@@ -545,8 +545,9 @@ export default function PlayerInput() {
       <head>
         <title>Player Data</title>
         <style>
-          @page { size: 80mm auto; margin: 0; }
-          body { font-family: Arial, sans-serif; font-size: 16px; padding: 4px; margin: 0; color: #000; }
+         @page { margin: 0; }
+          body {
+          width:80mm; font-family: Arial, sans-serif; font-size: 16px; padding: 4px; margin: 0; color: #000; }
           .container { width: 100%; }
           h2, p { font-size: 16px; text-align: center; margin: 2px 0; }
           h1 { font-size: 20px; text-align: center; margin: 2px 0; }
@@ -555,10 +556,10 @@ export default function PlayerInput() {
           .totals-table th, .totals-table td { border: 1px solid #000; padding: 2px; text-align: center; font-size: 16px; }
           .grand-total { font-weight: bold; }
           .first-container {
-  border: 1px solid #000;
-  padding: 4px;
-  margin-bottom: 4px;
-}
+            border: 1px solid #000;
+            padding: 4px;
+            margin-bottom: 4px;
+          }
         </style>
       </head>
       <body>
@@ -668,7 +669,7 @@ export default function PlayerInput() {
 
       <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-red-500 shadow-2xl p-6">
         <h1 className="text-lg lg:text-4xl  font-bold text-center mb-6 text-yellow-400">
-          🎰 Player Input 🎰
+          🎰 Player Voucher 🎰
         </h1>
 
         <label className="block mb-2 text-yellow-300 ">Player Name:</label>
@@ -814,11 +815,8 @@ export default function PlayerInput() {
                           <span className="font-mono">
                             {player.voucher || "N/A"}
                           </span>
-                        </p>{" "}
-                        <div
-                          div
-                          className="w-full mb-4 flex items-center justify-around "
-                        >
+                        </p>
+                        <div className="w-full mb-4 flex items-center justify-around ">
                           <button
                             onClick={() =>
                               handlePlayerDownloadPdf(player.voucher)

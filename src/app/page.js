@@ -8,10 +8,12 @@ import PlayerInput from "@/components/PlayerInput";
 import AllahBhorosha from "@/components/Allah";
 import PlayerInputModal from "@/components/PlayerInputModal";
 import { ReceiptText } from "lucide-react";
+import PlayerDoubleInputModal from "@/components/PlayerDoubleInputModal";
 
 export default function AgentDashboard() {
   const { agentId, loading } = useAgent();
   const [inputModal, setInputModal] = useState(false);
+  const [doubleInputModal, setDoubleInputModal] = useState(false);
   const router = useRouter();
 
   // State for game status
@@ -65,10 +67,9 @@ export default function AgentDashboard() {
 
   return (
     <AgentLayout>
-      
       <button
         onClick={() => setInputModal(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold rounded-full shadow-lg transition duration-200 ease-in-out transform hover:scale-105"
+        className="my-2 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold rounded-full shadow-lg transition duration-200 ease-in-out transform hover:scale-105"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -86,9 +87,33 @@ export default function AgentDashboard() {
         </svg>
         New Input <ReceiptText />
       </button>
+      <button
+        onClick={() => setDoubleInputModal(true)}
+        className="my-2 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold rounded-full shadow-lg transition duration-200 ease-in-out transform hover:scale-105"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="w-5 h-5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 4.5v15m7.5-7.5h-15"
+          />
+        </svg>
+        Double Input <ReceiptText />
+        <ReceiptText />
+      </button>
       {gameActive ? <PlayerInput /> : <AllahBhorosha></AllahBhorosha>}
       {gameActive && inputModal && (
         <PlayerInputModal onClose={() => setInputModal(false)} />
+      )}
+      {gameActive && doubleInputModal && (
+        <PlayerDoubleInputModal onClose={() => setDoubleInputModal(false)} />
       )}
     </AgentLayout>
   );

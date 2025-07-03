@@ -2,9 +2,8 @@
 
 import Loading from "@/components/Loading";
 import NumberTable from "@/components/NumberTable";
+import NumberTableSingle from "@/components/NumberTableSingle";
 import { useEffect, useState } from "react";
-
-// Ticker Component - Modernized with a richer neon glow
 
 // NumberTable Component - Transformed into a visually striking casino grid
 // const NumberTable = ({ rows, data, title }) => (
@@ -83,6 +82,8 @@ import { useEffect, useState } from "react";
 export default function HappyNewYear() {
   const [numberData, setNumberData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [totals, setTotals] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -97,7 +98,34 @@ export default function HappyNewYear() {
     };
     fetchData();
   }, []);
+  const getTotalAmountPlayed = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/getTotalAmountPlayed", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
+      if (!response.ok) {
+        throw new Error("Failed to fetch totals");
+      }
+
+      const data = await response.json();
+      setTotals(data.totals);
+    } catch (err) {
+      console.error("Error fetching totals:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Call it immediately once
+    getTotalAmountPlayed();
+  }, []);
   const downRows = [
     ["10", "20", "30", "40", "50", "60", "70", "80", "90", "00"],
     ["01", "02", "03", "04", "05", "06", "07", "08", "09", "XX"],
@@ -112,6 +140,7 @@ export default function HappyNewYear() {
     ["65", "75", "76", "86", "87", "97", "98", "XX", "54", "64"],
     ["XX", "66", "XX", "77", "XX", "88", "XX", "99", "XX", "55"],
   ];
+  const singleRows = [[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]];
 
   const columns = [...Array(9).keys()].map((i) => i + 1).concat(0);
   const columnData = columns.reduce((acc, col) => {
@@ -144,6 +173,32 @@ export default function HappyNewYear() {
       <h1 className="text-center text-6xl font-extrabold mb-16 uppercase tracking-widest text-red-500 drop-shadow-lg animate-pulse-light">
         🎰 Thai Lottery Agent 🎲
       </h1>
+      <div className="max-w-md mx-auto mb-12 p-6 bg-gradient-to-br from-gray-900 via-black to-red-900 rounded-2xl shadow-2xl border-4 border-yellow-500 animate-fade-in">
+        <h2 className="text-3xl font-extrabold text-center text-yellow-400 mb-6 tracking-wide uppercase drop-shadow-md">
+          🎯 Total Amount Played
+        </h2>
+
+        <div className="space-y-4 text-center font-mono text-lg">
+          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
+            <span className="text-red-300 font-bold">3D</span>
+            <span className="text-white">{totals?.ThreeD ?? "—"}</span>
+          </div>
+          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
+            <span className="text-red-300 font-bold">2D</span>
+            <span className="text-white">{totals?.TwoD ?? "—"}</span>
+          </div>
+          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
+            <span className="text-red-300 font-bold">1D</span>
+            <span className="text-white">{totals?.OneD ?? "—"}</span>
+          </div>
+          <div className="flex justify-between px-4 py-3 bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 mt-4">
+            <span className="text-white font-bold text-xl">💰 Total</span>
+            <span className="text-yellow-300 font-extrabold text-xl">
+              {totals?.total ?? "—"}
+            </span>
+          </div>
+        </div>
+      </div>
       <div className="mb-16 bg-gray-950 rounded-xl shadow-2xl border-2 border-yellow-600 overflow-x-auto">
         <h3 className="text-3xl font-bold text-yellow-400 mb-4 text-center uppercase tracking-wider bg-black py-4 rounded-lg shadow-inner">
           🎯 Hot Numbers
@@ -202,7 +257,12 @@ export default function HappyNewYear() {
         data={numberData}
         line={2}
       />
-
+      <NumberTableSingle
+        title="Single"
+        rows={singleRows}
+        data={numberData}
+        single={true}
+      />
       {/* Tailwind CSS custom animations and colors (add to your global CSS or tailwind.config.js) */}
     </div>
   );

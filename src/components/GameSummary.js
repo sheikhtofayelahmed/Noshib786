@@ -342,7 +342,7 @@ const GameSummary = ({ agentId }) => {
           }
           .total-row td {
             font-weight: bold;
-            font-size: 18px;
+            font-size: 16px;
             padding: 8px 4px;
           }
           .highlight {
@@ -505,7 +505,7 @@ const GameSummary = ({ agentId }) => {
           body {
           width:80mm;
             font-family: Arial, sans-serif;
-            font-size: 14px;
+            font-size: 16px;
             color: #000;
             padding: 4px;
             margin: 0;
@@ -526,7 +526,7 @@ const GameSummary = ({ agentId }) => {
           }
   h1 { font-size: 20px; text-align: center; margin: 2px 0; }
           p {
-            font-size: 14px;
+            font-size: 16px;
             text-align: center;
             margin: 4px 0;
           }
@@ -535,7 +535,7 @@ const GameSummary = ({ agentId }) => {
             width: 100%;
             margin-top: 8px;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 16px;
           }
 
           .input-table th,
@@ -549,7 +549,7 @@ const GameSummary = ({ agentId }) => {
             width: 100%;
             margin-top: 12px;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 16px;
           }
 
           .totals-table th,

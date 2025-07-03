@@ -22,8 +22,14 @@ export default function AgentLayout({ children }) {
     ...(loginAs === "agent"
       ? [
           {
-            name: `Games${entryCount !== undefined ? ` (${entryCount})` : ""}`,
+            name: `Games`,
             path: "/agent/games",
+          },
+          {
+            name: `Voucher${
+              entryCount !== undefined ? ` (${entryCount})` : ""
+            }`,
+            path: "/agent/voucher",
           },
         ]
       : []),
@@ -118,7 +124,7 @@ export default function AgentLayout({ children }) {
               ))}
           </nav>
         </div>
-    
+
         <div className="pt-6 border-t border-yellow-600 mt-6">
           <button
             onClick={() => {

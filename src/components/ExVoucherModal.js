@@ -146,19 +146,19 @@ const ExVoucher = ({ item, visible, onClose }) => {
           body {
           width:80mm;
             font-family: Arial, sans-serif;
-            font-size: 14px;
+            font-size: 16px;
             color: #000;
             padding: 4px;
             margin: 0;
           }
 
           .container { width: 100%; }
- .first-container {
-  border: 1px solid #000;
-  padding: 4px;
-  margin-bottom: 4px;
-}
-     
+          .first-container {
+            border: 1px solid #000;
+            padding: 4px;
+            margin-bottom: 4px;
+          }
+              
           h2 {
             font-size: 16px;
             margin: 4px 0;
@@ -167,7 +167,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
           }
   h1 { font-size: 20px; text-align: center; margin: 2px 0; }
           p {
-            font-size: 14px;
+            font-size: 16px;
             text-align: center;
             margin: 4px 0;
           }
@@ -176,7 +176,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
             width: 100%;
             margin-top: 8px;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 16px;
           }
 
           .input-table th,
@@ -190,7 +190,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
             width: 100%;
             margin-top: 12px;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 16px;
           }
 
           .totals-table th,
