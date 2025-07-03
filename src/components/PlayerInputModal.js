@@ -506,14 +506,34 @@ export default function PlayerInputModal({ onClose }) {
     }
   };
 
-  const handlePrint = (player, amountPlayed) => {
-    const win = window.open("", "_blank");
+  const handlePrint = async (player, amountPlayed) => {
+    if (typeof window === "undefined") return;
+
+    const secret = "thai-lottery-secret-key";
+    const payload = {
+      voucher: player.voucher,
+      time: player.time,
+      amount: player.amountPlayed,
+      entries: player.data.map((d) => d.input),
+    };
+
+    const encrypted = AES.encrypt(JSON.stringify(payload), secret).toString();
+    let qrDataUrl = "";
+    try {
+      qrDataUrl = await QRCode.toDataURL(encrypted);
+    } catch (err) {
+      console.error("QR code generation failed:", err);
+      alert("❌ Failed to generate QR code.");
+      return;
+    }
+
+    const calculateDeduction = (amount, percent) =>
+      (amount * ((100 - percent) / 100)).toFixed(0);
 
     const formatDataRows = (dataArray) => {
-      const sortedData = [...dataArray].sort((a, b) => {
-        return b.input.num.length - a.input.num.length;
-      });
-
+      const sortedData = [...dataArray].sort(
+        (a, b) => b.input.num.length - a.input.num.length
+      );
       const half = Math.ceil(sortedData.length / 2);
       const col1 = sortedData.slice(0, half);
       const col2 = sortedData.slice(half);
@@ -526,7 +546,7 @@ export default function PlayerInputModal({ onClose }) {
         <tr>
           <td>${c1.num || ""}</td><td>${c1.str || ""}</td><td>${
           c1.rumble || ""
-        }</td> <td></td>
+        }</td><td></td>
           <td>${c2.num || ""}</td><td>${c2.str || ""}</td><td>${
           c2.rumble || ""
         }</td>
@@ -536,45 +556,63 @@ export default function PlayerInputModal({ onClose }) {
       return rows.join("");
     };
 
-    const calculateDeduction = (amount, percent) =>
-      (amount * ((100 - percent) / 100)).toFixed(0);
+    const printedAt = new Date().toLocaleString();
 
     const htmlContent = `
     <html>
       <head>
-        <title>Player Data</title>
+        <title>Player Voucher</title>
         <style>
-        @page { margin: 0; }
+          @page { margin: 0; }
           body {
-          width:80mm; font-family: Arial, sans-serif; font-size: 16px; padding: 4px; margin: 0; color: #000; }
+            width: 80mm;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            padding: 4px;
+            margin: 0;
+            color: #000;
+          }
           .container { width: 100%; }
           h2, p { font-size: 16px; text-align: center; margin: 2px 0; }
           h1 { font-size: 20px; text-align: center; margin: 2px 0; }
-          .input-table, .totals-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+          .input-table, .totals-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 4px;
+          }
           .input-table th, .input-table td,
-          .totals-table th, .totals-table td { border: 1px solid #000; padding: 2px; text-align: center; font-size: 16px; }
+          .totals-table th, .totals-table td {
+            border: 1px solid #000;
+            padding: 2px;
+            text-align: center;
+            font-size: 16px;
+          }
           .grand-total { font-weight: bold; }
           .first-container {
-  border: 1px solid #000;
-  padding: 4px;
-  margin-bottom: 4px;
-}
+            border: 1px solid #000;
+            padding: 4px;
+            margin-bottom: 4px;
+          }
+          .qr-code {
+            display: flex;
+            justify-content: center;
+            margin-top: 8px;
+          }
         </style>
       </head>
       <body>
         <div class="container">
-       <div class="first-container"> 
-       <h2>${new Date(player.time).toLocaleString()}</h2>
-          <h1>${player.voucher || ""}</h1>
-          <p>Player: ${player.name || ""}     </p>
-          <p> Sub Agent: ${subAgentId || ""}</p>
+          <div class="first-container">
+            <h2>${new Date(player.time).toLocaleString()}</h2>
+            <h1>${player.voucher || ""}</h1>
+            <p>Player: ${player.name || ""}</p>
+            <p>Sub Agent: ${subAgentId || ""}</p>
           </div>
 
           <table class="input-table">
             <thead>
               <tr>
-                <th>Num</th><th>Str</th><th>Rum.</th>
-                <th></th>
+                <th>Num</th><th>Str</th><th>Rum.</th><th></th>
                 <th>Num</th><th>Str</th><th>Rum.</th>
               </tr>
             </thead>
@@ -614,7 +652,6 @@ export default function PlayerInputModal({ onClose }) {
               </tr>
               <tr class="grand-total">
                 <td colspan="2">Grand Total</td>
-             
                 <td>${(
                   (amountPlayed.ThreeD * (100 - agent.cPercentages.threeD)) /
                     100 +
@@ -624,14 +661,42 @@ export default function PlayerInputModal({ onClose }) {
               </tr>
             </tbody>
           </table>
+      <div style="margin-top: 24px; text-align: center;">
+  <p style="margin-bottom: 6px; font-size: 14px;">✍️ Authorized Signature</p>
+  <div style="
+    display: inline-block;
+    border-bottom: 1px solid #000;
+    width: 200px;
+    height: 40px;
+  "></div>
+</div>
+          <div class="qr-code">
+            <img src="${qrDataUrl}" width="120" height="120" />
+          </div>
+          <p style="text-align:center; font-size:12px; margin-top:8px;">
+            🕒 Printed At: ${printedAt}
+          </p>
+          <p style="text-align:center; font-size:10px; color:#888;">
+            🔐 Encrypted QR Code. Only readable by Thai Lottery Agent System.
+          </p>
         </div>
       </body>
     </html>
   `;
 
+    const win = window.open("", "_blank");
     win.document.write(htmlContent);
     win.document.close();
-    win.print();
+
+    // Wait for the QR image to load before printing
+    win.onload = () => {
+      const qrImg = win.document.querySelector("img");
+      if (qrImg && !qrImg.complete) {
+        qrImg.onload = () => win.print();
+      } else {
+        win.print();
+      }
+    };
   };
   const handlePlayerDownloadPdf = async (voucher) => {
     const html2pdf = (await import("html2pdf.js")).default;
