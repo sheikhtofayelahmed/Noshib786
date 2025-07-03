@@ -189,20 +189,30 @@ const GameSummary = ({ agentId }) => {
     const numAmounts = [Number(input.str || 0), Number(input.rumble || 0)];
     const permutations = getPermutations(threeUp);
     const reversedDown = downGame?.split("").reverse().join("");
+
     if (number.length === 3) {
-      if (number === threeUp) return { match: true, type: "str" };
-      if (permutations.includes(number) && numAmounts.length >= 2)
-        return { match: true, type: "rumble" };
+      // Match for 3-digit number
+      if (threeUp.includes(number)) {
+        return { match: true, type: "str" }; // STR matched for 3 digits
+      }
+      if (permutations.includes(number) && numAmounts[1]) {
+        return { match: true, type: "rumble" }; // RUMBLE matched for 3 digits
+      }
     }
 
     if (number.length === 2) {
-      if (number === downGame) return { match: true, type: "down" };
-      if (number === reversedDown && numAmounts.length >= 2)
-        return { match: true, type: "rumble" };
+      // Match for 2-digit number
+      if (number === downGame) {
+        return { match: true, type: "down" }; // DOWN matched for 2 digits
+      }
+      if (number === reversedDown && numAmounts[1]) {
+        return { match: true, type: "rumble" }; // RUMBLE matched for 2 digits
+      }
     }
 
     if (number.length === 1 && threeUp.includes(number)) {
-      return { match: true, type: "single" };
+      // Match for 1-digit number
+      return { match: true, type: "single" }; // SINGLE matched for 1 digit
     }
 
     return { match: false, type: null };
@@ -1381,15 +1391,33 @@ const GameSummary = ({ agentId }) => {
                             threeUp,
                             downGame
                           );
+                          const numLength = entry.input.num?.length;
 
-                          const shouldHighlight =
-                            match &&
-                            (field === "num" ||
-                              (field === "str" && type === "str") ||
-                              (field === "rumble" &&
-                                (type === "rumble" ||
-                                  type === "down" ||
-                                  type === "single")));
+                          let shouldHighlight = false;
+
+                          if (!match) return <span>{value}</span>;
+
+                          if (field === "num") {
+                            // ✅ Always highlight `num` if there's a match
+                            shouldHighlight = true;
+                          } else if (numLength === 3) {
+                            if (type === "str") {
+                              shouldHighlight =
+                                field === "str" || field === "rumble";
+                            } else if (type === "rumble") {
+                              shouldHighlight = field === "rumble";
+                            }
+                          } else if (numLength === 2) {
+                            if (type === "down") {
+                              shouldHighlight = field === "rumble";
+                            } else if (type === "str") {
+                              shouldHighlight = field === "str";
+                            } else if (type === "rumble") {
+                              shouldHighlight = field === "rumble";
+                            }
+                          } else if (numLength === 1 && type === "single") {
+                            shouldHighlight = field === "str";
+                          }
 
                           return (
                             <span

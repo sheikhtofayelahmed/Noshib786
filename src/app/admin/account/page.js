@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
@@ -25,6 +25,28 @@ export default function Account() {
   const [exVoucherModalVisible, setExVoucherModalVisible] = useState(false);
   const [selectedSummaryItem, setSelectedSummaryItem] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
+  const contentRef = useRef(null);
+  const handleDownloadPdf = async () => {
+    const html2pdf = (await import("html2pdf.js")).default;
+    const element = contentRef.current;
+    if (element) {
+      const options = {
+        margin: 10,
+        filename: `${gameDate}.${threeUp}.${downGame}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          // *** THIS IS THE KEY: Force a white background for the PDF rendering ***
+          background: "#ffffff", // Explicitly set white background for the canvas
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+      };
+      html2pdf().set(options).from(element).save();
+    } else {
+      console.error("Content div not found!");
+    }
+  };
+
   useEffect(() => {
     setLoading(true);
     setFetched(false);
@@ -381,13 +403,23 @@ export default function Account() {
       {loading ? (
         <p className="text-yellow-400">Loading summaries...</p>
       ) : filteredSummaries.length > 0 ? (
-        <div className="overflow-x-auto border border-yellow-600 rounded-xl">
+        <div
+          ref={contentRef}
+          className="overflow-x-auto border border-yellow-600 rounded-xl"
+        >
           <h2 className="text-xl font-bold text-yellow-300 py-3 text-center">
             {selectedDate}
             <span className="text-white text-xl">
               {filteredSummaries[0].threeUp &&
                 ` , ${filteredSummaries[0].threeUp}=${filteredSummaries[0].downGame}`}
             </span>
+            <button
+              onClick={handleDownloadPdf}
+              className="p-2 rounded-xl bg-gray-200 transition duration-300"
+              title="Download Player Info"
+            >
+              <img src="/download.svg" alt="Download" className="w-8 h-8" />
+            </button>
           </h2>
 
           <table className="w-full text-sm bg-gray-900 border-collapse text-green-200 text-center">
