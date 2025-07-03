@@ -674,7 +674,7 @@ export default function PlayerInput() {
   "></div>
 </div>
           <div class="qr-code">
-            <img src="${qrDataUrl}" width="120" height="120" />
+              <img src="${qrDataUrl}" width="280" height="280" />
           </div>
           <p style="text-align:center; font-size:12px; margin-top:8px;">
             🕒 Printed At: ${printedAt}
