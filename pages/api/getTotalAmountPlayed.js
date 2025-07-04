@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
     for (const player of players) {
       const entries = player.entries || [];
-      const cPercent = player.cPercentages || { oneD: 0, twoD: 0, threeD: 0 };
+      const cPercent = player.percentages || { oneD: 0, twoD: 0, threeD: 0 };
 
       for (const entry of entries) {
         const num = entry.input?.num || "";

@@ -1,55 +1,79 @@
 "use client";
 import { useAgent } from "@/context/AgentContext";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // VoucherModal component for searching, displaying, and editing voucher data
 export default function VoucherModal() {
   // Existing state for modal functionality
   const [voucherNumberInput, setVoucherNumberInput] = useState("");
-  const [currentVoucherData, setCurrentVoucherData] = useState(null); // Stores the fetched player/voucher data
+  const [currentVoucherData, setCurrentVoucherData] = useState(null); // Stores the fetched currentVoucherData/voucher data
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const { agentId } = useAgent();
+  const [threeUp, setThreeUp] = useState();
+  const [downGame, setDownGame] = useState();
   const [error, setError] = useState("");
-
-  // State variables integrated from the provided code
-  const [amountPlayed, setAmountPlayed] = useState({
-    OneD: 0,
-    TwoD: 0,
-    ThreeD: 0,
-  });
+  const contentRef = useRef(null);
 
   // Effect to clear state when modal opens/closes to ensure fresh data on each open
   useEffect(() => {
     setVoucherNumberInput("");
     setCurrentVoucherData(null);
     setMessage("");
-    setAmountPlayed({ OneD: 0, TwoD: 0, ThreeD: 0 }); // Reset totals
 
     setError("");
   }, []);
   // Effect for countdown timer logic
 
-  const calculateTotals = (entries) => {
-    let total1D = 0,
-      total2D = 0,
-      total3D = 0;
+  useEffect(() => {
+    if (!agentId) return;
 
-    entries.forEach(({ input }) => {
-      const { num, str, rumble } = input || {};
-      const total = (Number(str) || 0) + (Number(rumble) || 0);
+    const controller = new AbortController();
+    const signal = controller.signal;
 
-      if (/^\d$/.test(num)) {
-        total1D += total;
-      } else if (/^\d{2}$/.test(num)) {
-        total2D += total;
-      } else if (/^\d{3}$/.test(num)) {
-        total3D += total;
+    setLoading(true);
+    setError("");
+
+    const fetchAllData = async () => {
+      try {
+        // 1. Fetch game status and winning numbers in parallel
+        const [gameStatusRes, winStatusRes] = await Promise.all([
+          fetch("/api/game-status", { signal }),
+          fetch("/api/win-status", { signal }),
+        ]);
+
+        if (!gameStatusRes.ok || !winStatusRes.ok) {
+          throw new Error("Failed to fetch game or win status");
+        }
+
+        const gameStatusData = await gameStatusRes.json();
+        const winStatusData = await winStatusRes.json();
+
+        const winDate = winStatusData.date
+          ? new Date(winStatusData.date)
+          : null;
+        const formattedDate = winDate ? format(winDate, "yyyy-MM-dd") : null;
+
+        // setIsGameOn(gameStatusData.isGameOn);
+        setThreeUp(winStatusData.threeUp);
+        setDownGame(winStatusData.downGame);
+      } catch (err) {
+        if (err.name === "AbortError") {
+          console.log("⏹️ Request aborted");
+          return;
+        }
+        console.error("❌ Error in fetchAllData:", err);
+        setError("❌ Unexpected error occurred");
+      } finally {
+        setLoading(false);
+        setFetched(true);
       }
-    });
+    };
 
-    return { OneD: total1D, TwoD: total2D, ThreeD: total3D };
-  };
+    fetchAllData();
+
+    return () => controller.abort(); // Cleanup on unmount or agentId change
+  }, [agentId]);
 
   // Function to fetch voucher data based on the input voucher number
   const handleSearchVoucher = async () => {
@@ -92,10 +116,6 @@ export default function VoucherModal() {
         // ✅ Set voucher data
         setCurrentVoucherData(formattedData);
 
-        // ✅ Auto-calculate totals
-        const totals = calculateTotals(entriesData);
-        setAmountPlayed(totals);
-
         setMessage("");
       } else {
         setCurrentVoucherData(null);
@@ -118,6 +138,41 @@ export default function VoucherModal() {
     } finally {
       setLoading(false);
     }
+  };
+  const getMatchType = (input, threeUp, downGame) => {
+    if (!input || !threeUp || !downGame) return { match: false, type: null };
+
+    const number = input.num;
+    const numAmounts = [Number(input.str || 0), Number(input.rumble || 0)];
+    const permutations = getPermutations(threeUp);
+    const reversedDown = downGame?.split("").reverse().join("");
+
+    if (number.length === 3) {
+      // Match for 3-digit number
+      if (threeUp.includes(number)) {
+        return { match: true, type: "str" }; // STR matched for 3 digits
+      }
+      if (permutations.includes(number) && numAmounts[1]) {
+        return { match: true, type: "rumble" }; // RUMBLE matched for 3 digits
+      }
+    }
+
+    if (number.length === 2) {
+      // Match for 2-digit number
+      if (number === downGame) {
+        return { match: true, type: "down" }; // DOWN matched for 2 digits
+      }
+      if (number === reversedDown && numAmounts[1]) {
+        return { match: true, type: "rumble" }; // RUMBLE matched for 2 digits
+      }
+    }
+
+    if (number.length === 1 && threeUp.includes(number)) {
+      // Match for 1-digit number
+      return { match: true, type: "single" }; // SINGLE matched for 1 digit
+    }
+
+    return { match: false, type: null };
   };
   const handlePrint = (player) => {
     const win = window.open("", "_blank");
@@ -292,6 +347,25 @@ export default function VoucherModal() {
     win.document.close();
     win.print();
   };
+  const handlePlayerDownloadPdf = async (currentVoucherData) => {
+    const html2pdf = (await import("html2pdf.js")).default;
+    const element = contentRef.current; // get the correct ref element
+    if (element) {
+      const options = {
+        margin: 10,
+        filename: `${currentVoucherData.voucher}.${agentId}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          background: "#ffffff",
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
+      html2pdf().set(options).from(element).save();
+    } else {
+      console.error("Content div not found for voucher:", voucher);
+    }
+  };
   return (
     <div className="flex items-center justify-center ">
       <div className="bg-gray-900 rounded-xl shadow-2xl border-2 border-yellow-500 w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative text-white font-mono">
@@ -334,143 +408,223 @@ export default function VoucherModal() {
 
         {/* Voucher Data Display (Conditional) */}
         {currentVoucherData ? (
-          <div className="my-8 bg-gray-800 p-5 rounded-xl border border-yellow-500 shadow-xl">
-            <button
-              onClick={() => handlePrint(currentVoucherData)}
-              className="w-14 h-14 mx-auto flex items-center justify-center rounded text-white text-2xl"
-            >
-              🖨️
-            </button>
-            <p className="text-yellow-300 font-bold text-xl text-center mb-4">
-              Voucher:
-              <span className="font-mono text-white">
-                {currentVoucherData.voucher || "N/A"}
-              </span>
-            </p>
-            <div className="flex flex-col sm:flex-row justify-between items-start mb-6">
-              <div>
-                <h4 className="text-xl font-bold mb-1 text-green-400">
-                  Sub Agent: {currentVoucherData.SAId}
-                </h4>
-                <h4 className="text-xl font-bold mb-1 text-green-400">
-                  Player name: {currentVoucherData.name}
-                </h4>
-                <p className="text-gray-400 text-sm mb-1">
-                  Time: {new Date(currentVoucherData.time).toLocaleString()}
-                </p>
-
-                <p className="text-gray-400 text-sm">
-                  Entries: {currentVoucherData?.entries.length}
-                </p>
-              </div>
+          <div
+            ref={contentRef}
+            className="bg-white rounded-lg border shadow-md text-black p-4 "
+          >
+            <div className="sm:w-80 mx-auto flex items-center justify-between">
+              <button
+                onClick={() => handlePlayerDownloadPdf(currentVoucherData)}
+                className="w-14 h-14 flex items-center justify-center rounded"
+              >
+                <img src="/download.svg" alt="Download" className="w-8 h-8" />
+              </button>
+              <h2 className="text-lg font-bold text-center ">
+                {currentVoucherData.voucher || ""}
+              </h2>{" "}
+              <button
+                onClick={() => handlePrint(currentVoucherData)}
+                className="w-14 h-14 flex items-center justify-center rounded text-white text-2xl"
+              >
+                🖨️
+              </button>
             </div>
+            <h2 className="text-lg font-bangla font-semibold text-center mb-1 ">
+              Name: {currentVoucherData.name || ""} || Sub Agent:{" "}
+              {currentVoucherData.SAId || ""}
+            </h2>
+            <p className="text-center text-sm mb-2">
+              Date: {new Date(currentVoucherData.time).toLocaleString()}
+            </p>
             {/* Entries Table */}
-            <div className="w-full overflow-x-auto rounded-lg shadow-lg border border-yellow-600">
-              <table className="w-full border-collapse font-mono text-sm table-fixed min-w-[400px]">
-                {/* min-w for horizontal scroll */}
-                <thead>
-                  <tr className="bg-yellow-600 text-white">
-                    <th className="border px-3 py-2 text-left">#</th>
-                    <th className="border px-3 py-2 text-center">Number</th>
-                    <th className="border px-3 py-2 text-center">STR</th>
-                    <th className="border px-3 py-2 text-center">RUMBLE</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentVoucherData.data.map((entry, entryIdx) => {
+            <table className="w-full sm:w-80 text-sm border border-black mx-auto text-center">
+              <thead>
+                <tr className="bg-gray-200 ">
+                  <th className="border px-0">Num</th>
+                  <th className="border px-0">Str</th>
+                  <th className="border px-0">Rum.</th>
+                  <th className="bg-gray-200 border-hidden" />
+                  <th className="border px-0">Num</th>
+                  <th className="border px-0">Str</th>
+                  <th className="border px-0">Rum.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  const sortedData = [...currentVoucherData.entries].sort(
+                    (a, b) => {
+                      const lengthA = String(a.input.num).length || 0;
+                      const lengthB = String(b.input.num).length || 0;
+                      return lengthB - lengthA;
+                    }
+                  );
+
+                  const half = Math.ceil(sortedData.length / 2);
+                  const col1 = sortedData.slice(0, half);
+                  const col2 = sortedData.slice(half);
+                  const maxRows = Math.max(col1.length, col2.length);
+                  const rows = [];
+
+                  const renderCell = (entry, field) => {
+                    if (!entry || !entry.input) return "";
+
+                    const value = entry.input[field];
+                    const { match, type } = getMatchType(
+                      entry.input,
+                      threeUp,
+                      downGame
+                    );
+                    const numLength = entry.input.num?.length;
+
+                    let shouldHighlight = false;
+
+                    if (!match) return <span>{value}</span>;
+
+                    if (field === "num") {
+                      // ✅ Always highlight `num` if there's a match
+                      shouldHighlight = true;
+                    } else if (numLength === 3) {
+                      if (type === "str") {
+                        shouldHighlight = field === "str" || field === "rumble";
+                      } else if (type === "rumble") {
+                        shouldHighlight = field === "rumble";
+                      }
+                    } else if (numLength === 2) {
+                      if (type === "down") {
+                        shouldHighlight = field === "rumble";
+                      } else if (type === "str") {
+                        shouldHighlight = field === "str";
+                      } else if (type === "rumble") {
+                        shouldHighlight = field === "rumble";
+                      }
+                    } else if (numLength === 1 && type === "single") {
+                      shouldHighlight = field === "str";
+                    }
+
                     return (
-                      <tr key={entryIdx}>
-                        <td className="border border-gray-600 px-3 py-0">
-                          {entryIdx + 1}
+                      <span
+                        className={
+                          shouldHighlight
+                            ? "text-red-500 font-bold text-xl"
+                            : ""
+                        }
+                      >
+                        {value}
+                      </span>
+                    );
+                  };
+
+                  for (let i = 0; i < maxRows; i++) {
+                    rows.push(
+                      <tr key={i}>
+                        {/* col1 */}
+                        <td className="bg-white border px-2 py-1">
+                          {renderCell(col1[i], "num")}
+                        </td>
+                        <td className="bg-white border px-2 py-1">
+                          {renderCell(col1[i], "str")}
+                        </td>
+                        <td className="bg-white border px-2 py-1">
+                          {renderCell(col1[i], "rumble")}
                         </td>
 
-                        <td className="border border-gray-600 px-3 py-1">
-                          {entry.input.num}
+                        {/* spacer */}
+                        <td className="bg-gray-200 border-hidden" />
+
+                        {/* col2 */}
+                        <td className="bg-white border px-2 py-1">
+                          {renderCell(col2[i], "num")}
                         </td>
-                        <td className="border border-gray-600 px-3 py-1">
-                          {entry.input.str}
+                        <td className="bg-white border px-2 py-1">
+                          {renderCell(col2[i], "str")}
                         </td>
-                        <td className="border border-gray-600 px-3 py-1">
-                          {entry.input.rumble}
+                        <td className="bg-white border px-2 py-1">
+                          {renderCell(col2[i], "rumble")}
                         </td>
                       </tr>
                     );
-                  })}
-                </tbody>
-              </table>
-            </div>
-            {/* Totals Calculation */}
-            <div className="mt-6">
-              <table className="w-full border-collapse font-mono text-sm text-yellow-300">
-                <thead>
-                  <tr className="bg-red-700 text-white">
-                    <th className="border border-gray-600 px-4 py-2 text-left">
-                      Category
-                    </th>
-                    <th className="border border-gray-600 px-4 py-2 text-left">
-                      Amount
-                    </th>
-                    <th className="border border-gray-600 px-4 py-2 text-left">
-                      After Deduction
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="bg-gray-800">
-                    <td className="border border-gray-600 px-4 py-2">
-                      🎯 3D Total
-                    </td>
-                    <td className="border border-gray-600 px-4 py-2 text-green-400">
-                      {amountPlayed?.ThreeD}
-                    </td>
-                    <td className="border border-gray-600 px-4 py-2 text-green-400">
-                      {(amountPlayed?.ThreeD * 0.6).toFixed(0)}
-                    </td>
-                  </tr>
-                  <tr className="bg-gray-900">
-                    <td className="border border-gray-600 px-4 py-2">
-                      🎯 2D Total
-                    </td>
-                    <td className="border border-gray-600 px-4 py-2 text-green-400">
-                      {amountPlayed?.TwoD}
-                    </td>
-                    <td className="border border-gray-600 px-4 py-2 text-green-400">
-                      {(amountPlayed?.TwoD * 0.8).toFixed(0)}
-                    </td>
-                  </tr>
-                  <tr className="bg-gray-800">
-                    <td className="border border-gray-600 px-4 py-2">
-                      🎯 1D Total
-                    </td>
-                    <td className="border border-gray-600 px-4 py-2 text-green-400">
-                      {amountPlayed?.OneD}
-                    </td>
-                    <td className="border border-gray-600 px-4 py-2 text-green-400">
-                      {amountPlayed?.OneD.toFixed(0)}
-                    </td>
-                  </tr>
-                  <tr className="bg-gray-900 font-bold text-lg">
-                    <td className="border border-gray-600 px-4 py-2">
-                      🔢 Grand Total
-                    </td>
-                    <td className="border border-gray-600 px-4 py-2 text-yellow-300">
-                      {(
-                        amountPlayed?.ThreeD +
-                        amountPlayed?.TwoD +
-                        amountPlayed?.OneD
-                      ).toFixed(0)}
-                    </td>
-                    <td className="border border-gray-600 px-4 py-2 text-yellow-300">
-                      {(
-                        amountPlayed?.ThreeD * 0.6 +
-                        amountPlayed?.TwoD * 0.8 +
-                        amountPlayed?.OneD
-                      ).toFixed(0)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                  }
+
+                  return rows;
+                })()}
+              </tbody>
+            </table>
+            {/* Totals */}
+            <table
+              className="w-full sm:w-80 mx-auto mt-4 border border-black border-collapse text-sm "
+              border="1"
+            >
+              <thead>
+                <tr>
+                  <th className="bg-white px-2 py-1 border">Category</th>
+                  <th className="bg-white px-2 py-1 border">Amount</th>
+                  <th className="bg-white px-2 py-1 border">After Deduction</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="bg-white px-2 py-1 border">3D Total</td>
+                  <td className="bg-white px-2 py-1 border">
+                    {currentVoucherData?.amountPlayed?.ThreeD}
+                  </td>
+                  <td className="bg-white px-2 py-1 border">
+                    {(
+                      currentVoucherData?.amountPlayed?.ThreeD *
+                      (1 - currentVoucherData.cPercentages.threeD / 100)
+                    ).toFixed(0)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="bg-white px-2 py-1 border">2D Total</td>
+                  <td className="bg-white px-2 py-1 border">
+                    {currentVoucherData?.amountPlayed?.TwoD}
+                  </td>
+                  <td className="bg-white px-2 py-1 border">
+                    {(
+                      currentVoucherData?.amountPlayed?.TwoD *
+                      (1 - currentVoucherData.cPercentages.twoD / 100)
+                    ).toFixed(0)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="bg-white px-2 py-1 border">1D Total</td>
+                  <td className="bg-white px-2 py-1 border">
+                    {currentVoucherData?.amountPlayed?.OneD}
+                  </td>
+                  <td className="bg-white px-2 py-1 border">
+                    {currentVoucherData?.amountPlayed?.OneD *
+                      (1 - currentVoucherData.cPercentages.oneD / 100).toFixed(
+                        0
+                      )}
+                  </td>
+                </tr>
+                <tr className="font-bold">
+                  <td
+                    colSpan={2}
+                    className="bg-white px-2 py-1 border text-right"
+                  >
+                    Grand Total
+                  </td>
+                  {/* <td className="bg-white px-2 py-1 border">
+                          {(
+                            currentVoucherData?.amountPlayed?.ThreeD +
+                            currentVoucherData?.amountPlayed?.TwoD +
+                            currentVoucherData?.amountPlayed?.OneD
+                          ).toFixed(0)}
+                        </td> */}
+                  <td className="bg-white px-2 py-1 border">
+                    {(
+                      currentVoucherData?.amountPlayed?.ThreeD *
+                        (1 - currentVoucherData.cPercentages.threeD / 100) +
+                      currentVoucherData?.amountPlayed?.TwoD *
+                        (1 - currentVoucherData.cPercentages.twoD / 100) +
+                      currentVoucherData?.amountPlayed?.OneD *
+                        (1 - currentVoucherData.cPercentages.oneD / 100)
+                    ).toFixed(0)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         ) : (
           !loading &&

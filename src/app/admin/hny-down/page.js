@@ -199,6 +199,12 @@ export default function HappyNewYear() {
           </div>
         </div>
       </div>
+      <NumberTableSingle
+        title="Single"
+        rows={singleRows}
+        data={numberData}
+        single={true}
+      />
       <div className="mb-16 bg-gray-950 rounded-xl shadow-2xl border-2 border-yellow-600 overflow-x-auto">
         <h3 className="text-3xl font-bold text-yellow-400 mb-4 text-center uppercase tracking-wider bg-black py-4 rounded-lg shadow-inner">
           🎯 Hot Numbers
@@ -257,12 +263,7 @@ export default function HappyNewYear() {
         data={numberData}
         line={2}
       />
-      <NumberTableSingle
-        title="Single"
-        rows={singleRows}
-        data={numberData}
-        single={true}
-      />
+
       {/* Tailwind CSS custom animations and colors (add to your global CSS or tailwind.config.js) */}
     </div>
   );

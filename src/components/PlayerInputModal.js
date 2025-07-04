@@ -663,13 +663,16 @@ export default function PlayerInputModal({ onClose }) {
               </tr>
             </tbody>
           </table>
-      <div style="margin-top: 24px; text-align: center;">
-  <p style="margin-bottom: 6px; font-size: 14px;">✍️ Authorized Signature</p>
+    <div style="margin-top: 24px; text-align: center;">
+  <p style="margin-bottom: 12px; font-size: 14px; line-height: 1.5;">
+    ✍️ Authorized Signature
+  </p>
   <div style="
     display: inline-block;
     border-bottom: 1px solid #000;
     width: 200px;
     height: 40px;
+    vertical-align: top;
   "></div>
 </div>
           <div class="qr-code">

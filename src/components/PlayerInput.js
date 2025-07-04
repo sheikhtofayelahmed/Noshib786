@@ -8,7 +8,7 @@ import AllahBhorosha from "./Allah";
 import AES from "crypto-js/aes";
 import Utf8 from "crypto-js/enc-utf8";
 import QRCode from "qrcode";
-export default function PlayerInput() {
+export default function PlayerInput({ doubleInput, setDoubleInput }) {
   const [name, setName] = useState("");
   const [inputs, setInputs] = useState(
     Array(20).fill({ num: "", str: "", rumble: "" })
@@ -436,6 +436,113 @@ export default function PlayerInput() {
       alert("❌ Network issue. Could not submit. Please try again.");
     }
   };
+  const handleDoubleSubmitAndPrint = async (player) => {
+    try {
+      const statusRes = await fetch("/api/game-status");
+      if (!statusRes.ok) {
+        throw new Error(`Failed to fetch game status: ${statusRes.statusText}`);
+      }
+      const statusData = await statusRes.json();
+
+      const now = new Date();
+      const targetTime = statusData.targetDateTime
+        ? new Date(statusData.targetDateTime)
+        : null;
+
+      if (!statusData.isGameOn || (targetTime && now > targetTime)) {
+        alert(
+          "⛔ The game has ended or the time is up. Attempting to save to 'waiting' list."
+        );
+        await submitToWaitingListDouble(
+          player,
+          statusData.isGameOn,
+          targetTime
+        );
+        return;
+      }
+    } catch (err) {
+      console.error("Game status verification error:", err);
+      alert(
+        `⚠️ Failed to verify game status. Please try again. Details: ${
+          err.message || err
+        }`
+      );
+      return;
+    }
+
+    const dataEntries = player.data || [];
+    const parsedData = dataEntries.map((entry) => ({ input: entry.input }));
+    const totals = calculateTotals(dataEntries.map((e) => e.input));
+
+    if (totals.OneD === 0 && totals.TwoD === 0 && totals.ThreeD === 0) {
+      alert(
+        "⚠️ Player has entries, but the total played amount is zero or invalid. Not submitting to active game."
+      );
+      return;
+    }
+
+    // Generate two voucher numbers
+    const baseVoucher = player.voucher;
+    const voucher1 = `${baseVoucher}-A`;
+    const voucher2 = `${baseVoucher}-B`;
+
+    // Create two payloads
+    const basePayload = {
+      agentId,
+      agentName: agent.name,
+      name: player.name || "",
+      SAId: subAgentId || "",
+      data: parsedData,
+      amountPlayed: totals,
+      cPercentages: agent.cPercentages,
+      percentages: agent.percentages,
+    };
+
+    const payloads = [
+      { ...basePayload, voucher: voucher1 },
+      { ...basePayload, voucher: voucher2 },
+    ];
+
+    // Submit both payloads
+    for (const payload of payloads) {
+      try {
+        const res = await fetch("/api/savePlayer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          alert("✅ Player double data submitted to database!");
+          setPlayers((prevPlayers) =>
+            prevPlayers.map((p) =>
+              p.voucher === player.voucher ? { ...p, submitted: true } : p
+            )
+          );
+          fetchEntryCount(agentId);
+          setDoubleInput(false);
+        } else {
+          const err = await res.json();
+          alert(
+            `❌ Failed to submit ${payload.voucher}: ${
+              err.message || `Status: ${res.status}`
+            }`
+          );
+        }
+      } catch (err) {
+        console.error(`Submission error for ${payload.voucher}:`, err);
+        alert(`❌ Network issue. Could not submit ${payload.voucher}.`);
+      }
+    }
+
+    alert("✅ Both entries submitted!");
+    setPlayers((prevPlayers) =>
+      prevPlayers.map((p) =>
+        p.voucher === player.voucher ? { ...p, submitted: true } : p
+      )
+    );
+    fetchEntryCount(agentId);
+  };
 
   /**
    * Handles submitting player data to a "waiting" collection when the game is closed.
@@ -506,6 +613,79 @@ export default function PlayerInput() {
       alert(
         "❌ Error occurred while saving to waiting list. Please try again."
       );
+    }
+  };
+  const submitToWaitingListDouble = async (player, isGameOn, targetTime) => {
+    const dataEntries = player.data || [];
+
+    if (dataEntries.length === 0) {
+      alert(
+        "ℹ️ No game entries found for this player. Not saving to 'waiting' list."
+      );
+      return;
+    }
+
+    const parsedData = dataEntries.map((entry) => ({
+      input: entry.input, // Already an object: { num, str, rumble }
+    }));
+
+    const totals = calculateTotals(dataEntries.map((e) => e.input));
+
+    if (totals.OneD === 0 && totals.TwoD === 0 && totals.ThreeD === 0) {
+      alert(
+        "⚠️ Player has entries, but the total played amount is zero or invalid. Not submitting."
+      );
+      return;
+    }
+    const baseVoucher = player.voucher;
+    const voucher1 = `${baseVoucher}-A`;
+    const voucher2 = `${baseVoucher}-B`;
+
+    const waitingPayload = {
+      voucher: player.voucher,
+      agentId: agentId,
+      agentName: agent.name,
+      name: player.name || "",
+      SAId: subAgentId || "",
+      data: parsedData,
+      amountPlayed: totals,
+      cPercentages: agent.cPercentages,
+      percentages: agent.percentages,
+      submissionAttemptTime: new Date().toISOString(),
+      gameStatusAtAttempt: {
+        isGameOn: isGameOn,
+        targetDateTime: targetTime ? targetTime.toISOString() : null,
+      },
+    };
+    const payloads = [
+      { ...waitingPayload, voucher: voucher1 },
+      { ...waitingPayload, voucher: voucher2 },
+    ];
+    for (const payload of payloads) {
+      try {
+        const res = await fetch("/api/waitingSavePlayer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          fetchWaitingPlayers(agentId);
+          alert("✅ Player double data saved to 'waiting' list successfully!");
+        } else {
+          const err = await res.json();
+          alert(
+            `❌ Failed to save player to waiting list: ${
+              err.message || `Status: ${res.status}`
+            }`
+          );
+        }
+      } catch (err) {
+        console.error("Waiting list submission error:", err);
+        alert(
+          "❌ Error occurred while saving to waiting list. Please try again."
+        );
+      }
     }
   };
 
@@ -664,13 +844,16 @@ export default function PlayerInput() {
               </tr>
             </tbody>
           </table>
-      <div style="margin-top: 24px; text-align: center;">
-  <p style="margin-bottom: 6px; font-size: 14px;">✍️ Authorized Signature</p>
+   <div style="margin-top: 24px; text-align: center;">
+  <p style="margin-bottom: 12px; font-size: 14px; line-height: 1.5;">
+    ✍️ Authorized Signature
+  </p>
   <div style="
     display: inline-block;
     border-bottom: 1px solid #000;
     width: 200px;
     height: 40px;
+    vertical-align: top;
   "></div>
 </div>
           <div class="qr-code">
@@ -720,7 +903,6 @@ export default function PlayerInput() {
       console.error("Content div not found for voucher:", voucher);
     }
   };
-  console.log(players);
   return (
     <div className="min-h-screen  text-white p-6 ">
       <div
@@ -738,7 +920,12 @@ export default function PlayerInput() {
         <h1 className="text-lg lg:text-4xl  font-bold text-center mb-6 text-yellow-400">
           🎰 Player Voucher 🎰
         </h1>
-
+        <button
+          onClick={handleSavePlayer}
+          className="block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded mx-auto mb-10"
+        >
+          🎲 Complete
+        </button>
         <label className="block mb-2 text-yellow-300 ">Player Name:</label>
         <input
           type="text"
@@ -843,13 +1030,6 @@ export default function PlayerInput() {
         )}
         <div className="flex flex-wrap gap-2 mt-4">
           <button
-            onClick={handleSavePlayer}
-            // disabled={isCompleted === false}
-            className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
-          >
-            🎲 Complete
-          </button>
-          <button
             onClick={handleAddInputs}
             className="bg-green-500 hover:bg-green-600 text-black font-bold py-2 px-4 rounded"
           >
@@ -911,12 +1091,21 @@ export default function PlayerInput() {
                             {player.voucher || "N/A"}
                           </span>
                         </p>{" "}
-                        <button
-                          onClick={() => handleSubmitAndPrint(player)}
-                          className="bg-blue-600 hover:bg-blue-700 mb-4 py-2 px-4 rounded font-semibold text-white transition"
-                        >
-                          🚀 Submit
-                        </button>
+                        {doubleInput ? (
+                          <button
+                            onClick={() => handleDoubleSubmitAndPrint(player)}
+                            className="bg-blue-600 hover:bg-blue-700 mb-4 py-2 px-4 rounded font-semibold text-white transition"
+                          >
+                            🚀 Submit
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleSubmitAndPrint(player)}
+                            className="bg-blue-600 hover:bg-blue-700 mb-4 py-2 px-4 rounded font-semibold text-white transition"
+                          >
+                            🚀 Submit
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
