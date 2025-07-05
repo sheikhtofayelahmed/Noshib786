@@ -8,7 +8,7 @@ export default function NumberPayoutTable() {
   useEffect(() => {
     async function fetchPayouts() {
       try {
-        const res = await fetch("/api/profitLose", { method: "POST" }); // change URL to your API route
+        const res = await fetch("/api/profitLoss", { method: "POST" }); // change URL to your API route
         if (!res.ok) throw new Error("Failed to fetch");
         const json = await res.json();
         setData(json);
