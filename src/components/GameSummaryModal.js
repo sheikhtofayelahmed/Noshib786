@@ -574,7 +574,6 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
 
     return finalResult.toFixed(0);
   };
-
   if (loading) return <Loading></Loading>;
 
   return (

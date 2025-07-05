@@ -345,6 +345,7 @@ export default function Account() {
       totalWin: 0,
     }
   );
+
   return (
     <div className="p-4 min-h-screen text-white font-mono space-y-10">
       {/* Summary Runner */}
@@ -583,6 +584,7 @@ export default function Account() {
                 <th className="p-2">Total Game</th>
                 <th className="p-2">Total Win</th>
                 <th className="p-2">W/L</th>
+                <th className="p-2">Last Updated</th>
                 <th className="p-2">Summary</th>
                 <th className="p-2">Voucher</th>
               </tr>
@@ -611,6 +613,19 @@ export default function Account() {
                     }`}
                   >
                     {item.totalGame - item.totalWin}
+                  </td>
+                  <td className="p-2">
+                    {item?.lastUpdated
+                      ? new Date(item.lastUpdated).toLocaleString("en-GB", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: true, // use 24-hour format
+                        })
+                      : ""}
                   </td>
                   <td className="p-2 text-yellow-300">
                     <button
@@ -653,6 +668,7 @@ export default function Account() {
                 >
                   {totalsBA.totalGame - totalsBA.totalWin}
                 </td>
+                <td className="p-2">—</td>
                 <td className="p-2">—</td>
                 <td className="p-2">—</td>
               </tr>
