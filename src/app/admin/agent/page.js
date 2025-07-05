@@ -29,6 +29,8 @@ export default function AdminAgentPage() {
   };
   const [agentId, setAgentId] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordValid, setPasswordValid] = useState(true);
+
   const [name, setName] = useState("");
   const [adding, setAdding] = useState(false);
   const [entryCounts, setEntryCounts] = useState({});
@@ -317,6 +319,20 @@ export default function AdminAgentPage() {
     return () => clearInterval(interval);
   }, []);
 
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+
+    // Validate: uppercase, lowercase, number, and min length 6
+    const isValid =
+      /[A-Z]/.test(value) && // uppercase
+      /[a-z]/.test(value) && // lowercase
+      /\d/.test(value) && // number
+      value.length >= 6; // min length
+
+    setPasswordValid(isValid);
+  };
+
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black to-red-900 min-h-screen">
       {/* <h1 className="text-4xl mb-6 text-yellow-400 font-bold">
@@ -566,18 +582,27 @@ export default function AdminAgentPage() {
               type="text"
               placeholder="Agent ID"
               value={agentId}
-              onChange={(e) => setAgentId(e.target.value)}
+              onChange={(e) => setAgentId(e.target.value.replace(/\s/g, ""))}
               className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
               disabled={adding}
             />
             <input
-              type="password"
+              type="text"
               placeholder="Password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
+              onChange={handlePasswordChange}
+              className={`w-full mb-3 p-3 rounded bg-black border ${
+                passwordValid ? "border-yellow-400" : "border-red-500"
+              } text-yellow-300`}
               disabled={adding}
             />
+            {!passwordValid && password.length > 0 && (
+              <p className="text-red-500 text-sm mt-[-10px] mb-2">
+                Must be at least 6 characters and include uppercase, lowercase,
+                and a number
+              </p>
+            )}
+
             <div className="mb-4">
               <label className=" font-bangla block text-green-400 text-lg mt-5">
                 সাব এজেন্ট
@@ -743,19 +768,7 @@ export default function AdminAgentPage() {
                 {formError}
               </p>
             )}
-
-            {/* Agent ID */}
-            <div className="mb-3">
-              <label className="block text-sm">Agent ID</label>
-              <input
-                type="text"
-                className="w-full p-2 bg-black border border-yellow-400 rounded text-yellow-300"
-                value={agentId}
-                onChange={(e) => setAgentId(e.target.value)}
-              />
-            </div>
-
-            {/* Name */}
+            {/* Agent ID */}{" "}
             <div className="mb-3">
               <label className="block text-sm">Name</label>
               <input
@@ -765,18 +778,36 @@ export default function AdminAgentPage() {
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
-
+            <div className="mb-3">
+              <label className="block text-sm">Agent ID</label>
+              <input
+                type="text"
+                className="w-full p-2 bg-black border border-yellow-400 rounded text-yellow-300"
+                value={agentId}
+                onChange={(e) => setAgentId(e.target.value.replace(/\s/g, ""))}
+              />
+            </div>
+            {/* Name */}
             {/* Password */}
             <div className="mb-3">
               <label className="block text-sm">Password</label>
               <input
                 type="text"
-                className="w-full p-2 bg-black border border-yellow-400 rounded text-yellow-300"
+                placeholder="Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+                onChange={handlePasswordChange}
+                className={`w-full mb-3 p-3 rounded bg-black border ${
+                  passwordValid ? "border-yellow-400" : "border-red-500"
+                } text-yellow-300`}
+                disabled={adding}
+              />{" "}
+              {!passwordValid && password.length > 0 && (
+                <p className="text-red-500 text-sm mt-[-10px] mb-2">
+                  Must be at least 6 characters and include uppercase,
+                  lowercase, and a number
+                </p>
+              )}
             </div>
-
             {/* Percentages */}
             <div className="mb-3 mt-4">
               <h3 className="text-green-400 font-semibold mb-2">Sub Agents</h3>
@@ -795,7 +826,6 @@ export default function AdminAgentPage() {
                 />
               ))}
             </div>
-
             <div className="mb-3 mt-4">
               <h3 className=" font-bangla text-yellow-400 font-semibold mb-2">
                 ব্যাংকার ডিসকাঊন্ট

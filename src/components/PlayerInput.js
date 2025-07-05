@@ -23,6 +23,8 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
   const [agent, setAgent] = useState();
   const playerRefs = useRef({});
   const [error, setError] = useState("");
+  const [submittingVoucher, setSubmittingVoucher] = useState(null);
+  const [submittingDoubleVoucher, setSubmittingDoubleVoucher] = useState(null);
 
   useEffect(() => {
     const fetchTarget = async () => {
@@ -352,13 +354,14 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
   };
 
   const handleSubmitAndPrint = async (player) => {
-    try {
-      const statusRes = await fetch("/api/game-status");
-      if (!statusRes.ok) {
-        throw new Error(`Failed to fetch game status: ${statusRes.statusText}`);
-      }
-      const statusData = await statusRes.json();
+    if (submittingVoucher === player.voucher) return; // prevent double click
 
+    setSubmittingVoucher(player.voucher); // disable button instantly
+
+    try {
+      // ✅ your submission logic
+      const statusRes = await fetch("/api/game-status");
+      const statusData = await statusRes.json();
       const now = new Date();
       const targetTime = statusData.targetDateTime
         ? new Date(statusData.targetDateTime)
@@ -371,44 +374,28 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
         await submitToWaitingList(player, statusData.isGameOn, targetTime);
         return;
       }
-    } catch (err) {
-      console.error("Game status verification error:", err);
-      alert(
-        `⚠️ Failed to verify game status. Please try again. Details: ${
-          err.message || err
-        }`
-      );
-      return;
-    }
 
-    const dataEntries = player.data || [];
+      const dataEntries = player.data || [];
+      const parsedData = dataEntries.map((entry) => ({ input: entry.input }));
+      const totals = calculateTotals(dataEntries.map((e) => e.input));
 
-    const parsedData = dataEntries.map((entry) => ({
-      input: entry.input,
-    }));
+      if (totals.OneD === 0 && totals.TwoD === 0 && totals.ThreeD === 0) {
+        alert("⚠️ Player has entries, but total amount is zero.");
+        return;
+      }
 
-    const totals = calculateTotals(dataEntries.map((e) => e.input));
+      const payload = {
+        voucher: player.voucher,
+        agentId,
+        agentName: agent.name,
+        name: player.name || "",
+        SAId: subAgentId || "",
+        data: parsedData,
+        amountPlayed: totals,
+        cPercentages: agent.cPercentages,
+        percentages: agent.percentages,
+      };
 
-    if (totals.OneD === 0 && totals.TwoD === 0 && totals.ThreeD === 0) {
-      alert(
-        "⚠️ Player has entries, but the total played amount is zero or invalid. Not submitting to active game."
-      );
-      return;
-    }
-
-    const payload = {
-      voucher: player.voucher,
-      agentId,
-      agentName: agent.name,
-      name: player.name || "",
-      SAId: subAgentId || "",
-      data: parsedData, 
-      amountPlayed: totals,
-      cPercentages: agent.cPercentages,
-      percentages: agent.percentages,
-    };
-
-    try {
       const res = await fetch("/api/savePlayer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -416,27 +403,30 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
       });
 
       if (res.ok) {
-        alert("✅ Player data submitted to database!");
-        setPlayers((prevPlayers) =>
-          prevPlayers.map((p) =>
+        alert("✅ Player submitted!");
+        setPlayers((prev) =>
+          prev.map((p) =>
             p.voucher === player.voucher ? { ...p, submitted: true } : p
           )
         );
         fetchEntryCount(agentId);
       } else {
         const err = await res.json();
-        alert(
-          `❌ Failed to submit to active game: ${
-            err.message || `Status: ${res.status}`
-          }`
-        );
+        alert(`❌ Failed to submit: ${err.message || res.status}`);
       }
     } catch (err) {
-      console.error("Submission error:", err);
-      alert("❌ Network issue. Could not submit. Please try again.");
+      console.error("Submit error:", err);
+      alert("❌ Network or server error.");
+    } finally {
+      setSubmittingVoucher(null); // ✅ allow next submit
     }
   };
+
   const handleDoubleSubmitAndPrint = async (player) => {
+    if (submittingDoubleVoucher === player.voucher) return; // prevent double click
+
+    setSubmittingDoubleVoucher(player.voucher); // disable button instantly
+
     try {
       const statusRes = await fetch("/api/game-status");
       if (!statusRes.ok) {
@@ -460,6 +450,76 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
         );
         return;
       }
+
+      const dataEntries = player.data || [];
+      const parsedData = dataEntries.map((entry) => ({ input: entry.input }));
+      const totals = calculateTotals(dataEntries.map((e) => e.input));
+
+      if (totals.OneD === 0 && totals.TwoD === 0 && totals.ThreeD === 0) {
+        alert(
+          "⚠️ Player has entries, but the total played amount is zero or invalid. Not submitting to active game."
+        );
+        return;
+      }
+
+      // Generate two voucher numbers
+      const baseVoucher = player.voucher;
+      const voucher1 = `${baseVoucher}-A`;
+      const voucher2 = `${baseVoucher}-B`;
+
+      // Create two payloads
+      const basePayload = {
+        agentId,
+        agentName: agent.name,
+        name: player.name || "",
+        SAId: subAgentId || "",
+        data: parsedData,
+        amountPlayed: totals,
+        cPercentages: agent.cPercentages,
+        percentages: agent.percentages,
+      };
+
+      const payloads = [
+        { ...basePayload, voucher: voucher1 },
+        { ...basePayload, voucher: voucher2 },
+      ];
+
+      // Submit both payloads
+      for (const payload of payloads) {
+        try {
+          const res = await fetch("/api/savePlayer", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (res.ok) {
+            // mark submitted only after both succeed, so just skip here
+            fetchEntryCount(agentId);
+            setDoubleInput(false);
+          } else {
+            const err = await res.json();
+            alert(
+              `❌ Failed to submit ${payload.voucher}: ${
+                err.message || `Status: ${res.status}`
+              }`
+            );
+            return; // stop on first failure
+          }
+        } catch (err) {
+          console.error(`Submission error for ${payload.voucher}:`, err);
+          alert(`❌ Network issue. Could not submit ${payload.voucher}.`);
+          return;
+        }
+      }
+
+      alert("✅ Both entries submitted!");
+      setPlayers((prevPlayers) =>
+        prevPlayers.map((p) =>
+          p.voucher === player.voucher ? { ...p, submitted: true } : p
+        )
+      );
+      fetchEntryCount(agentId);
     } catch (err) {
       console.error("Game status verification error:", err);
       alert(
@@ -467,81 +527,9 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
           err.message || err
         }`
       );
-      return;
+    } finally {
+      setSubmittingDoubleVoucher(null); // enable button again
     }
-
-    const dataEntries = player.data || [];
-    const parsedData = dataEntries.map((entry) => ({ input: entry.input }));
-    const totals = calculateTotals(dataEntries.map((e) => e.input));
-
-    if (totals.OneD === 0 && totals.TwoD === 0 && totals.ThreeD === 0) {
-      alert(
-        "⚠️ Player has entries, but the total played amount is zero or invalid. Not submitting to active game."
-      );
-      return;
-    }
-
-    // Generate two voucher numbers
-    const baseVoucher = player.voucher;
-    const voucher1 = `${baseVoucher}-A`;
-    const voucher2 = `${baseVoucher}-B`;
-
-    // Create two payloads
-    const basePayload = {
-      agentId,
-      agentName: agent.name,
-      name: player.name || "",
-      SAId: subAgentId || "",
-     data: parsedData,
-      amountPlayed: totals,
-      cPercentages: agent.cPercentages,
-      percentages: agent.percentages,
-    };
-
-    const payloads = [
-      { ...basePayload, voucher: voucher1 },
-      { ...basePayload, voucher: voucher2 },
-    ];
-
-    // Submit both payloads
-    for (const payload of payloads) {
-      try {
-        const res = await fetch("/api/savePlayer", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        if (res.ok) {
-          alert("✅ Player double data submitted to database!");
-          setPlayers((prevPlayers) =>
-            prevPlayers.map((p) =>
-              p.voucher === player.voucher ? { ...p, submitted: true } : p
-            )
-          );
-          fetchEntryCount(agentId);
-          setDoubleInput(false);
-        } else {
-          const err = await res.json();
-          alert(
-            `❌ Failed to submit ${payload.voucher}: ${
-              err.message || `Status: ${res.status}`
-            }`
-          );
-        }
-      } catch (err) {
-        console.error(`Submission error for ${payload.voucher}:`, err);
-        alert(`❌ Network issue. Could not submit ${payload.voucher}.`);
-      }
-    }
-
-    alert("✅ Both entries submitted!");
-    setPlayers((prevPlayers) =>
-      prevPlayers.map((p) =>
-        p.voucher === player.voucher ? { ...p, submitted: true } : p
-      )
-    );
-    fetchEntryCount(agentId);
   };
 
   /**
@@ -647,7 +635,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
       agentName: agent.name,
       name: player.name || "",
       SAId: subAgentId || "",
-     data: parsedData,
+      data: parsedData,
       amountPlayed: totals,
       cPercentages: agent.cPercentages,
       percentages: agent.percentages,
@@ -1096,16 +1084,24 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
                         {doubleInput ? (
                           <button
                             onClick={() => handleDoubleSubmitAndPrint(player)}
+                            disabled={
+                              submittingDoubleVoucher === player.voucher
+                            }
                             className="bg-blue-600 hover:bg-blue-700 mb-4 py-2 px-4 rounded font-semibold text-white transition"
                           >
-                            🚀 Submit
+                            {submittingDoubleVoucher === player.voucher
+                              ? "Submitting..."
+                              : "Submit"}
                           </button>
                         ) : (
                           <button
                             onClick={() => handleSubmitAndPrint(player)}
+                            disabled={submittingVoucher === player.voucher}
                             className="bg-blue-600 hover:bg-blue-700 mb-4 py-2 px-4 rounded font-semibold text-white transition"
                           >
-                            🚀 Submit
+                            {submittingVoucher === player.voucher
+                              ? "Submitting..."
+                              : "Submit"}
                           </button>
                         )}
                       </div>

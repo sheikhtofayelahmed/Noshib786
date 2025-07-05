@@ -22,6 +22,7 @@ export default function PlayerInputModal({ onClose }) {
   const [agent, setAgent] = useState();
   const playerRefs = useRef({});
   const [error, setError] = useState("");
+  const [submittingVoucher, setSubmittingVoucher] = useState(null);
 
   useEffect(() => {
     const fetchTarget = async () => {
@@ -351,13 +352,14 @@ export default function PlayerInputModal({ onClose }) {
   };
 
   const handleSubmitAndPrint = async (player) => {
-    try {
-      const statusRes = await fetch("/api/game-status");
-      if (!statusRes.ok) {
-        throw new Error(`Failed to fetch game status: ${statusRes.statusText}`);
-      }
-      const statusData = await statusRes.json();
+    if (submittingVoucher === player.voucher) return; // prevent double click
 
+    setSubmittingVoucher(player.voucher); // disable button instantly
+
+    try {
+      // ✅ your submission logic
+      const statusRes = await fetch("/api/game-status");
+      const statusData = await statusRes.json();
       const now = new Date();
       const targetTime = statusData.targetDateTime
         ? new Date(statusData.targetDateTime)
@@ -370,44 +372,28 @@ export default function PlayerInputModal({ onClose }) {
         await submitToWaitingList(player, statusData.isGameOn, targetTime);
         return;
       }
-    } catch (err) {
-      console.error("Game status verification error:", err);
-      alert(
-        `⚠️ Failed to verify game status. Please try again. Details: ${
-          err.message || err
-        }`
-      );
-      return;
-    }
 
-    const dataEntries = player.data || [];
+      const dataEntries = player.data || [];
+      const parsedData = dataEntries.map((entry) => ({ input: entry.input }));
+      const totals = calculateTotals(dataEntries.map((e) => e.input));
 
-    const parsedData = dataEntries.map((entry) => ({
-      input: entry.input,
-    }));
+      if (totals.OneD === 0 && totals.TwoD === 0 && totals.ThreeD === 0) {
+        alert("⚠️ Player has entries, but total amount is zero.");
+        return;
+      }
 
-    const totals = calculateTotals(dataEntries.map((e) => e.input));
+      const payload = {
+        voucher: player.voucher,
+        agentId,
+        agentName: agent.name,
+        name: player.name || "",
+        SAId: subAgentId || "",
+        data: parsedData,
+        amountPlayed: totals,
+        cPercentages: agent.cPercentages,
+        percentages: agent.percentages,
+      };
 
-    if (totals.OneD === 0 && totals.TwoD === 0 && totals.ThreeD === 0) {
-      alert(
-        "⚠️ Player has entries, but the total played amount is zero or invalid. Not submitting to active game."
-      );
-      return;
-    }
-
-    const payload = {
-      voucher: player.voucher,
-      agentId,
-      agentName: agent.name,
-      name: player.name || "",
-      SAId: subAgentId || "",
-     data: parsedData,
-      amountPlayed: totals,
-      cPercentages: agent.cPercentages,
-      percentages: agent.percentages,
-    };
-
-    try {
       const res = await fetch("/api/savePlayer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -415,24 +401,22 @@ export default function PlayerInputModal({ onClose }) {
       });
 
       if (res.ok) {
-        alert("✅ Player data submitted to database!");
-        setPlayers((prevPlayers) =>
-          prevPlayers.map((p) =>
+        alert("✅ Player submitted!");
+        setPlayers((prev) =>
+          prev.map((p) =>
             p.voucher === player.voucher ? { ...p, submitted: true } : p
           )
         );
         fetchEntryCount(agentId);
       } else {
         const err = await res.json();
-        alert(
-          `❌ Failed to submit to active game: ${
-            err.message || `Status: ${res.status}`
-          }`
-        );
+        alert(`❌ Failed to submit: ${err.message || res.status}`);
       }
     } catch (err) {
-      console.error("Submission error:", err);
-      alert("❌ Network issue. Could not submit. Please try again.");
+      console.error("Submit error:", err);
+      alert("❌ Network or server error.");
+    } finally {
+      setSubmittingVoucher(null); // ✅ allow next submit
     }
   };
 
@@ -471,7 +455,7 @@ export default function PlayerInputModal({ onClose }) {
       agentName: agent.name,
       name: player.name || "",
       SAId: subAgentId || "",
-     data: parsedData,
+      data: parsedData,
       amountPlayed: totals,
       cPercentages: agent.cPercentages,
       percentages: agent.percentages,
@@ -889,11 +873,8 @@ export default function PlayerInputModal({ onClose }) {
                             <span className="font-mono">
                               {player.voucher || "N/A"}
                             </span>
-                          </p>{" "}
-                          <div
-                            div
-                            className="w-full mb-4 flex items-center justify-around "
-                          >
+                          </p>
+                          <div className="w-full mb-4 flex items-center justify-around ">
                             <button
                               onClick={() =>
                                 handlePlayerDownloadPdf(player.voucher)
@@ -923,9 +904,12 @@ export default function PlayerInputModal({ onClose }) {
                           </p>{" "}
                           <button
                             onClick={() => handleSubmitAndPrint(player)}
+                            disabled={submittingVoucher === player.voucher}
                             className="bg-blue-600 hover:bg-blue-700 mb-4 py-2 px-4 rounded font-semibold text-white transition"
                           >
-                            🚀 Submit
+                            {submittingVoucher === player.voucher
+                              ? "Submitting..."
+                              : "Submit"}
                           </button>
                         </div>
                       )}
