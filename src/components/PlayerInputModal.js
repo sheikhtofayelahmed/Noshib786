@@ -99,8 +99,8 @@ export default function PlayerInputModal({ onClose }) {
     // Allow completely empty row
     if (!num && !str && !rumble) return true;
 
-    // Validate num: 1–3 digits and not "000"
-    if (!/^\d{1,3}$/.test(num) || num === "000") return false;
+    // Validate num: 1–3 digits
+    if (!/^\d{1,3}$/.test(num)) return false;
 
     const numLength = num.length;
     const isStrValid = /^\d+$/.test(str);
@@ -222,7 +222,7 @@ export default function PlayerInputModal({ onClose }) {
       editError: false,
     }));
 
-    const voucher = `${agentId}-${Math.floor(Math.random() * 10000)}`;
+    const voucher = `${agentId}-${Math.floor(100000 + Math.random() * 900000)}`;
     const totals = calculateTotals(validEntries);
 
     const newPlayer = {
@@ -401,7 +401,7 @@ export default function PlayerInputModal({ onClose }) {
       agentName: agent.name,
       name: player.name || "",
       SAId: subAgentId || "",
-      data: parsedData,
+     data: parsedData,
       amountPlayed: totals,
       cPercentages: agent.cPercentages,
       percentages: agent.percentages,
@@ -471,7 +471,7 @@ export default function PlayerInputModal({ onClose }) {
       agentName: agent.name,
       name: player.name || "",
       SAId: subAgentId || "",
-      data: parsedData,
+     data: parsedData,
       amountPlayed: totals,
       cPercentages: agent.cPercentages,
       percentages: agent.percentages,

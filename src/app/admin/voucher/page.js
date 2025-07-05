@@ -64,8 +64,8 @@ export default function VoucherModal() {
     // Allow completely empty row
     if (!num && !str && !rumble) return true;
 
-    // Validate num: 1–3 digits and not "000"
-    if (!/^\d{1,3}$/.test(num) || num === "000") return false;
+    // Validate num: 1–3 digits and 
+    if (!/^\d{1,3}$/.test(num) ) return false;
 
     const numLength = num.length;
     const isStrValid = /^\d+$/.test(str);
@@ -446,7 +446,7 @@ export default function VoucherModal() {
       agentId: player.agentId,
       name: player.name || "",
       SAId: player.SAId || "",
-      data: parsedData,
+       data: parsedData,
       amountPlayed: updatedTotals,
     };
 
@@ -502,7 +502,7 @@ export default function VoucherModal() {
       setMessage("❌ Network error while deleting voucher.");
     }
   };
-  console.log(amountPlayed);
+  console.log(currentVoucherData);
   return (
     <div className="flex items-center justify-center ">
       <div className="bg-gray-900 rounded-xl shadow-2xl border-2 border-yellow-500 w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative text-white font-mono">
