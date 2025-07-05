@@ -55,9 +55,6 @@ const GameSummary = ({ agentId }) => {
   useEffect(() => {
     if (!agentId) return;
 
-    const controller = new AbortController();
-    const signal = controller.signal;
-
     setLoading(true);
     setFetched(false);
     setError("");
@@ -66,79 +63,70 @@ const GameSummary = ({ agentId }) => {
       try {
         // 1. Fetch game status and winning numbers in parallel
         const [gameStatusRes, winStatusRes] = await Promise.all([
-          fetch("/api/game-status", { signal }),
-          fetch("/api/win-status", { signal }),
+          fetch("/api/game-status"),
+          fetch("/api/win-status"),
         ]);
-
-        if (!gameStatusRes.ok || !winStatusRes.ok) {
-          throw new Error("Failed to fetch game or win status");
-        }
 
         const gameStatusData = await gameStatusRes.json();
         const winStatusData = await winStatusRes.json();
-
         const winDate = winStatusData.date
           ? new Date(winStatusData.date)
           : null;
-        const formattedDate = winDate ? format(winDate, "yyyy-MM-dd") : null;
 
         setIsGameOn(gameStatusData.isGameOn);
         setThreeUp(winStatusData.threeUp);
         setDownGame(winStatusData.downGame);
-        setDate(winDate);
+        setDate(winStatusData.date);
 
         // 2. Fetch agent info
-        const agentRes = await fetch(`/api/getAgentById?agentId=${agentId}`, {
-          signal,
-        });
+        const agentRes = await fetch(`/api/getAgentById?agentId=${agentId}`);
         if (!agentRes.ok) throw new Error("Failed to fetch agent data");
-
         const agentData = await agentRes.json();
         setAgent(agentData.agent);
 
-        // 3. Fetch summary data
-        if (formattedDate) {
-          const query = new URLSearchParams({
-            agentId,
-            gameDate: formattedDate,
-          }).toString();
-          const summaryRes = await fetch(
-            `/api/get-summaries-id-date?${query}`,
-            { signal }
-          );
+        // 3. Fetch summary
+        const formattedDate = winDate ? format(winDate, "yyyy-MM-dd") : null;
 
-          if (summaryRes.ok) {
-            const summaryJson = await summaryRes.json();
-            setSummaryData(summaryJson.summary || {});
+        const query = new URLSearchParams({
+          agentId,
+          gameDate: formattedDate,
+        }).toString();
+
+        try {
+          const summaryRes = await fetch(`/api/get-summaries-id-date?${query}`);
+          if (!summaryRes.ok) {
+            console.warn("⚠️ Could not fetch summary");
           } else {
-            console.warn(
-              "⚠️ Could not fetch summary:",
-              await summaryRes.text()
-            );
+            const res = await summaryRes.json();
+            const data = res.summary;
+            setSummaryData(data || {});
           }
+        } catch (summaryErr) {
+          console.error("❌ Error fetching summary:", summaryErr);
         }
 
         // 4. Fetch players
-        const playersRes = await fetch("/api/getPlayersByAgentId", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ agentId }),
-          signal,
-        });
+        try {
+          const playersRes = await fetch("/api/getPlayersByAgentId", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ agentId }),
+          });
 
-        if (playersRes.ok) {
+          if (!playersRes.ok) {
+            const errMsg = await playersRes.text();
+            setError("⚠️ Could not load players: " + errMsg);
+            setPlayers([]);
+            return;
+          }
+
           const playersJson = await playersRes.json();
           setPlayers(playersJson.players || []);
-        } else {
-          const errMsg = await playersRes.text();
-          setError("⚠️ Could not load players: " + errMsg);
-          setPlayers([]);
+        } catch (err) {
+          console.error("❌ Error fetching players:", err);
+          setError("❌ Network error: " + err.message);
         }
       } catch (err) {
-        if (err.name === "AbortError") {
-          console.log("⏹️ Request aborted");
-          return;
-        }
         console.error("❌ Error in fetchAllData:", err);
         setError("❌ Unexpected error occurred");
       } finally {
@@ -148,8 +136,6 @@ const GameSummary = ({ agentId }) => {
     };
 
     fetchAllData();
-
-    return () => controller.abort(); // Cleanup on unmount or agentId change
   }, [agentId]);
 
   useEffect(() => {
@@ -189,77 +175,25 @@ const GameSummary = ({ agentId }) => {
     const numAmounts = [Number(input.str || 0), Number(input.rumble || 0)];
     const permutations = getPermutations(threeUp);
     const reversedDown = downGame?.split("").reverse().join("");
-
     if (number.length === 3) {
-      // Match for 3-digit number
-      if (threeUp.includes(number)) {
-        return { match: true, type: "str" }; // STR matched for 3 digits
-      }
-      if (permutations.includes(number) && numAmounts[1]) {
-        return { match: true, type: "rumble" }; // RUMBLE matched for 3 digits
-      }
+      if (number === threeUp) return { match: true, type: "str" };
+      if (permutations.includes(number) && numAmounts.length >= 2)
+        return { match: true, type: "rumble" };
     }
 
     if (number.length === 2) {
-      // Match for 2-digit number
-      if (number === downGame) {
-        return { match: true, type: "down" }; // DOWN matched for 2 digits
-      }
-      if (number === reversedDown && numAmounts[1]) {
-        return { match: true, type: "rumble" }; // RUMBLE matched for 2 digits
-      }
+      if (number === downGame) return { match: true, type: "down" };
+      if (number === reversedDown && numAmounts.length >= 2)
+        return { match: true, type: "rumble" };
     }
 
     if (number.length === 1 && threeUp.includes(number)) {
-      // Match for 1-digit number
-      return { match: true, type: "single" }; // SINGLE matched for 1 digit
+      return { match: true, type: "single" };
     }
 
     return { match: false, type: null };
   };
 
-  const uploadSummary = async () => {
-    const cal = {
-      thisGame,
-      thisGameAmt: Number(thisGameAmt),
-      exGame,
-      exGameAmt: Number(exGameAmt),
-      currentGame,
-      currentGameAmt: Number(currentGameAmt),
-      currentGameOperation,
-      joma: {
-        date: new Date().toISOString().split("T")[0],
-        jomaType,
-        jomaAmt: Number(jomaAmt),
-      },
-      finalCalType,
-      finalCalAmt: Number(finalCalAmt),
-      finalCalOperation,
-    };
-
-    // Make the API call
-    try {
-      const res = await fetch("/api/save-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          agentId,
-          gameDate: date,
-          cal,
-        }),
-      });
-
-      const result = await res.json();
-
-      if (result.success) {
-        alert("✅ Summary saved or updated");
-      } else {
-        alert("⚠️ Summary not saved: " + (result.message || result.error));
-      }
-    } catch (error) {
-      alert("❌ Network error: " + error.message);
-    }
-  };
   useEffect(() => {
     setThisGame(summaryData?.calculation?.thisGame);
     setThisGameAmt(summaryData?.calculation?.thisGameAmt);
@@ -308,7 +242,8 @@ const GameSummary = ({ agentId }) => {
           }
           .container {
             width: 100%;
-          }
+          } 
+             h1 { font-size: 20px; text-align: center; margin: 2px 0; }
           h2 {
             font-size: 20px;
             margin: 4px 0;
@@ -351,6 +286,11 @@ const GameSummary = ({ agentId }) => {
           .final-calc {
             text-align: left;
           }
+             .first-container {
+  border: 1px solid #000;
+  padding: 4px;
+  margin-bottom: 4px;
+}
         </style>
       </head>
       <body>
@@ -678,20 +618,20 @@ const GameSummary = ({ agentId }) => {
     }
   };
 
-  useEffect(() => {
-    // Step 1: বর্তমান হিসাব নির্ণয় (currentGameAmt)
-    const thisGame = parseFloat(thisGameAmt) || 0;
-    const exGame = parseFloat(exGameAmt) || 0;
-    let currentResult = 0;
+  // useEffect(() => {
+  //   // Step 1: বর্তমান হিসাব নির্ণয় (currentGameAmt)
+  //   const thisGame = parseFloat(thisGameAmt) || 0;
+  //   const exGame = parseFloat(exGameAmt) || 0;
+  //   let currentResult = 0;
 
-    if (currentGameOperation === "plusCurrent") {
-      currentResult = thisGame + exGame;
-    } else if (currentGameOperation === "minusCurrent") {
-      currentResult = thisGame - exGame;
-    }
+  //   if (currentGameOperation === "plusCurrent") {
+  //     currentResult = thisGame + exGame;
+  //   } else if (currentGameOperation === "minusCurrent") {
+  //     currentResult = thisGame - exGame;
+  //   }
 
-    setCurrentGameAmt(currentResult.toFixed(0));
-  }, [thisGameAmt, exGameAmt, currentGameOperation]);
+  //   setCurrentGameAmt(currentResult.toFixed(0));
+  // }, [thisGameAmt, exGameAmt, currentGameOperation]);
 
   useEffect(() => {
     // Step 2: ফাইনাল হিসাব নির্ণয় (finalCalAmt)
@@ -707,8 +647,8 @@ const GameSummary = ({ agentId }) => {
 
     setFinalCalAmt(finalResult.toFixed(0));
   }, [currentGameAmt, jomaAmt, finalCalOperation]);
-
-  console.log(summaryData, "summarydata");
+  console.log(moneyCal.totalAmounts);
+  console.log(moneyCal);
   if (loading) return <Loading></Loading>;
   if (fetched && players.length === 0)
     return <p>No players found for this agent.</p>;
@@ -735,6 +675,9 @@ const GameSummary = ({ agentId }) => {
             >
               <div className="flex justify-between items-center mb-6">
                 {/* <div className="flex items-center gap-4 mt-4"> */}
+                <h2 className="text-lg md:text-2xl font-bold text-gray-800">
+                  📊 Game & Player Summary
+                </h2>
                 <button
                   onClick={handleDownloadPdf}
                   className="p-2 rounded-xl bg-gray-200 transition duration-300"
@@ -742,17 +685,6 @@ const GameSummary = ({ agentId }) => {
                 >
                   <img src="/download.svg" alt="Download" className="w-8 h-8" />
                 </button>
-
-                <h2 className="text-lg md:text-2xl font-bold text-gray-800">
-                  📊 Game & Player Summary
-                </h2>
-                <button
-                  onClick={uploadSummary}
-                  className="py-2 px-2 bg-gray-200 text-black rounded-xl transition duration-300 text-lg font-medium"
-                >
-                  Save
-                </button>
-                {/* </div> */}
               </div>
 
               <table className="w-full border-collapse font-mono text-sm rounded-lg shadow border border-gray-400">
@@ -847,6 +779,7 @@ const GameSummary = ({ agentId }) => {
                     </td>
                   </tr>
 
+                  {/* After Deduction */}
                   {summaryData ? (
                     <tr className="bg-gray-50 text-gray-800">
                       <td className="border px-4 py-2 font-semibold">
@@ -948,7 +881,12 @@ const GameSummary = ({ agentId }) => {
                       {summaryData?.totalWin || 0}
                     </td>
                     <td colSpan={3} className="border px-4 py-2 font-bangla">
-                      <select
+                      {thisGame === "adminTGame"
+                        ? " ই - গেম ব্যাংকার পাবে"
+                        : currentGame === "agentTGame"
+                        ? "ই - গেম এজেন্ট পাবে"
+                        : ""}
+                      {/* <select
                         value={thisGame}
                         onChange={(e) => setThisGame(e.target.value)}
                         className="w-full bg-white border px-2 py-1 text-center"
@@ -958,17 +896,17 @@ const GameSummary = ({ agentId }) => {
                           ই - গেম ব্যাংকার পাবে
                         </option>
                         <option value="agentTGame">ই - গেম এজেন্ট পাবে</option>
-                      </select>
+                      </select> */}
                     </td>
-                    <td className="border px-4 py-2 text-red-600"></td>
-                    <td className="border px-4 py-2 text-red-600">
-                      <input
+                    <td colSpan={2} className="border px-4 py-2 text-red-600">
+                      {thisGameAmt}
+                      {/* <input
                         type="number"
                         value={thisGameAmt}
                         onChange={(e) => setThisGameAmt(e.target.value)}
                         placeholder="পরিমাণ"
                         className="w-full font-bangla bg-gray-100 border text-center px-2 py-1"
-                      />
+                      /> */}
                     </td>
                   </tr>
 
@@ -983,7 +921,12 @@ const GameSummary = ({ agentId }) => {
                         : 0}
                     </td>
                     <td colSpan={3} className="font-bangla border px-4 py-2">
-                      <select
+                      {exGame === "adminEx"
+                        ? "ব্যাংকার সাবেক"
+                        : currentGame === "agentEx"
+                        ? "এজেন্ট সাবেক"
+                        : ""}
+                      {/* <select
                         value={exGame}
                         onChange={(e) => setExGame(e.target.value)}
                         className="w-full bg-white border px-2 py-1 text-center"
@@ -991,18 +934,18 @@ const GameSummary = ({ agentId }) => {
                         <option value="option">সাবেক</option>
                         <option value="adminEx">ব্যাংকার সাবেক</option>
                         <option value="agentEx">এজেন্ট সাবেক</option>
-                      </select>
+                      </select> */}
                     </td>
-                    <td className="border px-4 py-2 text-red-600"></td>
 
-                    <td className="border px-4 py-2">
-                      <input
+                    <td colSpan={2} className="border px-4 py-2">
+                      {exGameAmt}
+                      {/* <input
                         type="number"
                         value={exGameAmt}
                         onChange={(e) => setExGameAmt(e.target.value)}
                         placeholder="পরিমাণ"
                         className="w-full font-bangla bg-gray-100 border text-center px-2 py-1"
-                      />
+                      /> */}
                     </td>
                   </tr>
 
@@ -1017,61 +960,32 @@ const GameSummary = ({ agentId }) => {
                         : 0}
                     </td>
 
-                    {summaryData?.calculation ? (
-                      finalCalAmt && (
-                        <>
-                          <td
-                            colSpan={3}
-                            className="font-bangla border px-4 py-2 text-red-700 font-bold"
-                          >
-                            {currentGame === "finalCalBanker"
-                              ? "বর্তমানে ব্যাংকার পাবে"
-                              : currentGame === "finalCalAgent"
-                              ? "বর্তমানে এজেন্ট পাবে"
-                              : ""}
-                          </td>
-                          <td className="border px-4 py-2 font-bangla"></td>
-                          <td className="border px-4 py-2 font-bangla">
-                            {currentGameAmt}
-                          </td>
-                        </>
-                      )
-                    ) : (
+                    {summaryData?.calculation?.finalCalAmt ? (
                       <>
                         <td
-                          colSpan={3}
-                          className="font-bangla border px-4 py-2"
+                          colSpan={2}
+                          className="font-bangla border px-4 py-2 text-red-700 font-bold"
                         >
-                          <select
-                            value={currentGame}
-                            onChange={(e) => setCurrentGame(e.target.value)}
-                            className="w-full bg-white border px-2 py-1 text-center"
-                          >
-                            <option value="option">বর্তমান</option>
-                            <option value="adminCurrent">
-                              বর্তমানে ব্যাংকার পাবে
-                            </option>
-                            <option value="agentCurrent">
-                              বর্তমানে এজেন্ট পাবে
-                            </option>
-                          </select>
-                        </td>
-                        <td className="border px-4 py-2 font-bangla">
-                          <select
-                            value={currentGameOperation}
-                            onChange={(e) =>
-                              setCurrentGameOperation(e.target.value)
-                            }
-                            className="w-full bg-white border py-1 text-center"
-                          >
-                            <option value="option">+/-</option>
-                            <option value="plusCurrent">+</option>
-                            <option value="minusCurrent">-</option>
-                          </select>
+                          {currentGame === "finalCalBanker"
+                            ? "বর্তমানে ব্যাংকার পাবে"
+                            : currentGame === "finalCalAgent"
+                            ? "বর্তমানে এজেন্ট পাবে"
+                            : ""}
                         </td>
                         <td className="border px-4 py-2 font-bangla">
                           {currentGameAmt}
                         </td>
+                      </>
+                    ) : (
+                      <>
+                        <td
+                          colSpan={3}
+                          className="font-bangla border px-4 py-2 text-red-700 font-bold"
+                        ></td>
+                        <td
+                          colSpan={2}
+                          className="border px-4 py-2 font-bangla"
+                        ></td>
                       </>
                     )}
                   </tr>
@@ -1080,10 +994,15 @@ const GameSummary = ({ agentId }) => {
                   <tr className="bg-gray-100 text-gray-800">
                     <td
                       colSpan={3}
+                      className="border px-4 py-2 font-bangla"
+                    ></td>
+                    <td
+                      colSpan={5}
                       rowSpan={2}
                       className="font-bangla text-sm px-4 py-2 border text-left"
                     >
                       <ol>
+                        <p className="text-center">জমা বিবরনী</p>
                         {summaryData?.calculation?.joma
                           ?.filter((entry) => entry.jomaAmt !== 0)
                           .map((entry, i) => (
@@ -1101,60 +1020,6 @@ const GameSummary = ({ agentId }) => {
                             </li>
                           ))}
                       </ol>
-                    </td>
-                    <td colSpan={3} className="border px-4 py-2 font-bangla">
-                      <select
-                        value={jomaType}
-                        onChange={(e) => setJomaType(e.target.value)}
-                        className="w-full bg-white border px-2 py-1 text-center"
-                      >
-                        <option value="option">জমার ধরণ</option>
-                        <option value="jomaRegular">জমা</option>
-                        <option value="jomaWin">উইন জমা</option>
-                        <option value="jomaCash">নগদ জমা</option>
-                      </select>
-                    </td>
-                    <td className="border px-4 py-2 text-red-600"></td>
-
-                    <td colSpan={2} className="border px-4 py-2">
-                      <input
-                        type="number"
-                        value={jomaAmt}
-                        onChange={(e) => setJomaAmt(e.target.value)}
-                        placeholder="পরিমাণ"
-                        className="w-full font-bangla bg-gray-100 border text-center px-2 py-1"
-                      />
-                    </td>
-                  </tr>
-
-                  {/* Final Summary */}
-                  <tr className="bg-gray-100 text-gray-900 font-bold">
-                    <td colSpan={3} className="border px-4 py-2 font-bangla">
-                      <select
-                        value={finalCalType}
-                        onChange={(e) => setFinalCalType(e.target.value)}
-                        className="w-full bg-white border px-2 py-1 text-center"
-                      >
-                        <option value="option">মোট বর্তমান হিসাব</option>
-                        <option value="finalCalBanker">
-                          ব্যাংকার মোট পাবে
-                        </option>
-                        <option value="finalCalAgent">এজেন্ট মোট পাবে</option>
-                      </select>
-                    </td>
-                    <td className="border px-4 py-2 text-red-600">
-                      <select
-                        value={finalCalOperation}
-                        onChange={(e) => setFinalCalOperation(e.target.value)}
-                        className="w-full bg-white border py-1 text-center"
-                      >
-                        <option value="option">+/-</option>
-                        <option value="plusFinal">+</option>
-                        <option value="minusFinal">-</option>
-                      </select>
-                    </td>
-                    <td className="border px-4 py-2 text-red-600">
-                      {finalCalAmt}
                     </td>
                   </tr>
                 </tbody>
@@ -1362,7 +1227,7 @@ const GameSummary = ({ agentId }) => {
                         <th className="border px-0">Num</th>
                         <th className="border px-0">Str</th>
                         <th className="border px-0">Rum.</th>
-                        <th className="bg-gray-200 border-hidden" />
+                        <th className="bg-gray-200" />
                         <th className="border px-0">Num</th>
                         <th className="border px-0">Str</th>
                         <th className="border px-0">Rum.</th>
@@ -1391,33 +1256,15 @@ const GameSummary = ({ agentId }) => {
                             threeUp,
                             downGame
                           );
-                          const numLength = entry.input.num?.length;
 
-                          let shouldHighlight = false;
-
-                          if (!match) return <span>{value}</span>;
-
-                          if (field === "num") {
-                            // ✅ Always highlight `num` if there's a match
-                            shouldHighlight = true;
-                          } else if (numLength === 3) {
-                            if (type === "str") {
-                              shouldHighlight =
-                                field === "str" || field === "rumble";
-                            } else if (type === "rumble") {
-                              shouldHighlight = field === "rumble";
-                            }
-                          } else if (numLength === 2) {
-                            if (type === "down") {
-                              shouldHighlight = field === "rumble";
-                            } else if (type === "str") {
-                              shouldHighlight = field === "str";
-                            } else if (type === "rumble") {
-                              shouldHighlight = field === "rumble";
-                            }
-                          } else if (numLength === 1 && type === "single") {
-                            shouldHighlight = field === "str";
-                          }
+                          const shouldHighlight =
+                            match &&
+                            (field === "num" ||
+                              (field === "str" && type === "str") ||
+                              (field === "rumble" &&
+                                (type === "rumble" ||
+                                  type === "down" ||
+                                  type === "single")));
 
                           return (
                             <span

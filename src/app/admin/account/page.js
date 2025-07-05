@@ -664,116 +664,120 @@ export default function Account() {
       {/* 🔽 Year Selector */}
       <div className="mb-4 flex flex-col">
         <label className="font-bold text-yellow-400 mb-2">Select Year:</label>
-       <div className="flex items-center justify-start">
-         <select
-          value={selectedYear || ""}
-          onChange={(e) => setSelectedYear(Number(e.target.value))}
-          className="bg-gray-800 text-white px-3 py-1 rounded border border-yellow-500 w-fit"
-        >
-          <option value="" disabled>
-            -- Select Year --
-          </option>
-          {years.map((year) => (
-            <option key={year} value={year}>
-              {year}
+        <div className="flex items-center justify-start">
+          <select
+            value={selectedYear || ""}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            className="bg-gray-800 text-white px-3 py-1 rounded border border-yellow-500 w-fit"
+          >
+            <option value="" disabled>
+              -- Select Year --
             </option>
-          ))}
-        </select>
-        <button
-          onClick={() => handleYearDownloadPdf(selectedYear)}
-          className="p-1 mx-4 rounded-xl bg-gray-200 transition duration-300"
-          title="Download Player Info"
-        >
-          <img src="/download.svg" alt="Download" className="w-8 h-8" />
-        </button>
-       </div>
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => handleYearDownloadPdf(selectedYear)}
+            className="p-1 mx-4 rounded-xl bg-gray-200 transition duration-300"
+            title="Download Player Info"
+          >
+            <img src="/download.svg" alt="Download" className="w-8 h-8" />
+          </button>
+        </div>
       </div>
 
       {/* 📊 Totals by Date Table */}
 
-      <table
-        ref={yearContentRef}
-        className="w-full border-collapse text-sm font-mono text-center"
-      >
-        <thead className="bg-yellow-700 text-white">
-          <tr>
-            <th className="p-2 ">#</th>
-            <th className="p-2 ">Date</th>
-            <th className="p-2">STR</th>
-            <th className="p-2">RUMBLE</th>
-            <th className="p-2">DOWN</th>
-            <th className="p-2">SINGLE</th>
-            <th className="p-2">Total Game</th>
-            <th className="p-2">Total Win</th>
-            <th className="p-2">W/L</th>
-          </tr>
-        </thead>
-        <tbody>
-          {groupedByDate.map(([date, totals], idx) => (
-            <tr key={date} className="hover:bg-gray-800">
-              <td className="p-2">{idx + 1}</td>
-              <td className="p-2">{new Date(date).toDateString()}</td>
-              <td className="p-2">{totals.STR}</td>
-              <td className="p-2">{totals.RUMBLE}</td>
-              <td className="p-2">{totals.DOWN}</td>
-              <td className="p-2">{totals.SINGLE}</td>
-              <td className="p-2">{totals.totalGame}</td>
-              <td className="p-2">{totals.totalWin}</td>
+      <div className="w-full overflow-x-auto">
+        <table
+          ref={yearContentRef}
+          className="min-w-full border-collapse text-sm font-mono text-center"
+        >
+          <thead className="bg-yellow-700 text-white">
+            <tr>
+              <th className="p-2">#</th>
+              <th className="p-2">Date</th>
+              <th className="p-2">STR</th>
+              <th className="p-2">RUMBLE</th>
+              <th className="p-2">DOWN</th>
+              <th className="p-2">SINGLE</th>
+              <th className="p-2">Total Game</th>
+              <th className="p-2">Total Win</th>
+              <th className="p-2">W/L</th>
+            </tr>
+          </thead>
+          <tbody>
+            {groupedByDate.map(([date, totals], idx) => (
+              <tr key={date} className="hover:bg-gray-800">
+                <td className="p-2">{idx + 1}</td>
+                <td className="p-2">{new Date(date).toDateString()}</td>
+                <td className="p-2">{totals.STR}</td>
+                <td className="p-2">{totals.RUMBLE}</td>
+                <td className="p-2">{totals.DOWN}</td>
+                <td className="p-2">{totals.SINGLE}</td>
+                <td className="p-2">{totals.totalGame}</td>
+                <td className="p-2">{totals.totalWin}</td>
+                <td
+                  className={`p-2 font-semibold ${
+                    totals.totalGame - totals.totalWin < 0
+                      ? "text-red-500"
+                      : "text-green-400"
+                  }`}
+                >
+                  {totals.totalGame - totals.totalWin}
+                </td>
+              </tr>
+            ))}
+
+            {/* Year Total Row */}
+            <tr className="bg-gray-900 text-yellow-300 font-bold border-t border-yellow-500">
+              <td className="p-2" colSpan={2}>
+                Year Total — {selectedYear}
+              </td>
+              <td className="p-2">{yearTotal.STR}</td>
+              <td className="p-2">{yearTotal.RUMBLE}</td>
+              <td className="p-2">{yearTotal.DOWN}</td>
+              <td className="p-2">{yearTotal.SINGLE}</td>
+              <td className="p-2">{yearTotal.totalGame}</td>
+              <td className="p-2">{yearTotal.totalWin}</td>
               <td
-                className={`p-2 font-semibold ${
-                  totals.totalGame - totals.totalWin < 0
+                className={`p-2 ${
+                  yearTotal.totalGame - yearTotal.totalWin < 0
                     ? "text-red-500"
                     : "text-green-400"
                 }`}
               >
-                {totals.totalGame - totals.totalWin}
+                {yearTotal.totalGame - yearTotal.totalWin}
               </td>
             </tr>
-          ))}
 
-          {/* 🧾 Final Total Row */}
-          <tr className="bg-gray-900 text-yellow-300 font-bold border-t border-yellow-500">
-            <td className="p-2" colSpan={2}>
-              Year Total — {selectedYear}
-            </td>
-            <td className="p-2">{yearTotal.STR}</td>
-            <td className="p-2">{yearTotal.RUMBLE}</td>
-            <td className="p-2">{yearTotal.DOWN}</td>
-            <td className="p-2">{yearTotal.SINGLE}</td>
-            <td className="p-2">{yearTotal.totalGame}</td>
-            <td className="p-2">{yearTotal.totalWin}</td>
-            <td
-              className={`p-2 ${
-                yearTotal.totalGame - yearTotal.totalWin < 0
-                  ? "text-red-500"
-                  : "text-green-400"
-              }`}
-            >
-              {yearTotal.totalGame - yearTotal.totalWin}
-            </td>
-          </tr>
-          <tr className="bg-yellow-950 text-yellow-200 font-bold border-t border-yellow-500">
-            <td className="p-2" colSpan={2}>
-              Ultimate Total
-            </td>
-            <td className="p-2">{ultimateTotal.STR}</td>
-            <td className="p-2">{ultimateTotal.RUMBLE}</td>
-            <td className="p-2">{ultimateTotal.DOWN}</td>
-            <td className="p-2">{ultimateTotal.SINGLE}</td>
-            <td className="p-2">{ultimateTotal.totalGame}</td>
-            <td className="p-2">{ultimateTotal.totalWin}</td>
-            <td
-              className={`p-2 ${
-                ultimateTotal.totalGame - ultimateTotal.totalWin < 0
-                  ? "text-red-500"
-                  : "text-green-400"
-              }`}
-            >
-              {ultimateTotal.totalGame - ultimateTotal.totalWin}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            {/* Ultimate Total Row */}
+            <tr className="bg-yellow-950 text-yellow-200 font-bold border-t border-yellow-500">
+              <td className="p-2" colSpan={2}>
+                Ultimate Total
+              </td>
+              <td className="p-2">{ultimateTotal.STR}</td>
+              <td className="p-2">{ultimateTotal.RUMBLE}</td>
+              <td className="p-2">{ultimateTotal.DOWN}</td>
+              <td className="p-2">{ultimateTotal.SINGLE}</td>
+              <td className="p-2">{ultimateTotal.totalGame}</td>
+              <td className="p-2">{ultimateTotal.totalWin}</td>
+              <td
+                className={`p-2 ${
+                  ultimateTotal.totalGame - ultimateTotal.totalWin < 0
+                    ? "text-red-500"
+                    : "text-green-400"
+                }`}
+              >
+                {ultimateTotal.totalGame - ultimateTotal.totalWin}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       {modalVisible && (
         <GameSummary
           // visible={modalVisible}

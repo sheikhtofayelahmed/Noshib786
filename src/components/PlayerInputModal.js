@@ -667,13 +667,15 @@ export default function PlayerInputModal({ onClose }) {
   <p style="margin-bottom: 12px; font-size: 14px; line-height: 1.5;">
     ✍️ Authorized Signature
   </p>
-  <div style="
-    display: inline-block;
-    border-bottom: 1px solid #000;
-    width: 200px;
-    height: 40px;
-    vertical-align: top;
-  "></div>
+<div style="
+  display: inline-block;
+  width: 200px;
+  height: 60px;
+  vertical-align: top;
+  background-color: #e5e5e5;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+"></div>
 </div>
           <div class="qr-code">
               <img src="${qrDataUrl}" width="280" height="280" />
@@ -745,7 +747,12 @@ export default function PlayerInputModal({ onClose }) {
           <h1 className="text-lg lg:text-4xl  font-bold text-center mb-6 text-yellow-400">
             🎰 Player Voucher 🎰
           </h1>
-
+          <button
+            onClick={handleSavePlayer}
+            className="block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded mx-auto mb-10"
+          >
+            🎲 Complete
+          </button>
           <label className="block mb-2 text-yellow-300 ">Player Name:</label>
           <input
             type="text"
@@ -849,13 +856,6 @@ export default function PlayerInputModal({ onClose }) {
             <p className="text-red-400">Please correct the errors.</p>
           )}
           <div className="flex flex-wrap gap-2 mt-4">
-            <button
-              onClick={handleSavePlayer}
-              // disabled={isCompleted === false}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
-            >
-              🎲 Complete
-            </button>
             <button
               onClick={handleAddInputs}
               className="bg-green-500 hover:bg-green-600 text-black font-bold py-2 px-4 rounded"

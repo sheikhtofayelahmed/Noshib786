@@ -28,6 +28,7 @@ export default async function handler(req, res) {
       {
         $set: calFields,
         $push: { "calculation.joma": joma },
+        $currentDate: { lastUpdated: true }, // ⏱️ MongoDB sets this to ISODate
       }
     );
 

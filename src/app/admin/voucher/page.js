@@ -725,7 +725,10 @@ export default function VoucherModal() {
                       {amountPlayed?.ThreeD}
                     </td>
                     <td className="border border-gray-600 px-4 py-2 text-green-400">
-                      {(amountPlayed?.ThreeD * 0.6).toFixed(0)}
+                      {(
+                        amountPlayed?.ThreeD *
+                        (1 - currentVoucherData.cPercentages.threeD / 100)
+                      ).toFixed(0)}
                     </td>
                   </tr>
                   <tr className="bg-gray-900">
@@ -736,7 +739,10 @@ export default function VoucherModal() {
                       {amountPlayed?.TwoD}
                     </td>
                     <td className="border border-gray-600 px-4 py-2 text-green-400">
-                      {(amountPlayed?.TwoD * 0.8).toFixed(0)}
+                      {(
+                        amountPlayed?.TwoD *
+                        (1 - currentVoucherData.cPercentages.twoD / 100)
+                      ).toFixed(0)}
                     </td>
                   </tr>
                   <tr className="bg-gray-800">
@@ -747,25 +753,29 @@ export default function VoucherModal() {
                       {amountPlayed?.OneD}
                     </td>
                     <td className="border border-gray-600 px-4 py-2 text-green-400">
-                      {amountPlayed?.OneD.toFixed(0)}
+                      {amountPlayed?.OneD *
+                        (
+                          1 -
+                          currentVoucherData.cPercentages.threeD / 100
+                        ).toFixed(0)}
                     </td>
                   </tr>
                   <tr className="bg-gray-900 font-bold text-lg">
-                    <td className="border border-gray-600 px-4 py-2">
+                    <td
+                      colSpan={2}
+                      className="border border-gray-600 px-4 py-2"
+                    >
                       🔢 Grand Total
                     </td>
+
                     <td className="border border-gray-600 px-4 py-2 text-yellow-300">
                       {(
-                        amountPlayed?.ThreeD +
-                        amountPlayed?.TwoD +
-                        amountPlayed?.OneD
-                      ).toFixed(0)}
-                    </td>
-                    <td className="border border-gray-600 px-4 py-2 text-yellow-300">
-                      {(
-                        amountPlayed?.ThreeD * 0.6 +
-                        amountPlayed?.TwoD * 0.8 +
-                        amountPlayed?.OneD
+                        amountPlayed?.ThreeD *
+                          (1 - currentVoucherData.cPercentages.threeD / 100) +
+                        amountPlayed?.TwoD *
+                          (1 - currentVoucherData.cPercentages.twoD / 100) +
+                        amountPlayed?.OneD *
+                          (1 - currentVoucherData.cPercentages.oneD / 100)
                       ).toFixed(0)}
                     </td>
                   </tr>

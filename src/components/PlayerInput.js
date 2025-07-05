@@ -844,18 +844,20 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
               </tr>
             </tbody>
           </table>
-   <div style="margin-top: 24px; text-align: center;">
-  <p style="margin-bottom: 12px; font-size: 14px; line-height: 1.5;">
-    ✍️ Authorized Signature
-  </p>
-  <div style="
-    display: inline-block;
-    border-bottom: 1px solid #000;
-    width: 200px;
-    height: 40px;
-    vertical-align: top;
-  "></div>
-</div>
+          <div style="margin-top: 24px; text-align: center;">
+          <p style="margin-bottom: 12px; font-size: 14px; line-height: 1.5;">
+            ✍️ Authorized Signature
+          </p>
+         <div style="
+            display: inline-block;
+            width: 200px;
+            height: 60px;
+            vertical-align: top;
+            background-color: #e5e5e5;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+          "></div>
+        </div>
           <div class="qr-code">
               <img src="${qrDataUrl}" width="280" height="280" />
           </div>

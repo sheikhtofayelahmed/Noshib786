@@ -10,43 +10,37 @@ export default function AdminGameControl() {
   const [downGame, setDownGame] = useState("");
   const [gameDate, setGameDate] = useState(null);
   const [targetDateTime, setTargetDateTime] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchStatus = async () => {
+    const fetchGameInfo = async () => {
       try {
-        const res = await fetch("/api/game-status");
-        if (!res.ok) throw new Error("Failed to fetch game status");
-        const data = await res.json();
-        setIsGameOn(data.isGameOn);
+        setLoading(true);
+
+        const [statusRes, dataRes] = await Promise.all([
+          fetch("/api/game-status"),
+          fetch("/api/win-status"),
+        ]);
+
+        if (!statusRes.ok) throw new Error("Failed to fetch game status");
+        if (!dataRes.ok) throw new Error("Failed to fetch game data");
+
+        const statusData = await statusRes.json();
+        const gameData = await dataRes.json();
+        setIsGameOn(statusData.isGameOn);
+        setThreeUp(gameData.threeUp);
+        setDownGame(gameData.downGame);
+        setGameDate(gameData.gameDate);
+        setTargetDateTime(new Date(statusData.targetDateTime));
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    fetchStatus();
-  }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch("/api/win-status");
-        const data = await res.json();
-        setThreeUp(data.threeUp || "");
-        setDownGame(data.downGame || "");
-
-        if (data.date) {
-          // Convert UTC string to Date object (still in local time)
-          setGameDate(new Date(data.date));
-        }
-      } catch (error) {
-        console.error("Error fetching winning numbers:", error);
-      }
-    };
-
-    fetchData();
+    fetchGameInfo();
   }, []);
 
   const toggleGameStatus = async () => {
@@ -93,7 +87,7 @@ export default function AdminGameControl() {
       setLoading(false);
     }
   };
-
+  console.log(targetDateTime);
   const handleSubmit = async () => {
     if (
       !threeUp ||
@@ -218,7 +212,13 @@ export default function AdminGameControl() {
             disabled={loading}
             className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-4 py-2 rounded shadow w-full sm:w-auto"
           >
-            {loading ? "Saving..." : "Save"}
+            {loading ? (
+              "..."
+            ) : targetDateTime ? (
+              <span className="text-green-800 font-semibold">On</span>
+            ) : (
+              <span className="text-red-700 font-semibold">Off</span>
+            )}
           </button>
         </div>
       </div>

@@ -1,14 +1,14 @@
 "use client";
 import AllahBhorosha from "@/components/Allah";
 import { AgentProvider, useAgent } from "@/context/AgentContext";
-import GameSummaryAgent from "@/components/GameSummaryAgent";
+import GameSummary from "@/components/GameSummary";
 
 const Reports = () => {
   const { agentId } = useAgent();
   return (
     <AgentProvider>
       <AllahBhorosha></AllahBhorosha>
-      <GameSummaryAgent agentId={agentId}></GameSummaryAgent>
+      <GameSummary agentId={agentId}></GameSummary>
     </AgentProvider>
   );
 };
