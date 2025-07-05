@@ -1,71 +1,87 @@
-import React, { useEffect, useState } from "react";
+'use client'
+import { useEffect, useState } from "react";
 
-export default function NumberPayoutTable() {
+export default function NumbersPage() {
   const [data, setData] = useState({ threeD: [], twoD: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchPayouts() {
+    async function fetchData() {
       try {
-        const res = await fetch("/api/profitLoss", { method: "POST" }); // change URL to your API route
+        const res = await fetch("/api/your-api-endpoint", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
         if (!res.ok) throw new Error("Failed to fetch");
         const json = await res.json();
         setData(json);
-      } catch (e) {
-        setError(e.message);
+      } catch (err) {
+        setError(err.message || "Unknown error");
       } finally {
         setLoading(false);
       }
     }
 
-    fetchPayouts();
+    fetchData();
   }, []);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
   const renderTable = (title, numbers) => (
-    <div style={{ marginBottom: "2rem" }}>
+    <section style={{ marginBottom: 40 }}>
       <h2>{title}</h2>
-      <table border="1" cellPadding="8" style={{ borderCollapse: "collapse", width: "100%" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
-            <th>Number</th>
-            <th>Str Amount</th>
-            <th>Rumble Amount</th>
-            <th>Payout</th>
-            <th>Profit / Loss</th>
+            <th style={th}>Number</th>
+            <th style={th}>Str</th>
+            <th style={th}>Rumble</th>
+            <th style={th}>Payout</th>
+            <th style={th}>Profit/Loss</th>
           </tr>
         </thead>
         <tbody>
           {numbers.length === 0 ? (
             <tr>
-              <td colSpan="5" style={{ textAlign: "center" }}>
-                No data available
+              <td colSpan={5} style={{ padding: 12, textAlign: "center" }}>
+                No data
               </td>
             </tr>
           ) : (
             numbers.map(({ number, str, rumble, payout, profitLoss }) => (
               <tr key={number}>
-                <td>{number}</td>
-                <td>{str}</td>
-                <td>{rumble}</td>
-                <td>{payout}</td>
-                <td>{profitLoss}</td>
+                <td style={td}>{number}</td>
+                <td style={td}>{str}</td>
+                <td style={td}>{rumble}</td>
+                <td style={td}>{payout}</td>
+                <td style={td}>{profitLoss}</td>
               </tr>
             ))
           )}
         </tbody>
       </table>
-    </div>
+    </section>
   );
 
+  const th = {
+    border: "1px solid #ddd",
+    padding: "8px",
+    backgroundColor: "#f0f0f0",
+    textAlign: "left",
+  };
+
+  const td = {
+    border: "1px solid #ddd",
+    padding: "8px",
+  };
+
   return (
-    <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
-      <h1>Lottery Numbers and Payouts</h1>
+    <main style={{ maxWidth: 900, margin: "40px auto", fontFamily: "sans-serif" }}>
+      <h1>Lottery Number Payouts</h1>
       {renderTable("3-Digit Numbers", data.threeD)}
       {renderTable("2-Digit Numbers", data.twoD)}
-    </div>
+    </main>
   );
 }
