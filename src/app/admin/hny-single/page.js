@@ -9,7 +9,7 @@ export default function NumbersPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch("/api/your-api-endpoint", {
+        const res = await fetch("/api/profitLoss", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
