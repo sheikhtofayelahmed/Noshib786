@@ -1,46 +1,79 @@
 "use client";
 
-import Loading from "@/components/Loading";
-import NumberTableSingle from "@/components/NumberTableSingle";
-import { useEffect, useState } from "react";
-export default function HappyNewYear() {
-  const [numberData, setNumberData] = useState([]);
+import React, { useEffect, useState } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  CartesianGrid,
+} from "recharts";
+
+export default function ProfitChart() {
+  const [threeD, setThreeD] = useState([]);
+  const [twoD, setTwoD] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const res = await fetch("/api/happyNewYear");
-      if (!res.ok) {
-        console.error("Failed to fetch number stats:", res.statusText);
-        return;
-      }
-      const data = await res.json();
-      setNumberData(data);
-      setLoading(false);
-    };
-    fetchData();
+    fetch("/api/profitLoss", {
+      method: "POST",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setThreeD(data.threeD || []);
+        setTwoD(data.twoD || []);
+      })
+      .catch((err) => console.error("Error loading data:", err))
+      .finally(() => setLoading(false));
   }, []);
 
-  const singleRows = [[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]];
+  const formatData = (data) =>
+    data.map((item) => ({
+      number: item.number,
+      payout: item.payout,
+      pl: item.pl,
+    }));
 
-  const [loading, setLoading] = useState(false);
   if (loading) {
-    return <Loading></Loading>;
+    return <div className="p-4 text-center text-gray-500">Loading chart...</div>;
   }
+
   return (
-    <div className="w-full p-8 bg-gradient-to-b from-black to-red-950 min-h-screen font-sans text-gray-100 select-none overflow-x-hidden">
-      <h1 className="text-center text-6xl font-extrabold mb-16 uppercase tracking-widest text-red-500 drop-shadow-lg animate-pulse-light">
-        🎰 Thai Lottery Agent 🎲
-      </h1>
+    <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* 3 Digit Profit */}
+      <div className="bg-white p-4 shadow-lg rounded-xl">
+        <h2 className="text-xl font-semibold mb-4">3 Digit Profit</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={formatData(threeD)}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="number" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="pl" fill="#10b981" name="Profit" />
+            <Bar dataKey="payout" fill="#3b82f6" name="Payout" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
-      <NumberTableSingle
-        title="Single"
-        rows={singleRows}
-        data={numberData}
-        single={true}
-      />
-
-      {/* Tailwind CSS custom animations and colors (add to your global CSS or tailwind.config.js) */}
+      {/* 2 Digit Profit */}
+      <div className="bg-white p-4 shadow-lg rounded-xl">
+        <h2 className="text-xl font-semibold mb-4">2 Digit Profit</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={formatData(twoD)}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="number" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="pl" fill="#ef4444" name="Profit" />
+            <Bar dataKey="payout" fill="#facc15" name="Payout" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }
