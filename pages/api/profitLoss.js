@@ -96,12 +96,9 @@ export default async function handler(req, res) {
         const rumblePayout = rumbleSum * multipliers.threeD.rumble;
 
         const digits = [...new Set(num.split(""))];
-        let singleSum = 0;
-        for (const d of digits) {
-          if (singleDigitPayouts[d]) {
-            singleSum += singleDigitPayouts[d];
-          }
-        }
+        const singleSum = digits.reduce((sum, d) => {
+          return sum + (singleDigitPayouts[d] ? singleDigitPayouts[d] * 3 : 0);
+        }, 0);
 
         const payout = strPayout + rumblePayout + singleSum;
         const pl = (finalTotals.total - payout) / 100;
