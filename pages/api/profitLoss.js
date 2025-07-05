@@ -101,7 +101,8 @@ export default async function handler(req, res) {
         }, 0);
 
         const payout = strPayout + rumblePayout + singleSum;
-        const pl = (finalTotals.total - payout) / finalTotals.total;
+        const pl = ((finalTotals.total - payout)*100) /finalTotals.total ;
+
 
         threeD.push({
           number: num,
@@ -112,7 +113,7 @@ export default async function handler(req, res) {
         });
       } else if (data.length === 2) {
         const payout = (data.str + data.rumble) * multipliers.twoD;
-        const pl = (finalTotals.total - payout) /finalTotals.total ;
+        const pl = ((finalTotals.total - payout)*100) /finalTotals.total ;
 
         twoD.push({
           number: num,
