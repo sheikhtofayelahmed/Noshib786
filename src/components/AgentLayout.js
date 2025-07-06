@@ -101,11 +101,7 @@ export default function AgentLayout({ children }) {
             🎯 Agent Panel
           </h2>
 
-          <p className="text-lg font-bold text-red-400 mb-1">ID: {agentId}</p>
-          <p className="text-lg font-bold text-red-400 mb-1">
-            Name: {agent?.name}
-          </p>
-
+          
           <nav className="space-y-3 font-bangla          ">
             {navItems
               .filter((item) => item && item.path) // ensure item and item.path exist
@@ -126,6 +122,20 @@ export default function AgentLayout({ children }) {
           </nav>
         </div>
         <AllahBhorosha></AllahBhorosha>
+                <div className="bg-white shadow-md rounded-xl p-4 mb-4 border border-red-200">
+  <div className="flex items-center space-x-3 mb-2">
+    <span className="text-red-500 text-xl font-semibold">🆔</span>
+    <p className="text-lg font-semibold text-gray-800">
+      <span className="text-red-400">ID:</span> {agentId}
+    </p>
+  </div>
+  <div className="flex items-center space-x-3">
+    <span className="text-red-500 text-xl font-semibold">👤</span>
+    <p className="text-lg font-semibold text-gray-800">
+      <span className="text-red-400">Name:</span> {agent?.name}
+    </p>
+  </div>
+</div>
         <div className="pt-6 border-t border-yellow-600 mt-6">
           <button
             onClick={() => {
