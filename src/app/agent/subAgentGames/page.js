@@ -100,7 +100,13 @@ const SubAgentSummary = () => {
       total: (deducted.OneD + deducted.TwoD + deducted.ThreeD).toFixed(0),
     };
   };
-
+if (!players || players.length === 0) {
+  return (
+    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+      <p className="text-yellow-600 font-medium">No subagent data available.</p>
+    </div>
+  );
+}
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
       {Object.entries(groupedBySAId)
