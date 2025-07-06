@@ -224,8 +224,10 @@ export default function ProfitLossTable() {
                       Total Game
                     </td>
                     <td className="px-4 py-2 text-right font-bold text-white">
-                      {data?.finalTotals?.total ?? "—"}
-                    </td>
+  {data?.finalTotals?.total != null
+    ? data.finalTotals.total.toLocaleString()
+    : "—"}
+</td>
                   </tr>
                   <tr className="border-b border-green-300 bg-green-900/20">
                     <td className="px-4 py-2 text-yellow-200 font-semibold text-left">
