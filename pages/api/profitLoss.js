@@ -135,6 +135,7 @@ export default async function handler(req, res) {
           rumblePayout,
           payout,
           total: game,
+          total: game,
           PL,
           profitLoss: pl.toFixed(3), // 3 decimals as string
         });
