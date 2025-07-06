@@ -1,4 +1,3 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{html,js,jsx,ts,tsx}"],
   theme: {
@@ -33,12 +32,10 @@ module.exports = {
         },
         "pulse-light": {
           "0%, 100%": {
-            // Corrected: Use camelCase for 'textShadow'
             textShadow:
               "0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.7), 0 0 15px rgba(255, 0, 0, 0.7)",
           },
           "50%": {
-            // Corrected: Use camelCase for 'textShadow'
             textShadow:
               "0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(255, 255, 255, 0.9), 0 0 30px rgba(255, 255, 255, 0.9)",
           },
@@ -49,6 +46,7 @@ module.exports = {
         marquee: "marquee 20s linear infinite",
         "pulse-light": "pulse-light 3s infinite alternate",
         flicker: "flicker 2s infinite",
+        "spin-slow": "spin 2s linear infinite", // Correct here
       },
     },
   },

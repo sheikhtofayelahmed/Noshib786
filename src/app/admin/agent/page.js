@@ -347,7 +347,9 @@ export default function AdminAgentPage() {
           🧑‍💼 Agents List
         </h2>
         {loadingAgents ? (
-          <p className="text-yellow-300">Loading agents...</p>
+          <div className="flex items-center justify-center h-screen">
+            <div className="animate-spin-slow text-6xl text-yellow-300">🎲</div>
+          </div>
         ) : (
           <div className="overflow-x-auto text-center">
             <table className="min-w-full text-yellow-300 border-collapse font-mono">

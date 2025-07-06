@@ -5,7 +5,6 @@ import NumberTable from "@/components/NumberTable";
 import { useEffect, useState } from "react";
 
 export default function HappyNewYear() {
-  const [totals, setTotals] = useState(null);
   const [error, setError] = useState(null);
   const [numberData, setNumberData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -22,35 +21,6 @@ export default function HappyNewYear() {
       setLoading(false);
     };
     fetchData();
-  }, []);
-
-  const getTotalAmountPlayed = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/getTotalAmountPlayed", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch totals");
-      }
-
-      const data = await response.json();
-      setTotals(data.totals);
-    } catch (err) {
-      console.error("Error fetching totals:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // Call it immediately once
-    getTotalAmountPlayed();
   }, []);
 
   const threeDigitRows = [
@@ -155,7 +125,11 @@ export default function HappyNewYear() {
     }
   });
   if (loading) {
-    return <Loading></Loading>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin-slow text-6xl text-yellow-300">🎲</div>
+      </div>
+    );
   }
   return (
     <div className="w-full p-8 bg-gradient-to-b from-black to-red-950 min-h-screen font-sans text-gray-100 select-none overflow-x-hidden">
@@ -163,32 +137,6 @@ export default function HappyNewYear() {
         🎰 Thai Lottery Agent 🎲
       </h1>
 
-      <div className="max-w-md mx-auto mb-12 p-6 bg-gradient-to-br from-gray-900 via-black to-red-900 rounded-2xl shadow-2xl border-4 border-yellow-500 animate-fade-in">
-        <h2 className="text-3xl font-extrabold text-center text-yellow-400 mb-6 tracking-wide uppercase drop-shadow-md">
-          🎯 Total Amount Played
-        </h2>
-
-        <div className="space-y-4 text-center font-mono text-lg">
-          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
-            <span className="text-red-300 font-bold">3D</span>
-            <span className="text-white">{totals?.ThreeD ?? "—"}</span>
-          </div>
-          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
-            <span className="text-red-300 font-bold">2D</span>
-            <span className="text-white">{totals?.TwoD ?? "—"}</span>
-          </div>
-          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
-            <span className="text-red-300 font-bold">1D</span>
-            <span className="text-white">{totals?.OneD ?? "—"}</span>
-          </div>
-          <div className="flex justify-between px-4 py-3 bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 mt-4">
-            <span className="text-white font-bold text-xl">💰 Total</span>
-            <span className="text-yellow-300 font-extrabold text-xl">
-              {totals?.total ?? "—"}
-            </span>
-          </div>
-        </div>
-      </div>
       <div className="mb-16 bg-gray-950 rounded-xl shadow-2xl border-2 border-yellow-600 overflow-x-auto">
         <h3 className="text-3xl font-bold text-yellow-400 mb-4 text-center uppercase tracking-wider bg-black py-4 rounded-lg shadow-inner">
           🎯 Hot Numbers

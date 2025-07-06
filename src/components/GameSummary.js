@@ -649,15 +649,20 @@ const GameSummary = ({ agentId }) => {
   }, [currentGameAmt, jomaAmt, finalCalOperation]);
   console.log(moneyCal.totalAmounts);
   console.log(moneyCal);
-  if (loading) return <Loading></Loading>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin-slow text-6xl text-yellow-300">🎲</div>
+      </div>
+    );
   if (fetched && players.length === 0)
     return <p>No players found for this agent.</p>;
 
   return (
     <div className=" min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
-      {loading && (
+      {/* {loading && (
         <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>
-      )}
+      )} */}
 
       {!loading && fetched && players.length === 0 && (
         <div className="flex items-center justify-center h-[60vh]">

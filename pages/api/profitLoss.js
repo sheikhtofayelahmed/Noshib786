@@ -101,26 +101,37 @@ export default async function handler(req, res) {
         }, 0);
 
         const payout = strPayout + rumblePayout + singleSum;
-        const pl = ((finalTotals.total - payout)*100) /finalTotals.total ;
-
+        const PL = finalTotals.total - payout;
+        const pl = (PL * 100) / finalTotals.total;
 
         threeD.push({
           number: num,
           str: data.str,
           rumble: data.rumble,
+          strPayout,
+          rumblePayout,
+          singleSum,
           payout,
-          profitLoss: Math.round(pl),
+          total: finalTotals.total,
+          PL,
+          profitLoss: pl.toFixed(3), // 3 decimals as string
         });
       } else if (data.length === 2) {
-        const payout = (data.str + data.rumble) * multipliers.twoD;
-        const pl = ((finalTotals.total - payout)*100) /finalTotals.total ;
-
+        const strPayout = data.str * multipliers.twoD;
+        const rumblePayout = data.rumble * multipliers.twoD;
+        const payout = strPayout + rumblePayout;
+        const PL = finalTotals.total - payout;
+        const pl = (PL * 100) / finalTotals.total;
         twoD.push({
           number: num,
           str: data.str,
           rumble: data.rumble,
+          strPayout,
+          rumblePayout,
           payout,
-          profitLoss: Math.round(pl),
+          total: finalTotals.total,
+          PL,
+          profitLoss: pl.toFixed(3), // 3 decimals as string
         });
       }
     }

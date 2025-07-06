@@ -574,7 +574,12 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
 
     return finalResult.toFixed(0);
   };
-  if (loading) return <Loading></Loading>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin-slow text-6xl text-yellow-300">🎲</div>
+      </div>
+    );
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center">

@@ -82,7 +82,6 @@ import { useEffect, useState } from "react";
 export default function HappyNewYear() {
   const [numberData, setNumberData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [totals, setTotals] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,34 +97,7 @@ export default function HappyNewYear() {
     };
     fetchData();
   }, []);
-  const getTotalAmountPlayed = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/getTotalAmountPlayed", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch totals");
-      }
-
-      const data = await response.json();
-      setTotals(data.totals);
-    } catch (err) {
-      console.error("Error fetching totals:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // Call it immediately once
-    getTotalAmountPlayed();
-  }, []);
   const downRows = [
     ["10", "20", "30", "40", "50", "60", "70", "80", "90", "00"],
     ["01", "02", "03", "04", "05", "06", "07", "08", "09", "XX"],
@@ -165,39 +137,18 @@ export default function HappyNewYear() {
     }
   });
   if (loading) {
-    return <Loading></Loading>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin-slow text-6xl text-yellow-300">🎲</div>
+      </div>
+    );
   }
   return (
     <div className="w-full p-8 bg-gradient-to-b from-black to-red-950 min-h-screen font-sans text-gray-100 select-none overflow-x-hidden">
       <h1 className="text-center text-6xl font-extrabold mb-16 uppercase tracking-widest text-red-500 drop-shadow-lg animate-pulse-light">
         🎰 Thai Lottery Agent 🎲
       </h1>
-      <div className="max-w-md mx-auto mb-12 p-6 bg-gradient-to-br from-gray-900 via-black to-red-900 rounded-2xl shadow-2xl border-4 border-yellow-500 animate-fade-in">
-        <h2 className="text-3xl font-extrabold text-center text-yellow-400 mb-6 tracking-wide uppercase drop-shadow-md">
-          🎯 Total Amount Played
-        </h2>
 
-        <div className="space-y-4 text-center font-mono text-lg">
-          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
-            <span className="text-red-300 font-bold">3D</span>
-            <span className="text-white">{totals?.ThreeD ?? "—"}</span>
-          </div>
-          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
-            <span className="text-red-300 font-bold">2D</span>
-            <span className="text-white">{totals?.TwoD ?? "—"}</span>
-          </div>
-          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
-            <span className="text-red-300 font-bold">1D</span>
-            <span className="text-white">{totals?.OneD ?? "—"}</span>
-          </div>
-          <div className="flex justify-between px-4 py-3 bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 mt-4">
-            <span className="text-white font-bold text-xl">💰 Total</span>
-            <span className="text-yellow-300 font-extrabold text-xl">
-              {totals?.total ?? "—"}
-            </span>
-          </div>
-        </div>
-      </div>
       <NumberTableSingle
         title="Single"
         rows={singleRows}
