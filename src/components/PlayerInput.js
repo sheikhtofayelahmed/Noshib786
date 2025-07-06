@@ -18,7 +18,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
   const { agentId, subAgentId, fetchEntryCount, fetchWaitingPlayers } =
     useAgent();
   const [targetTime, setTargetTime] = useState(null);
-  const [timeLeft, setTimeLeft] = useState("");
+const [timeLeft, setTimeLeft] = useState({ text: "", isWarning: false });  
   const [agent, setAgent] = useState();
   const playerRefs = useRef({});
   const [error, setError] = useState("");
@@ -48,29 +48,62 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
     fetchTarget();
   }, []);
 
-  useEffect(() => {
-    if (!targetTime) return;
+  Ah, that explains the issue. You're initializing timeLeft as a string, but later treating it like an object (e.g., using timeLeft.text, timeLeft.isWarning), which will cause undefined errors and prevent the time from showing.
 
-    const interval = setInterval(() => {
-      const now = new Date();
-      const diff = targetTime - now;
 
-      if (diff <= 0) {
-        setTimeLeft("The game has ended!");
-        clearInterval(interval);
-        return;
-      }
+---
 
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+✅ Solution: Always treat timeLeft as an object
 
-      const isWarning = diff <= 10 * 60 * 1000; // 10 minutes in milliseconds
-      setTimeLeft({ text: `${hours}h ${minutes}m ${seconds}s`, isWarning });
-    }, 1000);
+Update your state like this:
 
-    return () => clearInterval(interval);
-  }, [targetTime]);
+const [targetTime, setTargetTime] = useState(null);
+const [timeLeft, setTimeLeft] = useState({ text: "", isWarning: false });
+
+
+useEffect(() => {
+  if (!targetTime) return;
+
+  const interval = setInterval(() => {
+    const now = new Date();
+    const diff = targetTime - now;
+
+    if (diff <= 0) {
+      setTimeLeft({ text: "The game has ended!", isWarning: true });
+      clearInterval(interval);
+      return;
+    }
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    const isWarning = diff <= 10 * 60 * 1000; // less than 10 minutes
+    setTimeLeft({ text: `${hours}h ${minutes}m ${seconds}s`, isWarning });
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [targetTime]);
+
+
+
+
+<div
+  className={`mb-16 p-4 rounded text-yellow-200 font-mono text-xl lg:text-3xl text-center transition-colors duration-500 ${
+    timeLeft.isWarning
+      ? "bg-red-600 text-white font-extrabold animate-pulse"
+      : ""
+  }`}
+>
+  ⏳ Time Remaining: <span className="font-bold">{timeLeft.text}</span>
+</div>
+
+
+---
+
+Let me know if you want it to count down to a specific daily time (e.g. "6 PM every day") or reset automatically after expiration!
+
+
   useEffect(() => {
     if (!agentId) return;
 
@@ -904,14 +937,14 @@ const autofillMiddleEntries = (inputs) => {
   return (
     <div className="min-h-screen  text-white p-6 ">
       <div
-        className={`mb-16 p-4 rounded text-yellow-200 font-mono text-xl lg:text-3xl text-center transition-colors duration-500 ${
-          timeLeft?.isWarning
-            ? "bg-red-600 text-white font-extrabold animate-pulse"
-            : ""
-        }`}
-      >
-        ⏳ Time Remaining: <p className="font-bold">{timeLeft?.text}</p>
-      </div>
+  className={`mb-16 p-4 rounded text-yellow-200 font-mono text-xl lg:text-3xl text-center transition-colors duration-500 ${
+    timeLeft.isWarning
+      ? "bg-red-600 text-white font-extrabold animate-pulse"
+      : ""
+  }`}
+>
+  ⏳ Time Remaining: <span className="font-bold">{timeLeft.text}</span>
+</div>
 
       <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-red-500 shadow-2xl p-6">
         {showInput && (
