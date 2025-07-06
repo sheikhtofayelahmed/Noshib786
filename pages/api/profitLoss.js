@@ -68,6 +68,9 @@ export default async function handler(req, res) {
     }
 
     const finalTotals = {
+      oneD:grandTotals.OneD,
+      twoD:grandTotals.TwoD,
+      threeD:grandTotals.ThreeD,
       total: Math.round(
         grandTotals.OneD + grandTotals.TwoD + grandTotals.ThreeD
       ),
@@ -101,7 +104,8 @@ export default async function handler(req, res) {
         }, 0);
 
         const payout = strPayout + rumblePayout + singleSum;
-        const PL = finalTotals.total - payout;
+        const game=finalTotals.threeD+ finalTotals.oneD
+        const PL = game- payout;
         const pl = (PL * 100) / finalTotals.total;
 
         threeD.push({
@@ -112,7 +116,7 @@ export default async function handler(req, res) {
           rumblePayout,
           singleSum,
           payout,
-          total: finalTotals.total,
+          total: game,
           PL,
           profitLoss: pl.toFixed(3), // 3 decimals as string
         });
@@ -120,7 +124,8 @@ export default async function handler(req, res) {
         const strPayout = data.str * multipliers.twoD;
         const rumblePayout = data.rumble * multipliers.twoD;
         const payout = strPayout + rumblePayout;
-        const PL = finalTotals.total - payout;
+        const game=finalTotals.twoD
+        const PL = game- payout;
         const pl = (PL * 100) / finalTotals.total;
         twoD.push({
           number: num,
@@ -129,7 +134,7 @@ export default async function handler(req, res) {
           strPayout,
           rumblePayout,
           payout,
-          total: finalTotals.total,
+          total: game,
           PL,
           profitLoss: pl.toFixed(3), // 3 decimals as string
         });
