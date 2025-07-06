@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import React from "react";
-import AllahBhorosha from "@/components/Allah";
 import { useAgent } from "@/context/AgentContext";
 
 const SubAgentSummary = () => {
@@ -104,7 +103,6 @@ const SubAgentSummary = () => {
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
-      <AllahBhorosha />
       {Object.entries(groupedBySAId)
         .sort(([a], [b]) => parseInt(a) - parseInt(b))
         .map(([saId, group], groupIndex) => (

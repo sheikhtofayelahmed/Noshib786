@@ -68,8 +68,11 @@ export default async function handler(req, res) {
     }
 
     const finalTotals = {
-      total: Math.round(
-        grandTotals.OneD + grandTotals.TwoD + grandTotals.ThreeD
+      oneD: parseFloat(grandTotals.OneD.toFixed(1)),
+      twoD: parseFloat(grandTotals.TwoD.toFixed(1)),
+      threeD: parseFloat(grandTotals.ThreeD.toFixed(1)),
+      total: parseFloat(
+        (grandTotals.OneD + grandTotals.TwoD + grandTotals.ThreeD).toFixed(1)
       ),
     };
 
@@ -101,7 +104,8 @@ export default async function handler(req, res) {
         }, 0);
 
         const payout = strPayout + rumblePayout + singleSum;
-        const PL = finalTotals.total - payout;
+        const game = finalTotals.threeD + finalTotals.oneD;
+        const PL = game - payout;
         const pl = (PL * 100) / finalTotals.total;
 
         threeD.push({
@@ -112,7 +116,7 @@ export default async function handler(req, res) {
           rumblePayout,
           singleSum,
           payout,
-          total: finalTotals.total,
+          total: game,
           PL,
           profitLoss: pl.toFixed(3), // 3 decimals as string
         });
@@ -120,7 +124,8 @@ export default async function handler(req, res) {
         const strPayout = data.str * multipliers.twoD;
         const rumblePayout = data.rumble * multipliers.twoD;
         const payout = strPayout + rumblePayout;
-        const PL = finalTotals.total - payout;
+        const game = finalTotals.twoD;
+        const PL = game - payout;
         const pl = (PL * 100) / finalTotals.total;
         twoD.push({
           number: num,
@@ -129,14 +134,14 @@ export default async function handler(req, res) {
           strPayout,
           rumblePayout,
           payout,
-          total: finalTotals.total,
+          total: game,
           PL,
           profitLoss: pl.toFixed(3), // 3 decimals as string
         });
       }
     }
 
-    return res.status(200).json({ threeD, twoD });
+    return res.status(200).json({ threeD, twoD, finalTotals });
   } catch (error) {
     console.error("Fetch error:", error);
     return res.status(500).json({ message: "Internal server error" });

@@ -5,7 +5,8 @@ export default function ProfitLossTable() {
   const [data, setData] = useState({ threeD: [], twoD: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [selectedThreeD, setSelectedThreeD] = useState(null);
+  const [selectedTwoD, setSelectedTwoD] = useState(null);
   // For toggling views
   const [view, setView] = useState("twoD"); // 'twoD' or 'threeD'
 
@@ -95,7 +96,35 @@ export default function ProfitLossTable() {
                 ({ number, str, rumble, payout, total, PL, profitLoss }) => (
                   <tr
                     key={number}
-                    className="even:bg-black/30 hover:bg-yellow-900/40 transition-colors duration-200 text-sm h-7"
+                    onClick={() => {
+                      if (view === "threeD")
+                        setSelectedThreeD({
+                          number,
+                          str,
+                          rumble,
+                          payout,
+                          total,
+                          PL,
+                          profitLoss,
+                        });
+                      if (view === "twoD")
+                        setSelectedTwoD({
+                          number,
+                          str,
+                          rumble,
+                          payout,
+                          total,
+                          PL,
+                          profitLoss,
+                        });
+                    }}
+                    className={`cursor-pointer hover:bg-yellow-900/40 transition-colors duration-200 text-sm h-7 ${
+                      (view === "threeD" &&
+                        selectedThreeD?.number === number) ||
+                      (view === "twoD" && selectedTwoD?.number === number)
+                        ? "bg-gradient-to-r from-green-500 to-green-700  text-white font-bold"
+                        : "even:bg-black/30"
+                    }`}
                   >
                     <td className="px-3 text-center font-mono">{number}</td>
                     <td className="px-3 text-center font-mono">{str}</td>
@@ -166,7 +195,88 @@ export default function ProfitLossTable() {
       <h1 className="text-center text-yellow-300 font-extrabold text-4xl tracking-widest uppercase drop-shadow-[0_0_5px_rgba(255,215,0,0.9)] mb-12">
         🎯 Profit & Loss
       </h1>
+      <div className="max-w-md mx-auto mb-12 p-6 bg-gradient-to-br from-gray-900 via-black to-red-900 rounded-2xl shadow-2xl border-4 border-yellow-500 animate-fade-in">
+        <h2 className="text-3xl font-extrabold text-center text-yellow-400 mb-6 tracking-wide uppercase drop-shadow-md">
+          🎯 Total Amount Played
+        </h2>
+        <div className="space-y-4 text-center font-mono text-lg">
+          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
+            <span className="text-red-300 font-bold">3D</span>
+            <span className="text-white">
+              {data?.finalTotals?.threeD ?? "—"}
+            </span>
+          </div>
+          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
+            <span className="text-red-300 font-bold">2D</span>
+            <span className="text-white">{data?.finalTotals?.twoD ?? "—"}</span>
+          </div>
+          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
+            <span className="text-red-300 font-bold">1D</span>
+            <span className="text-white">{data?.finalTotals?.oneD ?? "—"}</span>
+          </div>
 
+          {selectedThreeD && selectedTwoD ? (
+            <div className="mt-4">
+              <table className="w-full text-sm font-mono text-white bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 overflow-hidden">
+                <tbody>
+                  <tr className="border-b border-green-300 bg-green-900/30">
+                    <td className="px-4 py-2 text-yellow-200 font-semibold text-left">
+                      Total Game
+                    </td>
+                    <td className="px-4 py-2 text-right font-bold text-white">
+                      {data?.finalTotals?.total ?? "—"}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-green-300 bg-green-900/20">
+                    <td className="px-4 py-2 text-yellow-200 font-semibold text-left">
+                      Payout
+                    </td>
+                    <td className="px-4 py-2 text-right font-bold text-white">
+                      {(
+                        selectedThreeD.payout + selectedTwoD.payout
+                      ).toLocaleString()}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-green-300 bg-green-900/30">
+                    <td className="px-4 py-2 text-yellow-200 font-semibold text-left">
+                      P/L
+                    </td>
+                    <td className="px-4 py-2 text-right font-bold text-white">
+                      {(
+                        data.finalTotals.total -
+                        selectedThreeD.payout -
+                        selectedTwoD.payout
+                      ).toLocaleString()}
+                    </td>
+                  </tr>
+                  <tr className="bg-green-900/20">
+                    <td className="px-4 py-2 text-yellow-200 font-semibold text-left">
+                      %
+                    </td>
+                    <td className="px-4 py-2 text-right font-bold text-white">
+                      {(
+                        ((data.finalTotals.total -
+                          selectedThreeD.payout -
+                          selectedTwoD.payout) /
+                          data?.finalTotals?.total) *
+                        100
+                      ).toFixed(2)}
+                      %
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="flex justify-between px-4 py-3 bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 mt-4">
+              <span className="text-white font-bold text-xl">💰 Total</span>
+              <span className="text-yellow-300 font-extrabold text-xl">
+                {data?.finalTotals?.total ?? "—"}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
       {/* Navigation Buttons */}
       <div className="flex justify-center mb-8 gap-6 select-none">
         <button

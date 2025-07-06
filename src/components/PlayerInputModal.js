@@ -23,6 +23,7 @@ export default function PlayerInputModal({ onClose }) {
   const playerRefs = useRef({});
   const [error, setError] = useState("");
   const [submittingVoucher, setSubmittingVoucher] = useState(null);
+  const [showInput, setShowInput] = useState(true);
 
   useEffect(() => {
     const fetchTarget = async () => {
@@ -126,8 +127,9 @@ export default function PlayerInputModal({ onClose }) {
     const entriesWithSuffix = inputs
       .map((input, idx) => {
         if (!input?.num) return null;
-        const suffixExists = input.str || input.rumble;
-        if (!suffixExists) return null;
+        const hasStr = input.str !== undefined && input.str !== null;
+        const hasRumble = input.rumble !== undefined && input.rumble !== null;
+        if (!hasStr || !hasRumble) return null;
 
         return {
           index: idx,
@@ -145,11 +147,11 @@ export default function PlayerInputModal({ onClose }) {
         const e1 = entriesWithSuffix[i];
         const e2 = entriesWithSuffix[j];
 
-        if (
-          e1.numLength === e2.numLength &&
-          e1.str === e2.str &&
-          e1.rumble === e2.rumble
-        ) {
+        const isSameLength = e1.numLength === e2.numLength;
+        const isSameStr = e1.str === e2.str;
+        const isSameRumble = e1.rumble === e2.rumble;
+
+        if (isSameLength && isSameStr && isSameRumble) {
           for (let k = e1.index + 1; k < e2.index; k++) {
             const cur = inputs[k];
             if (!cur?.num || cur.str || cur.rumble) continue;
@@ -233,7 +235,7 @@ export default function PlayerInputModal({ onClose }) {
       voucher,
       data: newEntries,
     };
-
+    setShowInput(false);
     setPlayers([newPlayer]);
     setAmountPlayed(totals);
     setName("");
@@ -402,6 +404,7 @@ export default function PlayerInputModal({ onClose }) {
 
       if (res.ok) {
         alert("✅ Player submitted!");
+        setShowInput(true);
         setPlayers((prev) =>
           prev.map((p) =>
             p.voucher === player.voucher ? { ...p, submitted: true } : p
@@ -475,6 +478,7 @@ export default function PlayerInputModal({ onClose }) {
 
       if (res.ok) {
         fetchWaitingPlayers(agentId);
+        setShowInput(true);
         alert("✅ Player data saved to 'waiting' list successfully!");
       } else {
         const err = await res.json();
@@ -728,131 +732,94 @@ export default function PlayerInputModal({ onClose }) {
         </div>
 
         <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-red-500 shadow-2xl p-6">
-          <h1 className="text-lg lg:text-4xl  font-bold text-center mb-6 text-yellow-400">
-            🎰 Player Voucher 🎰
-          </h1>
-          <button
-            onClick={handleSavePlayer}
-            className="block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded mx-auto mb-10"
-          >
-            🎲 Complete
-          </button>
-          <label className="block mb-2 text-yellow-300 ">Player Name:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your Name"
-            className="w-full p-3 mb-4 rounded bg-black border-2 border-yellow-400 text-white"
-          />
-
-          <label className="block mb-2 text-yellow-300">Enter Plays:</label>
-
-          {inputs.map((entry, i) => (
-            <div key={i} className="grid grid-cols-3 gap-2 mb-2">
+          {showInput && (
+            <>
+              <h1 className="text-lg lg:text-4xl  font-bold text-center mb-6 text-yellow-400">
+                🎰 Player Voucher 🎰
+              </h1>
+              <button
+                onClick={handleSavePlayer}
+                className="block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded mx-auto mb-10"
+              >
+                🎲 Complete
+              </button>
+              <label className="block mb-2 text-yellow-300 ">
+                Player Name:
+              </label>
               <input
                 type="text"
-                inputMode="numeric"
-                pattern="[0-9]+"
-                value={entry.num}
-                onChange={(e) => {
-                  const updated = [...inputs];
-                  updated[i] = { ...updated[i], num: e.target.value };
-                  setInputs(updated);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    const next = document.querySelector(
-                      `input[name="input-${i + 1}-num"]`
-                    );
-                    if (next) next.focus();
-                  }
-                }}
-                placeholder="Number"
-                className={`w-full p-2 rounded bg-black border-2 text-white ${
-                  errors[i]?.num
-                    ? "border-red-500 bg-red-900"
-                    : "border-yellow-400"
-                }`}
-                name={`input-${i}-num`}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your Name"
+                className="w-full p-3 mb-4 rounded bg-black border-2 border-yellow-400 text-white"
               />
 
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]+"
-                value={entry.str}
-                onChange={(e) => {
-                  const updated = [...inputs];
-                  updated[i] = { ...updated[i], str: e.target.value };
-                  setInputs(updated);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    const next = document.querySelector(
-                      `input[name="input-${i + 1}-str"]`
-                    );
-                    if (next) next.focus();
-                  }
-                }}
-                placeholder="STR"
-                className={`w-full p-2 rounded bg-black border-2 text-white ${
-                  errors[i]?.str
-                    ? "border-red-500 bg-red-900"
-                    : "border-yellow-400"
-                }`}
-                name={`input-${i}-str`}
-              />
+              <label className="block mb-2 text-yellow-300">Enter Plays:</label>
 
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]+"
-                value={entry.rumble}
-                onChange={(e) => {
-                  const updated = [...inputs];
-                  updated[i] = { ...updated[i], rumble: e.target.value };
-                  setInputs(updated);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    const next = document.querySelector(
-                      `input[name="input-${i + 1}-rumble"]`
-                    );
-                    if (next) next.focus();
-                  }
-                }}
-                placeholder="RUMBLE"
-                className={`w-full p-2 rounded bg-black border-2 text-white ${
-                  errors[i]?.rumble
-                    ? "border-red-500 bg-red-900"
-                    : "border-yellow-400"
-                }`}
-                name={`input-${i}-rumble`}
-              />
-            </div>
-          ))}
+              {inputs.map((entry, rowIndex) => (
+                <div key={rowIndex} className="grid grid-cols-3 gap-2 mb-2">
+                  {["num", "str", "rumble"].map((field, colIndex) => {
+                    const flatIndex = rowIndex * 3 + colIndex;
+                    const value = entry[field];
+                    const error = errors[rowIndex]?.[field];
 
-          {errors.some((err) => Object.values(err).some((v) => v)) && (
-            <p className="text-red-400">Please correct the errors.</p>
+                    return (
+                      <input
+                        key={field}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]+"
+                        value={value}
+                        onChange={(e) => {
+                          const updated = [...inputs];
+                          updated[rowIndex] = {
+                            ...updated[rowIndex],
+                            [field]: e.target.value,
+                          };
+                          setInputs(updated);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            const next = document.querySelector(
+                              `input[name="input-${flatIndex + 1}"]`
+                            );
+                            if (next) next.focus();
+                          }
+                        }}
+                        placeholder={field.toUpperCase()}
+                        className={`w-full p-2 rounded bg-black border-2 text-white ${
+                          error
+                            ? "border-red-500 bg-red-900"
+                            : "border-yellow-400"
+                        }`}
+                        name={`input-${flatIndex}`}
+                      />
+                    );
+                  })}
+                </div>
+              ))}
+
+              {errors.some((err) => Object.values(err).some((v) => v)) && (
+                <p className="text-red-400">Please correct the errors.</p>
+              )}
+              <div className="flex flex-wrap gap-2 mt-4">
+                <button
+                  onClick={handleAddInputs}
+                  className="bg-green-500 hover:bg-green-600 text-black font-bold py-2 px-4 rounded"
+                >
+                  ➕ Add More
+                </button>
+              </div>
+            </>
           )}
-          <div className="flex flex-wrap gap-2 mt-4">
-            <button
-              onClick={handleAddInputs}
-              className="bg-green-500 hover:bg-green-600 text-black font-bold py-2 px-4 rounded"
-            >
-              ➕ Add More
-            </button>
-          </div>
 
           {players.length > 0 && (
             <div className="mt-8 max-w-4xl mx-auto space-y-6">
               <h3 className="text-2xl text-yellow-400 mb-4 font-semibold text-center">
                 🎉 Player Summary 🎉
               </h3>
+
               {players.forEach((player) => {
                 if (!playerRefs.current[player.voucher]) {
                   playerRefs.current[player.voucher] = React.createRef();
@@ -865,55 +832,12 @@ export default function PlayerInputModal({ onClose }) {
                     ref={playerRefs.current[player.voucher]}
                     className="my-16 bg-gray-800 p-5 rounded-xl border border-yellow-500 shadow hover:shadow-yellow-500 transition-shadow"
                   >
-                    <div className=" w-max sm:w-2/3 mx-auto border-collapse flex justify-between items-start">
-                      {player.submitted ? (
-                        <div className="w-full flex flex-col justify-center items-center">
-                          <p className="text-yellow-300 font-bold sm:text-2xl  text-center my-5">
-                            Voucher:{" "}
-                            <span className="font-mono">
-                              {player.voucher || "N/A"}
-                            </span>
-                          </p>
-                          <div className="w-full mb-4 flex items-center justify-around ">
-                            <button
-                              onClick={() =>
-                                handlePlayerDownloadPdf(player.voucher)
-                              }
-                              className="bg-white w-14 h-14 flex items-center justify-center rounded"
-                            >
-                              <img
-                                src="/download.svg"
-                                alt="Download"
-                                className="w-8 h-8"
-                              />
-                            </button>
-                            <button
-                              onClick={() => handlePrint(player, amountPlayed)}
-                              className="bg-white w-14 h-14 flex items-center justify-center rounded text-white text-2xl"
-                            >
-                              🖨️
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="w-full flex flex-col justify-center items-center">
-                          <p className="text-yellow-300 font-bold sm:text-2xl  text-center my-5">
-                            <span className="font-mono">
-                              {player.voucher || "N/A"}
-                            </span>
-                          </p>{" "}
-                          <button
-                            onClick={() => handleSubmitAndPrint(player)}
-                            disabled={submittingVoucher === player.voucher}
-                            className="bg-blue-600 hover:bg-blue-700 mb-4 py-2 px-4 rounded font-semibold text-white transition"
-                          >
-                            {submittingVoucher === player.voucher
-                              ? "Submitting..."
-                              : "Submit"}
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                    <p className="text-yellow-300 font-bold sm:text-2xl  text-center my-5">
+                      Voucher:{" "}
+                      <span className="font-mono">
+                        {player.voucher || "N/A"}
+                      </span>
+                    </p>
                     <div className=" w-max sm:w-2/3 mx-auto border-collapse flex justify-between items-start">
                       <div>
                         <h4 className="text-xl font-bold mb-1">
@@ -931,7 +855,6 @@ export default function PlayerInputModal({ onClose }) {
                         </p>
                       </div>
                     </div>
-
                     <div className="mt-6 overflow-x-auto w-full">
                       <table className=" w-max sm:w-2/3 mx-auto  border-collapse font-mono text-sm text-yellow-300">
                         <thead>
@@ -1147,6 +1070,44 @@ export default function PlayerInputModal({ onClose }) {
                           </tr>
                         </tbody>
                       </table>
+                    </div>{" "}
+                    <div className=" w-max sm:w-2/3 mx-auto mt-5 border-collapse flex justify-between items-start">
+                      {player.submitted ? (
+                        <div className="w-full flex flex-col justify-center items-center mt-5">
+                          <div className="w-full mb-4 flex items-center justify-around ">
+                            <button
+                              onClick={() =>
+                                handlePlayerDownloadPdf(player.voucher)
+                              }
+                              className="bg-white w-14 h-14 flex items-center justify-center rounded"
+                            >
+                              <img
+                                src="/download.svg"
+                                alt="Download"
+                                className="w-8 h-8"
+                              />
+                            </button>
+                            <button
+                              onClick={() => handlePrint(player, amountPlayed)}
+                              className="bg-white w-14 h-14 flex items-center justify-center rounded text-white text-2xl"
+                            >
+                              🖨️
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-full mb-4 flex items-center justify-around ">
+                          <button
+                            onClick={() => handleSubmitAndPrint(player)}
+                            disabled={submittingVoucher === player.voucher}
+                            className="bg-blue-600 hover:bg-blue-700 mb-4 py-2 px-4 rounded font-semibold text-white transition"
+                          >
+                            {submittingVoucher === player.voucher
+                              ? "Submitting..."
+                              : "Submit"}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 

@@ -100,7 +100,7 @@ const NumberTable = ({ rows, data, title, line, single }) => {
                     key={globalRowIndex}
                     className={
                       (globalRowIndex + 1) % line === 0
-                        ? "border-b-4 border-red-600"
+                        ? "border-b-[30px] border-green-900"
                         : ""
                     }
                   >

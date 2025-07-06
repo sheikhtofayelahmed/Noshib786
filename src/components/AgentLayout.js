@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import Breadcrumb from "./Breadcrumb"; // adjust path if needed
 import { useAgent } from "@/context/AgentContext";
 import Image from "next/image";
+import AllahBhorosha from "./Allah";
 
 export default function AgentLayout({ children }) {
   const { loginAs, entryCount, waitingEntryCount, logout } = useAgent();
@@ -124,7 +125,7 @@ export default function AgentLayout({ children }) {
               ))}
           </nav>
         </div>
-
+        <AllahBhorosha></AllahBhorosha>
         <div className="pt-6 border-t border-yellow-600 mt-6">
           <button
             onClick={() => {

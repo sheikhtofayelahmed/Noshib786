@@ -19,6 +19,7 @@ const GameSummary = ({ agentId }) => {
   const [uploadStatus, setUploadStatus] = useState(null);
   const hasUploadedRef = useRef(false);
   const contentRef = useRef(null);
+  const contentAllRef = useRef(null);
   const playerRefs = useRef({});
   const [summaryData, setSummaryData] = useState(null);
   const [selectedOption, setSelectedOption] = useState("");
@@ -585,14 +586,48 @@ const GameSummary = ({ agentId }) => {
       const options = {
         margin: 10,
         filename: `${agent?.name}.${agentId}.${date}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
+        image: { type: "jpeg", quality: 0.2 },
         html2canvas: {
           scale: 2,
           // *** THIS IS THE KEY: Force a white background for the PDF rendering ***
           background: "#ffffff", // Explicitly set white background for the canvas
         },
-        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       };
+      html2pdf().set(options).from(element).save();
+    } else {
+      console.error("Content div not found!");
+    }
+  };
+  const handleAllDownloadPdf = async () => {
+    const html2pdf = (await import("html2pdf.js")).default;
+    const element = contentAllRef.current;
+
+    if (element) {
+      // Get the element's dimensions
+      const elementWidth = element.offsetWidth;
+      const elementHeight = element.offsetHeight;
+
+      // Convert pixels to mm (1px ≈ 0.264583 mm)
+      const pxToMm = (px) => px * 0.264583;
+      const pdfWidth = pxToMm(elementWidth);
+      const pdfHeight = pxToMm(elementHeight);
+
+      const options = {
+        margin: 0,
+        filename: `All ${agent?.name}.${agentId}.${date}.pdf`,
+        image: { type: "jpeg", quality: 0.2 },
+        html2canvas: {
+          scale: 2,
+          backgroundColor: "#ffffff",
+        },
+        jsPDF: {
+          unit: "mm",
+          format: [pdfWidth, pdfHeight],
+          orientation: "portrait",
+        },
+      };
+
       html2pdf().set(options).from(element).save();
     } else {
       console.error("Content div not found!");
@@ -618,37 +653,6 @@ const GameSummary = ({ agentId }) => {
     }
   };
 
-  // useEffect(() => {
-  //   // Step 1: বর্তমান হিসাব নির্ণয় (currentGameAmt)
-  //   const thisGame = parseFloat(thisGameAmt) || 0;
-  //   const exGame = parseFloat(exGameAmt) || 0;
-  //   let currentResult = 0;
-
-  //   if (currentGameOperation === "plusCurrent") {
-  //     currentResult = thisGame + exGame;
-  //   } else if (currentGameOperation === "minusCurrent") {
-  //     currentResult = thisGame - exGame;
-  //   }
-
-  //   setCurrentGameAmt(currentResult.toFixed(0));
-  // }, [thisGameAmt, exGameAmt, currentGameOperation]);
-
-  useEffect(() => {
-    // Step 2: ফাইনাল হিসাব নির্ণয় (finalCalAmt)
-    const current = parseFloat(currentGameAmt) || 0;
-    const joma = parseFloat(jomaAmt) || 0;
-    let finalResult = 0;
-
-    if (finalCalOperation === "plusFinal") {
-      finalResult = current + joma;
-    } else if (finalCalOperation === "minusFinal") {
-      finalResult = current - joma;
-    }
-
-    setFinalCalAmt(finalResult.toFixed(0));
-  }, [currentGameAmt, jomaAmt, finalCalOperation]);
-  console.log(moneyCal.totalAmounts);
-  console.log(moneyCal);
   if (loading)
     return (
       <div className="flex items-center justify-center h-screen">
@@ -1184,7 +1188,17 @@ const GameSummary = ({ agentId }) => {
           <h3 className="text-2xl text-yellow-400 mb-6 font-semibold text-center">
             🎉 Player Summary 🎉
           </h3>
-          <div className="mt-8 max-w-4xl mx-auto space-y-12">
+          <div
+            ref={contentAllRef}
+            className="mt-8 max-w-4xl mx-auto space-y-12"
+          >
+            <button
+              onClick={handleAllDownloadPdf}
+              className="px-16 py-7 mx-auto rounded-xl bg-gray-200 transition duration-300"
+              title="Download Player Info"
+            >
+              <img src="/download.svg" alt="Download" className="w-10 h-10" />
+            </button>
             {players.forEach((player) => {
               if (!playerRefs.current[player.voucher]) {
                 playerRefs.current[player.voucher] = React.createRef();
