@@ -17,14 +17,17 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
   const [amountPlayed, setAmountPlayed] = useState({});
   const { agentId, subAgentId, fetchEntryCount, fetchWaitingPlayers } =
     useAgent();
-  const [targetTime, setTargetTime] = useState(null);
-const [timeLeft, setTimeLeft] = useState({ text: "", isWarning: false });  
   const [agent, setAgent] = useState();
   const playerRefs = useRef({});
-  const [error, setError] = useState("");
   const [submittingVoucher, setSubmittingVoucher] = useState(null);
   const [submittingDoubleVoucher, setSubmittingDoubleVoucher] = useState(null);
   const [showInput, setShowInput] = useState(true);
+  const [targetTime, setTargetTime] = useState(null);
+  const [timeLeft, setTimeLeft] = useState({ text: "", isWarning: false });
+  const [error, setError] = useState("");
+  const [isGameOn, setIsGameOn] = useState(null);
+  const [isCompleted, setIsCompleted] = useState(true);
+  const [print, setPrint] = useState(false);
 
   useEffect(() => {
     const fetchTarget = async () => {
@@ -47,62 +50,29 @@ const [timeLeft, setTimeLeft] = useState({ text: "", isWarning: false });
 
     fetchTarget();
   }, []);
+  useEffect(() => {
+    if (!targetTime) return;
 
-  Ah, that explains the issue. You're initializing timeLeft as a string, but later treating it like an object (e.g., using timeLeft.text, timeLeft.isWarning), which will cause undefined errors and prevent the time from showing.
+    const interval = setInterval(() => {
+      const now = new Date();
+      const diff = targetTime - now;
 
+      if (diff <= 0) {
+        setTimeLeft({ text: "The game has ended!", isWarning: true });
+        clearInterval(interval);
+        return;
+      }
 
----
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-✅ Solution: Always treat timeLeft as an object
+      const isWarning = diff <= 10 * 60 * 1000; // less than 10 minutes
+      setTimeLeft({ text: `${hours}h ${minutes}m ${seconds}s`, isWarning });
+    }, 1000);
 
-Update your state like this:
-
-const [targetTime, setTargetTime] = useState(null);
-const [timeLeft, setTimeLeft] = useState({ text: "", isWarning: false });
-
-
-useEffect(() => {
-  if (!targetTime) return;
-
-  const interval = setInterval(() => {
-    const now = new Date();
-    const diff = targetTime - now;
-
-    if (diff <= 0) {
-      setTimeLeft({ text: "The game has ended!", isWarning: true });
-      clearInterval(interval);
-      return;
-    }
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    const isWarning = diff <= 10 * 60 * 1000; // less than 10 minutes
-    setTimeLeft({ text: `${hours}h ${minutes}m ${seconds}s`, isWarning });
-  }, 1000);
-
-  return () => clearInterval(interval);
-}, [targetTime]);
-
-
-
-
-<div
-  className={`mb-16 p-4 rounded text-yellow-200 font-mono text-xl lg:text-3xl text-center transition-colors duration-500 ${
-    timeLeft.isWarning
-      ? "bg-red-600 text-white font-extrabold animate-pulse"
-      : ""
-  }`}
->
-  ⏳ Time Remaining: <span className="font-bold">{timeLeft.text}</span>
-</div>
-
-
----
-
-Let me know if you want it to count down to a specific daily time (e.g. "6 PM every day") or reset automatically after expiration!
-
+    return () => clearInterval(interval);
+  }, [targetTime]);
 
   useEffect(() => {
     if (!agentId) return;
@@ -157,52 +127,52 @@ Let me know if you want it to count down to a specific daily time (e.g. "6 PM ev
     return true;
   };
 
-const autofillMiddleEntries = (inputs) => {
-  const entriesWithSuffix = inputs
-    .map((input, idx) => {
-      if (!input?.num) return null;
-      const hasStr = input.str !== undefined && input.str !== null;
-      const hasRumble = input.rumble !== undefined && input.rumble !== null;
-      if (!hasStr || !hasRumble) return null;
+  const autofillMiddleEntries = (inputs) => {
+    const entriesWithSuffix = inputs
+      .map((input, idx) => {
+        if (!input?.num) return null;
+        const hasStr = input.str !== undefined && input.str !== null;
+        const hasRumble = input.rumble !== undefined && input.rumble !== null;
+        if (!hasStr || !hasRumble) return null;
 
-      return {
-        index: idx,
-        numLength: input.num.length,
-        str: input.str,
-        rumble: input.rumble,
-      };
-    })
-    .filter(Boolean);
+        return {
+          index: idx,
+          numLength: input.num.length,
+          str: input.str,
+          rumble: input.rumble,
+        };
+      })
+      .filter(Boolean);
 
-  if (entriesWithSuffix.length < 2) return inputs;
+    if (entriesWithSuffix.length < 2) return inputs;
 
-  for (let i = 0; i < entriesWithSuffix.length; i++) {
-    for (let j = i + 1; j < entriesWithSuffix.length; j++) {
-      const e1 = entriesWithSuffix[i];
-      const e2 = entriesWithSuffix[j];
+    for (let i = 0; i < entriesWithSuffix.length; i++) {
+      for (let j = i + 1; j < entriesWithSuffix.length; j++) {
+        const e1 = entriesWithSuffix[i];
+        const e2 = entriesWithSuffix[j];
 
-      const isSameLength = e1.numLength === e2.numLength;
-      const isSameStr = e1.str === e2.str;
-      const isSameRumble = e1.rumble === e2.rumble;
+        const isSameLength = e1.numLength === e2.numLength;
+        const isSameStr = e1.str === e2.str;
+        const isSameRumble = e1.rumble === e2.rumble;
 
-      if (isSameLength && isSameStr && isSameRumble) {
-        for (let k = e1.index + 1; k < e2.index; k++) {
-          const cur = inputs[k];
-          if (!cur?.num || cur.str || cur.rumble) continue;
-          if (cur.num.length !== e1.numLength) continue;
+        if (isSameLength && isSameStr && isSameRumble) {
+          for (let k = e1.index + 1; k < e2.index; k++) {
+            const cur = inputs[k];
+            if (!cur?.num || cur.str || cur.rumble) continue;
+            if (cur.num.length !== e1.numLength) continue;
 
-          inputs[k] = {
-            ...cur,
-            str: e1.str,
-            rumble: e1.rumble,
-          };
+            inputs[k] = {
+              ...cur,
+              str: e1.str,
+              rumble: e1.rumble,
+            };
+          }
         }
       }
     }
-  }
 
-  return inputs;
-};
+    return inputs;
+  };
   const calculateTotals = (entries) => {
     let total1D = 0,
       total2D = 0,
@@ -937,15 +907,14 @@ const autofillMiddleEntries = (inputs) => {
   return (
     <div className="min-h-screen  text-white p-6 ">
       <div
-  className={`mb-16 p-4 rounded text-yellow-200 font-mono text-xl lg:text-3xl text-center transition-colors duration-500 ${
-    timeLeft.isWarning
-      ? "bg-red-600 text-white font-extrabold animate-pulse"
-      : ""
-  }`}
->
-  ⏳ Time Remaining: <span className="font-bold">{timeLeft.text}</span>
-</div>
-
+        className={`mb-16 p-4 rounded text-yellow-200 font-mono text-3xl text-center transition-colors duration-500 ${
+          timeLeft.isWarning
+            ? "bg-red-600 text-white font-extrabold animate-pulse"
+            : ""
+        }`}
+      >
+        ⏳ Time Remaining: <span className="font-bold">{timeLeft.text}</span>
+      </div>
       <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-red-500 shadow-2xl p-6">
         {showInput && (
           <>

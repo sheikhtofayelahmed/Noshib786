@@ -6,7 +6,7 @@ import { useAgent } from "@/context/AgentContext";
 const SubAgentSummary = () => {
   const [loading, setLoading] = useState(true);
   const [fetched, setFetched] = useState(false);
-  const [players, setPlayers] = useState([]);
+  const [playersSA, setPlayersSA] = useState([]);
   const [agent, setAgent] = useState(null);
 
   const { agentId, subAgentId, loginAs } = useAgent();
@@ -27,14 +27,14 @@ const SubAgentSummary = () => {
           subAgentId && loginAs !== "agent"
             ? data.players.filter((p) => String(p.SAId) === String(subAgentId))
             : data.players.sort((a, b) => parseInt(a.SAId) - parseInt(b.SAId));
-        setPlayers(filtered || []);
+        setPlayersSA(filtered || []);
       } else {
         console.error(data.message || "Failed to fetch players.");
-        setPlayers([]);
+        setPlayersSA([]);
       }
     } catch (error) {
       console.error("Fetch error:", error);
-      setPlayers([]);
+      setPlayersSA([]);
     } finally {
       setLoading(false);
       setFetched(true);
@@ -62,15 +62,7 @@ const SubAgentSummary = () => {
     }
   }, [agentId]);
 
-  if (loading) return <p>Loading...</p>;
-  if (fetched && players.length === 0)
-    return (
-      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <p className="text-yellow-600 font-medium">No subagent data available.</p>
-      </div>
-    );
-
-  const groupedBySAId = players.reduce((acc, player) => {
+  const groupedBySAId = playersSA.reduce((acc, player) => {
     if (!player.SAId) return acc;
     if (!acc[player.SAId]) acc[player.SAId] = [];
     acc[player.SAId].push(player);
@@ -103,7 +95,19 @@ const SubAgentSummary = () => {
       total: (deducted.OneD + deducted.TwoD + deducted.ThreeD).toFixed(0),
     };
   };
-
+  if (loading) return <p>Loading...</p>;
+  if (Object.keys(groupedBySAId).length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black to-red-900 text-white font-mono">
+        <div className="bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-lg p-6 shadow-lg max-w-md text-center">
+          <h2 className="text-2xl font-bold mb-2">🎲 No Data Found</h2>
+          <p className="text-sm">
+            There are no subagent entries available at the moment.
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
       {Object.entries(groupedBySAId)
@@ -179,32 +183,53 @@ const SubAgentSummary = () => {
                       <tr className="bg-red-700 text-white">
                         <th className="border px-4 py-2 text-left">Category</th>
                         <th className="border px-4 py-2 text-left">Amount</th>
-                        <th className="border px-4 py-2 text-left">After Deduction</th>
+                        <th className="border px-4 py-2 text-left">
+                          After Deduction
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {["ThreeD", "TwoD", "OneD"].map((key, i) => {
                         const label = `🎯 ${key.replace("D", "")}D Total`;
                         const amount = player?.amountPlayed?.[key] ?? 0;
-                        const percentage = agent?.cPercentages?.[key.toLowerCase()] || 0;
-                        const after = (amount * ((100 - percentage) / 100)).toFixed(0);
+                        const percentage =
+                          agent?.cPercentages?.[key.toLowerCase()] || 0;
+                        const after = (
+                          amount *
+                          ((100 - percentage) / 100)
+                        ).toFixed(0);
                         return (
-                          <tr key={key} className={i % 2 === 0 ? "bg-gray-800" : "bg-gray-900"}>
+                          <tr
+                            key={key}
+                            className={
+                              i % 2 === 0 ? "bg-gray-800" : "bg-gray-900"
+                            }
+                          >
                             <td className="border px-4 py-2">{label}</td>
-                            <td className="border px-4 py-2 text-green-400">{amount}</td>
-                            <td className="border px-4 py-2 text-green-400">{after}</td>
+                            <td className="border px-4 py-2 text-green-400">
+                              {amount}
+                            </td>
+                            <td className="border px-4 py-2 text-green-400">
+                              {after}
+                            </td>
                           </tr>
                         );
                       })}
                       <tr className="bg-gray-900 font-bold text-lg">
-                        <td colSpan={2} className="border px-4 py-2 text-center">
+                        <td
+                          colSpan={2}
+                          className="border px-4 py-2 text-center"
+                        >
                           🔢 Grand Total
                         </td>
                         <td className="border px-4 py-2 text-yellow-400">
                           {(
-                            ((player?.amountPlayed?.ThreeD || 0) * (100 - (agent?.cPercentages?.threeD || 0)) +
-                              (player?.amountPlayed?.TwoD || 0) * (100 - (agent?.cPercentages?.twoD || 0)) +
-                              (player?.amountPlayed?.OneD || 0) * (100 - (agent?.cPercentages?.oneD || 0))) /
+                            ((player?.amountPlayed?.ThreeD || 0) *
+                              (100 - (agent?.cPercentages?.threeD || 0)) +
+                              (player?.amountPlayed?.TwoD || 0) *
+                                (100 - (agent?.cPercentages?.twoD || 0)) +
+                              (player?.amountPlayed?.OneD || 0) *
+                                (100 - (agent?.cPercentages?.oneD || 0))) /
                             100
                           ).toFixed(0)}
                         </td>

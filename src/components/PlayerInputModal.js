@@ -17,14 +17,14 @@ export default function PlayerInputModal({ onClose }) {
   const [amountPlayed, setAmountPlayed] = useState({});
   const { agentId, subAgentId, fetchEntryCount, fetchWaitingPlayers } =
     useAgent();
-  const [targetTime, setTargetTime] = useState(null);
-  const [timeLeft, setTimeLeft] = useState("");
   const [agent, setAgent] = useState();
   const playerRefs = useRef({});
   const [error, setError] = useState("");
   const [submittingVoucher, setSubmittingVoucher] = useState(null);
   const [showInput, setShowInput] = useState(true);
 
+  const [targetTime, setTargetTime] = useState(null);
+  const [timeLeft, setTimeLeft] = useState({ text: "", isWarning: false });
   useEffect(() => {
     const fetchTarget = async () => {
       try {
@@ -47,29 +47,6 @@ export default function PlayerInputModal({ onClose }) {
     fetchTarget();
   }, []);
 
-  useEffect(() => {
-    if (!targetTime) return;
-
-    const interval = setInterval(() => {
-      const now = new Date();
-      const diff = targetTime - now;
-
-      if (diff <= 0) {
-        setTimeLeft("The game has ended!");
-        clearInterval(interval);
-        return;
-      }
-
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-      const isWarning = diff <= 10 * 60 * 1000; // 10 minutes in milliseconds
-      setTimeLeft({ text: `${hours}h ${minutes}m ${seconds}s`, isWarning });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [targetTime]);
   useEffect(() => {
     if (!agentId) return;
 
@@ -721,16 +698,6 @@ export default function PlayerInputModal({ onClose }) {
         >
           ✕
         </button>
-        <div
-          className={`mb-16 p-4 rounded text-yellow-200 font-mono text-xl lg:text-3xl text-center transition-colors duration-500 ${
-            timeLeft?.isWarning
-              ? "bg-red-600 text-white font-extrabold animate-pulse"
-              : ""
-          }`}
-        >
-          ⏳ Time Remaining: <p className="font-bold">{timeLeft?.text}</p>
-        </div>
-
         <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-red-500 shadow-2xl p-6">
           {showInput && (
             <>

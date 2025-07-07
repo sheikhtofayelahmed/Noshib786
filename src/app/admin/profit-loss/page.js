@@ -189,95 +189,145 @@ export default function ProfitLossTable() {
       )}
     </section>
   );
+  const InfoRow = ({ label, value, isProfit }) => (
+    <>
+      <div className="text-gray-300">{label}</div>
+      <div
+        className={`font-bold ${
+          isProfit === undefined
+            ? "text-green-400"
+            : isProfit
+            ? "text-green-400"
+            : "text-red-400"
+        }`}
+      >
+        {value}
+      </div>
+    </>
+  );
 
+  const SummaryRow = ({ label, value }) => (
+    <tr className="border-b border-green-300 bg-green-900/30">
+      <td className="px-4 py-2 text-yellow-200 font-semibold text-left">
+        {label}
+      </td>
+      <td className="px-4 py-2 text-right font-bold text-white">
+        {value != null ? value.toLocaleString() : "—"}
+      </td>
+    </tr>
+  );
   return (
     <main className="max-w-7xl mx-auto p-8 font-sans bg-gradient-to-br from-black via-gray-900 to-black rounded-3xl shadow-[0_0_60px_rgba(255,215,0,0.3)] border-4 border-yellow-500">
       <h1 className="text-center text-yellow-300 font-extrabold text-4xl tracking-widest uppercase drop-shadow-[0_0_5px_rgba(255,215,0,0.9)] mb-12">
         🎯 Profit & Loss
       </h1>
-      <div className="max-w-md mx-auto mb-12 p-6 bg-gradient-to-br from-gray-900 via-black to-red-900 rounded-2xl shadow-2xl border-4 border-yellow-500 animate-fade-in">
-        <h2 className="text-3xl font-extrabold text-center text-yellow-400 mb-6 tracking-wide uppercase drop-shadow-md">
-          🎯 Total Amount Played
-        </h2>
-        <div className="space-y-4 text-center font-mono text-lg">
-          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
-            <span className="text-red-300 font-bold">3D</span>
-            <span className="text-white">
-              {data?.finalTotals?.threeD ?? "—"}
-            </span>
-          </div>
-          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
-            <span className="text-red-300 font-bold">2D</span>
-            <span className="text-white">{data?.finalTotals?.twoD ?? "—"}</span>
-          </div>
-          <div className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner">
-            <span className="text-red-300 font-bold">1D</span>
-            <span className="text-white">{data?.finalTotals?.oneD ?? "—"}</span>
-          </div>
+      <div className="flex flex-wrap justify-center gap-6 p-4">
+        {/* Selected 2D Box */}
 
-          {selectedThreeD && selectedTwoD ? (
-            <div className="mt-4">
-              <table className="w-full text-sm font-mono text-white bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 overflow-hidden">
+        {selectedTwoD && (
+          <div className="w-full sm:w-[22rem] p-6 rounded-xl border-4 border-yellow-400 bg-gradient-to-br from-black via-red-900 to-black shadow-[0_0_25px_rgba(255,215,0,0.6)] text-white font-mono animate-fade-in">
+            <h2 className="text-3xl font-extrabold text-yellow-300 text-left mb-4">
+              🎲 2D
+            </h2>
+            <div className="grid grid-cols-2 gap-4 text-lg">
+              <InfoRow label="🔢 Number" value={selectedTwoD?.number} />
+              <InfoRow label="🧾 STR" value={selectedTwoD?.str} />
+              <InfoRow label="🎯 Rumble" value={selectedTwoD?.rumble} />
+              <InfoRow label="💸 Payout" value={selectedTwoD?.payout} />
+              <InfoRow label="🧮 Total" value={selectedTwoD?.total} />
+              <InfoRow label="📈 PL" value={selectedTwoD?.PL} />
+              <InfoRow
+                label="🏁 P/L"
+                value={selectedTwoD?.profitLoss}
+                isProfit={selectedTwoD?.profitLoss >= 0}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Totals Box */}
+        <div className="w-full sm:w-[22rem] p-6 bg-gradient-to-br from-gray-900 via-black to-red-900 rounded-2xl shadow-2xl border-4 border-yellow-500 animate-fade-in">
+          <h2 className="text-3xl font-extrabold text-center text-yellow-400 mb-6 tracking-wide uppercase drop-shadow-md">
+            🎯 Total 
+          </h2>
+          <div className="space-y-4 text-center font-mono text-lg">
+            {["threeD", "twoD", "oneD"].map((key) => (
+              <div
+                key={key}
+                className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner"
+              >
+                <span className="text-red-300 font-bold">
+                  {key.toUpperCase()}
+                </span>
+                <span className="text-white">
+                  {data?.finalTotals?.[key] ?? "—"}
+                </span>
+              </div>
+            ))}
+
+            {selectedThreeD && selectedTwoD ? (
+              <table className="w-full text-sm font-mono text-white bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 mt-4">
                 <tbody>
-                  <tr className="border-b border-green-300 bg-green-900/30">
-                    <td className="px-4 py-2 text-yellow-200 font-semibold text-left">
-                      Total Game
-                    </td>
-                    <td className="px-4 py-2 text-right font-bold text-white">
-  {data?.finalTotals?.total != null
-    ? data.finalTotals.total.toLocaleString()
-    : "—"}
-</td>
-                  </tr>
-                  <tr className="border-b border-green-300 bg-green-900/20">
-                    <td className="px-4 py-2 text-yellow-200 font-semibold text-left">
-                      Payout
-                    </td>
-                    <td className="px-4 py-2 text-right font-bold text-white">
-                      {(
-                        selectedThreeD.payout + selectedTwoD.payout
-                      ).toLocaleString()}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-green-300 bg-green-900/30">
-                    <td className="px-4 py-2 text-yellow-200 font-semibold text-left">
-                      P/L
-                    </td>
-                    <td className="px-4 py-2 text-right font-bold text-white">
-                      {(
-                        data.finalTotals.total -
+                  <SummaryRow
+                    label="Total Game"
+                    value={data?.finalTotals?.total}
+                  />
+                  <SummaryRow
+                    label="Payout"
+                    value={selectedThreeD.payout + selectedTwoD.payout}
+                  />
+                  <SummaryRow
+                    label="P/L"
+                    value={
+                      data.finalTotals.total -
+                      selectedThreeD.payout -
+                      selectedTwoD.payout
+                    }
+                  />
+                  <SummaryRow
+                    label="%"
+                    value={`${(
+                      ((data.finalTotals.total -
                         selectedThreeD.payout -
-                        selectedTwoD.payout
-                      ).toLocaleString()}
-                    </td>
-                  </tr>
-                  <tr className="bg-green-900/20">
-                    <td className="px-4 py-2 text-yellow-200 font-semibold text-left">
-                      %
-                    </td>
-                    <td className="px-4 py-2 text-right font-bold text-white">
-                      {(
-                        ((data.finalTotals.total -
-                          selectedThreeD.payout -
-                          selectedTwoD.payout) /
-                          data?.finalTotals?.total) *
-                        100
-                      ).toFixed(2)}
-                      %
-                    </td>
-                  </tr>
+                        selectedTwoD.payout) /
+                        data?.finalTotals?.total) *
+                      100
+                    ).toFixed(2)}%`}
+                  />
                 </tbody>
               </table>
-            </div>
-          ) : (
-            <div className="flex justify-between px-4 py-3 bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 mt-4">
-              <span className="text-white font-bold text-xl">💰 Total</span>
-              <span className="text-yellow-300 font-extrabold text-xl">
-                {data?.finalTotals?.total ?? "—"}
-              </span>
-            </div>
-          )}
+            ) : (
+              <div className="flex justify-between px-4 py-3 bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 mt-4">
+                <span className="text-white font-bold text-xl">💰 Total</span>
+                <span className="text-yellow-300 font-extrabold text-xl">
+                  {data?.finalTotals?.total ?? "—"}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Selected 3D Box */}
+        {selectedThreeD && (
+          <div className="w-full sm:w-[22rem] p-6 rounded-xl border-4 border-yellow-400 bg-gradient-to-br from-black via-red-900 to-black shadow-[0_0_25px_rgba(255,215,0,0.6)] text-white font-mono animate-fade-in">
+            <h2 className="text-3xl font-extrabold text-yellow-300 text-left mb-4">
+              🎲 3D
+            </h2>
+            <div className="grid grid-cols-2 gap-4 text-lg">
+              <InfoRow label="🔢 Number" value={selectedThreeD?.number} />
+              <InfoRow label="🧾 String" value={selectedThreeD?.str} />
+              <InfoRow label="🎯 Rumble" value={selectedThreeD?.rumble} />
+              <InfoRow label="💸 Payout" value={selectedThreeD?.payout} />
+              <InfoRow label="🧮 Total" value={selectedThreeD?.total} />
+              <InfoRow label="📈 PL" value={selectedThreeD?.PL} />
+              <InfoRow
+                label="🏁 P/L"
+                value={selectedThreeD?.profitLoss}
+                isProfit={selectedThreeD?.profitLoss >= 0}
+              />
+            </div>
+          </div>
+        )}
       </div>
       {/* Navigation Buttons */}
       <div className="flex justify-center mb-8 gap-6 select-none">
