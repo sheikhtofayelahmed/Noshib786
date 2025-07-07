@@ -1,4 +1,5 @@
 "use client";
+import { Info } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 export default function ProfitLossTable() {
@@ -7,7 +8,8 @@ export default function ProfitLossTable() {
   const [error, setError] = useState(null);
   const [selectedThreeD, setSelectedThreeD] = useState(null);
   const [selectedTwoD, setSelectedTwoD] = useState(null);
-  // For toggling views
+  const [showAgentsModal, setShowAgentsModal] = useState(false);
+  const [modalAgents, setModalAgents] = useState([]);
   const [view, setView] = useState("twoD"); // 'twoD' or 'threeD'
 
   // Pagination state for 3D only
@@ -93,7 +95,16 @@ export default function ProfitLossTable() {
               </tr>
             ) : (
               numbers.map(
-                ({ number, str, rumble, payout, total, PL, profitLoss }) => (
+                ({
+                  number,
+                  str,
+                  rumble,
+                  payout,
+                  total,
+                  PL,
+                  profitLoss,
+                  agents,
+                }) => (
                   <tr
                     key={number}
                     onClick={() => {
@@ -106,6 +117,7 @@ export default function ProfitLossTable() {
                           total,
                           PL,
                           profitLoss,
+                          agents,
                         });
                       if (view === "twoD")
                         setSelectedTwoD({
@@ -116,6 +128,7 @@ export default function ProfitLossTable() {
                           total,
                           PL,
                           profitLoss,
+                          agents,
                         });
                     }}
                     className={`cursor-pointer hover:bg-yellow-900/40 transition-colors duration-200 text-sm h-7 ${
@@ -189,17 +202,16 @@ export default function ProfitLossTable() {
       )}
     </section>
   );
-  const InfoRow = ({ label, value, isProfit }) => (
+  const InfoRow = ({ label, value, onClick, isInteractive }) => (
     <>
       <div className="text-gray-300">{label}</div>
       <div
         className={`font-bold ${
-          isProfit === undefined
-            ? "text-green-400"
-            : isProfit
-            ? "text-green-400"
-            : "text-red-400"
+          isInteractive
+            ? "cursor-pointer hover:text-yellow-300 transition-colors"
+            : "text-green-400"
         }`}
+        onClick={onClick}
       >
         {value}
       </div>
@@ -216,6 +228,7 @@ export default function ProfitLossTable() {
       </td>
     </tr>
   );
+  console.log(selectedThreeD);
   return (
     <main className="max-w-7xl mx-auto p-8 font-sans bg-gradient-to-br from-black via-gray-900 to-black rounded-3xl shadow-[0_0_60px_rgba(255,215,0,0.3)] border-4 border-yellow-500">
       <h1 className="text-center text-yellow-300 font-extrabold text-4xl tracking-widest uppercase drop-shadow-[0_0_5px_rgba(255,215,0,0.9)] mb-12">
@@ -241,6 +254,20 @@ export default function ProfitLossTable() {
                 value={selectedTwoD?.profitLoss}
                 isProfit={selectedTwoD?.profitLoss >= 0}
               />
+              <InfoRow
+                label="📈 Agents"
+                value={
+                  <span className="flex items-center gap-2">
+                    {selectedTwoD?.agents?.length || 0}
+                    <span className="text-blue-300">ℹ️</span>
+                  </span>
+                }
+                onClick={() => {
+                  setModalAgents(selectedTwoD?.agents || []);
+                  setShowAgentsModal(true);
+                }}
+                isInteractive
+              />
             </div>
           </div>
         )}
@@ -248,7 +275,7 @@ export default function ProfitLossTable() {
         {/* Totals Box */}
         <div className="w-full sm:w-[22rem] p-6 bg-gradient-to-br from-gray-900 via-black to-red-900 rounded-2xl shadow-2xl border-4 border-yellow-500 animate-fade-in">
           <h2 className="text-3xl font-extrabold text-center text-yellow-400 mb-6 tracking-wide uppercase drop-shadow-md">
-            🎯 Total 
+            🎯 Total
           </h2>
           <div className="space-y-4 text-center font-mono text-lg">
             {["threeD", "twoD", "oneD"].map((key) => (
@@ -325,6 +352,20 @@ export default function ProfitLossTable() {
                 value={selectedThreeD?.profitLoss}
                 isProfit={selectedThreeD?.profitLoss >= 0}
               />
+              <InfoRow
+                label="📈 Agents"
+                value={
+                  <span className="flex items-center gap-2">
+                    {selectedThreeD?.agents?.length || 0}
+                    <span className="text-blue-300">ℹ️</span>
+                  </span>
+                }
+                onClick={() => {
+                  setModalAgents(selectedThreeD?.agents || []);
+                  setShowAgentsModal(true);
+                }}
+                isInteractive
+              />
             </div>
           </div>
         )}
@@ -339,7 +380,7 @@ export default function ProfitLossTable() {
           }`}
           onClick={() => setView("twoD")}
         >
-          2-Digit Numbers
+          2-Digit
         </button>
         <button
           className={`px-6 py-2 rounded-lg font-bold text-xl transition ${
@@ -349,7 +390,7 @@ export default function ProfitLossTable() {
           }`}
           onClick={() => setView("threeD")}
         >
-          3-Digit Numbers
+          3-Digit
         </button>
       </div>
 
@@ -364,6 +405,28 @@ export default function ProfitLossTable() {
           setPage={setPage}
           totalPages={totalPages}
         />
+      )}
+      {showAgentsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-white text-black rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">
+              🧑‍💼 Agents for this number
+            </h2>
+            <ul className="list-disc list-inside space-y-1 max-h-60 overflow-y-auto">
+              {modalAgents.map((agent, idx) => (
+                <li key={idx} className="text-gray-800">
+                  {agent}
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={() => setShowAgentsModal(false)}
+              className="mt-6 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       )}
     </main>
   );

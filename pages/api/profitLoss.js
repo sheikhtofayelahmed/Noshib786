@@ -37,6 +37,7 @@ export default async function handler(req, res) {
     let grandTotals = { OneD: 0, TwoD: 0, ThreeD: 0 };
     const numberStats = {};
     const singleDigitPayouts = {};
+    const numberAgents = {}; // Track which agents submitted each number
 
     for (const player of players) {
       const entries = player.entries || [];
@@ -48,6 +49,10 @@ export default async function handler(req, res) {
         const rumble = entry.input?.rumble || 0;
         const amount = str + rumble;
         if (!num || typeof amount !== "number") continue;
+
+        // Track agentId for this number
+        if (!numberAgents[num]) numberAgents[num] = new Set();
+        numberAgents[num].add(player.agentId);
 
         if (num.length === 1) {
           grandTotals.OneD += amount * ((100 - cPercent.oneD) / 100);
@@ -86,6 +91,8 @@ export default async function handler(req, res) {
     const twoD = [];
 
     for (const [num, data] of Object.entries(numberStats)) {
+      const agents = Array.from(numberAgents[num] || []);
+
       if (data.length === 3) {
         const strPayout = data.str * multipliers.threeD.str;
 
@@ -106,19 +113,19 @@ export default async function handler(req, res) {
         const payout = strPayout + rumblePayout + singleSum;
         const game = finalTotals.threeD + finalTotals.oneD;
         const PL = game - payout;
-        const pl = (PL * 100) / finalTotals.total;
-
+        const pl = (PL * 100) / game;
         threeD.push({
           number: num,
-          str: data.str,
-          rumble: data.rumble,
-          strPayout,
-          rumblePayout,
-          singleSum,
-          payout,
-          total: game,
-          PL,
-          profitLoss: pl.toFixed(3), // 3 decimals as string
+          str: Number(data.str.toFixed(1)),
+          rumble: Number(data.rumble.toFixed(1)),
+          strPayout: Number(strPayout.toFixed(1)),
+          rumblePayout: Number(rumblePayout.toFixed(1)),
+          singleSum: Number(singleSum.toFixed(1)),
+          payout: Number(payout.toFixed(1)),
+          total: Number(game.toFixed(1)),
+          PL: Number(PL.toFixed(1)),
+          profitLoss: Number(pl.toFixed(1)), // now a number with 1 decimal
+          agents,
         });
       } else if (data.length === 2) {
         const strPayout = data.str * multipliers.twoD;
@@ -126,18 +133,19 @@ export default async function handler(req, res) {
         const payout = strPayout + rumblePayout;
         const game = finalTotals.twoD;
         const PL = game - payout;
-        const pl = (PL * 100) / finalTotals.total;
+        const pl = (PL * 100) / game;
+
         twoD.push({
           number: num,
-          str: data.str,
-          rumble: data.rumble,
-          strPayout,
-          rumblePayout,
-          payout,
-          total: game,
-          total: game,
-          PL,
-          profitLoss: pl.toFixed(3), // 3 decimals as string
+          str: Number(data.str.toFixed(1)),
+          rumble: Number(data.rumble.toFixed(1)),
+          strPayout: Number(strPayout.toFixed(1)),
+          rumblePayout: Number(rumblePayout.toFixed(1)),
+          payout: Number(payout.toFixed(1)),
+          total: Number(game.toFixed(1)),
+          PL: Number(PL.toFixed(1)),
+          profitLoss: Number(pl.toFixed(1)), // now a number with 1 decimal
+          agents,
         });
       }
     }
