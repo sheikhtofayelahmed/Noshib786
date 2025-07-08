@@ -3,6 +3,7 @@
 import Loading from "@/components/Loading";
 import NumberTable from "@/components/NumberTable";
 import NumberTableSingle from "@/components/NumberTableSingle";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { useEffect, useState } from "react";
 
 // NumberTable Component - Transformed into a visually striking casino grid
@@ -213,6 +214,7 @@ export default function HappyNewYear() {
         data={numberData}
         line={2}
       />
+      <ScrollToTopButton />
 
       {/* Tailwind CSS custom animations and colors (add to your global CSS or tailwind.config.js) */}
     </div>

@@ -2,6 +2,7 @@
 
 import Loading from "@/components/Loading";
 import NumberTable from "@/components/NumberTable";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { useEffect, useState } from "react";
 
 export default function HappyNewYear() {
@@ -198,6 +199,7 @@ export default function HappyNewYear() {
       />
 
       {/* Tailwind CSS custom animations and colors (add to your global CSS or tailwind.config.js) */}
+      <ScrollToTopButton />
     </div>
   );
 }

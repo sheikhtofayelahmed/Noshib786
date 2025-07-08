@@ -2,6 +2,7 @@
 
 import Loading from "@/components/Loading";
 import NumberTable from "@/components/NumberTable";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { useEffect, useState } from "react";
 
 export default function HappyNewYear() {
@@ -195,6 +196,7 @@ export default function HappyNewYear() {
         data={numberData}
         line={3}
       />
+      <ScrollToTopButton />
     </div>
   );
 }

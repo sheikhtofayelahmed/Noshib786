@@ -4,6 +4,7 @@ import React, { useRef } from "react";
 // import html2pdf from "html2pdf.js";
 import { parseISO, format, isValid } from "date-fns";
 import Loading from "./Loading";
+import ScrollToTopButton from "./ScrollToTopButton";
 const GameSummary = ({ agentId }) => {
   const [loading, setLoading] = useState(true);
   const [fetched, setFetched] = useState(false);
@@ -667,7 +668,6 @@ const GameSummary = ({ agentId }) => {
       {/* {loading && (
         <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>
       )} */}
-
       {!loading && fetched && players.length === 0 && (
         <div className="flex items-center justify-center h-[60vh]">
           <p className="text-pink-400 text-3xl font-bold text-center">
@@ -1420,6 +1420,7 @@ const GameSummary = ({ agentId }) => {
           </div>
         </div>
       )}
+      <ScrollToTopButton />
     </div>
   );
 };

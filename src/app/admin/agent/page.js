@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 export default function AdminAgentPage() {
   const router = useRouter();
   const [onlineAgentIds, setOnlineAgentIds] = useState(new Set());
@@ -958,6 +959,7 @@ export default function AdminAgentPage() {
           </div>
         </div>
       )}
+      <ScrollToTopButton />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import GameSummary from "@/components/GameSummaryModal";
 import { AppWindow, FileText } from "lucide-react";
 import ExVoucher from "@/components/ExVoucherModal";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 
 export default function Account() {
   const [threeUp, setThreeUp] = useState("");
@@ -808,6 +809,7 @@ export default function Account() {
           onClose={() => setExVoucherModalVisible(false)}
         />
       )}
+      <ScrollToTopButton />
     </div>
   );
 }

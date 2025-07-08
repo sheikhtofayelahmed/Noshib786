@@ -1,5 +1,6 @@
 // src/components/AdminApprovalDashboard.jsx
 "use client";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import React, { useState, useEffect } from "react";
 
 const AdminApprovalDashboard = () => {
@@ -335,6 +336,8 @@ const AdminApprovalDashboard = () => {
           </div>
         ))}
       </div>
+          <ScrollToTopButton />
+
     </div>
   );
 };

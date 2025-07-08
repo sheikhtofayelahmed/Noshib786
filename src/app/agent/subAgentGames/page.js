@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import React from "react";
 import { useAgent } from "@/context/AgentContext";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 
 const SubAgentSummary = () => {
   const [loading, setLoading] = useState(true);
@@ -666,6 +667,7 @@ const SubAgentSummary = () => {
             </div>
           );
         })}
+      <ScrollToTopButton />
     </div>
   );
 };
