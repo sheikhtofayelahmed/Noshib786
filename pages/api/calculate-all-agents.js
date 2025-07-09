@@ -67,12 +67,12 @@ export default async function handler(req, res) {
 
           const winDetails = [];
 
-          if (number.length === 3 && number === threeUp && str > 0) {
+          if (number === threeUp && str > 0) {
             winDetails.push({ type: "STR3D", amount: str });
           }
           if (
             number.length === 3 &&
-            permutations3D.includes(number) &&
+            (number === threeUp || permutations3D.includes(number)) &&
             rumble > 0
           ) {
             winDetails.push({ type: "RUMBLE3D", amount: rumble });
@@ -136,13 +136,13 @@ export default async function handler(req, res) {
       const afterOneD = Math.floor(
         totalAmounts.OneD * (1 - percentages.oneD / 100)
       );
-      const afterSTR = Math.floor(totalWins.STR3D * percentages.str);
-      const afterRUMBLE = Math.floor(totalWins.RUMBLE3D * percentages.rumble);
-      const afterDOWN = Math.floor(totalWins.DOWN * percentages.down);
-      const afterSINGLE = Math.floor(totalWins.SINGLE * percentages.single);
+      const totalSTR = Math.floor(totalWins.STR3D * percentages.str);
+      const totalRUMBLE = Math.floor(totalWins.RUMBLE3D * percentages.rumble);
+      const totalDOWN = Math.floor(totalWins.DOWN * percentages.down);
+      const totalSINGLE = Math.floor(totalWins.SINGLE * percentages.single);
 
       const totalGame = afterThreeD + afterTwoD + afterOneD;
-      let totalWin = afterSTR + afterRUMBLE + afterDOWN + afterSINGLE;
+      let totalWin = totalSTR + totalRUMBLE + totalDOWN + totalSINGLE;
 
       let underPercentage = 0;
       let Expense = 0;
@@ -169,10 +169,10 @@ export default async function handler(req, res) {
         afterThreeD,
         afterTwoD,
         afterOneD,
-        afterSTR,
-        afterRUMBLE,
-        afterDOWN,
-        afterSINGLE,
+        afterSTR: totalWins.STR3D,
+        afterRUMBLE: totalWins.RUMBLE3D,
+        afterDOWN: totalWins.DOWN,
+        afterSINGLE: totalWins.SINGLE,
         totalGame,
         totalWin,
         expense: agent.expense,
