@@ -38,21 +38,6 @@ const GameSummary = ({ agentId }) => {
   const [finalCalAmt, setFinalCalAmt] = useState("");
   const [finalCalOperation, setFinalCalOperation] = useState("");
 
-  const safeDate = (dateInput) => {
-    if (!dateInput) return "Invalid Date";
-
-    let dateObj;
-
-    if (typeof dateInput === "string") {
-      dateObj = parseISO(dateInput);
-    } else if (dateInput instanceof Date) {
-      dateObj = dateInput;
-    } else {
-      return "Invalid Date";
-    }
-
-    return isValid(dateObj) ? format(dateObj, "dd/MM/yyyy") : "Invalid Date";
-  };
   // Single useEffect to fetch all initial data that depends on agentId
   useEffect(() => {
     if (!agentId) return;
@@ -78,7 +63,7 @@ const GameSummary = ({ agentId }) => {
         setIsGameOn(gameStatusData.isGameOn);
         setThreeUp(winStatusData.threeUp);
         setDownGame(winStatusData.downGame);
-        setDate(winStatusData.date);
+        setDate(winStatusData.gameDate);
 
         // 2. Fetch agent info
         const agentRes = await fetch(`/api/getAgentById?agentId=${agentId}`);
@@ -703,7 +688,7 @@ const GameSummary = ({ agentId }) => {
                       {agent?.name}
                     </td>
                     <td colSpan={2} className="px-6 py-4 text-xl">
-                      {safeDate(date)}
+                      {date}
                     </td>
                     <td colSpan={2} className="px-6 py-4 text-2xl">
                       {threeUp || "XXX"}

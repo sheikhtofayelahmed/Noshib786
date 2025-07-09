@@ -13,8 +13,8 @@ export default function Account() {
   const [downGame, setDownGame] = useState("");
   const [gameDate, setGameDate] = useState(null);
   const [toast, setToast] = useState({ type: "", message: "" });
-  const [submitting, setSubmitting] = useState(false);
   const [allSummaries, setAllSummaries] = useState([]);
+  const [latestSummaryData, setLatestSummaryData] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedAgent, setSelectedAgent] = useState("");
   const [loading, setLoading] = useState(true);
@@ -103,7 +103,7 @@ export default function Account() {
 
         setThreeUp(winStatusData.threeUp);
         setDownGame(winStatusData.downGame);
-        setGameDate(winStatusData.date);
+        setGameDate(winStatusData.gameDate);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError(err.message);
@@ -122,47 +122,6 @@ export default function Account() {
       return () => clearTimeout(timer);
     }
   }, [toast]);
-
-  const handleCalculate = async () => {
-    if (!threeUp || !downGame || !gameDate) {
-      setToast({ type: "error", message: "All fields are required." });
-      return;
-    }
-    const confirmed = window.confirm(
-      "Are you sure you want to proceed with the calculation?"
-    );
-    if (!confirmed) return;
-
-    setSubmitting(true);
-    setToast({ type: "", message: "" });
-
-    try {
-      const res = await fetch("/api/calculate-all-agents", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          threeUp,
-          downGame,
-          gameDate: format(gameDate, "yyyy-MM-dd"),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Calculation failed");
-
-      setToast({
-        type: "success",
-        message: `✅ ${data.summaries.length} summaries generated.`,
-      });
-
-      setThreeUp("");
-      setDownGame("");
-      setGameDate(null);
-    } catch (err) {
-      setToast({ type: "error", message: err.message || "Unexpected error." });
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   useEffect(() => {
     async function fetchSummaries() {
@@ -197,19 +156,50 @@ export default function Account() {
     fetchSummaries();
   }, []);
 
-  const uniqueDates = [
-    ...new Set(allSummaries.map((s) => new Date(s.gameDate).toDateString())),
-  ].sort((a, b) => new Date(b) - new Date(a));
+  useEffect(() => {
+    if (!gameDate) return;
 
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const fetchSummaries = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch("/api/get-summaries-by-date", {
+          method: "POST",
+          signal,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ gameDate }),
+        });
+
+        if (!res.ok) {
+          console.warn("⚠️ Fetch summaries failed:", await res.text());
+          return;
+        }
+
+        const data = await res.json();
+        setLatestSummaryData(data.summaries || []);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error("❌ Fetch error:", err);
+          setError("❌ Something went wrong");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSummaries();
+    return () => controller.abort();
+  }, [gameDate]);
   const uniqueAgents = [
     ...new Map(
       allSummaries.map((s) => [s.agentId, { agentId: s.agentId, name: s.name }])
     ).values(),
   ].sort((a, b) => a.agentId.localeCompare(b.agentId));
-
-  const filteredSummaries = allSummaries.filter(
-    (s) => new Date(s.gameDate).toDateString() === selectedDate
-  );
 
   const filteredAgentSummaries = allSummaries
     .filter((s) => s.agentId === selectedAgent)
@@ -221,7 +211,7 @@ export default function Account() {
     // Example: setModalData({ agentId, gameDate }); setShowModal(true);
     setSummaryModal(true);
   };
-  const totalsBD = filteredSummaries.reduce(
+  const totalsBD = latestSummaryData.reduce(
     (acc, item) => {
       acc.afterSTR += item.afterSTR || 0;
       acc.afterRUMBLE += item.afterRUMBLE || 0;
@@ -351,8 +341,8 @@ export default function Account() {
     <div className="p-4 min-h-screen text-white font-mono space-y-10">
       {/* Summary Runner */}
       <div className="max-w-3xl mx-auto bg-gray-900 p-6 rounded-lg ring-2 ring-cyan-400 text-white shadow-lg">
-        <h2 className="text-2xl font-bold text-lime-400 text-center">
-          🧮 All-Agent Summary Runner
+        <h2 className="font-bangla text-2xl font-bold text-lime-400 text-center">
+          🧮 হিসাব নিকাশ
         </h2>
 
         {toast.message && (
@@ -366,97 +356,22 @@ export default function Account() {
             {toast.message}
           </div>
         )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-          <div>
-            <label className="block mb-1 font-semibold text-yellow-300">
-              🎯 3UP Number
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="\d{3}"
-              value={threeUp}
-              readOnly
-              disabled
-              className="w-full px-4 py-2 rounded bg-gray-800 border border-yellow-500"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-semibold text-pink-300">
-              💥 DOWN Number
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="\d{2}"
-              value={downGame}
-              readOnly
-              disabled
-              className="w-full px-4 py-2 rounded bg-gray-800 border border-pink-500"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-semibold text-cyan-300 font-bangla">
-              🗓️ গেমের তারিখ
-            </label>
-            <DatePicker
-              selected={gameDate}
-              readOnly
-              disabled
-              dateFormat="dd/MM/yyyy"
-              className="w-full px-4 py-2 rounded bg-gray-800 border border-cyan-500 text-white"
-            />
-          </div>
-        </div>
-
-        <button
-          onClick={handleCalculate}
-          disabled={submitting}
-          className={`mt-6 w-full sm:w-auto px-6 py-2 font-bold rounded shadow transition ${
-            submitting
-              ? "bg-gray-600 cursor-not-allowed"
-              : "bg-green-500 hover:bg-lime-500 text-black"
-          }`}
-        >
-          {submitting ? "Calculating..." : "Calculate All Agents"}
-        </button>
-      </div>
-
-      {/* Select Game Date */}
-      <div>
-        <label className="block mb-2 font-bold text-yellow-300">
-          Select Game Date
-        </label>
-        <select
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          className="px-4 py-2 bg-gray-800 border border-cyan-500 rounded text-white"
-        >
-          {uniqueDates.map((date) => (
-            <option key={date} value={date}>
-              {date}
-            </option>
-          ))}
-        </select>
       </div>
 
       {/* Summary Table by Date */}
       {loading ? (
         <p className="text-yellow-400">Loading summaries...</p>
-      ) : filteredSummaries.length > 0 ? (
+      ) : latestSummaryData.length > 0 ? (
         <div
           ref={currentGameContentRef}
           className="overflow-x-auto border border-yellow-600 rounded-xl bg-gray-900 "
         >
           <div className="flex items-center justify-center">
             <h2 className="text-xl font-bold text-yellow-300 py-3 text-center">
-              {selectedDate}
+              {gameDate}
               <span className="text-white text-xl">
-                {filteredSummaries[0].threeUp &&
-                  ` , ${filteredSummaries[0].threeUp}=${filteredSummaries[0].downGame}`}
+                {latestSummaryData[0].threeUp &&
+                  ` , ${latestSummaryData[0].threeUp}=${latestSummaryData[0].downGame}`}
               </span>
             </h2>
             <button
@@ -481,10 +396,12 @@ export default function Account() {
                 <th className="p-2">Total Game</th>
                 <th className="p-2">Total Win</th>
                 <th className="p-2">W/L</th>
+                <th className="p-2">Last Updated</th>
+                <th className="p-2">Summary</th>
               </tr>
             </thead>
             <tbody>
-              {filteredSummaries.map((item, idx) => (
+              {latestSummaryData.map((item, idx) => (
                 <tr key={idx} className="hover:bg-gray-700">
                   <td className="p-2">{idx + 1}</td>
                   <td className="p-2">{item.name}</td>
@@ -503,6 +420,29 @@ export default function Account() {
                     }`}
                   >
                     {item.totalGame - item.totalWin}
+                  </td>
+                  <td className="p-2">
+                    {item?.lastUpdated
+                      ? new Date(item.lastUpdated).toLocaleString("en-GB", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: true, // use 24-hour format
+                        })
+                      : ""}
+                  </td>
+                  <td className="p-2 text-yellow-300">
+                    <button
+                      onClick={() => {
+                        setSelectedSummaryItem(item);
+                        setModalVisible(true);
+                      }}
+                    >
+                      <FileText className="w-4 h-4" />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -525,13 +465,15 @@ export default function Account() {
                 >
                   {totalsBD.totalGame - totalsBD.totalWin}
                 </td>
+                <td className="p-2">—</td>
+                <td className="p-2">—</td>
               </tr>
             </tbody>
           </table>
         </div>
       ) : (
         <p className="text-center text-pink-400 font-bold">
-          No data found for {selectedDate}
+          No data found for {gameDate}
         </p>
       )}
 
@@ -594,9 +536,7 @@ export default function Account() {
               {filteredAgentSummaries.map((item, idx) => (
                 <tr key={idx} className="hover:bg-gray-700">
                   <td className="p-2">{idx + 1}</td>
-                  <td className="p-2">
-                    {format(new Date(item.gameDate), "dd/MM/yyyy")}
-                  </td>
+                  <td className="p-2">{item.gameDate}</td>
                   <td className="p-2">
                     {item.threeUp} = {item.downGame}
                   </td>

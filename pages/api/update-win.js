@@ -5,9 +5,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { threeUp, downGame, date } = req.body;
+  const { threeUp, downGame, gameDate } = req.body;
 
-  if (!threeUp || !downGame || !date) {
+  if (!threeUp || !downGame || !gameDate) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
         $set: {
           threeUp,
           downGame,
-          date,
+          gameDate,
         },
       },
       { upsert: true } // if it doesn't exist, create it

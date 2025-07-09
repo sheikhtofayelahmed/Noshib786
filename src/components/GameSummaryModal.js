@@ -23,23 +23,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
   const [finalCalType, setFinalCalType] = useState("");
   const [finalCalAmt, setFinalCalAmt] = useState("");
   const [finalCalOperation, setFinalCalOperation] = useState("");
-  console.log(currentGame, currentGameAmt, "currentGamecurrentGameAmt");
   const { agentId, gameDate, name, threeUp, downGame, percentages } = item;
-  const safeDate = (dateInput) => {
-    if (!dateInput) return "Invalid Date";
-
-    let dateObj;
-
-    if (typeof dateInput === "string") {
-      dateObj = parseISO(dateInput);
-    } else if (dateInput instanceof Date) {
-      dateObj = dateInput;
-    } else {
-      return "Invalid Date";
-    }
-
-    return isValid(dateObj) ? format(dateObj, "dd/MM/yyyy") : "Invalid Date";
-  };
   // Single useEffect to fetch all initial data that depends on agentId
   useEffect(() => {
     if (!agentId) return;
@@ -114,7 +98,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           agentId,
-          gameDate: gameDate,
+          gameDate,
           cal,
         }),
       });
@@ -630,7 +614,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                         {name}
                       </td>
                       <td colSpan={2} className="px-6 py-4 text-xl">
-                        {safeDate(gameDate)}
+                        {gameDate}
                       </td>
                       <td colSpan={2} className="px-6 py-4 text-2xl">
                         {threeUp || "XXX"}

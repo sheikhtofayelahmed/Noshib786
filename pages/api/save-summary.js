@@ -11,7 +11,6 @@ export default async function handler(req, res) {
   try {
     const client = await clientPromise;
     const db = client.db("thai-agent-lottery");
-    const dateOnly = new Date(gameDate).toISOString().slice(0, 10);
 
     // Separate joma and other calculation fields
     const { joma, ...otherCalFields } = cal;
@@ -24,7 +23,7 @@ export default async function handler(req, res) {
 
     // Update the document
     const result = await db.collection("summaries").updateOne(
-      { agentId, gameDate: dateOnly },
+      { agentId, gameDate },
       {
         $set: calFields,
         $push: { "calculation.joma": joma },

@@ -15,12 +15,12 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: "No winning data found" });
     }
 
-    const { threeUp, downGame, date } = win;
+    const { threeUp, downGame, gameDate } = win;
 
     return res.status(200).json({
       threeUp: threeUp || "",
       downGame: downGame || "",
-      date: date || "",
+      gameDate: gameDate || "",
     });
   } catch (error) {
     console.error("Error fetching win data:", error);
