@@ -202,7 +202,9 @@ export default function PlayerInputModal({ onClose }) {
       editError: false,
     }));
 
-    const voucher = `${agentId}-${Math.floor(100000 + Math.random() * 900000)}`;
+    const voucher = `${agentId}-${Math.floor(
+      100000 + Math.random() * 90000000
+    )}`;
     const totals = calculateTotals(validEntries);
 
     const newPlayer = {

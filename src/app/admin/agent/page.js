@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import { CircleOff, Delete, DeleteIcon, Eye, EyeOff } from "lucide-react";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 export default function AdminAgentPage() {
   const router = useRouter();
@@ -77,6 +77,38 @@ export default function AdminAgentPage() {
   const [editingAgent, setEditingAgent] = useState(null);
   const [editingModal, setEditingModal] = useState(false);
   const [modal, setModal] = useState(false);
+  const [modalNotes, setModalNotes] = useState([]);
+  const [noteInput, setNoteInput] = useState("");
+  const [noteId, setNoteId] = useState("");
+  const [showNoteModal, setShowNoteModal] = useState(false);
+
+  async function notes(agentId) {
+    setShowNoteModal(true);
+    setNoteId(agentId);
+    try {
+      const res = await fetch(`/api/getNotes?agentId=${agentId}`);
+      const data = await res.json();
+      setModalNotes(data.notes || []);
+    } catch (error) {
+      console.error("Failed to load notes:", error);
+    }
+  }
+  async function submitNote(agentId) {
+    if (!noteInput.trim()) return;
+    try {
+      await fetch("/api/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agentId, note: noteInput }),
+      });
+
+      // Refresh notes after upload
+      notes(agentId);
+      setNoteInput("");
+    } catch (err) {
+      console.error("Failed to submit note:", err);
+    }
+  }
   useEffect(() => {
     fetchAgents();
   }, []);
@@ -377,7 +409,7 @@ export default function AdminAgentPage() {
                   <th className="font-bangla border border-yellow-400 p-2">
                     Sub Agent
                   </th>
-                  <th colSpan={3} className="border border-yellow-400 p-2">
+                  <th colSpan={4} className="border border-yellow-400 p-2">
                     Actions
                   </th>
                 </tr>
@@ -546,11 +578,19 @@ export default function AdminAgentPage() {
                       </td>
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <button
+                          onClick={() => notes(agentId)}
+                          className="px-4 py-1  hover:bg-yellow-500 text-black font-bold rounded-full shadow-md transition"
+                        >
+                          📝
+                        </button>
+                      </td>
+                      <td className="border border-yellow-400 p-2 space-x-2">
+                        <button
                           onClick={() => toggleActive(agentId, active)}
                           className={`px-3 py-1 rounded  
                           } text-red-500 font-semibold`}
                         >
-                          {active && "Inactive"}
+                          {active && <CircleOff />}
                         </button>
                       </td>
                     </tr>
@@ -956,6 +996,52 @@ export default function AdminAgentPage() {
                 Save
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {showNoteModal && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center font-mono">
+          <div className="bg-gradient-to-br from-black via-zinc-900 to-black border-4 border-yellow-500 rounded-xl shadow-2xl p-6 w-full max-w-md animate-fade-in">
+            <h2 className="text-2xl font-extrabold text-yellow-300 mb-4 text-center">
+              🃏 Agent Notes
+            </h2>
+
+            <div className="max-h-64 overflow-y-auto space-y-3 mb-4 pr-2 scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-transparent">
+              {modalNotes.map((n, i) => (
+                <div
+                  key={i}
+                  className="bg-white/10 p-3 rounded text-sm shadow-inner border-l-2 border-yellow-400 text-yellow-100"
+                >
+                  <div>{n.text}</div>
+                  <div className="text-xs text-yellow-500 mt-1">
+                    🕓 {new Date(n.time).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={noteInput}
+                onChange={(e) => setNoteInput(e.target.value)}
+                placeholder="Type your note like a boss..."
+                className="flex-1 px-3 py-2 rounded bg-black text-yellow-200 border border-yellow-500 placeholder-yellow-500 focus:outline-none"
+              />
+              <button
+                onClick={() => submitNote(noteId)}
+                className="px-4 py-2 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-black font-bold rounded-full hover:scale-105 transition"
+              >
+                💾 Save
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowNoteModal(false)}
+              className="mt-6 w-full py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded shadow"
+            >
+              🚪 Close
+            </button>
           </div>
         </div>
       )}
