@@ -51,9 +51,14 @@ export default async function handler(req, res) {
         if (!num || typeof amount !== "number") continue;
 
         // Track agentId for this number
-        if (!numberAgents[num]) numberAgents[num] = new Set();
-        numberAgents[num].add(player.agentId);
+        if (!numberAgents[num]) numberAgents[num] = {};
 
+        if (!numberAgents[num][player.agentId]) {
+          numberAgents[num][player.agentId] = { str: 0, rumble: 0 };
+        }
+
+        numberAgents[num][player.agentId].str += str;
+        numberAgents[num][player.agentId].rumble += rumble;
         if (num.length === 1) {
           grandTotals.OneD += amount * ((100 - cPercent.oneD) / 100);
           const payout = amount * 1;
@@ -91,8 +96,13 @@ export default async function handler(req, res) {
     const twoD = [];
 
     for (const [num, data] of Object.entries(numberStats)) {
-      const agents = Array.from(numberAgents[num] || []);
-
+      const agents = Object.entries(numberAgents[num] || {}).map(
+        ([id, stats]) => ({
+          id,
+          str: Number(stats.str.toFixed(1)),
+          rumble: Number(stats.rumble.toFixed(1)),
+        })
+      );
       if (data.length === 3) {
         const strPayout = data.str * multipliers.threeD.str;
 
@@ -129,7 +139,16 @@ export default async function handler(req, res) {
         });
       } else if (data.length === 2) {
         const strPayout = data.str * multipliers.twoD;
-        const rumblePayout = data.rumble * multipliers.twoD;
+
+        // Find reverse number
+        const reversed = num.split("").reverse().join("");
+
+        // Include rumble from both the number and its reverse
+        const reverseRumble = numberStats[reversed]?.rumble || 0;
+        const totalRumble =
+          data.rumble + (reversed !== num ? reverseRumble : 0);
+
+        const rumblePayout = totalRumble * multipliers.twoD;
         const payout = strPayout + rumblePayout;
         const game = finalTotals.twoD;
         const PL = game - payout;

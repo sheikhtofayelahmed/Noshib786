@@ -228,147 +228,148 @@ export default function ProfitLossTable() {
       </td>
     </tr>
   );
-  console.log(selectedThreeD);
   return (
-    <main className="max-w-7xl mx-auto p-8 font-sans bg-gradient-to-br from-black via-gray-900 to-black rounded-3xl shadow-[0_0_60px_rgba(255,215,0,0.3)] border-4 border-yellow-500">
+    <main className="max-w-[7xl] mx-auto p-8 font-sans bg-gradient-to-br from-black via-gray-900 to-black rounded-3xl shadow-[0_0_60px_rgba(255,215,0,0.3)] border-4 border-yellow-500">
       <h1 className="text-center text-yellow-300 font-extrabold text-4xl tracking-widest uppercase drop-shadow-[0_0_5px_rgba(255,215,0,0.9)] mb-12">
         🎯 Profit & Loss
       </h1>
-      <div className="flex flex-wrap justify-center gap-6 p-4">
-        {/* Selected 2D Box */}
+      <div className="max-w-[1024px] my-5">
+        <div className="overflow-x-auto  flex flex-row flex-nowrap gap-6">
+          {/* Selected 2D Box */}
 
-        {selectedTwoD && (
-          <div className="w-full sm:w-[22rem] p-6 rounded-xl border-4 border-yellow-400 bg-gradient-to-br from-black via-red-900 to-black shadow-[0_0_25px_rgba(255,215,0,0.6)] text-white font-mono animate-fade-in">
-            <h2 className="text-3xl font-extrabold text-yellow-300 text-left mb-4">
-              🎲 2D
-            </h2>
-            <div className="grid grid-cols-2 gap-4 text-lg">
-              <InfoRow label="🔢 Number" value={selectedTwoD?.number} />
-              <InfoRow label="🧾 STR" value={selectedTwoD?.str} />
-              <InfoRow label="🎯 Rumble" value={selectedTwoD?.rumble} />
-              <InfoRow label="💸 Payout" value={selectedTwoD?.payout} />
-              <InfoRow label="🧮 Total" value={selectedTwoD?.total} />
-              <InfoRow label="📈 PL" value={selectedTwoD?.PL} />
-              <InfoRow
-                label="🏁 P/L"
-                value={selectedTwoD?.profitLoss}
-                isProfit={selectedTwoD?.profitLoss >= 0}
-              />
-              <InfoRow
-                label="📈 Agents"
-                value={
-                  <span className="flex items-center gap-2">
-                    {selectedTwoD?.agents?.length || 0}
-                    <span className="text-blue-300">ℹ️</span>
-                  </span>
-                }
-                onClick={() => {
-                  setModalAgents(selectedTwoD?.agents || []);
-                  setShowAgentsModal(true);
-                }}
-                isInteractive
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Totals Box */}
-        <div className="w-full sm:w-[22rem] p-6 bg-gradient-to-br from-gray-900 via-black to-red-900 rounded-2xl shadow-2xl border-4 border-yellow-500 animate-fade-in">
-          <h2 className="text-3xl font-extrabold text-center text-yellow-400 mb-6 tracking-wide uppercase drop-shadow-md">
-            🎯 Total
-          </h2>
-          <div className="space-y-4 text-center font-mono text-lg">
-            {["threeD", "twoD", "oneD"].map((key) => (
-              <div
-                key={key}
-                className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner"
-              >
-                <span className="text-red-300 font-bold">
-                  {key.toUpperCase()}
-                </span>
-                <span className="text-white">
-                  {data?.finalTotals?.[key] ?? "—"}
-                </span>
+          {selectedTwoD && (
+            <div className="w-full sm:w-[22rem] p-6 rounded-xl border-4 border-yellow-400 bg-gradient-to-br from-black via-red-900 to-black shadow-[0_0_25px_rgba(255,215,0,0.6)] text-white font-mono animate-fade-in">
+              <h2 className="text-3xl font-extrabold text-yellow-300 text-left mb-4">
+                🎲 2D
+              </h2>
+              <div className="grid grid-cols-2 gap-4 text-lg">
+                <InfoRow label="🔢 Number" value={selectedTwoD?.number} />
+                <InfoRow label="🧾 STR" value={selectedTwoD?.str} />
+                <InfoRow label="🎯 Rumble" value={selectedTwoD?.rumble} />
+                <InfoRow label="💸 Payout" value={selectedTwoD?.payout} />
+                <InfoRow label="🧮 Total" value={selectedTwoD?.total} />
+                <InfoRow label="📈 PL" value={selectedTwoD?.PL} />
+                <InfoRow
+                  label="🏁 P/L"
+                  value={selectedTwoD?.profitLoss}
+                  isProfit={selectedTwoD?.profitLoss >= 0}
+                />
+                <InfoRow
+                  label="📈 Agents"
+                  value={
+                    <span className="flex items-center gap-2">
+                      {selectedTwoD?.agents?.length || 0}
+                      <span className="text-blue-300">ℹ️</span>
+                    </span>
+                  }
+                  onClick={() => {
+                    setModalAgents(selectedTwoD?.agents || []);
+                    setShowAgentsModal(true);
+                  }}
+                  isInteractive
+                />
               </div>
-            ))}
+            </div>
+          )}
 
-            {selectedThreeD && selectedTwoD ? (
-              <table className="w-full text-sm font-mono text-white bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 mt-4">
-                <tbody>
-                  <SummaryRow
-                    label="Total Game"
-                    value={data?.finalTotals?.total}
-                  />
-                  <SummaryRow
-                    label="Payout"
-                    value={selectedThreeD.payout + selectedTwoD.payout}
-                  />
-                  <SummaryRow
-                    label="P/L"
-                    value={
-                      data.finalTotals.total -
-                      selectedThreeD.payout -
-                      selectedTwoD.payout
-                    }
-                  />
-                  <SummaryRow
-                    label="%"
-                    value={`${(
-                      ((data.finalTotals.total -
+          {/* Totals Box */}
+          <div className="w-full sm:w-[22rem] p-6 bg-gradient-to-br from-gray-900 via-black to-red-900 rounded-2xl shadow-2xl border-4 border-yellow-500 animate-fade-in">
+            <h2 className="text-3xl font-extrabold text-center text-yellow-400 mb-6 tracking-wide uppercase drop-shadow-md">
+              🎯 Total
+            </h2>
+            <div className="space-y-4 text-center font-mono text-lg">
+              {["threeD", "twoD", "oneD"].map((key) => (
+                <div
+                  key={key}
+                  className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner"
+                >
+                  <span className="text-red-300 font-bold">
+                    {key.toUpperCase()}
+                  </span>
+                  <span className="text-white">
+                    {data?.finalTotals?.[key] ?? "—"}
+                  </span>
+                </div>
+              ))}
+
+              {selectedThreeD && selectedTwoD ? (
+                <table className="w-full text-sm font-mono text-white bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 mt-4">
+                  <tbody>
+                    <SummaryRow
+                      label="Total Game"
+                      value={data?.finalTotals?.total}
+                    />
+                    <SummaryRow
+                      label="Payout"
+                      value={selectedThreeD.payout + selectedTwoD.payout}
+                    />
+                    <SummaryRow
+                      label="P/L"
+                      value={
+                        data.finalTotals.total -
                         selectedThreeD.payout -
-                        selectedTwoD.payout) /
-                        data?.finalTotals?.total) *
-                      100
-                    ).toFixed(2)}%`}
-                  />
-                </tbody>
-              </table>
-            ) : (
-              <div className="flex justify-between px-4 py-3 bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 mt-4">
-                <span className="text-white font-bold text-xl">💰 Total</span>
-                <span className="text-yellow-300 font-extrabold text-xl">
-                  {data?.finalTotals?.total ?? "—"}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Selected 3D Box */}
-        {selectedThreeD && (
-          <div className="w-full sm:w-[22rem] p-6 rounded-xl border-4 border-yellow-400 bg-gradient-to-br from-black via-red-900 to-black shadow-[0_0_25px_rgba(255,215,0,0.6)] text-white font-mono animate-fade-in">
-            <h2 className="text-3xl font-extrabold text-yellow-300 text-left mb-4">
-              🎲 3D
-            </h2>
-            <div className="grid grid-cols-2 gap-4 text-lg">
-              <InfoRow label="🔢 Number" value={selectedThreeD?.number} />
-              <InfoRow label="🧾 String" value={selectedThreeD?.str} />
-              <InfoRow label="🎯 Rumble" value={selectedThreeD?.rumble} />
-              <InfoRow label="💸 Payout" value={selectedThreeD?.payout} />
-              <InfoRow label="🧮 Total" value={selectedThreeD?.total} />
-              <InfoRow label="📈 PL" value={selectedThreeD?.PL} />
-              <InfoRow
-                label="🏁 P/L"
-                value={selectedThreeD?.profitLoss}
-                isProfit={selectedThreeD?.profitLoss >= 0}
-              />
-              <InfoRow
-                label="📈 Agents"
-                value={
-                  <span className="flex items-center gap-2">
-                    {selectedThreeD?.agents?.length || 0}
-                    <span className="text-blue-300">ℹ️</span>
+                        selectedTwoD.payout
+                      }
+                    />
+                    <SummaryRow
+                      label="%"
+                      value={`${(
+                        ((data.finalTotals.total -
+                          selectedThreeD.payout -
+                          selectedTwoD.payout) /
+                          data?.finalTotals?.total) *
+                        100
+                      ).toFixed(2)}%`}
+                    />
+                  </tbody>
+                </table>
+              ) : (
+                <div className="flex justify-between px-4 py-3 bg-gradient-to-r from-green-700 to-green-500 rounded-xl shadow-lg border border-green-300 mt-4">
+                  <span className="text-white font-bold text-xl">💰 Total</span>
+                  <span className="text-yellow-300 font-extrabold text-xl">
+                    {data?.finalTotals?.total ?? "—"}
                   </span>
-                }
-                onClick={() => {
-                  setModalAgents(selectedThreeD?.agents || []);
-                  setShowAgentsModal(true);
-                }}
-                isInteractive
-              />
+                </div>
+              )}
             </div>
           </div>
-        )}
+
+          {/* Selected 3D Box */}
+          {selectedThreeD && (
+            <div className="w-full sm:w-[22rem] p-6 rounded-xl border-4 border-yellow-400 bg-gradient-to-br from-black via-red-900 to-black shadow-[0_0_25px_rgba(255,215,0,0.6)] text-white font-mono animate-fade-in">
+              <h2 className="text-3xl font-extrabold text-yellow-300 text-left mb-4">
+                🎲 3D
+              </h2>
+              <div className="grid grid-cols-2 gap-4 text-lg">
+                <InfoRow label="🔢 Number" value={selectedThreeD?.number} />
+                <InfoRow label="🧾 String" value={selectedThreeD?.str} />
+                <InfoRow label="🎯 Rumble" value={selectedThreeD?.rumble} />
+                <InfoRow label="💸 Payout" value={selectedThreeD?.payout} />
+                <InfoRow label="🧮 Total" value={selectedThreeD?.total} />
+                <InfoRow label="📈 PL" value={selectedThreeD?.PL} />
+                <InfoRow
+                  label="🏁 P/L"
+                  value={selectedThreeD?.profitLoss}
+                  isProfit={selectedThreeD?.profitLoss >= 0}
+                />
+                <InfoRow
+                  label="📈 Agents"
+                  value={
+                    <span className="flex items-center gap-2">
+                      {selectedThreeD?.agents?.length || 0}
+                      <span className="text-blue-300">ℹ️</span>
+                    </span>
+                  }
+                  onClick={() => {
+                    setModalAgents(selectedThreeD?.agents || []);
+                    setShowAgentsModal(true);
+                  }}
+                  isInteractive
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
       {/* Navigation Buttons */}
       <div className="flex justify-center mb-8 gap-6 select-none">
@@ -407,23 +408,51 @@ export default function ProfitLossTable() {
         />
       )}
       {showAgentsModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-white text-black rounded-lg shadow-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">
-              🧑‍💼 Agents for this number
+        <div className="fixed inset-0 bg-gradient-to-br from-black via-zinc-900 to-black bg-opacity-90 flex items-center justify-center z-50">
+          <div className="bg-gradient-to-br from-yellow-100 via-red-100 to-pink-100 text-black rounded-xl shadow-2xl border-4 border-yellow-400 p-6 w-full max-w-md animate-fade-in">
+            <h2 className="text-2xl font-extrabold text-center text-red-700 mb-6 tracking-wide uppercase">
+              🧑‍💼 Agents
             </h2>
-            <ul className="list-disc list-inside space-y-1 max-h-60 overflow-y-auto">
+
+            <ul className="space-y-3 max-h-60 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-transparent">
               {modalAgents.map((agent, idx) => (
-                <li key={idx} className="text-gray-800">
-                  {agent}
+                <li
+                  key={idx}
+                  className="bg-white/90 rounded-lg px-4 py-2 shadow-inner border-l-4 border-yellow-500"
+                >
+                  <div className="font-bold text-lg text-red-800">
+                    {agent.id}
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    🎯 STR:
+                    <span className="font-semibold text-black">
+                      {agent.str}
+                    </span>
+                    &nbsp;|&nbsp; 🔄 RUMBLE:{" "}
+                    <span className="font-semibold text-black">
+                      {agent.rumble}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
+
+            <div className="mt-6 text-center text-sm text-gray-800 font-semibold">
+              💰 Total STR:{" "}
+              <span className="text-green-700">
+                {modalAgents.reduce((sum, a) => sum + a.str, 0)}
+              </span>{" "}
+              | 🔁 Total RUMBLE:{" "}
+              <span className="text-blue-700">
+                {modalAgents.reduce((sum, a) => sum + a.rumble, 0)}
+              </span>
+            </div>
+
             <button
               onClick={() => setShowAgentsModal(false)}
-              className="mt-6 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              className="mt-8 w-full py-2 bg-gradient-to-r from-red-600 via-yellow-500 to-pink-500 text-white font-bold rounded-full shadow-lg hover:brightness-110 transition-all duration-300"
             >
-              Close
+              🎬 Close
             </button>
           </div>
         </div>
