@@ -240,7 +240,7 @@ export default function ProfitLossTable() {
           {selectedTwoD && (
             <div className="w-full sm:w-[22rem] p-6 rounded-xl border-4 border-yellow-400 bg-gradient-to-br from-black via-red-900 to-black shadow-[0_0_25px_rgba(255,215,0,0.6)] text-white font-mono animate-fade-in">
               <h2 className="text-3xl font-extrabold text-yellow-300 text-left mb-4">
-                🎲 2D
+                🎲 2 D
               </h2>
               <div className="grid grid-cols-2 gap-4 text-lg">
                 <InfoRow label="🔢 Number" value={selectedTwoD?.number} />
@@ -338,7 +338,7 @@ export default function ProfitLossTable() {
           {selectedThreeD && (
             <div className="w-full sm:w-[22rem] p-6 rounded-xl border-4 border-yellow-400 bg-gradient-to-br from-black via-red-900 to-black shadow-[0_0_25px_rgba(255,215,0,0.6)] text-white font-mono animate-fade-in">
               <h2 className="text-3xl font-extrabold text-yellow-300 text-left mb-4">
-                🎲 3D
+                🎲 3 D
               </h2>
               <div className="grid grid-cols-2 gap-4 text-lg">
                 <InfoRow label="🔢 Number" value={selectedThreeD?.number} />

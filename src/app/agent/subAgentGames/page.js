@@ -86,7 +86,18 @@ const SubAgentSummary = () => {
     acc[player.SAId].push(player);
     return acc;
   }, {});
-
+  const getPermutations = (str) => {
+    if (!str || str.length <= 1) return [str || ""];
+    const perms = [];
+    for (let i = 0; i < str.length; i++) {
+      const char = str[i];
+      const rest = str.slice(0, i) + str.slice(i + 1);
+      for (const perm of getPermutations(rest)) {
+        perms.push(char + perm);
+      }
+    }
+    return [...new Set(perms)];
+  };
   const getMatchType = (input, threeUp, downGame) => {
     if (!input || !threeUp || !downGame) return { match: false, type: null };
 
