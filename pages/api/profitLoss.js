@@ -107,6 +107,7 @@ export default async function handler(req, res) {
         const strPayout = data.str * multipliers.threeD.str;
 
         const perms = getPermutations(num);
+        console.log(perms);
         let rumbleSum = 0;
         for (const permNum of perms) {
           if (numberStats[permNum]) {
