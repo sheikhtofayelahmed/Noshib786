@@ -20,11 +20,15 @@ export default function HappyNewYear() {
       const data = await res.json();
       console.log(data, "fetch dataa");
       setNumberData(data);
+
       setLoading(false);
     };
     fetchData();
   }, []);
-
+  const numberDataMap = {};
+  numberData.forEach((item) => {
+    numberDataMap[item._id] = item;
+  });
   const doubleRows = [
     ["100", "110", "166", "112", "113", "114", "115", "116", "117", "118"],
     ["010", "101", "616", "121", "131", "141", "151", "161", "171", "181"],
@@ -107,6 +111,29 @@ export default function HappyNewYear() {
       }
     }
   });
+  function getTotalRumbleForPermutations(number, numberDataMap) {
+    const digits = number.split("");
+    const permutations = new Set();
+
+    // Generate all 3-digit permutations (exactly 3 unique for duplicated digit cases)
+    const len = digits.length;
+    for (let i = 0; i < len; i++) {
+      for (let j = 0; j < len; j++) {
+        for (let k = 0; k < len; k++) {
+          const perm = `${digits[i]}${digits[j]}${digits[k]}`;
+          permutations.add(perm);
+        }
+      }
+    }
+
+    const validPerms = [...permutations].filter((p) => numberDataMap[p]);
+
+    const total = validPerms.reduce((sum, p) => {
+      return sum + (numberDataMap[p]?.totalRumble || 0);
+    }, 0);
+
+    return total;
+  }
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -120,12 +147,12 @@ export default function HappyNewYear() {
         🎰 Thai Lottery Agent 🎲
       </h1>
 
-      <div className="mb-16 bg-gray-950 rounded-xl shadow-2xl border-2 border-yellow-600 overflow-x-auto">
+      <div className="mb-16  max-h-[700px] overflow-y-auto bg-gray-950 rounded-xl shadow-2xl border-2 border-yellow-600 overflow-x-auto">
         <h3 className="text-3xl font-bold text-yellow-400 mb-4 text-center uppercase tracking-wider bg-black py-4 rounded-lg shadow-inner">
           🎯 Hot Numbers
         </h3>
         <table className="w-full text-center font-mono text-sm md:text-base text-white">
-          <thead>
+          <thead className="sticky top-0 z-30">
             <tr>
               {columns.map((col) => (
                 <th
@@ -139,34 +166,53 @@ export default function HappyNewYear() {
           </thead>
           <tbody>
             <tr>
-              {columns.map((_, modIndex) => {
+              {columns.map((colDigitMod) => {
                 const matchingNumbers = [];
 
                 Object.keys(patternData).forEach((patternType) => {
+                  let rowCount = 0;
+
                   patternData[patternType].forEach(
-                    ({ number, str, rumble }) => {
+                    ({ number, str, rumble }, idx) => {
                       const digitSumMod =
                         number
                           .split("") // assuming number is a string like "123"
                           .reduce((acc, d) => acc + Number(d), 0) % 10;
+                      const totalPermRumble = getTotalRumbleForPermutations(
+                        number,
+                        numberDataMap
+                      );
 
-                      if (digitSumMod === modIndex) {
+                      if (digitSumMod === colDigitMod) {
+                        const isOdd = rowCount % 2 !== 0;
+
                         matchingNumbers.push(
                           <div
                             key={`${patternType}-${number}`}
-                            className="text-white text-3xl font-extrabold uppercase bg-gradient-to-br from-indigo-600 to-sky-500 p-2 rounded-lg mb-2 shadow-md transform transition-all duration-300"
+                            className={`flex flex-col items-center justify-center space-y-1 mb-2 p-2 rounded-lg transition-all duration-300 ease-in-out ${
+                              isOdd
+                                ? "bg-gradient-to-br from-indigo-600 to-sky-700 text-white shadow-xl transform scale-105"
+                                : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
+                            }`}
                           >
-                            <span>{number}</span>
-                            <div className="flex justify-center space-x-2 mt-2">
-                              <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md text-center min-w-[1.5rem]">
+                            <div className=" font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md min-w-[1.5rem] text-center">
+                              {totalPermRumble}
+                            </div>
+                            <span className="text-3xl font-extrabold uppercase">
+                              {number}
+                            </span>
+                            <div className="flex justify-center space-x-2">
+                              <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md min-w-[1.5rem] text-center">
                                 {str}
                               </div>
-                              <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md text-center min-w-[1.5rem]">
+                              <div className="text-sm font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md min-w-[1.5rem] text-center">
                                 {rumble}
                               </div>
                             </div>
                           </div>
                         );
+
+                        rowCount++; // ✅ Important: advance row counter for alternating styles
                       }
                     }
                   );
@@ -174,7 +220,7 @@ export default function HappyNewYear() {
 
                 return (
                   <td
-                    key={modIndex}
+                    key={colDigitMod}
                     className="bg-gray-900 p-4 rounded-lg border border-gray-700 align-top"
                   >
                     {matchingNumbers.length > 0 && (

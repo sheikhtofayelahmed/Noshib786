@@ -164,12 +164,12 @@ export default function HappyNewYear() {
         🎰 Thai Lottery Agent 🎲
       </h1>
 
-      <div className="mb-16 bg-gray-950 rounded-xl shadow-2xl border-2 border-yellow-600 overflow-x-auto">
+      <div className="mb-16  max-h-[700px] overflow-y-auto bg-gray-950 rounded-xl shadow-2xl border-2 border-yellow-600 overflow-x-auto">
         <h3 className="text-3xl font-bold text-yellow-400 mb-4 text-center uppercase tracking-wider bg-black py-4 rounded-lg shadow-inner">
           🎯 Hot Numbers
         </h3>
         <table className="w-full text-center font-mono text-sm md:text-base text-white border-collapse">
-          <thead>
+          <thead className="sticky top-0 z-30">
             <tr>
               {columns.map((col) => (
                 <th
