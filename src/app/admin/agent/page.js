@@ -35,6 +35,7 @@ export default function AdminAgentPage() {
   const [name, setName] = useState("");
   const [adding, setAdding] = useState(false);
   const [entryCounts, setEntryCounts] = useState({});
+  const [entryCountsNotes, setEntryCountsNotes] = useState({});
   const [loading, setLoading] = useState(true);
   const [iPercentages, setIPercentages] = useState({
     threeD: 45,
@@ -109,6 +110,43 @@ export default function AdminAgentPage() {
       console.error("Failed to submit note:", err);
     }
   }
+  useEffect(() => {
+    const fetchCountsForNotes = async () => {
+      const counts = {};
+
+      for (const agent of agents) {
+        try {
+          const res = await fetch(`/api/getNotes?agentId=${agent.agentId}`);
+          const data = await res.json();
+
+          counts[agent.agentId] = data.notes?.length || 0; // Store count instead of array
+        } catch (error) {
+          console.error(`Failed to load notes for ${agent.agentId}:`, error);
+          counts[agent.agentId] = 0;
+        }
+      }
+
+      setEntryCountsNotes(counts); // Set final counts object
+    };
+
+    if (agents.length > 0) {
+      fetchCountsForNotes();
+    }
+  }, [agents]);
+
+  async function deleteNote(agentId, time) {
+    try {
+      await fetch("/api/notes", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agentId, time }),
+      });
+      notes(agentId); // re-fetch after deletion
+    } catch (err) {
+      console.error("Failed to delete note:", err);
+    }
+  }
+
   useEffect(() => {
     fetchAgents();
   }, []);
@@ -577,12 +615,20 @@ export default function AdminAgentPage() {
                         </button>
                       </td>
                       <td className="border border-yellow-400 p-2 space-x-2">
-                        <button
-                          onClick={() => notes(agentId)}
-                          className="px-4 py-1  hover:bg-yellow-500 text-black font-bold rounded-full shadow-md transition"
-                        >
-                          📝
-                        </button>
+                        <div className="relative inline-block">
+                          <button
+                            onClick={() => notes(agentId)}
+                            className="px-4 py-1 hover:bg-yellow-500 text-black font-bold rounded-full shadow-md transition"
+                          >
+                            📝
+                          </button>
+
+                          {entryCountsNotes[agentId] > 0 && (
+                            <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
+                              {entryCountsNotes[agentId]}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <button
@@ -1010,9 +1056,18 @@ export default function AdminAgentPage() {
               {modalNotes.map((n, i) => (
                 <div
                   key={i}
-                  className="bg-white/10 p-3 rounded text-sm shadow-inner border-l-2 border-yellow-400 text-yellow-100"
+                  className="bg-white/10 p-3 rounded text-sm shadow-inner border-l-2 border-yellow-400 text-yellow-100 flex flex-col"
                 >
-                  <div>{n.text}</div>
+                  <div className="flex justify-between items-start gap-2">
+                    <div>{n.text}</div>
+                    <button
+                      onClick={() => deleteNote(noteId, n.time)}
+                      className="text-red-400 hover:text-red-600 text-xs font-bold"
+                      title="Delete note"
+                    >
+                      ❌
+                    </button>
+                  </div>
                   <div className="text-xs text-yellow-500 mt-1">
                     🕓 {new Date(n.time).toLocaleString()}
                   </div>

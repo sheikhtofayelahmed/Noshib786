@@ -2,6 +2,21 @@
 import clientPromise from "lib/mongodb";
 
 export default async function handler(req, res) {
+  if (req.method === "DELETE") {
+    const client = await clientPromise;
+    const db = client.db("thai-agent-lottery");
+    const { agentId, time } = req.body;
+
+    try {
+      await db
+        .collection("notes")
+        .updateOne({ agentId }, { $pull: { notes: { time: new Date(time) } } });
+      return res.status(200).json({ message: "Note deleted." });
+    } catch (err) {
+      return res.status(500).json({ error: "Failed to delete note." });
+    }
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
