@@ -59,149 +59,180 @@ export default function ProfitLossTable() {
       </p>
     );
 
-  const Table = ({ numbers, paginated, page, setPage, totalPages }) => (
-    <section className="mb-12">
-      <div className="overflow-auto rounded-xl border-2 border-yellow-500 shadow-[0_0_20px_rgba(255,215,0,0.6)] max-h-[600px]">
-        <table className="min-w-full table-auto border-collapse bg-black bg-opacity-90 text-yellow-100">
-          <thead className="bg-gradient-to-r from-yellow-800 via-yellow-700 to-yellow-800 sticky top-0">
-            <tr className="text-sm h-8">
-              {[
-                "Number",
-                "Str",
-                "Rumble",
-                "Payout",
-                "Total",
-                "P/L",
-                "Profit/Loss (%)",
-              ].map((header) => (
-                <th
-                  key={header}
-                  className="px-3 text-center text-yellow-100 font-bold uppercase tracking-wider border-b border-yellow-400 select-none"
-                >
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {numbers.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={6}
-                  className="text-center p-4 text-yellow-400 italic text-sm"
-                >
-                  No data available
-                </td>
-              </tr>
-            ) : (
-              numbers.map(
-                ({
-                  number,
-                  str,
-                  rumble,
-                  payout,
-                  total,
-                  PL,
-                  profitLoss,
-                  agents,
-                }) => (
-                  <tr
-                    key={number}
-                    onClick={() => {
-                      if (view === "threeD")
-                        setSelectedThreeD({
-                          number,
-                          str,
-                          rumble,
-                          payout,
-                          total,
-                          PL,
-                          profitLoss,
-                          agents,
-                        });
-                      if (view === "twoD")
-                        setSelectedTwoD({
-                          number,
-                          str,
-                          rumble,
-                          payout,
-                          total,
-                          PL,
-                          profitLoss,
-                          agents,
-                        });
-                    }}
-                    className={`cursor-pointer hover:bg-yellow-900/40 transition-colors duration-200 text-sm h-7 ${
-                      (view === "threeD" &&
-                        selectedThreeD?.number === number) ||
-                      (view === "twoD" && selectedTwoD?.number === number)
-                        ? "bg-gradient-to-r from-green-500 to-green-700  text-white font-bold"
-                        : "even:bg-black/30"
-                    }`}
-                  >
-                    <td className="px-3 text-center font-mono">{number}</td>
-                    <td className="px-3 text-center font-mono">{str}</td>
-                    <td className="px-3 text-center font-mono">{rumble}</td>
-                    <td className="px-3 text-center font-mono">
-                      {payout.toLocaleString()}
-                    </td>
-                    <td className="px-3 text-center font-mono">
-                      {total.toLocaleString()}
-                    </td>
-                    <td
-                      className={`px-3 text-center font-mono ${
-                        PL > 0
-                          ? "text-green-400 font-bold"
-                          : PL < 0
-                          ? "text-red-500 font-bold"
-                          : "text-yellow-300"
-                      }`}
-                    >
-                      {PL.toLocaleString()}
-                    </td>
-                    <td
-                      className={`px-3 text-center font-mono ${
-                        profitLoss > 0
-                          ? "text-green-400 font-bold"
-                          : profitLoss < 0
-                          ? "text-red-500 font-bold"
-                          : "text-yellow-300"
-                      }`}
-                    >
-                      {profitLoss}%
-                    </td>
-                  </tr>
-                )
-              )
-            )}
-          </tbody>
-        </table>
-      </div>
+  const Table = ({
+    numbers,
+    paginated,
+    page,
+    setPage,
+    totalPages,
+    view,
+    setSelectedThreeD,
+    setSelectedTwoD,
+  }) => {
+    const [searchTerm, setSearchTerm] = useState("");
 
-      {/* Pagination for 3D only */}
-      {paginated && totalPages > 1 && (
-        <div className="mt-4 flex justify-center gap-3 select-none">
-          <button
-            className="bg-yellow-700 hover:bg-yellow-800 px-3 py-1 rounded disabled:opacity-50"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-          >
-            ◀ Prev
-          </button>
-          <span className="text-yellow-300 font-mono">
-            Page {page} / {totalPages}
-          </span>
-          <button
-            className="bg-yellow-700 hover:bg-yellow-800 px-3 py-1 rounded disabled:opacity-50"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-          >
-            Next ▶
-          </button>
+    const filteredNumbers = numbers.filter((entry) =>
+      Object.values(entry)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase().trim())
+    );
+
+    return (
+      <section className="mb-12 max-w-[1024px]">
+        {/* 🔍 Search Input */}
+        <input
+          type="text"
+          placeholder="🎲 Search your lucky number..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="mb-4 w-full max-w-xs px-4 py-2 rounded-lg border border-yellow-500 bg-gradient-to-r from-yellow-900 via-black to-yellow-900 text-yellow-200 placeholder-yellow-500 shadow-[0_0_12px_rgba(255,215,0,0.4)] font-mono tracking-wide focus:outline-none focus:ring-2 focus:ring-yellow-400 hover:shadow-[0_0_20px_rgba(255,215,0,0.6)] transition-shadow duration-300"
+        />
+
+        {/* 📊 Table */}
+        <div className="overflow-auto rounded-xl border-2 border-yellow-500 shadow-[0_0_20px_rgba(255,215,0,0.6)] max-h-[600px]">
+          <table className="min-w-full table-auto border-collapse bg-black bg-opacity-90 text-yellow-100">
+            <thead className="bg-gradient-to-r from-yellow-800 via-yellow-700 to-yellow-800 sticky top-0">
+              <tr className="text-sm h-8">
+                {[
+                  "Number",
+                  "Str",
+                  "Rumble",
+                  "Payout",
+                  "Total",
+                  "P/L",
+                  "Profit/Loss (%)",
+                ].map((header) => (
+                  <th
+                    key={header}
+                    className="px-3 text-center text-yellow-100 font-bold uppercase tracking-wider border-b border-yellow-400 select-none"
+                  >
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredNumbers.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="text-center p-4 text-yellow-400 italic text-sm"
+                  >
+                    No matching results
+                  </td>
+                </tr>
+              ) : (
+                filteredNumbers.map(
+                  ({
+                    number,
+                    str,
+                    rumble,
+                    payout,
+                    total,
+                    PL,
+                    profitLoss,
+                    agents,
+                  }) => (
+                    <tr
+                      key={number}
+                      onClick={() => {
+                        if (view === "threeD")
+                          setSelectedThreeD({
+                            number,
+                            str,
+                            rumble,
+                            payout,
+                            total,
+                            PL,
+                            profitLoss,
+                            agents,
+                          });
+                        if (view === "twoD")
+                          setSelectedTwoD({
+                            number,
+                            str,
+                            rumble,
+                            payout,
+                            total,
+                            PL,
+                            profitLoss,
+                            agents,
+                          });
+                      }}
+                      className={`cursor-pointer hover:bg-yellow-900/40 transition-colors duration-200 text-sm h-7 ${
+                        (view === "threeD" &&
+                          selectedThreeD?.number === number) ||
+                        (view === "twoD" && selectedTwoD?.number === number)
+                          ? "bg-gradient-to-r from-green-500 to-green-700 text-white font-bold"
+                          : "even:bg-black/30"
+                      }`}
+                    >
+                      <td className="px-3 text-center font-mono">{number}</td>
+                      <td className="px-3 text-center font-mono">{str}</td>
+                      <td className="px-3 text-center font-mono">{rumble}</td>
+                      <td className="px-3 text-center font-mono">
+                        {payout.toLocaleString()}
+                      </td>
+                      <td className="px-3 text-center font-mono">
+                        {total.toLocaleString()}
+                      </td>
+                      <td
+                        className={`px-3 text-center font-mono ${
+                          PL > 0
+                            ? "text-green-400 font-bold"
+                            : PL < 0
+                            ? "text-red-500 font-bold"
+                            : "text-yellow-300"
+                        }`}
+                      >
+                        {PL.toLocaleString()}
+                      </td>
+                      <td
+                        className={`px-3 text-center font-mono ${
+                          profitLoss > 0
+                            ? "text-green-400 font-bold"
+                            : profitLoss < 0
+                            ? "text-red-500 font-bold"
+                            : "text-yellow-300"
+                        }`}
+                      >
+                        {profitLoss}%
+                      </td>
+                    </tr>
+                  )
+                )
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
-    </section>
-  );
+
+        {/* 📃 Pagination */}
+        {paginated && totalPages > 1 && (
+          <div className="mt-4 flex justify-center gap-3 select-none">
+            <button
+              className="bg-yellow-700 hover:bg-yellow-800 px-3 py-1 rounded disabled:opacity-50"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              ◀ Prev
+            </button>
+            <span className="text-yellow-300 font-mono">
+              Page {page} / {totalPages}
+            </span>
+            <button
+              className="bg-yellow-700 hover:bg-yellow-800 px-3 py-1 rounded disabled:opacity-50"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+            >
+              Next ▶
+            </button>
+          </div>
+        )}
+      </section>
+    );
+  };
+
   const InfoRow = ({ label, value, onClick, isInteractive }) => (
     <>
       <div className="text-gray-300">{label}</div>

@@ -125,6 +125,32 @@ export default function HappyNewYear() {
       columnData[columnKey].push({ number: numStr, str, rumble });
     }
   });
+  // Utility to get all 6 permutations of a unique 3-digit number
+  const getPermutations = (number) => {
+    const digits = number.split("");
+    const perms = new Set();
+
+    const permute = (arr, m = "") => {
+      if (arr.length === 0) perms.add(m);
+      else {
+        for (let i = 0; i < arr.length; i++) {
+          let copy = arr.slice();
+          let next = copy.splice(i, 1);
+          permute(copy, m + next);
+        }
+      }
+    };
+
+    permute(digits);
+    return Array.from(perms);
+  };
+  const getTotalRumble = (numStr) => {
+    const permutations = getPermutations(numStr);
+    return permutations.reduce((total, perm) => {
+      const found = numberData.find((n) => n._id === perm);
+      return total + (found?.totalRumble || 0);
+    }, 0);
+  };
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -171,6 +197,9 @@ export default function HappyNewYear() {
                           : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
                       }`}
                     >
+                      <div className=" font-bold text-black bg-white px-2 py-0.5 rounded-full shadow-md min-w-[1.5rem] text-center">
+                        {getTotalRumble(number)}
+                      </div>
                       <span className="text-3xl font-extrabold uppercase">
                         {number}
                       </span>
