@@ -502,7 +502,7 @@ export default function VoucherModal() {
       setMessage("❌ Network error while deleting voucher.");
     }
   };
-  console.log(currentVoucherData);
+
   return (
     <div className="flex items-center justify-center ">
       <div className="bg-gray-900 rounded-xl shadow-2xl border-2 border-yellow-500 w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative text-white font-mono">

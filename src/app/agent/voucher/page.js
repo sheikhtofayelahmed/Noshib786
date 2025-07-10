@@ -139,37 +139,38 @@ export default function VoucherModal() {
       setLoading(false);
     }
   };
+  const getPermutations = (str) => {
+    if (!str || str.length <= 1) return [str || ""];
+    const perms = [];
+    for (let i = 0; i < str.length; i++) {
+      const char = str[i];
+      const rest = str.slice(0, i) + str.slice(i + 1);
+      for (const perm of getPermutations(rest)) {
+        perms.push(char + perm);
+      }
+    }
+    return [...new Set(perms)];
+  };
+
   const getMatchType = (input, threeUp, downGame) => {
     if (!input || !threeUp || !downGame) return { match: false, type: null };
 
     const number = input.num;
-    const numAmounts = [Number(input.str || 0), Number(input.rumble || 0)];
     const permutations = getPermutations(threeUp);
-    const reversedDown = downGame?.split("").reverse().join("");
+    const reversedDown = downGame.split("").reverse().join("");
 
     if (number.length === 3) {
-      // Match for 3-digit number
-      if (threeUp.includes(number)) {
-        return { match: true, type: "str" }; // STR matched for 3 digits
-      }
-      if (permutations.includes(number) && numAmounts[1]) {
-        return { match: true, type: "rumble" }; // RUMBLE matched for 3 digits
-      }
+      if (number === threeUp) return { match: true, type: "exact3" };
+      if (permutations.includes(number)) return { match: true, type: "perm3" };
     }
 
     if (number.length === 2) {
-      // Match for 2-digit number
-      if (number === downGame) {
-        return { match: true, type: "down" }; // DOWN matched for 2 digits
-      }
-      if (number === reversedDown && numAmounts[1]) {
-        return { match: true, type: "rumble" }; // RUMBLE matched for 2 digits
-      }
+      if (number === downGame) return { match: true, type: "exact2" };
+      if (number === reversedDown) return { match: true, type: "reverse2" };
     }
 
     if (number.length === 1 && threeUp.includes(number)) {
-      // Match for 1-digit number
-      return { match: true, type: "single" }; // SINGLE matched for 1 digit
+      return { match: true, type: "single" };
     }
 
     return { match: false, type: null };
@@ -469,50 +470,67 @@ export default function VoucherModal() {
                     if (!entry || !entry.input) return "";
 
                     const value = entry.input[field];
+                    const str = Number(entry.input.str || 0);
+                    const rumble = Number(entry.input.rumble || 0);
+                    const digitLength = entry.input.num?.length;
                     const { match, type } = getMatchType(
                       entry.input,
                       threeUp,
                       downGame
                     );
-                    const numLength = entry.input.num?.length;
 
                     let shouldHighlight = false;
 
-                    if (!match) return <span>{value}</span>;
+                    if (!match) return renderValue(value, false);
 
-                    if (field === "num") {
-                      // ✅ Always highlight `num` if there's a match
-                      shouldHighlight = true;
-                    } else if (numLength === 3) {
-                      if (type === "str") {
-                        shouldHighlight = field === "str" || field === "rumble";
-                      } else if (type === "rumble") {
-                        shouldHighlight = field === "rumble";
-                      }
-                    } else if (numLength === 2) {
-                      if (type === "down") {
-                        shouldHighlight = field === "rumble";
-                      } else if (type === "str") {
-                        shouldHighlight = field === "str";
-                      } else if (type === "rumble") {
-                        shouldHighlight = field === "rumble";
-                      }
-                    } else if (numLength === 1 && type === "single") {
-                      shouldHighlight = field === "str";
+                    switch (type) {
+                      case "exact3":
+                        if (field === "num") shouldHighlight = true;
+                        if (field === "str" && str > 0) shouldHighlight = true;
+                        if (field === "rumble" && rumble > 0)
+                          shouldHighlight = true;
+                        break;
+
+                      case "perm3":
+                        if (rumble > 0) {
+                          if (field === "num" || field === "rumble")
+                            shouldHighlight = true;
+                        }
+                        break;
+
+                      case "exact2":
+                        if (field === "num") shouldHighlight = true;
+                        if (field === "str" && str > 0) shouldHighlight = true;
+                        break;
+
+                      case "reverse2":
+                        if (field === "rumble" && rumble > 0)
+                          shouldHighlight = true;
+                        break;
+
+                      case "single":
+                        if (str > 0) {
+                          if (field === "num" || field === "str")
+                            shouldHighlight = true;
+                        }
+                        break;
+
+                      default:
+                        shouldHighlight = false;
                     }
 
-                    return (
-                      <span
-                        className={
-                          shouldHighlight
-                            ? "text-red-500 font-bold text-xl"
-                            : ""
-                        }
-                      >
-                        {value}
-                      </span>
-                    );
+                    return renderValue(value, shouldHighlight);
                   };
+
+                  const renderValue = (value, highlight) => (
+                    <span
+                      className={
+                        highlight ? "text-red-500 font-bold text-xl" : ""
+                      }
+                    >
+                      {value ?? "—"}
+                    </span>
+                  );
 
                   for (let i = 0; i < maxRows; i++) {
                     rows.push(

@@ -12,7 +12,7 @@ const GameSummary = ({ agentId }) => {
   const [players, setPlayers] = useState([]);
   const [threeUp, setThreeUp] = useState();
   const [downGame, setDownGame] = useState();
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(null);
   const [totalWins, setTotalWins] = useState({});
   const [agent, setAgent] = useState({});
   const [error, setError] = useState("");
@@ -72,11 +72,10 @@ const GameSummary = ({ agentId }) => {
         setAgent(agentData.agent);
 
         // 3. Fetch summary
-        const formattedDate = winDate ? format(winDate, "yyyy-MM-dd") : null;
 
         const query = new URLSearchParams({
           agentId,
-          gameDate: formattedDate,
+          gameDate: date,
         }).toString();
 
         try {
@@ -124,7 +123,44 @@ const GameSummary = ({ agentId }) => {
 
     fetchAllData();
   }, [agentId]);
+  // Single useEffect to fetch all initial data that depends on agentId
+  useEffect(() => {
+    if (!agentId && !date) return;
 
+    setLoading(true);
+    setFetched(false);
+    setError("");
+
+    const fetchAllData = async () => {
+      try {
+        const query = new URLSearchParams({
+          agentId,
+          gameDate: date,
+        }).toString();
+
+        try {
+          const summaryRes = await fetch(`/api/get-summaries-id-date?${query}`);
+          if (!summaryRes.ok) {
+            console.warn("⚠️ Could not fetch summary");
+          } else {
+            const res = await summaryRes.json();
+            const data = res.summary;
+            setSummaryData(data || {});
+          }
+        } catch (summaryErr) {
+          console.error("❌ Error fetching summary:", summaryErr);
+        }
+      } catch (err) {
+        console.error("❌ Error in fetchAllData:", err);
+        setError("❌ Unexpected error occurred");
+      } finally {
+        setLoading(false);
+        setFetched(true);
+      }
+    };
+
+    fetchAllData();
+  }, [agentId, date]);
   useEffect(() => {
     if (!players) return;
 
@@ -142,6 +178,7 @@ const GameSummary = ({ agentId }) => {
       totalAmounts,
     });
   }, [players]);
+
   const getPermutations = (str) => {
     if (!str || str.length <= 1) return [str || ""];
     const perms = [];
@@ -159,19 +196,17 @@ const GameSummary = ({ agentId }) => {
     if (!input || !threeUp || !downGame) return { match: false, type: null };
 
     const number = input.num;
-    const numAmounts = [Number(input.str || 0), Number(input.rumble || 0)];
     const permutations = getPermutations(threeUp);
-    const reversedDown = downGame?.split("").reverse().join("");
+    const reversedDown = downGame.split("").reverse().join("");
+
     if (number.length === 3) {
-      if (number === threeUp) return { match: true, type: "str" };
-      if (permutations.includes(number) && numAmounts.length >= 2)
-        return { match: true, type: "rumble" };
+      if (number === threeUp) return { match: true, type: "exact3" };
+      if (permutations.includes(number)) return { match: true, type: "perm3" };
     }
 
     if (number.length === 2) {
-      if (number === downGame) return { match: true, type: "down" };
-      if (number === reversedDown && numAmounts.length >= 2)
-        return { match: true, type: "rumble" };
+      if (number === downGame) return { match: true, type: "exact2" };
+      if (number === reversedDown) return { match: true, type: "reverse2" };
     }
 
     if (number.length === 1 && threeUp.includes(number)) {
@@ -638,7 +673,7 @@ const GameSummary = ({ agentId }) => {
       console.error("Content div not found for voucher:", voucher);
     }
   };
-
+  console.log(summaryData, "summ");
   if (loading)
     return (
       <div className="flex items-center justify-center h-screen">
@@ -1255,33 +1290,69 @@ const GameSummary = ({ agentId }) => {
                           if (!entry || !entry.input) return "";
 
                           const value = entry.input[field];
+                          const str = Number(entry.input.str || 0);
+                          const rumble = Number(entry.input.rumble || 0);
+                          const digitLength = entry.input.num?.length;
                           const { match, type } = getMatchType(
                             entry.input,
                             threeUp,
                             downGame
                           );
 
-                          const shouldHighlight =
-                            match &&
-                            (field === "num" ||
-                              (field === "str" && type === "str") ||
-                              (field === "rumble" &&
-                                (type === "rumble" ||
-                                  type === "down" ||
-                                  type === "single")));
+                          let shouldHighlight = false;
 
-                          return (
-                            <span
-                              className={
-                                shouldHighlight
-                                  ? "text-red-500 font-bold text-xl"
-                                  : ""
+                          if (!match) return renderValue(value, false);
+
+                          switch (type) {
+                            case "exact3":
+                              if (field === "num") shouldHighlight = true;
+                              if (field === "str" && str > 0)
+                                shouldHighlight = true;
+                              if (field === "rumble" && rumble > 0)
+                                shouldHighlight = true;
+                              break;
+
+                            case "perm3":
+                              if (rumble > 0) {
+                                if (field === "num" || field === "rumble")
+                                  shouldHighlight = true;
                               }
-                            >
-                              {value}
-                            </span>
-                          );
+                              break;
+
+                            case "exact2":
+                              if (field === "num") shouldHighlight = true;
+                              if (field === "str" && str > 0)
+                                shouldHighlight = true;
+                              break;
+
+                            case "reverse2":
+                              if (field === "rumble" && rumble > 0)
+                                shouldHighlight = true;
+                              break;
+
+                            case "single":
+                              if (str > 0) {
+                                if (field === "num" || field === "str")
+                                  shouldHighlight = true;
+                              }
+                              break;
+
+                            default:
+                              shouldHighlight = false;
+                          }
+
+                          return renderValue(value, shouldHighlight);
                         };
+
+                        const renderValue = (value, highlight) => (
+                          <span
+                            className={
+                              highlight ? "text-red-500 font-bold text-xl" : ""
+                            }
+                          >
+                            {value ?? "—"}
+                          </span>
+                        );
 
                         for (let i = 0; i < maxRows; i++) {
                           rows.push(

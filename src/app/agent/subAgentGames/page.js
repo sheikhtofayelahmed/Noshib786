@@ -98,23 +98,22 @@ const SubAgentSummary = () => {
     }
     return [...new Set(perms)];
   };
+
   const getMatchType = (input, threeUp, downGame) => {
     if (!input || !threeUp || !downGame) return { match: false, type: null };
 
     const number = input.num;
-    const numAmounts = [Number(input.str || 0), Number(input.rumble || 0)];
     const permutations = getPermutations(threeUp);
-    const reversedDown = downGame?.split("").reverse().join("");
+    const reversedDown = downGame.split("").reverse().join("");
+
     if (number.length === 3) {
-      if (number === threeUp) return { match: true, type: "str" };
-      if (permutations.includes(number) && numAmounts.length >= 2)
-        return { match: true, type: "rumble" };
+      if (number === threeUp) return { match: true, type: "exact3" };
+      if (permutations.includes(number)) return { match: true, type: "perm3" };
     }
 
     if (number.length === 2) {
-      if (number === downGame) return { match: true, type: "down" };
-      if (number === reversedDown && numAmounts.length >= 2)
-        return { match: true, type: "rumble" };
+      if (number === downGame) return { match: true, type: "exact2" };
+      if (number === reversedDown) return { match: true, type: "reverse2" };
     }
 
     if (number.length === 1 && threeUp.includes(number)) {
@@ -513,34 +512,71 @@ const SubAgentSummary = () => {
                               if (!entry || !entry.input) return "";
 
                               const value = entry.input[field];
+                              const str = Number(entry.input.str || 0);
+                              const rumble = Number(entry.input.rumble || 0);
+                              const digitLength = entry.input.num?.length;
                               const { match, type } = getMatchType(
                                 entry.input,
                                 threeUp,
                                 downGame
                               );
 
-                              const shouldHighlight =
-                                match &&
-                                (field === "num" ||
-                                  (field === "str" && type === "str") ||
-                                  (field === "rumble" &&
-                                    (type === "rumble" ||
-                                      type === "down" ||
-                                      type === "single")));
+                              let shouldHighlight = false;
 
-                              return (
-                                <span
-                                  className={
-                                    shouldHighlight
-                                      ? "text-red-500 font-bold text-xl"
-                                      : ""
+                              if (!match) return renderValue(value, false);
+
+                              switch (type) {
+                                case "exact3":
+                                  if (field === "num") shouldHighlight = true;
+                                  if (field === "str" && str > 0)
+                                    shouldHighlight = true;
+                                  if (field === "rumble" && rumble > 0)
+                                    shouldHighlight = true;
+                                  break;
+
+                                case "perm3":
+                                  if (rumble > 0) {
+                                    if (field === "num" || field === "rumble")
+                                      shouldHighlight = true;
                                   }
-                                >
-                                  {value}
-                                </span>
-                              );
+                                  break;
+
+                                case "exact2":
+                                  if (field === "num") shouldHighlight = true;
+                                  if (field === "str" && str > 0)
+                                    shouldHighlight = true;
+                                  break;
+
+                                case "reverse2":
+                                  if (field === "rumble" && rumble > 0)
+                                    shouldHighlight = true;
+                                  break;
+
+                                case "single":
+                                  if (str > 0) {
+                                    if (field === "num" || field === "str")
+                                      shouldHighlight = true;
+                                  }
+                                  break;
+
+                                default:
+                                  shouldHighlight = false;
+                              }
+
+                              return renderValue(value, shouldHighlight);
                             };
 
+                            const renderValue = (value, highlight) => (
+                              <span
+                                className={
+                                  highlight
+                                    ? "text-red-500 font-bold text-xl"
+                                    : ""
+                                }
+                              >
+                                {value ?? "—"}
+                              </span>
+                            );
                             for (let i = 0; i < maxRows; i++) {
                               rows.push(
                                 <tr key={i}>

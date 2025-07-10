@@ -23,13 +23,11 @@ export default function AgentLayout({ children }) {
     ...(loginAs === "agent"
       ? [
           {
-            name: `Games`,
+            name: `Games${entryCount !== undefined ? ` (${entryCount})` : ""}`,
             path: "/agent/games",
           },
           {
-            name: `Voucher${
-              entryCount !== undefined ? ` (${entryCount})` : ""
-            }`,
+            name: `Voucher`,
             path: "/agent/voucher",
           },
         ]

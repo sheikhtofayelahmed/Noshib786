@@ -11,7 +11,6 @@ function getPermutations(str) {
       perms.add(char + perm);
     }
   }
-  perms.delete(str);
   return [...perms];
 }
 
@@ -33,6 +32,8 @@ export default async function handler(req, res) {
     }
 
     const permutations3D = getPermutations(threeUp);
+    console.log(permutations3D);
+
     const reversed2D = downGame.split("").reverse().join("");
     const singleDigits = threeUp.split("");
 

@@ -228,13 +228,19 @@ export default function ProfitLossTable() {
       </td>
     </tr>
   );
+  const labelMap = {
+    threeD: "3 D",
+    twoD: "2 D",
+    oneD: "1 D",
+  };
+
   return (
     <main className="max-w-[7xl] mx-auto p-8 font-sans bg-gradient-to-br from-black via-gray-900 to-black rounded-3xl shadow-[0_0_60px_rgba(255,215,0,0.3)] border-4 border-yellow-500">
       <h1 className="text-center text-yellow-300 font-extrabold text-4xl tracking-widest uppercase drop-shadow-[0_0_5px_rgba(255,215,0,0.9)] mb-12">
         🎯 Profit & Loss
       </h1>
       <div className="max-w-[1024px] my-5">
-        <div className="overflow-x-auto  flex flex-row flex-nowrap gap-6">
+        <div className="overflow-x-auto  flex flex-row flex-nowrap gap-6 justify-center">
           {/* Selected 2D Box */}
 
           {selectedTwoD && (
@@ -284,7 +290,7 @@ export default function ProfitLossTable() {
                   className="flex justify-between px-4 py-2 bg-gray-800 rounded-lg shadow-inner"
                 >
                   <span className="text-red-300 font-bold">
-                    {key.toUpperCase()}
+                    {labelMap[key] ?? key}
                   </span>
                   <span className="text-white">
                     {data?.finalTotals?.[key] ?? "—"}
