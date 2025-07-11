@@ -127,16 +127,23 @@ export default async function handler(req, res) {
         },
         { ThreeD: 0, TwoD: 0, OneD: 0 }
       );
+      let afterThreeD = 0;
+      let afterTwoD = 0;
+      let afterOneD = 0;
 
-      const afterThreeD = Math.floor(
-        totalAmounts.ThreeD * (1 - percentages.threeD / 100)
-      );
-      const afterTwoD = Math.floor(
-        totalAmounts.TwoD * (1 - percentages.twoD / 100)
-      );
-      const afterOneD = Math.floor(
-        totalAmounts.OneD * (1 - percentages.oneD / 100)
-      );
+      for (const p of recent) {
+        const pPercent = p.percentages || { oneD: 0, twoD: 0, threeD: 0 };
+
+        afterThreeD += Math.floor(
+          (p.amountPlayed?.ThreeD || 0) * (1 - pPercent.threeD / 100)
+        );
+        afterTwoD += Math.floor(
+          (p.amountPlayed?.TwoD || 0) * (1 - pPercent.twoD / 100)
+        );
+        afterOneD += Math.floor(
+          (p.amountPlayed?.OneD || 0) * (1 - pPercent.oneD / 100)
+        );
+      }
       const totalSTR = Math.floor(totalWins.STR3D * percentages.str);
       const totalRUMBLE = Math.floor(totalWins.RUMBLE3D * percentages.rumble);
       const totalDOWN = Math.floor(totalWins.DOWN * percentages.down);
@@ -187,7 +194,6 @@ export default async function handler(req, res) {
         downGame,
         createdAt: new Date(),
       };
-
       summaries.push(summary);
       await db.collection("summaries").insertOne(summary);
     }

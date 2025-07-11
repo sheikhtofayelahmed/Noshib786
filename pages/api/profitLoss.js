@@ -61,7 +61,7 @@ export default async function handler(req, res) {
         numberAgents[num][player.agentId].rumble += rumble;
         if (num.length === 1) {
           grandTotals.OneD += amount * ((100 - cPercent.oneD) / 100);
-          const payout = amount * 1;
+          const payout = amount;
           singleDigitPayouts[num] = (singleDigitPayouts[num] || 0) + payout;
         } else if (num.length === 2) {
           grandTotals.TwoD += amount * ((100 - cPercent.twoD) / 100);
@@ -89,7 +89,7 @@ export default async function handler(req, res) {
     const multipliers = {
       threeD: { str: 400, rumble: 80 },
       twoD: 60,
-      single: 1,
+      single: 3,
     };
 
     const threeD = [];
@@ -107,19 +107,29 @@ export default async function handler(req, res) {
         const strPayout = data.str * multipliers.threeD.str;
 
         const perms = getPermutations(num);
-        console.log(perms);
         let rumbleSum = 0;
         for (const permNum of perms) {
-          if (numberStats[permNum]) {
+          if (permNum !== num && numberStats[permNum]) {
             rumbleSum += numberStats[permNum].rumble;
           }
         }
-        const rumblePayout = rumbleSum * multipliers.threeD.rumble;
+
+        const rumblePayout =
+          (data.rumble + rumbleSum) * multipliers.threeD.rumble;
 
         const digits = [...new Set(num.split(""))];
-        const singleSum = digits.reduce((sum, d) => {
-          return sum + (singleDigitPayouts[d] ? singleDigitPayouts[d] * 3 : 0);
-        }, 0);
+
+        const singleDetails = digits.map((d) => ({
+          digit: d,
+          amount: singleDigitPayouts[d]
+            ? Number(singleDigitPayouts[d].toFixed(1))
+            : 0,
+        }));
+
+        const singleSum = singleDetails.reduce(
+          (sum, obj) => sum + obj.amount * multipliers.single,
+          0
+        );
 
         const payout = strPayout + rumblePayout + singleSum;
         const game = finalTotals.threeD + finalTotals.oneD;
@@ -128,9 +138,10 @@ export default async function handler(req, res) {
         threeD.push({
           number: num,
           str: Number(data.str.toFixed(1)),
-          rumble: Number(data.rumble.toFixed(1)),
+          rumble: Number((data.rumble + rumbleSum).toFixed(1)),
           strPayout: Number(strPayout.toFixed(1)),
           rumblePayout: Number(rumblePayout.toFixed(1)),
+          singleDetails,
           singleSum: Number(singleSum.toFixed(1)),
           payout: Number(payout.toFixed(1)),
           total: Number(game.toFixed(1)),
@@ -141,15 +152,14 @@ export default async function handler(req, res) {
       } else if (data.length === 2) {
         const strPayout = data.str * multipliers.twoD;
 
-        // Find reverse number
         const reversed = num.split("").reverse().join("");
 
-        // Include rumble from both the number and its reverse
-        const reverseRumble = numberStats[reversed]?.rumble || 0;
-        const totalRumble =
-          data.rumble + (reversed !== num ? reverseRumble : 0);
+        // Only add rumble from the reverse, NOT from num itself
+        const reverseRumble =
+          reversed !== num ? numberStats[reversed]?.rumble || 0 : 0;
 
-        const rumblePayout = totalRumble * multipliers.twoD;
+        const rumblePayout = reverseRumble * multipliers.twoD;
+
         const payout = strPayout + rumblePayout;
         const game = finalTotals.twoD;
         const PL = game - payout;
@@ -158,13 +168,13 @@ export default async function handler(req, res) {
         twoD.push({
           number: num,
           str: Number(data.str.toFixed(1)),
-          rumble: Number(data.rumble.toFixed(1)),
+          rumble: Number(reverseRumble.toFixed(1)), // show only reverse rumble
           strPayout: Number(strPayout.toFixed(1)),
           rumblePayout: Number(rumblePayout.toFixed(1)),
           payout: Number(payout.toFixed(1)),
           total: Number(game.toFixed(1)),
           PL: Number(PL.toFixed(1)),
-          profitLoss: Number(pl.toFixed(1)), // now a number with 1 decimal
+          profitLoss: Number(pl.toFixed(1)),
           agents,
         });
       }
