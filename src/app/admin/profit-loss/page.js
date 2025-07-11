@@ -89,6 +89,19 @@ export default function ProfitLossTable() {
         setPage(1); // Reset to first page after search
       }
     }, [search, numbers]);
+    const topRumbleByBucket = {};
+
+    filtered.forEach((entry) => {
+      const bucket = Math.floor(entry.profitLoss);
+      if (
+        !topRumbleByBucket[bucket] ||
+        entry.rumble > topRumbleByBucket[bucket].rumble
+      ) {
+        topRumbleByBucket[bucket] = entry;
+      }
+    });
+    const highlightClass =
+      " text-green-500 font-bold text-center text-2xl shadow-md";
     return (
       <section className="mb-12">
         {/* 🔍 Search Bar */}
@@ -147,6 +160,9 @@ export default function ProfitLossTable() {
                     (view === "threeD" &&
                       selectedThreeD?.number === entry.number) ||
                     (view === "twoD" && selectedTwoD?.number === entry.number);
+                  const bucket = Math.floor(entry.profitLoss);
+                  const isTopRumble =
+                    topRumbleByBucket[bucket]?.number === entry.number;
 
                   return (
                     <tr
@@ -156,10 +172,10 @@ export default function ProfitLossTable() {
                         if (view === "threeD") setSelectedThreeD(selected);
                         if (view === "twoD") setSelectedTwoD(selected);
                       }}
-                      className={`cursor-pointer hover:bg-yellow-900/40 transition-colors duration-200 text-sm h-7 ${
+                      className={`cursor-pointer transition-colors duration-200 text-sm h-7 ${
                         isSelected
                           ? "bg-gradient-to-r from-green-500 to-green-700 text-white font-bold"
-                          : "even:bg-black/30"
+                          : "hover:bg-yellow-900/40 even:bg-black/30"
                       }`}
                     >
                       <td className="px-3 text-center font-mono">
@@ -168,7 +184,13 @@ export default function ProfitLossTable() {
                       <td className="px-3 text-center font-mono">
                         {entry.str}
                       </td>
-                      <td className="px-3 text-center font-mono">
+                      <td
+                        className={`cursor-pointer transition-colors duration-200  h-7 ${
+                          isTopRumble
+                            ? `${highlightClass} hover:brightness-110`
+                            : "px-3 text-center font-mono"
+                        }`}
+                      >
                         {entry.rumble}
                       </td>
                       <td className="px-3 text-center font-mono">
@@ -384,11 +406,22 @@ export default function ProfitLossTable() {
                 {selectedThreeD?.singleDetails?.length > 0 && (
                   <InfoRow
                     label="🎯 Single"
-                    value={selectedThreeD.singleDetails
-                      .map((d) => `${d.digit}: ${d.amount}`)
-                      .join(" | ")}
+                    value={
+                      <div className="space-y-1">
+                        {selectedThreeD.singleDetails.map((d, idx) => (
+                          <div key={idx}>
+                            <span className="text-yellow-300">{d.digit}</span>
+                            <span className="text-white">--</span>
+                            <span className="text-green-400 font-bold">
+                              {d.amount}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    }
                   />
                 )}
+
                 <InfoRow label="💸 Payout" value={selectedThreeD?.payout} />
                 <InfoRow label="🧮 Total" value={selectedThreeD?.total} />
                 <InfoRow label="📈 PL" value={selectedThreeD?.PL} />
@@ -483,7 +516,7 @@ export default function ProfitLossTable() {
                     <span className="font-semibold text-black">
                       {agent.str}
                     </span>
-                    &nbsp;|&nbsp; 🔄 RUMBLE:{" "}
+                    &nbsp;|&nbsp; 🔄 RUMBLE:
                     <span className="font-semibold text-black">
                       {agent.rumble}
                     </span>
@@ -493,11 +526,11 @@ export default function ProfitLossTable() {
             </ul>
 
             <div className="mt-6 text-center text-sm text-gray-800 font-semibold">
-              💰 Total STR:{" "}
+              💰 Total STR:
               <span className="text-green-700">
                 {modalAgents.reduce((sum, a) => sum + a.str, 0)}
-              </span>{" "}
-              | 🔁 Total RUMBLE:{" "}
+              </span>
+              | 🔁 Total RUMBLE:
               <span className="text-blue-700">
                 {modalAgents.reduce((sum, a) => sum + a.rumble, 0)}
               </span>

@@ -233,7 +233,7 @@ const NumberTable = ({ rows, data, title, line, single }) => {
             ) : (
               <div className="flex flex-col items-center justify-center space-y-3 p-3 rounded-xl bg-gradient-to-br from-yellow-700 via-yellow-600 to-amber-600 text-black shadow-xl ring-2 ring-yellow-300 transform scale-105 transition-all duration-300 ease-in-out">
                 <div className="text-md font-bold bg-black text-yellow-300 px-3 py-1 rounded-full shadow-inner border border-yellow-400">
-                  🔄 Total Rumble: {searchResult.totalPermRumble}
+                  🔄 Total {searchResult.totalPermRumble}
                 </div>
 
                 <span className="text-4xl font-extrabold uppercase tracking-wider text-white drop-shadow-[0_0_4px_gold]">
@@ -241,11 +241,11 @@ const NumberTable = ({ rows, data, title, line, single }) => {
                 </span>
 
                 <div className="flex gap-2">
-                  <div className="text-sm font-bold text-white bg-red-600 px-2 py-1 rounded-full shadow-md border border-yellow-300">
-                    STR: {searchResult.totalStr}
+                  <div className="text-center text-sm font-bold text-white bg-red-600 px-2 py-1 rounded-full shadow-md border border-yellow-300">
+                    STR <span>{searchResult.totalStr}</span>
                   </div>
-                  <div className="text-sm font-bold text-white bg-pink-600 px-2 py-1 rounded-full shadow-md border border-yellow-300">
-                    RUMBLE: {searchResult.totalRumble}
+                  <div className="text-center text-sm font-bold text-white bg-pink-600 px-2 py-1 rounded-full shadow-md border border-yellow-300">
+                    RUMBLE <span> {searchResult.totalRumble}</span>
                   </div>
                 </div>
               </div>
