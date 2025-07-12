@@ -330,6 +330,7 @@ export default function AdminAgentPage() {
 
   useEffect(() => {
     const fetchCountsForAgents = async () => {
+      setLoading(true);
       const counts = {};
 
       for (const agent of agents) {
@@ -351,6 +352,7 @@ export default function AdminAgentPage() {
         }
       }
 
+      setLoading(false);
       setEntryCounts(counts);
     };
 
@@ -563,17 +565,11 @@ export default function AdminAgentPage() {
                       <td className="border border-yellow-400 px-3 py-2">
                         {onlineAgentIds.has(agentId) ? (
                           <div className="space-x-1">
-                            <span className="inline-block align-middle w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
-                            <span className="inline-block align-middle">
-                              Online
-                            </span>
+                            <span className="inline-block align-middle w-4 h-4 rounded-full bg-green-500 animate-pulse"></span>
                           </div>
                         ) : (
                           <div className="space-x-1">
-                            <span className="inline-block align-middle w-3 h-3 rounded-full bg-gray-400"></span>
-                            <span className="inline-block align-middle">
-                              Offline
-                            </span>
+                            <span className="inline-block align-middle w-4 h-4 rounded-full bg-gray-400"></span>
                           </div>
                         )}
                       </td>
@@ -587,7 +583,15 @@ export default function AdminAgentPage() {
                           >
                             🎰
                           </button>
-
+                          {loading && (
+                            <div className="flex justify-center items-center absolute -top-2 -right-2 ">
+                              <div className="flex space-x-1">
+                                <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce"></div>
+                                <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
+                                <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
+                              </div>
+                            </div>
+                          )}
                           {entryCounts[agentId] > 0 && (
                             <span className="absolute -top-2 -right-2 w-5 h-5 bg-green-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
                               {entryCounts[agentId]}
