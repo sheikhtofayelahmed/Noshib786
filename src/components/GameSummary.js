@@ -75,7 +75,7 @@ const GameSummary = ({ agentId }) => {
 
         const query = new URLSearchParams({
           agentId,
-          gameDate: date,
+          gameDate: winStatusData.gameDate,
         }).toString();
 
         try {
@@ -123,44 +123,7 @@ const GameSummary = ({ agentId }) => {
 
     fetchAllData();
   }, [agentId]);
-  // Single useEffect to fetch all initial data that depends on agentId
-  useEffect(() => {
-    if (!agentId && !date) return;
 
-    setLoading(true);
-    setFetched(false);
-    setError("");
-
-    const fetchAllData = async () => {
-      try {
-        const query = new URLSearchParams({
-          agentId,
-          gameDate: date,
-        }).toString();
-
-        try {
-          const summaryRes = await fetch(`/api/get-summaries-id-date?${query}`);
-          if (!summaryRes.ok) {
-            console.warn("⚠️ Could not fetch summary");
-          } else {
-            const res = await summaryRes.json();
-            const data = res.summary;
-            setSummaryData(data || {});
-          }
-        } catch (summaryErr) {
-          console.error("❌ Error fetching summary:", summaryErr);
-        }
-      } catch (err) {
-        console.error("❌ Error in fetchAllData:", err);
-        setError("❌ Unexpected error occurred");
-      } finally {
-        setLoading(false);
-        setFetched(true);
-      }
-    };
-
-    fetchAllData();
-  }, [agentId, date]);
   useEffect(() => {
     if (!players) return;
 
@@ -734,7 +697,7 @@ const GameSummary = ({ agentId }) => {
                   </tr>
 
                   {/* Headers */}
-                  <tr className="bg-gray-200 text-gray-900 font-semibold text-sm">
+                  <tr className="bg-gray-300 text-black font-semibold text-sm">
                     <th className="border p-2">Category</th>
                     <th className="border p-2">🎯 3D</th>
                     <th className="border p-2">🎯 2D</th>
@@ -746,29 +709,29 @@ const GameSummary = ({ agentId }) => {
                   </tr>
 
                   {/* Total Amounts */}
-                  <tr className="bg-gray-50 text-green-700">
+                  <tr className="bg-gray-50 text-gray-700">
                     <td className="border px-4 py-2 font-semibold">Total</td>
-                    <td className="border text-center">
+                    <td className="border text-center text-lg font-bold">
                       {moneyCal?.totalAmounts?.ThreeD.toFixed(0)}
                     </td>
-                    <td className="border text-center">
+                    <td className="border text-center text-lg font-bold">
                       {moneyCal?.totalAmounts?.TwoD.toFixed(0)}
                     </td>
-                    <td className="border text-center">
+                    <td className="border text-center text-lg font-bold">
                       {moneyCal?.totalAmounts?.OneD.toFixed(0)}
                     </td>
                     {summaryData ? (
                       <>
-                        <td className="border text-center">
+                        <td className="border text-center text-lg font-bold bg-gray-200">
                           {summaryData?.totalWins?.STR3D || 0}
                         </td>
-                        <td className="border text-center">
+                        <td className="border text-center text-lg font-bold bg-gray-200">
                           {summaryData?.totalWins?.RUMBLE3D || 0}
                         </td>
-                        <td className="border text-center">
+                        <td className="border text-center text-lg font-bold bg-gray-200">
                           {summaryData?.totalWins?.DOWN || 0}
                         </td>
-                        <td className="border text-center">
+                        <td className="border text-center text-lg font-bold bg-gray-200">
                           {summaryData?.totalWins?.SINGLE || 0}
                         </td>
                       </>
@@ -794,16 +757,16 @@ const GameSummary = ({ agentId }) => {
                     <td className="border text-center">
                       {agent?.percentages?.oneD || 0}
                     </td>
-                    <td className="border text-center">
+                    <td className="border text-center bg-gray-200">
                       {agent?.percentages?.str || 0}
                     </td>
-                    <td className="border text-center">
+                    <td className="border text-center bg-gray-200">
                       {agent?.percentages?.rumble || 0}
                     </td>
-                    <td className="border text-center">
+                    <td className="border text-center bg-gray-200">
                       {agent?.percentages?.down || 0}
                     </td>
-                    <td className="border text-center">
+                    <td className="border text-center bg-gray-200">
                       {agent?.percentages?.single || 0}
                     </td>
                   </tr>
@@ -814,25 +777,25 @@ const GameSummary = ({ agentId }) => {
                       <td className="border px-4 py-2 font-semibold">
                         After Deduction
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold">
                         {summaryData?.afterThreeD || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold">
                         {summaryData?.afterTwoD || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold">
                         {summaryData?.afterOneD || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold bg-gray-200">
                         {summaryData?.afterSTR || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold bg-gray-200">
                         {summaryData?.afterRUMBLE || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold bg-gray-200">
                         {summaryData?.afterDOWN || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold bg-gray-200">
                         {summaryData?.afterSINGLE || 0}
                       </td>
                     </tr>
@@ -841,38 +804,46 @@ const GameSummary = ({ agentId }) => {
                       <td className="border px-4 py-2 font-semibold">
                         After Deduction
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold">
                         {(
                           moneyCal?.totalAmounts?.ThreeD *
                           (1 - agent?.percentages?.threeD / 100)
                         ).toFixed(0)}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold">
                         {(
                           moneyCal?.totalAmounts?.TwoD *
                           (1 - agent?.percentages?.twoD / 100)
                         ).toFixed(0)}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold">
                         {(
                           moneyCal?.totalAmounts?.OneD *
                           (1 - agent?.percentages?.oneD / 100)
                         ).toFixed(0)}
                       </td>
-                      <td className="border text-center">- </td>
-                      <td className="border text-center">-</td>
-                      <td className="border text-center">- </td>
-                      <td className="border text-center">-</td>
+                      <td className="border text-center text-lg font-bold bg-gray-200">
+                        -
+                      </td>
+                      <td className="border text-center text-lg font-bold bg-gray-200">
+                        -
+                      </td>
+                      <td className="border text-center text-lg font-bold bg-gray-200">
+                        -
+                      </td>
+                      <td className="border text-center text-lg font-bold bg-gray-200">
+                        -
+                      </td>
                     </tr>
                   )}
 
                   {/* Total Game and Win */}
                   <tr className="bg-gray-100 font-bold text-gray-900">
-                    <td colSpan={2} className="border px-4 py-2">
+                    <td colSpan={2} className="border px-4 py-2 text-green-600">
                       Total Game
                     </td>
                     {moneyCal.totalAmounts ? (
-                      <td className="border px-4 py-2">
+                      <td className="border px-4 py-2 text-green-600">
                         {(
                           moneyCal?.totalAmounts?.ThreeD *
                             (1 - agent?.percentages?.threeD / 100) +
@@ -883,7 +854,7 @@ const GameSummary = ({ agentId }) => {
                         ).toFixed(0)}
                       </td>
                     ) : (
-                      <td className="border px-4 py-2">
+                      <td className="border px-4 py-2 text-green-600">
                         {summaryData?.totalGame || 0}
                       </td>
                     )}
@@ -892,7 +863,7 @@ const GameSummary = ({ agentId }) => {
                     </td>
                   </tr>
                   <tr className="bg-gray-100 font-bold text-gray-900">
-                    <td colSpan={2} className="border px-4 py-2">
+                    <td colSpan={2} className="border px-4 py-2 text-red-600">
                       Total Win
                       {summaryData?.expense && summaryData?.totalWin > 0 && (
                         <p className="font-bangla">খরচ {summaryData.Expense}</p>
@@ -906,7 +877,7 @@ const GameSummary = ({ agentId }) => {
                         </p>
                       )}
                     </td>
-                    <td className="border px-4 py-2">
+                    <td className="border px-4 py-2 text-red-600">
                       {summaryData?.totalWin || 0}
                     </td>
                     <td colSpan={3} className="border px-4 py-2 font-bangla">
@@ -1044,7 +1015,7 @@ const GameSummary = ({ agentId }) => {
                                 : entry.jomaType === "jomaCash"
                                 ? "নগদ জমা"
                                 : ""}
-                              ) 💰 {""}
+                              ) 💰
                               {entry.jomaAmt.toLocaleString("en-US")}
                             </li>
                           ))}

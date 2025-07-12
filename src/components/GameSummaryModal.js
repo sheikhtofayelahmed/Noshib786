@@ -625,7 +625,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                     </tr>
 
                     {/* Headers */}
-                    <tr className="bg-gray-200 text-gray-900 font-semibold text-sm">
+                    <tr className="bg-gray-300 text-black font-semibold text-sm">
                       <th className="border p-2">Category</th>
                       <th className="border p-2">🎯 3D</th>
                       <th className="border p-2">🎯 2D</th>
@@ -637,28 +637,28 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                     </tr>
 
                     {/* Total Amounts */}
-                    <tr className="bg-gray-50 text-green-700">
+                    <tr className="bg-gray-50 text-gray-700">
                       <td className="border px-4 py-2 font-semibold">Total</td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold">
                         {summaryData?.totalAmounts?.ThreeD.toFixed(0)}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold">
                         {summaryData?.totalAmounts?.TwoD.toFixed(0)}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold">
                         {summaryData?.totalAmounts?.OneD.toFixed(0)}
                       </td>
 
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold bg-gray-200">
                         {summaryData?.totalWins?.STR3D || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold bg-gray-200">
                         {summaryData?.totalWins?.RUMBLE3D || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold bg-gray-200">
                         {summaryData?.totalWins?.DOWN || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold bg-gray-200">
                         {summaryData?.totalWins?.SINGLE || 0}
                       </td>
                     </tr>
@@ -675,16 +675,16 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                       <td className="border text-center">
                         {percentages?.oneD || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center bg-gray-200">
                         {percentages?.str || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center bg-gray-200">
                         {percentages?.rumble || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center bg-gray-200">
                         {percentages?.down || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center bg-gray-200">
                         {percentages?.single || 0}
                       </td>
                     </tr>
@@ -693,36 +693,39 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                       <td className="border px-4 py-2 font-semibold">
                         After Deduction
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold">
                         {summaryData?.afterThreeD || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold">
                         {summaryData?.afterTwoD || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold">
                         {summaryData?.afterOneD || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold bg-gray-200">
                         {summaryData?.afterSTR || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold bg-gray-200">
                         {summaryData?.afterRUMBLE || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold bg-gray-200">
                         {summaryData?.afterDOWN || 0}
                       </td>
-                      <td className="border text-center">
+                      <td className="border text-center text-lg font-bold bg-gray-200">
                         {summaryData?.afterSINGLE || 0}
                       </td>
                     </tr>
 
                     {/* Total Game and Win */}
-                    <tr className="bg-gray-100 font-bold text-gray-900">
-                      <td colSpan={2} className="border px-4 py-2">
+                    <tr className="bg-gray-100 font-bold ">
+                      <td
+                        colSpan={2}
+                        className="border px-4 py-2 text-green-600"
+                      >
                         Total Game
                       </td>
 
-                      <td className="border px-4 py-2">
+                      <td className="border px-4 py-2 text-green-600">
                         {summaryData?.totalGame || 0}
                       </td>
 
@@ -731,7 +734,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                       </td>
                     </tr>
                     <tr className="bg-gray-100 font-bold text-gray-900">
-                      <td colSpan={2} className="border px-4 py-2">
+                      <td colSpan={2} className="border px-4 py-2 text-red-600">
                         Total Win
                         {summaryData?.expense && summaryData?.totalWin > 0 && (
                           <p className="font-bangla">
@@ -748,7 +751,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                             </p>
                           )}
                       </td>
-                      <td className="border px-4 py-2">
+                      <td className="border px-4 py-2 text-red-600">
                         {summaryData?.totalWin || 0}
                       </td>
                       <td colSpan={3} className="border px-4 py-2 font-bangla">
@@ -780,10 +783,23 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
 
                     {/* Admin Gets Row */}
                     <tr className="bg-gray-100 text-gray-800">
-                      <td colSpan={2} className="border px-4 py-2 font-bangla">
+                      <td
+                        colSpan={2}
+                        className={`border px-4 py-2 font-bangla ${
+                          summaryData?.totalGame - summaryData?.totalWin > 0
+                            ? "text-green-600 font-bold"
+                            : "text-gray-800"
+                        }`}
+                      >
                         ব্যাংকার পাবে
                       </td>
-                      <td className="border px-4 py-2">
+                      <td
+                        className={`border px-4 py-2 font-bangla ${
+                          summaryData?.totalGame - summaryData?.totalWin > 0
+                            ? "text-green-600 font-bold"
+                            : "text-gray-800"
+                        }`}
+                      >
                         {summaryData?.totalGame - summaryData?.totalWin >= 0
                           ? summaryData?.totalGame - summaryData?.totalWin
                           : 0}
@@ -814,11 +830,24 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
 
                     {/* Agent Gets and Summary Logic */}
                     <tr className="bg-gray-100 text-gray-800">
-                      <td colSpan={2} className="border px-4 py-2 font-bangla">
+                      <td
+                        colSpan={2}
+                        className={`border px-4 py-2 font-bangla ${
+                          summaryData?.totalWin - summaryData?.totalGame > 0
+                            ? "text-red-600 font-bold"
+                            : "text-gray-800"
+                        }`}
+                      >
                         এজেন্ট পাবে
                       </td>
-                      <td className="border px-4 py-2">
-                        {summaryData?.totalWin - summaryData?.totalGame >= 0
+                      <td
+                        className={`border px-4 py-2 font-bangla ${
+                          summaryData?.totalWin - summaryData?.totalGame > 0
+                            ? "text-red-600 font-bold"
+                            : "text-gray-800"
+                        }`}
+                      >
+                        {summaryData?.totalWin - summaryData?.totalGame > 0
                           ? summaryData?.totalWin - summaryData?.totalGame
                           : 0}
                       </td>

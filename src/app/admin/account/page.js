@@ -213,38 +213,38 @@ export default function Account() {
   };
   const totalsBD = latestSummaryData.reduce(
     (acc, item) => {
-      acc.afterSTR += item.afterSTR || 0;
-      acc.afterRUMBLE += item.afterRUMBLE || 0;
-      acc.afterDOWN += item.afterDOWN || 0;
-      acc.afterSINGLE += item.afterSINGLE || 0;
+      acc.STR3D += item.totalWins?.STR3D || 0;
+      acc.RUMBLE3D += item.totalWins?.RUMBLE3D || 0;
+      acc.DOWN += item.totalWins?.DOWN || 0;
+      acc.SINGLE += item.totalWins?.SINGLE || 0;
       acc.totalGame += item.totalGame || 0;
       acc.totalWin += item.totalWin || 0;
       return acc;
     },
     {
-      afterSTR: 0,
-      afterRUMBLE: 0,
-      afterDOWN: 0,
-      afterSINGLE: 0,
+      STR3D: 0,
+      RUMBLE3D: 0,
+      DOWN: 0,
+      SINGLE: 0,
       totalGame: 0,
       totalWin: 0,
     }
   );
   const totalsBA = filteredAgentSummaries.reduce(
     (acc, item) => {
-      acc.afterSTR += item.afterSTR || 0;
-      acc.afterRUMBLE += item.afterRUMBLE || 0;
-      acc.afterDOWN += item.afterDOWN || 0;
-      acc.afterSINGLE += item.afterSINGLE || 0;
+      acc.STR3D += item.totalWins?.STR3D || 0;
+      acc.RUMBLE3D += item.totalWins?.RUMBLE3D || 0;
+      acc.DOWN += item.totalWins?.DOWN || 0;
+      acc.SINGLE += item.totalWins?.SINGLE || 0;
       acc.totalGame += item.totalGame || 0;
       acc.totalWin += item.totalWin || 0;
       return acc;
     },
     {
-      afterSTR: 0,
-      afterRUMBLE: 0,
-      afterDOWN: 0,
-      afterSINGLE: 0,
+      STR3D: 0,
+      RUMBLE3D: 0,
+      DOWN: 0,
+      SINGLE: 0,
       totalGame: 0,
       totalWin: 0,
     }
@@ -406,10 +406,10 @@ export default function Account() {
                   <td className="p-2">{idx + 1}</td>
                   <td className="p-2">{item.name}</td>
                   <td className="p-2">{item.agentId}</td>
-                  <td className="p-2">{item.afterSTR}</td>
-                  <td className="p-2">{item.afterRUMBLE}</td>
-                  <td className="p-2">{item.afterDOWN}</td>
-                  <td className="p-2">{item.afterSINGLE}</td>
+                  <td className="p-2">{item.totalWins?.STR3D}</td>
+                  <td className="p-2">{item.totalWins?.RUMBLE3D}</td>
+                  <td className="p-2">{item.totalWins?.DOWN}</td>
+                  <td className="p-2">{item.totalWins?.SINGLE}</td>
                   <td className="p-2">{item.totalGame}</td>
                   <td className="p-2">{item.totalWin}</td>
                   <td
@@ -450,10 +450,10 @@ export default function Account() {
                 <td className="p-2" colSpan={3}>
                   TOTAL
                 </td>
-                <td className="p-2">{totalsBD.afterSTR}</td>
-                <td className="p-2">{totalsBD.afterRUMBLE}</td>
-                <td className="p-2">{totalsBD.afterDOWN}</td>
-                <td className="p-2">{totalsBD.afterSINGLE}</td>
+                <td className="p-2">{totalsBD.STR3D}</td>
+                <td className="p-2">{totalsBD.RUMBLE3D}</td>
+                <td className="p-2">{totalsBD.DOWN}</td>
+                <td className="p-2">{totalsBD.SINGLE}</td>
                 <td className="p-2">{totalsBD.totalGame}</td>
                 <td className="p-2">{totalsBD.totalWin}</td>
                 <td
@@ -540,10 +540,10 @@ export default function Account() {
                   <td className="p-2">
                     {item.threeUp} = {item.downGame}
                   </td>
-                  <td className="p-2">{item.afterSTR}</td>
-                  <td className="p-2">{item.afterRUMBLE}</td>
-                  <td className="p-2">{item.afterDOWN}</td>
-                  <td className="p-2">{item.afterSINGLE}</td>
+                  <td className="p-2">{item.totalWins?.STR3D}</td>
+                  <td className="p-2">{item.totalWins?.RUMBLE3D}</td>
+                  <td className="p-2">{item.totalWins?.DOWN}</td>
+                  <td className="p-2">{item.totalWins?.SINGLE}</td>
                   <td className="p-2">{item.totalGame}</td>
                   <td className="p-2">{item.totalWin}</td>
                   <td
@@ -594,10 +594,10 @@ export default function Account() {
                 <td className="p-2" colSpan={3}>
                   TOTAL
                 </td>
-                <td className="p-2">{totalsBA.afterSTR}</td>
-                <td className="p-2">{totalsBA.afterRUMBLE}</td>
-                <td className="p-2">{totalsBA.afterDOWN}</td>
-                <td className="p-2">{totalsBA.afterSINGLE}</td>
+                <td className="p-2">{totalsBA.STR3D}</td>
+                <td className="p-2">{totalsBA.RUMBLE3D}</td>
+                <td className="p-2">{totalsBA.DOWN}</td>
+                <td className="p-2">{totalsBA.SINGLE}</td>
                 <td className="p-2">{totalsBA.totalGame}</td>
                 <td className="p-2">{totalsBA.totalWin}</td>
                 <td
