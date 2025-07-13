@@ -124,7 +124,10 @@ export default function AdminLayout({ children }) {
     fetchPendingPlayers();
   }, []);
   return (
-    <div className="min-h-screen font-mono bg-gradient-to-br from-black via-gray-900 to-yellow-400text-white flex flex-col md:flex-row">
+    <div
+      className="min-h-screen font-mono bg-gradient-to-br from-black via-gray-900 to-black text-white
+ flex flex-col md:flex-row"
+    >
       {/* Mobile Header */}
       <div className="flex justify-between items-center p-4 bg-black md:hidden border-b border-yellow-500">
         <h2 className="text-xl font-bold text-yellow-400">🎰 Game Admin</h2>
