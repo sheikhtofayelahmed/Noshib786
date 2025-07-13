@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
   try {
     const client = await clientPromise;
-    const db = client.db("thai-agent-lottery");
+    const db = client.db("noshib786");
 
     // ❗ Only fetch active agents
     const agents = await db

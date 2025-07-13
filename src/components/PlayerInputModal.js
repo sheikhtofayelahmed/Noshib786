@@ -651,7 +651,7 @@ export default function PlayerInputModal({ onClose }) {
             🕒 Printed At: ${printedAt}
           </p>
           <p style="text-align:center; font-size:10px; color:#888;">
-            🔐 Encrypted QR Code. Only readable by Thai Lottery Agent System.
+            🔐 Encrypted QR Code. Only readable by NOSHIB 786 System.
           </p>
         </div>
       </body>

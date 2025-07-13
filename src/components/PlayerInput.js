@@ -229,7 +229,9 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
       editError: false,
     }));
 
-    const voucher = `${agentId}-${Math.floor(100000 + Math.random() * 90000000)}`;
+    const voucher = `${agentId}-${Math.floor(
+      100000 + Math.random() * 90000000
+    )}`;
     const totals = calculateTotals(validEntries);
 
     const newPlayer = {
@@ -864,7 +866,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
             🕒 Printed At: ${printedAt}
           </p>
           <p style="text-align:center; font-size:10px; color:#888;">
-            🔐 Encrypted QR Code. Only readable by Thai Lottery Agent System.
+            🔐 Encrypted QR Code. Only readable by NOSHIB 786 System.
           </p>
         </div>
       </body>

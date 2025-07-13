@@ -144,7 +144,7 @@ export default function HappyNewYear() {
   return (
     <div className="w-full p-8 bg-gradient-to-b from-black to-red-950 min-h-screen font-sans text-gray-100 select-none overflow-x-hidden">
       <h1 className="text-center text-6xl font-extrabold mb-16 uppercase tracking-widest text-red-500 drop-shadow-lg animate-pulse-light">
-        🎰 Thai Lottery Agent 🎲
+        🎰 NOSHIB 786 🎲
       </h1>
 
       <div className="mb-16  max-h-[700px] overflow-y-auto bg-gray-950 rounded-xl shadow-2xl border-2 border-yellow-600 overflow-x-auto">

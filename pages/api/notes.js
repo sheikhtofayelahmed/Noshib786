@@ -4,7 +4,7 @@ import clientPromise from "lib/mongodb";
 export default async function handler(req, res) {
   if (req.method === "DELETE") {
     const client = await clientPromise;
-    const db = client.db("thai-agent-lottery");
+    const db = client.db("noshib786");
     const { agentId, time } = req.body;
 
     try {
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
 
   try {
     const client = await clientPromise;
-    const db = client.db("thai-agent-lottery");
+    const db = client.db("noshib786");
     const { agentId, note } = req.body;
 
     if (!agentId || typeof note !== "string" || note.trim() === "") {

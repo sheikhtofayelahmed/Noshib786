@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     const { agentId, password, loginAs = "agent", subAgentId } = req.body;
 
     const client = await clientPromise;
-    const db = client.db("thai-agent-lottery");
+    const db = client.db("noshib786");
 
     // Find the main agent first
     const agent = await db

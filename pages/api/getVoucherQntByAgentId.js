@@ -6,14 +6,14 @@ export default async function handler(req, res) {
   }
 
   const { agentId } = req.body;
-  console.log
+  console.log;
   if (!agentId) {
     return res.status(400).json({ message: "Missing agentId" });
   }
 
   try {
     const client = await clientPromise;
-    const db = client.db("thai-agent-lottery");
+    const db = client.db("noshib786");
 
     const count = await db
       .collection("playersInput")
