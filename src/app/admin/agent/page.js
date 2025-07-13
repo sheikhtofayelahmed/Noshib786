@@ -407,7 +407,7 @@ export default function AdminAgentPage() {
   };
 
   return (
-    <div className="p-6 text-white font-mono bg-gradient-to-br from-black to-red-900 min-h-screen">
+    <div className="p-6 text-white font-mono bg-gradient-to-br from-black via-gray-900 to-yellow-400min-h-screen">
       {/* <h1 className="text-4xl mb-6 text-yellow-400 font-bold">
         🎰 Admin Agent Management
       </h1> */}

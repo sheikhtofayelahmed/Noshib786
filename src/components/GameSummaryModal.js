@@ -567,7 +567,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center">
-      <div className="relative bg-gradient-to-br from-black to-red-900 text-white font-mono rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
+      <div className="relative bg-gradient-to-br from-black via-gray-900 to-yellow-400text-white font-mono rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white bg-gray-700 hover:bg-gray-600 rounded-full p-2"
