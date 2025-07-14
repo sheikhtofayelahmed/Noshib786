@@ -866,7 +866,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
             🕒 Printed At: ${printedAt}
           </p>
           <p style="text-align:center; font-size:10px; color:#888;">
-            🔐 Encrypted QR Code. Only readable by Thai Lottery Agent System.
+            🔐 Encrypted QR Code. Only readable by NOSHIB786 System.
           </p>
         </div>
       </body>

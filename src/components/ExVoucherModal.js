@@ -303,7 +303,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
   if (fetched && players.length === 0)
     return (
       <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center">
-        <div className="relative max-w-fit bg-gradient-to-br from-black to-red-900 text-white font-mono rounded-xl  w-full max-h-[90vh] overflow-y-auto p-6">
+        <div className="relative max-w-fit bg-gradient-to-br from-black via-gray-900 to-black text-white font-mono rounded-xl  w-full max-h-[90vh] overflow-y-auto p-6">
           <p className="m-5">No players found for this agent.</p>
           <button
             onClick={onClose}
@@ -317,7 +317,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center">
-      <div className="relative bg-gradient-to-br from-black to-red-900 text-white font-mono rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
+      <div className="relative bg-gradient-to-br from-black via-gray-900 to-black text-white font-mono rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
         {loading && (
           <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>
         )}

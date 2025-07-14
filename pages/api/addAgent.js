@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     }
 
     const client = await clientPromise;
-    const db = client.db("thai-agent-lottery");
+    const db = client.db("noshib786");
 
     // Check for duplicate agentId
     const existing = await db.collection("agents").findOne({ agentId });

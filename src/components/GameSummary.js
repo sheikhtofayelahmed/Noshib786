@@ -647,7 +647,7 @@ const GameSummary = ({ agentId }) => {
     return <p>No players found for this agent.</p>;
 
   return (
-    <div className=" min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
+    <div className=" min-h-screen p-6 bg-gradient-to-br from-black via-gray-900 to-black text-white font-mono">
       {/* {loading && (
         <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>
       )} */}

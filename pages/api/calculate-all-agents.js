@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     const singleDigits = threeUp.split("");
 
     const client = await clientPromise;
-    const db = client.db("thai-agent-lottery");
+    const db = client.db("noshib786");
 
     const agents = await db
       .collection("agents")
