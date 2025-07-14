@@ -17,7 +17,7 @@ export default async function handler(req, res) {
 
   try {
     const client = await clientPromise;
-    const db = client.db("noshib786");
+    const db = client.db("thai-agent-lottery");
 
     // 1. Find the player in the waiting collection
     // We fetch the entire document to get all its data for insertion into the primary collection.

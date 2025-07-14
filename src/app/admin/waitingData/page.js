@@ -324,7 +324,7 @@ const AdminApprovalDashboard = () => {
                               (player.amountPlayed.ThreeD ?? 0) +
                               (player.amountPlayed.TwoD ?? 0) +
                               (player.amountPlayed.OneD ?? 0)
-                            ).toFixed(0)}
+                            ).toFixed(1)}
                           </td>
                         </tr>
                       </tbody>
@@ -336,8 +336,7 @@ const AdminApprovalDashboard = () => {
           </div>
         ))}
       </div>
-          <ScrollToTopButton />
-
+      <ScrollToTopButton />
     </div>
   );
 };

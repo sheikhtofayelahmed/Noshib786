@@ -13,7 +13,7 @@ export function AgentProvider({ children }) {
   const [entryCount, setEntryCount] = useState(0);
   const [waitingEntryCount, setWaitingEntryCount] = useState(0);
 
-  // Load from localStorage (only on client)
+  // Load session from localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -28,12 +28,13 @@ export function AgentProvider({ children }) {
     setLoading(false);
   }, []);
 
-  // Login function
+  // Login function with support for subagent password
   async function login(
     inputAgentId,
     password,
     loginAsType = "agent",
-    subId = null
+    subId = null,
+    subAgentPassword = ""
   ) {
     setLoginError(null);
     try {
@@ -45,18 +46,20 @@ export function AgentProvider({ children }) {
           password,
           loginAs: loginAsType,
           subAgentId: subId,
+          subAgentPassword,
         }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        setLoginError(data.message || "Login failed");
+        setLoginError(data.error || "Login failed");
         return false;
       }
 
       // Save to localStorage
       localStorage.setItem("agentId", inputAgentId);
       localStorage.setItem("loginAs", loginAsType);
+
       if (loginAsType === "subagent" && subId) {
         localStorage.setItem("subAgentId", subId);
         setSubAgentId(subId);
@@ -70,12 +73,13 @@ export function AgentProvider({ children }) {
 
       return true;
     } catch (error) {
+      console.error("Login error:", error);
       setLoginError("Network error");
       return false;
     }
   }
 
-  // Logout
+  // Logout function
   function logout() {
     setAgentId(null);
     setLoginAs("agent");
@@ -85,7 +89,7 @@ export function AgentProvider({ children }) {
     localStorage.removeItem("subAgentId");
   }
 
-  // Fetch data
+  // Fetch total voucher count
   const fetchEntryCount = async (agentId) => {
     try {
       const res = await fetch("/api/getVoucherQntByAgentId", {
@@ -101,6 +105,7 @@ export function AgentProvider({ children }) {
     }
   };
 
+  // Fetch waiting voucher entries
   const fetchWaitingPlayers = async (agentId) => {
     try {
       const res = await fetch("/api/getWaitingPlayersByAgentId", {
@@ -116,6 +121,7 @@ export function AgentProvider({ children }) {
     }
   };
 
+  // Auto-fetch counts when agentId changes
   useEffect(() => {
     if (!agentId) return;
     fetchEntryCount(agentId);
@@ -136,6 +142,7 @@ export function AgentProvider({ children }) {
         logout,
         loginError,
         loading,
+        loggedIn: !!agentId,
       }}
     >
       {children}

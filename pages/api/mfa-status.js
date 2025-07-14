@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     }
 
     const client = await clientPromise;
-    const db = client.db("noshib786");
+    const db = client.db("thai-agent-lottery");
     const admin = await db
       .collection("admins")
       .findOne({ username: authenticatedAdmin.username });

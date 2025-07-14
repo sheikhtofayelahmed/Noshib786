@@ -145,7 +145,7 @@ const SubAgentSummary = () => {
 
     return {
       ...deducted,
-      total: (deducted.OneD + deducted.TwoD + deducted.ThreeD).toFixed(0),
+      total: (deducted.OneD + deducted.TwoD + deducted.ThreeD).toFixed(1),
     };
   };
   const handleAllDownloadPdf = async () => {
@@ -333,7 +333,7 @@ const SubAgentSummary = () => {
                 <td>${(
                   player?.amountPlayed?.ThreeD *
                   (1 - player.cPercentages.threeD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>2D Total</td>
@@ -341,14 +341,14 @@ const SubAgentSummary = () => {
                 <td>${(
                   player?.amountPlayed?.TwoD *
                   (1 - player.cPercentages.twoD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>1D Total</td>
                 <td>${player.amountPlayed.OneD}</td>
                 <td>${
                   player?.amountPlayed?.OneD *
-                  (1 - player.cPercentages.oneD / 100).toFixed(0)
+                  (1 - player.cPercentages.oneD / 100).toFixed(1)
                 }</td>
               </tr>
               <tr  class="grand-total">
@@ -361,7 +361,7 @@ const SubAgentSummary = () => {
                     (1 - player.cPercentages.twoD / 100) +
                   player?.amountPlayed?.OneD *
                     (1 - player.cPercentages.oneD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
 
             </tbody>
@@ -378,10 +378,7 @@ const SubAgentSummary = () => {
   if (loading) return <p>Loading...</p>;
   if (Object.keys(groupedBySAId).length === 0) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black text-white
- font-mono"
-      >
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black to-red-900 text-white font-mono">
         <div className="bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-lg p-6 shadow-lg max-w-md text-center">
           <h2 className="text-2xl font-bold mb-2">🎲 No Data Found</h2>
           <p className="text-sm">
@@ -392,10 +389,7 @@ const SubAgentSummary = () => {
     );
   }
   return (
-    <div
-      className="min-h-screen p-6 bg-gradient-to-br from-black via-gray-900 to-black text-white
- font-mono"
-    >
+    <div className="min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
       {Object.entries(groupedBySAId)
         .sort(([a], [b]) => parseInt(a) - parseInt(b))
         .map(([saId, group], groupIndex) => {
@@ -414,15 +408,15 @@ const SubAgentSummary = () => {
                   <div className="inline-block bg-gradient-to-r from-yellow-500 via-red-600 to-yellow-500 px-4 py-2 rounded-full shadow-[0_0_15px_rgba(255,215,0,0.6)] border border-yellow-300">
                     <span className="mx-2 text-black font-extrabold tracking-wider">
                       🎯 1D:{" "}
-                      <span className="text-white">{OneD.toFixed(0)}</span>
+                      <span className="text-white">{OneD.toFixed(1)}</span>
                     </span>
                     <span className="mx-2 text-black font-extrabold tracking-wider">
                       🎯 2D:{" "}
-                      <span className="text-white">{TwoD.toFixed(0)}</span>
+                      <span className="text-white">{TwoD.toFixed(1)}</span>
                     </span>
                     <span className="mx-2 text-black font-extrabold tracking-wider">
                       🎯 3D:{" "}
-                      <span className="text-white">{ThreeD.toFixed(0)}</span>
+                      <span className="text-white">{ThreeD.toFixed(1)}</span>
                     </span>
                   </div>
                 </div>
@@ -648,7 +642,7 @@ const SubAgentSummary = () => {
                               {(
                                 player?.amountPlayed?.ThreeD *
                                 (1 - player.cPercentages.threeD / 100)
-                              ).toFixed(0)}
+                              ).toFixed(1)}
                             </td>
                           </tr>
                           <tr>
@@ -662,7 +656,7 @@ const SubAgentSummary = () => {
                               {(
                                 player?.amountPlayed?.TwoD *
                                 (1 - player.cPercentages.twoD / 100)
-                              ).toFixed(0)}
+                              ).toFixed(1)}
                             </td>
                           </tr>
                           <tr>
@@ -674,7 +668,7 @@ const SubAgentSummary = () => {
                             </td>
                             <td className="bg-white px-2 py-1 border">
                               {player?.amountPlayed?.OneD *
-                                (1 - player.cPercentages.oneD / 100).toFixed(0)}
+                                (1 - player.cPercentages.oneD / 100).toFixed(1)}
                             </td>
                           </tr>
                           <tr className="font-bold">
@@ -689,7 +683,7 @@ const SubAgentSummary = () => {
                                        player?.amountPlayed?.ThreeD +
                                        player?.amountPlayed?.TwoD +
                                        player?.amountPlayed?.OneD
-                                     ).toFixed(0)}
+                                     ).toFixed(1)}
                                    </td> */}
                             <td className="bg-white px-2 py-1 border">
                               {(
@@ -699,7 +693,7 @@ const SubAgentSummary = () => {
                                   (1 - player.cPercentages.twoD / 100) +
                                 player?.amountPlayed?.OneD *
                                   (1 - player.cPercentages.oneD / 100)
-                              ).toFixed(0)}
+                              ).toFixed(1)}
                             </td>
                           </tr>
                         </tbody>

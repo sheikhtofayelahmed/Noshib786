@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     const { password, username = "admin" } = req.body; // In Pages Router, body is directly on req
 
     const client = await clientPromise;
-    const db = client.db("noshib786");
+    const db = client.db("thai-agent-lottery");
     const admin = await db.collection("admins").findOne({ username: username });
 
     if (!admin) {

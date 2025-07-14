@@ -712,7 +712,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
     }
 
     const calculateDeduction = (amount, percent) =>
-      (amount * ((100 - percent) / 100)).toFixed(0);
+      (amount * ((100 - percent) / 100)).toFixed(1);
 
     const formatDataRows = (dataArray) => {
       const sortedData = [...dataArray].sort(
@@ -841,7 +841,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
                     100 +
                   (amountPlayed.TwoD * (100 - agent.cPercentages.twoD)) / 100 +
                   (amountPlayed.OneD * (100 - agent.cPercentages.oneD)) / 100
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
             </tbody>
           </table>
@@ -866,7 +866,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
             🕒 Printed At: ${printedAt}
           </p>
           <p style="text-align:center; font-size:10px; color:#888;">
-            🔐 Encrypted QR Code. Only readable by NOSHIB 786 System.
+            🔐 Encrypted QR Code. Only readable by Thai Lottery Agent System.
           </p>
         </div>
       </body>
@@ -928,7 +928,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
               onClick={handleSavePlayer}
               className="block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded mx-auto mb-10"
             >
-              🎲 Complete
+              🎲 COMPLETE
             </button>
             <label className="block mb-2 text-yellow-300 ">Player Name:</label>
             <input
@@ -1181,13 +1181,13 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
                             🎯 3D Total
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-green-400">
-                            {amountPlayed?.ThreeD?.toFixed(0) || "0"}
+                            {amountPlayed?.ThreeD?.toFixed(1) || "0"}
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-green-400">
                             {(
                               (amountPlayed?.ThreeD || 0) *
                               ((100 - (agent?.cPercentages?.threeD || 0)) / 100)
-                            ).toFixed(0)}
+                            ).toFixed(1)}
                           </td>
                         </tr>
 
@@ -1196,13 +1196,13 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
                             🎯 2D Total
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-green-400">
-                            {amountPlayed?.TwoD?.toFixed(0) || "0"}
+                            {amountPlayed?.TwoD?.toFixed(1) || "0"}
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-green-400">
                             {(
                               (amountPlayed?.TwoD || 0) *
                               ((100 - (agent?.cPercentages?.twoD || 0)) / 100)
-                            ).toFixed(0)}
+                            ).toFixed(1)}
                           </td>
                         </tr>
 
@@ -1211,13 +1211,13 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
                             🎯 1D Total
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-green-400">
-                            {amountPlayed?.OneD?.toFixed(0) || "0"}
+                            {amountPlayed?.OneD?.toFixed(1) || "0"}
                           </td>
                           <td className="border border-gray-600 px-4 py-2 text-green-400">
                             {(
                               (amountPlayed?.OneD || 0) *
                               ((100 - (agent?.cPercentages?.oneD || 0)) / 100)
-                            ).toFixed(0)}
+                            ).toFixed(1)}
                           </td>
                         </tr>
 
@@ -1233,7 +1233,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
                               (amountPlayed?.ThreeD || 0) +
                               (amountPlayed?.TwoD || 0) +
                               (amountPlayed?.OneD || 0)
-                            ).toFixed(0)}
+                            ).toFixed(1)}
                           </td> */}
                           <td className="border border-gray-600 px-4 py-2 text-yellow-300">
                             {(
@@ -1246,7 +1246,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
                               ((amountPlayed?.OneD || 0) *
                                 (100 - (agent?.cPercentages?.oneD || 0))) /
                                 100
-                            ).toFixed(0)}
+                            ).toFixed(1)}
                           </td>
                         </tr>
                       </tbody>

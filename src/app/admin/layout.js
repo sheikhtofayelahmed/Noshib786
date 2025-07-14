@@ -124,10 +124,7 @@ export default function AdminLayout({ children }) {
     fetchPendingPlayers();
   }, []);
   return (
-    <div
-      className="min-h-screen font-mono bg-gradient-to-br from-black via-gray-900 to-black text-white
- flex flex-col md:flex-row"
-    >
+    <div className="min-h-screen font-mono bg-gradient-to-br from-black to-red-900 text-white flex flex-col md:flex-row">
       {/* Mobile Header */}
       <div className="flex justify-between items-center p-4 bg-black md:hidden border-b border-yellow-500">
         <h2 className="text-xl font-bold text-yellow-400">🎰 Game Admin</h2>
@@ -152,7 +149,7 @@ export default function AdminLayout({ children }) {
               <Link key={item.path} href={item.path}>
                 <div
                   onClick={() => setSidebarOpen(false)}
-                  className={`block px-4 py-2 rounded border border-yellow-400 hover:bg-yellow-500 hover:text-black transition ${
+                  className={`block px-3 py-1 rounded border border-yellow-400 hover:bg-yellow-500 hover:text-black transition ${
                     pathname === item.path
                       ? "bg-yellow-600 text-black font-bold shadow-lg"
                       : "text-yellow-300"

@@ -42,7 +42,7 @@ export default function Account() {
           // *** THIS IS THE KEY: Force a white background for the PDF rendering ***
           background: "#ffffff", // Explicitly set white background for the canvas
         },
-        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       };
       html2pdf().set(options).from(element).save();
     } else {
@@ -364,12 +364,12 @@ export default function Account() {
       ) : latestSummaryData.length > 0 ? (
         <div
           ref={currentGameContentRef}
-          className="overflow-x-auto border border-yellow-600 rounded-xl bg-gray-900 "
+          className="overflow-x-auto border border-yellow-600 rounded-xl bg-white "
         >
           <div className="flex items-center justify-center">
-            <h2 className="text-xl font-bold text-yellow-300 py-3 text-center">
+            <h2 className="text-xl font-bold text-yellow-900 py-3 text-center">
               {gameDate}
-              <span className="text-white text-xl">
+              <span className="text-yellow-900 text-xl">
                 {latestSummaryData[0].threeUp &&
                   ` , ${latestSummaryData[0].threeUp}=${latestSummaryData[0].downGame}`}
               </span>
@@ -383,45 +383,45 @@ export default function Account() {
             </button>
           </div>
 
-          <table className="w-full text-sm bg-gray-900 border-collapse text-green-200 text-center">
-            <thead className="bg-gray-800 text-yellow-300">
+          <table className="w-full text-sm bg-white border-collapse text-yellow-900 text-center">
+            <thead className="bg-white text-yellow-900">
               <tr>
-                <th className="p-2">#</th>
-                <th className="p-2">Name</th>
-                <th className="p-2">Agent ID</th>
-                <th className="p-2">STR</th>
-                <th className="p-2">RUMBLE</th>
-                <th className="p-2">DOWN</th>
-                <th className="p-2">SINGLE</th>
-                <th className="p-2">Total Game</th>
-                <th className="p-2">Total Win</th>
-                <th className="p-2">W/L</th>
-                <th className="p-2">Last Updated</th>
-                <th className="p-2">Summary</th>
+                <th className="p-2 bg-white">#</th>
+                <th className="p-2 bg-white">Name</th>
+                <th className="p-2 bg-white">Agent ID</th>
+                <th className="p-2 bg-white">STR</th>
+                <th className="p-2 bg-white">RUMBLE</th>
+                <th className="p-2 bg-white">DOWN</th>
+                <th className="p-2 bg-white">SINGLE</th>
+                <th className="p-2 bg-white">Total Game</th>
+                <th className="p-2 bg-white">Total Win</th>
+                <th className="p-2 bg-white">W/L</th>
+                <th className="p-2 bg-white">Last Updated</th>
+                <th className="p-2 bg-white">Summary</th>
               </tr>
             </thead>
             <tbody>
               {latestSummaryData.map((item, idx) => (
                 <tr key={idx} className="hover:bg-gray-700">
-                  <td className="p-2">{idx + 1}</td>
-                  <td className="p-2">{item.name}</td>
-                  <td className="p-2">{item.agentId}</td>
-                  <td className="p-2">{item.totalWins?.STR3D}</td>
-                  <td className="p-2">{item.totalWins?.RUMBLE3D}</td>
-                  <td className="p-2">{item.totalWins?.DOWN}</td>
-                  <td className="p-2">{item.totalWins?.SINGLE}</td>
-                  <td className="p-2">{item.totalGame}</td>
-                  <td className="p-2">{item.totalWin}</td>
+                  <td className="p-2 bg-white">{idx + 1}</td>
+                  <td className="p-2 bg-white">{item.name}</td>
+                  <td className="p-2 bg-white">{item.agentId}</td>
+                  <td className="p-2 bg-white">{item.totalWins?.STR3D}</td>
+                  <td className="p-2 bg-white">{item.totalWins?.RUMBLE3D}</td>
+                  <td className="p-2 bg-white">{item.totalWins?.DOWN}</td>
+                  <td className="p-2 bg-white">{item.totalWins?.SINGLE}</td>
+                  <td className="p-2 bg-white">{item.totalGame}</td>
+                  <td className="p-2 bg-white">{item.totalWin}</td>
                   <td
                     className={`p-2 ${
                       item.totalGame - item.totalWin < 0
-                        ? "text-red-500 font-bold"
-                        : ""
+                        ? "text-red-500 font-bold bg-gray-300"
+                        : "bg-white "
                     }`}
                   >
                     {item.totalGame - item.totalWin}
                   </td>
-                  <td className="p-2">
+                  <td className="p-2 bg-white">
                     {item?.lastUpdated
                       ? new Date(item.lastUpdated).toLocaleString("en-GB", {
                           day: "2-digit",
@@ -434,7 +434,7 @@ export default function Account() {
                         })
                       : ""}
                   </td>
-                  <td className="p-2 text-yellow-300">
+                  <td className="p-2 bg-white text-yellow-900">
                     <button
                       onClick={() => {
                         setSelectedSummaryItem(item);
@@ -446,18 +446,18 @@ export default function Account() {
                   </td>
                 </tr>
               ))}
-              <tr className="bg-gray-800 text-yellow-300 font-bold">
-                <td className="p-2" colSpan={3}>
+              <tr className="bg-white text-yellow-900 font-bold">
+                <td className="p-2 bg-white" colSpan={3}>
                   TOTAL
                 </td>
-                <td className="p-2">{totalsBD.STR3D}</td>
-                <td className="p-2">{totalsBD.RUMBLE3D}</td>
-                <td className="p-2">{totalsBD.DOWN}</td>
-                <td className="p-2">{totalsBD.SINGLE}</td>
-                <td className="p-2">{totalsBD.totalGame}</td>
-                <td className="p-2">{totalsBD.totalWin}</td>
+                <td className="p-2 bg-white">{totalsBD.STR3D}</td>
+                <td className="p-2 bg-white">{totalsBD.RUMBLE3D}</td>
+                <td className="p-2 bg-white">{totalsBD.DOWN}</td>
+                <td className="p-2 bg-white">{totalsBD.SINGLE}</td>
+                <td className="p-2 bg-white">{totalsBD.totalGame}</td>
+                <td className="p-2 bg-white">{totalsBD.totalWin}</td>
                 <td
-                  className={`p-2 ${
+                  className={`p-2 bg-white ${
                     totalsBD.totalGame - totalsBD.totalWin < 0
                       ? "text-red-500"
                       : "text-green-400"
@@ -465,8 +465,8 @@ export default function Account() {
                 >
                   {totalsBD.totalGame - totalsBD.totalWin}
                 </td>
-                <td className="p-2">—</td>
-                <td className="p-2">—</td>
+                <td className="p-2 bg-white">—</td>
+                <td className="p-2 bg-white">—</td>
               </tr>
             </tbody>
           </table>

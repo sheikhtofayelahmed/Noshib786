@@ -32,7 +32,7 @@ export default async function handler(req, res) {
 
   try {
     const client = await clientPromise;
-    const db = client.db("noshib786");
+    const db = client.db("thai-agent-lottery");
 
     // If agentId changed, check if new one already exists
     if (agentId !== oldAgentId) {

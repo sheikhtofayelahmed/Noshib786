@@ -237,7 +237,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
                 <td>${(
                   player?.amountPlayed?.ThreeD *
                   (1 - player.cPercentages.threeD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>2D Total</td>
@@ -245,14 +245,14 @@ const ExVoucher = ({ item, visible, onClose }) => {
                 <td>${(
                   player?.amountPlayed?.TwoD *
                   (1 - player.cPercentages.twoD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>1D Total</td>
                 <td>${player.amountPlayed.OneD}</td>
                 <td>${
                   player?.amountPlayed?.OneD *
-                  (1 - player.cPercentages.oneD / 100).toFixed(0)
+                  (1 - player.cPercentages.oneD / 100).toFixed(1)
                 }</td>
               </tr>
               <tr  class="grand-total">
@@ -265,7 +265,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
                     (1 - player.cPercentages.twoD / 100) +
                   player?.amountPlayed?.OneD *
                     (1 - player.cPercentages.oneD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
 
             </tbody>
@@ -303,10 +303,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
   if (fetched && players.length === 0)
     return (
       <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center">
-        <div
-          className="relative max-w-fit bg-gradient-to-br from-black via-gray-900 to-black text-white
- font-mono rounded-xl  w-full max-h-[90vh] overflow-y-auto p-6"
-        >
+        <div className="relative max-w-fit bg-gradient-to-br from-black to-red-900 text-white font-mono rounded-xl  w-full max-h-[90vh] overflow-y-auto p-6">
           <p className="m-5">No players found for this agent.</p>
           <button
             onClick={onClose}
@@ -320,10 +317,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center">
-      <div
-        className="relative bg-gradient-to-br from-black via-gray-900 to-black text-white
- font-mono rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6"
-      >
+      <div className="relative bg-gradient-to-br from-black to-red-900 text-white font-mono rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
         {loading && (
           <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>
         )}
@@ -510,7 +504,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
                             {(
                               player?.amountPlayed?.ThreeD *
                               (1 - player.cPercentages.threeD / 100)
-                            ).toFixed(0)}
+                            ).toFixed(1)}
                           </td>
                         </tr>
                         <tr>
@@ -524,7 +518,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
                             {(
                               player?.amountPlayed?.TwoD *
                               (1 - player.cPercentages.twoD / 100)
-                            ).toFixed(0)}
+                            ).toFixed(1)}
                           </td>
                         </tr>
                         <tr>
@@ -536,7 +530,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
                           </td>
                           <td className="bg-white px-2 py-1 border">
                             {player?.amountPlayed?.OneD *
-                              (1 - player.cPercentages.oneD / 100).toFixed(0)}
+                              (1 - player.cPercentages.oneD / 100).toFixed(1)}
                           </td>
                         </tr>
                         <tr className="font-bold">
@@ -551,7 +545,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
                             player?.amountPlayed?.ThreeD +
                             player?.amountPlayed?.TwoD +
                             player?.amountPlayed?.OneD
-                          ).toFixed(0)}
+                          ).toFixed(1)}
                         </td> */}
                           <td className="bg-white px-2 py-1 border">
                             {(
@@ -561,7 +555,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
                                 (1 - player.cPercentages.twoD / 100) +
                               player?.amountPlayed?.OneD *
                                 (1 - player.cPercentages.oneD / 100)
-                            ).toFixed(0)}
+                            ).toFixed(1)}
                           </td>
                         </tr>
                       </tbody>

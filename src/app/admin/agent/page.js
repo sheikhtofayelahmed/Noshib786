@@ -2,13 +2,28 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CircleOff, Delete, DeleteIcon, Eye, EyeOff } from "lucide-react";
+import {
+  CircleOff,
+  Delete,
+  DeleteIcon,
+  Eye,
+  EyeOff,
+  LucideDelete,
+} from "lucide-react";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 export default function AdminAgentPage() {
   const router = useRouter();
   const [onlineAgentIds, setOnlineAgentIds] = useState(new Set());
-  const [subAgents, setSubAgents] = useState(Array(10).fill("")); // Up to 10 sub-agents
-  const [subUpdateAgents, setSubUpdateAgents] = useState(Array(10).fill("")); // Up to 10 sub-agents
+  const [subAgents, setSubAgents] = useState(
+    Array(10)
+      .fill()
+      .map(() => ({ id: "", password: "" }))
+  );
+  const [subUpdateAgents, setSubUpdateAgents] = useState(
+    Array(10)
+      .fill()
+      .map(() => ({ id: "", password: "" }))
+  );
   const [expense, setExpense] = useState(false);
   const [updateExpense, setUpdateExpense] = useState(false);
   const [tenPercent, setTenPercent] = useState(false);
@@ -110,6 +125,38 @@ export default function AdminAgentPage() {
       console.error("Failed to submit note:", err);
     }
   }
+  const deleteVoucher = async (agentId) => {
+    const input = window.prompt(
+      `Type the agentId "${agentId}" to confirm deletion of all vouchers:`
+    );
+
+    if (input !== agentId) {
+      alert("❌ Deletion cancelled. Agent ID did not match.");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `/api/deleteVoucherByAgentId?agentId=${agentId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const result = await res.json();
+
+      if (res.ok) {
+        alert("Vouchers deleted successfully");
+        // Optional: reload or refetch data
+      } else {
+        alert("Failed to delete vouchers: " + result.message);
+      }
+    } catch (error) {
+      console.error("Delete voucher error:", error);
+      alert("An error occurred while deleting vouchers.");
+    }
+  };
+
   useEffect(() => {
     const fetchCountsForNotes = async () => {
       const counts = {};
@@ -211,12 +258,30 @@ export default function AdminAgentPage() {
 
   const handleAddAgent = async (e) => {
     e.preventDefault();
-    console.log(expense, tenPercent);
-    if (!agentId || !password || !name || !iPercentages || !cPercentages) {
-      setError("Please fill all fields");
+
+    // Basic validation
+    if (!agentId || !password || !name) {
+      setError("Please fill in Agent ID, password, and name");
       return;
     }
 
+    const hasValidIPercentages =
+      iPercentages && Object.values(iPercentages).length;
+    const hasValidCPercentages =
+      cPercentages && Object.values(cPercentages).length;
+
+    if (!hasValidIPercentages || !hasValidCPercentages) {
+      setError("Please complete both Banker and Customer discount fields");
+      return;
+    }
+
+    // Filter out incomplete subagent entries
+    const filteredSubAgents = subAgents
+      .map(({ id = "", password = "" }) => ({
+        id: id.trim(),
+        password: password.trim(),
+      }))
+      .filter((sa) => sa.id && sa.password);
     setAdding(true);
     setError("");
 
@@ -225,18 +290,19 @@ export default function AdminAgentPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          agentId,
+          agentId: agentId.trim(),
           password,
-          name,
+          name: name.trim(),
           percentages: iPercentages,
-          cPercentages: cPercentages,
-          subAgents: subAgents.filter((n) => n.trim() !== ""),
-          expense: expense,
-          expenseAmt: expenseAmt,
-          tenPercent: tenPercent,
-          tenPercentAmt: tenPercentAmt,
+          cPercentages,
+          subAgents: filteredSubAgents,
+          expense,
+          expenseAmt,
+          tenPercent,
+          tenPercentAmt,
         }),
       });
+
       const data = await res.json();
 
       if (res.ok) {
@@ -244,12 +310,14 @@ export default function AdminAgentPage() {
         setAgentId("");
         setPassword("");
         setName("");
-        alert("saved");
+        setSubAgents([{ id: "", password: "" }]);
+        alert("✅ Agent added successfully");
       } else {
         setError(data.message || "Failed to add agent");
       }
-    } catch {
-      setError("Failed to add agent");
+    } catch (err) {
+      console.error("Add Agent Error:", err);
+      setError("Something went wrong while adding agent");
     } finally {
       setAdding(false);
     }
@@ -407,7 +475,7 @@ export default function AdminAgentPage() {
   };
 
   return (
-    <div className="p-6 text-white font-mono bg-gradient-to-br from-black via-gray-900 to-yellow-400min-h-screen">
+    <div className="p-6 text-white font-mono bg-gradient-to-br from-black to-red-900 min-h-screen">
       {/* <h1 className="text-4xl mb-6 text-yellow-400 font-bold">
         🎰 Admin Agent Management
       </h1> */}
@@ -432,12 +500,7 @@ export default function AdminAgentPage() {
                   <th className="border border-yellow-400 p-2">Name</th>
                   <th className="border border-yellow-400 p-2">Agent ID</th>
                   <th className="border border-yellow-400 p-2">Password</th>
-                  {/* <th className="font-bangla border border-yellow-400 p-2">
-                    <span>ব্যাংকার - এজেন্ট </span>
-                  </th>
-                  <th className="font-bangla border border-yellow-400 p-2">
-                    <span> এজেন্ট - কাস্টমার</span>
-                  </th> */}
+
                   <th className="font-bangla border border-yellow-400 p-2">
                     <span> ডিসকাঊন্ট</span>
                   </th>
@@ -446,9 +509,9 @@ export default function AdminAgentPage() {
                   </th>
                   <th className="font-bangla border border-yellow-400 p-2">
                     Sub Agent
-                  </th>{" "}
+                  </th>
                   <th className="border border-yellow-400 p-2">Status</th>
-                  <th colSpan={4} className="border border-yellow-400 p-2">
+                  <th colSpan={5} className="border border-yellow-400 p-2">
                     Actions
                   </th>
                 </tr>
@@ -645,6 +708,15 @@ export default function AdminAgentPage() {
                           {active && <CircleOff />}
                         </button>
                       </td>
+                      <td className="border border-yellow-400 p-2 space-x-2">
+                        <button
+                          onClick={() => deleteVoucher(agentId)}
+                          className="px-3 py-1 rounded bg-red-100 hover:bg-red-200 text-red-600 font-semibold flex items-center space-x-1"
+                        >
+                          <LucideDelete className="w-4 h-4" />
+                          <span>Delete</span>
+                        </button>
+                      </td>
                     </tr>
                   )
                 )}
@@ -665,6 +737,7 @@ export default function AdminAgentPage() {
             onSubmit={handleAddAgent}
             className="bg-black bg-opacity-70 p-6 rounded-lg shadow-lg max-w-md mb-10"
           >
+            {/* Agent Info */}
             <input
               type="text"
               placeholder="Agent Name"
@@ -683,7 +756,7 @@ export default function AdminAgentPage() {
             />
             <input
               type="text"
-              placeholder="Password"
+              placeholder="Agent Password"
               value={password}
               onChange={handlePasswordChange}
               className={`w-full mb-3 p-3 rounded bg-black border ${
@@ -698,25 +771,49 @@ export default function AdminAgentPage() {
               </p>
             )}
 
+            {/* Subagents Section */}
             <div className="mb-4">
-              <label className=" font-bangla block text-green-400 text-lg mt-5">
+              <label className="font-bangla block text-green-400 text-lg mt-5">
                 সাব এজেন্ট
               </label>
               {subAgents.map((subAgent, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  placeholder={`Sub Agent ${index + 1}`}
-                  value={subAgent}
-                  onChange={(e) => {
-                    const updated = [...subAgents];
-                    updated[index] = e.target.value;
-                    setSubAgents(updated);
-                  }}
-                  className="w-full mb-2 p-3 rounded bg-black border border-green-400 text-green-300 placeholder-green-600"
-                  disabled={adding}
-                />
+                <div key={index} className="mb-2 grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    placeholder={`Sub Agent ID ${index + 1}`}
+                    value={subAgent.id}
+                    onChange={(e) => {
+                      const updated = [...subAgents];
+                      updated[index].id = e.target.value;
+                      setSubAgents(updated);
+                    }}
+                    className="p-3 rounded bg-black border border-green-400 text-green-300 placeholder-green-600"
+                    disabled={adding}
+                  />
+                  <input
+                    type="text"
+                    placeholder={`Password`}
+                    value={subAgent.password}
+                    onChange={(e) => {
+                      const updated = [...subAgents];
+                      updated[index].password = e.target.value;
+                      setSubAgents(updated);
+                    }}
+                    className="p-3 rounded bg-black border border-green-400 text-green-300 placeholder-green-600"
+                    disabled={adding}
+                  />
+                </div>
               ))}
+              <button
+                type="button"
+                onClick={() =>
+                  setSubAgents([...subAgents, { id: "", password: "" }])
+                }
+                className="mt-2 bg-green-600 text-black font-bold py-2 px-4 rounded hover:bg-green-700"
+                disabled={adding}
+              >
+                ➕ Add Sub-Agent
+              </button>
             </div>
             <div className="mb-4">
               <label className="font-bangla block text-yellow-400 text-lg mt-5">
@@ -817,7 +914,6 @@ export default function AdminAgentPage() {
                   />
                 </div>
               )}
-
               {/* 10% Amount */}
               {tenPercent && (
                 <div>
@@ -837,9 +933,13 @@ export default function AdminAgentPage() {
                     ))}
                   </select>
                 </div>
-              )}
+              )}{" "}
             </div>
 
+            {/* Discounts and Settings */}
+            {/* ...retain your iPercentages, cPercentages, expense, tenPercent logic as is... */}
+
+            {/* Final Submit */}
             <button
               type="submit"
               disabled={adding}
@@ -847,6 +947,7 @@ export default function AdminAgentPage() {
             >
               {adding ? "Adding..." : "Add Agent"}
             </button>
+
             {error && <p className="mt-2 text-red-400">{error}</p>}
           </form>
         )}
@@ -906,20 +1007,47 @@ export default function AdminAgentPage() {
             {/* Percentages */}
             <div className="mb-3 mt-4">
               <h3 className="text-green-400 font-semibold mb-2">Sub Agents</h3>
-              {subUpdateAgents.map((value, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  placeholder={`Sub Agent ${index + 1}`}
-                  className="w-full mb-2 p-2 bg-black border border-green-400 rounded text-green-300 placeholder-green-600"
-                  value={value}
-                  onChange={(e) => {
-                    const updated = [...subUpdateAgents];
-                    updated[index] = e.target.value;
-                    setSubUpdateAgents(updated);
-                  }}
-                />
+              {subUpdateAgents.map((subAgent, index) => (
+                <div key={index} className="grid grid-cols-2 gap-2 mb-2">
+                  <input
+                    type="text"
+                    placeholder={`Sub Agent ID ${index + 1}`}
+                    className="p-2 bg-black border border-green-400 rounded text-green-300 placeholder-green-600"
+                    value={subAgent.id}
+                    onChange={(e) => {
+                      const updated = [...subUpdateAgents];
+                      updated[index].id = e.target.value;
+                      setSubUpdateAgents(updated);
+                    }}
+                    disabled={adding}
+                  />
+                  <input
+                    type="text"
+                    placeholder={`Password`}
+                    className="p-2 bg-black border border-green-400 rounded text-green-300 placeholder-green-600"
+                    value={subAgent.password}
+                    onChange={(e) => {
+                      const updated = [...subUpdateAgents];
+                      updated[index].password = e.target.value;
+                      setSubUpdateAgents(updated);
+                    }}
+                    disabled={adding}
+                  />
+                </div>
               ))}
+              <button
+                type="button"
+                onClick={() =>
+                  setSubUpdateAgents([
+                    ...subUpdateAgents,
+                    { id: "", password: "" },
+                  ])
+                }
+                className="mt-2 bg-green-600 text-black font-bold py-2 px-4 rounded hover:bg-green-700"
+                disabled={adding}
+              >
+                ➕ Add Sub-Agent
+              </button>
             </div>
             <div className="mb-3 mt-4">
               <h3 className=" font-bangla text-yellow-400 font-semibold mb-2">

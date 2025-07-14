@@ -307,7 +307,7 @@ export default function VoucherModal() {
                 <td>${(
                   player?.amountPlayed?.ThreeD *
                   (1 - player.cPercentages.threeD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>2D Total</td>
@@ -315,14 +315,14 @@ export default function VoucherModal() {
                 <td>${(
                   player?.amountPlayed?.TwoD *
                   (1 - player.cPercentages.twoD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>1D Total</td>
                 <td>${player.amountPlayed.OneD}</td>
                 <td>${
                   player?.amountPlayed?.OneD *
-                  (1 - player.cPercentages.oneD / 100).toFixed(0)
+                  (1 - player.cPercentages.oneD / 100).toFixed(1)
                 }</td>
               </tr>
               <tr  class="grand-total">
@@ -335,7 +335,7 @@ export default function VoucherModal() {
                     (1 - player.cPercentages.twoD / 100) +
                   player?.amountPlayed?.OneD *
                     (1 - player.cPercentages.oneD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
 
             </tbody>
@@ -589,7 +589,7 @@ export default function VoucherModal() {
                     {(
                       currentVoucherData?.amountPlayed?.ThreeD *
                       (1 - currentVoucherData.cPercentages.threeD / 100)
-                    ).toFixed(0)}
+                    ).toFixed(1)}
                   </td>
                 </tr>
                 <tr>
@@ -601,7 +601,7 @@ export default function VoucherModal() {
                     {(
                       currentVoucherData?.amountPlayed?.TwoD *
                       (1 - currentVoucherData.cPercentages.twoD / 100)
-                    ).toFixed(0)}
+                    ).toFixed(1)}
                   </td>
                 </tr>
                 <tr>
@@ -628,7 +628,7 @@ export default function VoucherModal() {
                             currentVoucherData?.amountPlayed?.ThreeD +
                             currentVoucherData?.amountPlayed?.TwoD +
                             currentVoucherData?.amountPlayed?.OneD
-                          ).toFixed(0)}
+                          ).toFixed(1)}
                         </td> */}
                   <td className="bg-white px-2 py-1 border">
                     {(
@@ -638,7 +638,7 @@ export default function VoucherModal() {
                         (1 - currentVoucherData.cPercentages.twoD / 100) +
                       currentVoucherData?.amountPlayed?.OneD *
                         (1 - currentVoucherData.cPercentages.oneD / 100)
-                    ).toFixed(0)}
+                    ).toFixed(1)}
                   </td>
                 </tr>
               </tbody>

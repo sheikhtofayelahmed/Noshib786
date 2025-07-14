@@ -497,7 +497,7 @@ export default function PlayerInputModal({ onClose }) {
     }
 
     const calculateDeduction = (amount, percent) =>
-      (amount * ((100 - percent) / 100)).toFixed(0);
+      (amount * ((100 - percent) / 100)).toFixed(1);
 
     const formatDataRows = (dataArray) => {
       const sortedData = [...dataArray].sort(
@@ -626,7 +626,7 @@ export default function PlayerInputModal({ onClose }) {
                     100 +
                   (amountPlayed.TwoD * (100 - agent.cPercentages.twoD)) / 100 +
                   (amountPlayed.OneD * (100 - agent.cPercentages.oneD)) / 100
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
             </tbody>
           </table>
@@ -651,7 +651,7 @@ export default function PlayerInputModal({ onClose }) {
             🕒 Printed At: ${printedAt}
           </p>
           <p style="text-align:center; font-size:10px; color:#888;">
-            🔐 Encrypted QR Code. Only readable by NOSHIB 786 System.
+            🔐 Encrypted QR Code. Only readable by Thai Lottery Agent System.
           </p>
         </div>
       </body>
@@ -693,10 +693,7 @@ export default function PlayerInputModal({ onClose }) {
   };
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center">
-      <div
-        className="relative bg-gradient-to-br from-black via-gray-900 to-black text-white
- font-mono rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6"
-      >
+      <div className="relative bg-gradient-to-br from-black to-red-900 text-white font-mono rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white bg-gray-700 hover:bg-gray-600 rounded-full p-2"
@@ -713,7 +710,7 @@ export default function PlayerInputModal({ onClose }) {
                 onClick={handleSavePlayer}
                 className="block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded mx-auto mb-10"
               >
-                🎲 Complete
+                🎲 COMPLETE
               </button>
               <label className="block mb-2 text-yellow-300 ">
                 Player Name:
@@ -971,14 +968,14 @@ export default function PlayerInputModal({ onClose }) {
                               🎯 3D Total
                             </td>
                             <td className="border border-gray-600 px-4 py-2 text-green-400">
-                              {amountPlayed?.ThreeD?.toFixed(0) || "0"}
+                              {amountPlayed?.ThreeD?.toFixed(1) || "0"}
                             </td>
                             <td className="border border-gray-600 px-4 py-2 text-green-400">
                               {(
                                 (amountPlayed?.ThreeD || 0) *
                                 ((100 - (agent?.cPercentages?.threeD || 0)) /
                                   100)
-                              ).toFixed(0)}
+                              ).toFixed(1)}
                             </td>
                           </tr>
 
@@ -987,13 +984,13 @@ export default function PlayerInputModal({ onClose }) {
                               🎯 2D Total
                             </td>
                             <td className="border border-gray-600 px-4 py-2 text-green-400">
-                              {amountPlayed?.TwoD?.toFixed(0) || "0"}
+                              {amountPlayed?.TwoD?.toFixed(1) || "0"}
                             </td>
                             <td className="border border-gray-600 px-4 py-2 text-green-400">
                               {(
                                 (amountPlayed?.TwoD || 0) *
                                 ((100 - (agent?.cPercentages?.twoD || 0)) / 100)
-                              ).toFixed(0)}
+                              ).toFixed(1)}
                             </td>
                           </tr>
 
@@ -1002,13 +999,13 @@ export default function PlayerInputModal({ onClose }) {
                               🎯 1D Total
                             </td>
                             <td className="border border-gray-600 px-4 py-2 text-green-400">
-                              {amountPlayed?.OneD?.toFixed(0) || "0"}
+                              {amountPlayed?.OneD?.toFixed(1) || "0"}
                             </td>
                             <td className="border border-gray-600 px-4 py-2 text-green-400">
                               {(
                                 (amountPlayed?.OneD || 0) *
                                 ((100 - (agent?.cPercentages?.oneD || 0)) / 100)
-                              ).toFixed(0)}
+                              ).toFixed(1)}
                             </td>
                           </tr>
 
@@ -1024,7 +1021,7 @@ export default function PlayerInputModal({ onClose }) {
                               (amountPlayed?.ThreeD || 0) +
                               (amountPlayed?.TwoD || 0) +
                               (amountPlayed?.OneD || 0)
-                            ).toFixed(0)}
+                            ).toFixed(1)}
                           </td> */}
                             <td className="border border-gray-600 px-4 py-2 text-yellow-300">
                               {(
@@ -1037,7 +1034,7 @@ export default function PlayerInputModal({ onClose }) {
                                 ((amountPlayed?.OneD || 0) *
                                   (100 - (agent?.cPercentages?.oneD || 0))) /
                                   100
-                              ).toFixed(0)}
+                              ).toFixed(1)}
                             </td>
                           </tr>
                         </tbody>

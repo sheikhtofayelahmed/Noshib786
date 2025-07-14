@@ -210,7 +210,7 @@ const WaitingPlayerInput = () => {
                           player.amountPlayed.ThreeD +
                           player.amountPlayed.TwoD +
                           player.amountPlayed.OneD
-                        ).toFixed(0)}
+                        ).toFixed(1)}
                       </td>
                     </tr>
                   </tbody>

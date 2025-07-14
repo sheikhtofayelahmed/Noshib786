@@ -7,20 +7,17 @@ export default async function handler(req, res) {
 
   const { oldAgentId, newAgentId } = req.body;
 
-  //   if (!oldAgentId || !newAgentId) {
-  //     return res.status(400).json({ message: "Missing required fields" });
-  //   }
+//   if (!oldAgentId || !newAgentId) {
+//     return res.status(400).json({ message: "Missing required fields" });
+//   }
 
   try {
     const client = await clientPromise;
-    const db = client.db("noshib786");
+    const db = client.db("thai-agent-lottery");
 
     const result = await db
       .collection("playersInput")
-      .updateMany(
-        { agentId: "NAJIM TAHLIA" },
-        { $set: { agentId: "NAJIMTAHLIA" } }
-      );
+      .updateMany({ agentId: "NAJIM TAHLIA" }, { $set: { agentId: "NAJIMTAHLIA" } });
 
     return res.status(200).json({
       message: "Agent ID updated successfully",

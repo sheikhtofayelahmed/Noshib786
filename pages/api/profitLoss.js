@@ -26,7 +26,7 @@ export default async function handler(req, res) {
 
   try {
     const client = await clientPromise;
-    const db = client.db("noshib786");
+    const db = client.db("thai-agent-lottery");
 
     const players = await db
       .collection("playersInput")
@@ -78,10 +78,10 @@ export default async function handler(req, res) {
     }
 
     const finalTotals = {
-      oneD: parseFloat(grandTotals.OneD.toFixed(1)),
-      twoD: parseFloat(grandTotals.TwoD.toFixed(1)),
-      threeD: parseFloat(grandTotals.ThreeD.toFixed(1)),
-      total: parseFloat(
+      oneD: Number(grandTotals.OneD.toFixed(1)),
+      twoD: Number(grandTotals.TwoD.toFixed(1)),
+      threeD: Number(grandTotals.ThreeD.toFixed(1)),
+      total: Number(
         (grandTotals.OneD + grandTotals.TwoD + grandTotals.ThreeD).toFixed(1)
       ),
     };

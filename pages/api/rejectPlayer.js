@@ -17,7 +17,7 @@ export default async function handler(req, res) {
 
   try {
     const client = await clientPromise;
-    const db = client.db("noshib786");
+    const db = client.db("thai-agent-lottery");
 
     // Update the status in the waiting collection
     const result = await db.collection("waitingSavePlayer").updateOne(

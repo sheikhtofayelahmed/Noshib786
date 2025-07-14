@@ -2,7 +2,7 @@ import clientPromise from "lib/mongodb";
 
 export default async function handler(req, res) {
   const client = await clientPromise;
-  const db = client.db("noshib786");
+  const db = client.db("thai-agent-lottery");
   const collection = db.collection("gameStatus");
 
   if (req.method === "GET") {

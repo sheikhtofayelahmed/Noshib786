@@ -309,9 +309,9 @@ const GameSummary = ({ agentId }) => {
             <tbody>
               <tr>
                 <td class="category-header">Total</td>
-                <td>${(safeMoneyCal.totalAmounts?.ThreeD || 0).toFixed(0)}</td>
-                <td>${(safeMoneyCal.totalAmounts?.TwoD || 0).toFixed(0)}</td>
-                <td>${(safeMoneyCal.totalAmounts?.OneD || 0).toFixed(0)}</td>
+                <td>${(safeMoneyCal.totalAmounts?.ThreeD || 0).toFixed(1)}</td>
+                <td>${(safeMoneyCal.totalAmounts?.TwoD || 0).toFixed(1)}</td>
+                <td>${(safeMoneyCal.totalAmounts?.OneD || 0).toFixed(1)}</td>
                 <td class="highlight">${safeTotalWins.STR3D || 0}</td>
                 <td class="highlight">${safeTotalWins.RUMBLE3D || 0}</td>
                 <td class="highlight">${safeTotalWins.DOWN || 0}</td>
@@ -329,9 +329,9 @@ const GameSummary = ({ agentId }) => {
               </tr>
               <tr>
                 <td class="category-header">After Ded.</td>
-                <td>${(safeMoneyCal.afterThreeD || 0).toFixed(0)}</td>
-                <td>${(safeMoneyCal.afterTwoD || 0).toFixed(0)}</td>
-                <td>${(safeMoneyCal.afterOneD || 0).toFixed(0)}</td>
+                <td>${(safeMoneyCal.afterThreeD || 0).toFixed(1)}</td>
+                <td>${(safeMoneyCal.afterTwoD || 0).toFixed(1)}</td>
+                <td>${(safeMoneyCal.afterOneD || 0).toFixed(1)}</td>
                 <td class="highlight">${(safeMoneyCal.afterSTR || 0).toFixed(
                   0
                 )}</td>
@@ -348,13 +348,13 @@ const GameSummary = ({ agentId }) => {
               
               <tr class="total-row">
                 <td colSpan="1" class="final-calc">Total Game</td>
-                <td colSpan="1">${(safeMoneyCal.totalGame || 0).toFixed(0)}</td>
+                <td colSpan="1">${(safeMoneyCal.totalGame || 0).toFixed(1)}</td>
                   <td colSpan="2"><td/>
                    <td colSpan="2"><td/>
               </tr>
               <tr class="total-row">
                 <td colSpan="1" class="final-calc">Total Win</td>
-                <td colSpan="1">${(safeMoneyCal.totalWin || 0).toFixed(0)}</td>
+                <td colSpan="1">${(safeMoneyCal.totalWin || 0).toFixed(1)}</td>
                   <td colSpan="2"><td/>
                    <td colSpan="2"><td/>
               </tr>
@@ -363,7 +363,7 @@ const GameSummary = ({ agentId }) => {
                 <td colSpan="1">${Math.max(
                   0,
                   safeMoneyCal.totalGame - safeMoneyCal.totalWin
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
                   <td colSpan="2"><td/>
                    <td colSpan="2"><td/>
               </tr>
@@ -372,7 +372,7 @@ const GameSummary = ({ agentId }) => {
                 <td colSpan="1">${Math.max(
                   0,
                   safeMoneyCal.totalWin - safeMoneyCal.totalGame
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
                 <td colSpan="2"><td/>
                    <td colSpan="2"><td/>
               </tr>
@@ -521,7 +521,7 @@ const GameSummary = ({ agentId }) => {
                 <td>${(
                   player?.amountPlayed?.ThreeD *
                   (1 - player.cPercentages.threeD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>2D Total</td>
@@ -529,14 +529,14 @@ const GameSummary = ({ agentId }) => {
                 <td>${(
                   player?.amountPlayed?.TwoD *
                   (1 - player.cPercentages.twoD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>1D Total</td>
                 <td>${player.amountPlayed.OneD}</td>
                 <td>${
                   player?.amountPlayed?.OneD *
-                  (1 - player.cPercentages.oneD / 100).toFixed(0)
+                  (1 - player.cPercentages.oneD / 100).toFixed(1)
                 }</td>
               </tr>
               <tr  class="grand-total">
@@ -549,7 +549,7 @@ const GameSummary = ({ agentId }) => {
                     (1 - player.cPercentages.twoD / 100) +
                   player?.amountPlayed?.OneD *
                     (1 - player.cPercentages.oneD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
 
             </tbody>
@@ -647,10 +647,7 @@ const GameSummary = ({ agentId }) => {
     return <p>No players found for this agent.</p>;
 
   return (
-    <div
-      className=" min-h-screen p-6 bg-gradient-to-br from-black via-gray-900 to-black text-white
- font-mono"
-    >
+    <div className=" min-h-screen p-6 bg-gradient-to-br from-black to-red-900 text-white font-mono">
       {/* {loading && (
         <p className="text-yellow-300 mt-6">⏳ Loading player data...</p>
       )} */}
@@ -715,13 +712,13 @@ const GameSummary = ({ agentId }) => {
                   <tr className="bg-gray-50 text-gray-700">
                     <td className="border px-4 py-2 font-semibold">Total</td>
                     <td className="border text-center text-lg font-bold">
-                      {moneyCal?.totalAmounts?.ThreeD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.ThreeD.toFixed(1)}
                     </td>
                     <td className="border text-center text-lg font-bold">
-                      {moneyCal?.totalAmounts?.TwoD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.TwoD.toFixed(1)}
                     </td>
                     <td className="border text-center text-lg font-bold">
-                      {moneyCal?.totalAmounts?.OneD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.OneD.toFixed(1)}
                     </td>
                     {summaryData ? (
                       <>
@@ -811,19 +808,19 @@ const GameSummary = ({ agentId }) => {
                         {(
                           moneyCal?.totalAmounts?.ThreeD *
                           (1 - agent?.percentages?.threeD / 100)
-                        ).toFixed(0)}
+                        ).toFixed(1)}
                       </td>
                       <td className="border text-center text-lg font-bold">
                         {(
                           moneyCal?.totalAmounts?.TwoD *
                           (1 - agent?.percentages?.twoD / 100)
-                        ).toFixed(0)}
+                        ).toFixed(1)}
                       </td>
                       <td className="border text-center text-lg font-bold">
                         {(
                           moneyCal?.totalAmounts?.OneD *
                           (1 - agent?.percentages?.oneD / 100)
-                        ).toFixed(0)}
+                        ).toFixed(1)}
                       </td>
                       <td className="border text-center text-lg font-bold bg-gray-200">
                         -
@@ -854,7 +851,7 @@ const GameSummary = ({ agentId }) => {
                             (1 - agent?.percentages?.twoD / 100) +
                           moneyCal?.totalAmounts?.OneD *
                             (1 - agent?.percentages?.oneD / 100)
-                        ).toFixed(0)}
+                        ).toFixed(1)}
                       </td>
                     ) : (
                       <td className="border px-4 py-2 text-green-600">
@@ -875,7 +872,7 @@ const GameSummary = ({ agentId }) => {
                         <p className="font-bangla">
                           আন্ডার ({summaryData?.tenPercentAmt ?? 0}%) =
                           {summaryData
-                            ? summaryData?.underPercentage.toFixed(0)
+                            ? summaryData?.underPercentage.toFixed(1)
                             : "0"}
                         </p>
                       )}
@@ -1047,13 +1044,13 @@ const GameSummary = ({ agentId }) => {
                   <tr className="bg-gray-50 text-green-700">
                     <td className="border px-4 py-2 font-semibold">Total</td>
                     <td className="border text-center">
-                      {moneyCal?.totalAmounts?.ThreeD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.ThreeD.toFixed(1)}
                     </td>
                     <td className="border text-center">
-                      {moneyCal?.totalAmounts?.TwoD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.TwoD.toFixed(1)}
                     </td>
                     <td className="border text-center">
-                      {moneyCal?.totalAmounts?.OneD.toFixed(0)}
+                      {moneyCal?.totalAmounts?.OneD.toFixed(1)}
                     </td>
                     <td className="border text-center">
                       {summaryData?.totalWins?.STR3D || 0}
@@ -1102,43 +1099,43 @@ const GameSummary = ({ agentId }) => {
                       {(
                         moneyCal?.totalAmounts?.ThreeD *
                         (1 - agent?.cPercentages?.threeD / 100)
-                      ).toFixed(0)}
+                      ).toFixed(1)}
                     </td>
                     <td className="border text-center">
                       {(
                         moneyCal?.totalAmounts?.TwoD *
                         (1 - agent?.cPercentages?.twoD / 100)
-                      ).toFixed(0)}
+                      ).toFixed(1)}
                     </td>
                     <td className="border text-center">
                       {(
                         moneyCal?.totalAmounts?.OneD *
                         (1 - agent?.cPercentages?.oneD / 100)
-                      ).toFixed(0)}
+                      ).toFixed(1)}
                     </td>
                     <td className="border text-center">
                       {(
                         (summaryData?.totalWins?.STR3D || 0) *
                         (agent?.cPercentages?.str || 0)
-                      ).toFixed(0)}
+                      ).toFixed(1)}
                     </td>
                     <td className="border text-center">
                       {(
                         (summaryData?.totalWins?.RUMBLE3D || 0) *
                         (agent?.cPercentages?.rumble || 0)
-                      ).toFixed(0)}
+                      ).toFixed(1)}
                     </td>
                     <td className="border text-center">
                       {(
                         (summaryData?.totalWins?.DOWN || 0) *
                         (agent?.cPercentages?.down || 0)
-                      ).toFixed(0)}
+                      ).toFixed(1)}
                     </td>
                     <td className="border text-center">
                       {(
                         (summaryData?.totalWins?.SINGLE || 0) *
                         (agent?.cPercentages?.single || 0)
-                      ).toFixed(0)}
+                      ).toFixed(1)}
                     </td>
                   </tr>
                   {/* Total Game and Win */}
@@ -1154,7 +1151,7 @@ const GameSummary = ({ agentId }) => {
                           (1 - agent?.cPercentages?.twoD / 100) +
                         moneyCal?.totalAmounts?.OneD *
                           (1 - agent?.cPercentages?.oneD / 100)
-                      ).toFixed(0)}
+                      ).toFixed(1)}
                     </td>
                   </tr>
                   <tr className="bg-gray-100 font-bold text-gray-900">
@@ -1171,7 +1168,7 @@ const GameSummary = ({ agentId }) => {
                           (agent?.cPercentages?.down || 0) +
                         (summaryData?.totalWins?.SINGLE || 0) *
                           (agent?.cPercentages?.single || 0)
-                      ).toFixed(0)}
+                      ).toFixed(1)}
                     </td>
                   </tr>
                 </tbody>
@@ -1387,7 +1384,7 @@ const GameSummary = ({ agentId }) => {
                           {(
                             player?.amountPlayed?.ThreeD *
                             (1 - player.cPercentages.threeD / 100)
-                          ).toFixed(0)}
+                          ).toFixed(1)}
                         </td>
                       </tr>
                       <tr>
@@ -1399,7 +1396,7 @@ const GameSummary = ({ agentId }) => {
                           {(
                             player?.amountPlayed?.TwoD *
                             (1 - player.cPercentages.twoD / 100)
-                          ).toFixed(0)}
+                          ).toFixed(1)}
                         </td>
                       </tr>
                       <tr>
@@ -1409,7 +1406,7 @@ const GameSummary = ({ agentId }) => {
                         </td>
                         <td className="bg-white px-2 py-1 border">
                           {player?.amountPlayed?.OneD *
-                            (1 - player.cPercentages.oneD / 100).toFixed(0)}
+                            (1 - player.cPercentages.oneD / 100).toFixed(1)}
                         </td>
                       </tr>
                       <tr className="font-bold">
@@ -1424,7 +1421,7 @@ const GameSummary = ({ agentId }) => {
                             player?.amountPlayed?.ThreeD +
                             player?.amountPlayed?.TwoD +
                             player?.amountPlayed?.OneD
-                          ).toFixed(0)}
+                          ).toFixed(1)}
                         </td> */}
                         <td className="bg-white px-2 py-1 border">
                           {(
@@ -1434,7 +1431,7 @@ const GameSummary = ({ agentId }) => {
                               (1 - player.cPercentages.twoD / 100) +
                             player?.amountPlayed?.OneD *
                               (1 - player.cPercentages.oneD / 100)
-                          ).toFixed(0)}
+                          ).toFixed(1)}
                         </td>
                       </tr>
                     </tbody>

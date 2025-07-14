@@ -64,8 +64,8 @@ export default function VoucherModal() {
     // Allow completely empty row
     if (!num && !str && !rumble) return true;
 
-    // Validate num: 1–3 digits and 
-    if (!/^\d{1,3}$/.test(num) ) return false;
+    // Validate num: 1–3 digits and
+    if (!/^\d{1,3}$/.test(num)) return false;
 
     const numLength = num.length;
     const isStrValid = /^\d+$/.test(str);
@@ -219,7 +219,7 @@ export default function VoucherModal() {
                 <td>${(
                   player?.amountPlayed?.ThreeD *
                   (1 - player.cPercentages.threeD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>2D Total</td>
@@ -227,14 +227,14 @@ export default function VoucherModal() {
                 <td>${(
                   player?.amountPlayed?.TwoD *
                   (1 - player.cPercentages.twoD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>1D Total</td>
                 <td>${player.amountPlayed.OneD}</td>
                 <td>${
                   player?.amountPlayed?.OneD *
-                  (1 - player.cPercentages.oneD / 100).toFixed(0)
+                  (1 - player.cPercentages.oneD / 100).toFixed(1)
                 }</td>
               </tr>
               <tr  class="grand-total">
@@ -247,7 +247,7 @@ export default function VoucherModal() {
                     (1 - player.cPercentages.twoD / 100) +
                   player?.amountPlayed?.OneD *
                     (1 - player.cPercentages.oneD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
 
             </tbody>
@@ -446,7 +446,7 @@ export default function VoucherModal() {
       agentId: player.agentId,
       name: player.name || "",
       SAId: player.SAId || "",
-       data: parsedData,
+      data: parsedData,
       amountPlayed: updatedTotals,
     };
 
@@ -728,7 +728,7 @@ export default function VoucherModal() {
                       {(
                         amountPlayed?.ThreeD *
                         (1 - currentVoucherData.cPercentages.threeD / 100)
-                      ).toFixed(0)}
+                      ).toFixed(1)}
                     </td>
                   </tr>
                   <tr className="bg-gray-900">
@@ -742,7 +742,7 @@ export default function VoucherModal() {
                       {(
                         amountPlayed?.TwoD *
                         (1 - currentVoucherData.cPercentages.twoD / 100)
-                      ).toFixed(0)}
+                      ).toFixed(1)}
                     </td>
                   </tr>
                   <tr className="bg-gray-800">
@@ -757,7 +757,7 @@ export default function VoucherModal() {
                         (
                           1 -
                           currentVoucherData.cPercentages.threeD / 100
-                        ).toFixed(0)}
+                        ).toFixed(1)}
                     </td>
                   </tr>
                   <tr className="bg-gray-900 font-bold text-lg">
@@ -776,7 +776,7 @@ export default function VoucherModal() {
                           (1 - currentVoucherData.cPercentages.twoD / 100) +
                         amountPlayed?.OneD *
                           (1 - currentVoucherData.cPercentages.oneD / 100)
-                      ).toFixed(0)}
+                      ).toFixed(1)}
                     </td>
                   </tr>
                 </tbody>

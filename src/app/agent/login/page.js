@@ -7,11 +7,12 @@ import { useRouter } from "next/navigation";
 export default function AgentLogin() {
   const [agentIdInput, setAgentIdInput] = useState("");
   const [password, setPassword] = useState("");
+  const [subAgentPassword, setSubAgentPassword] = useState("");
   const [hasSubAgents, setHasSubAgents] = useState(false);
   const [subAgents, setSubAgents] = useState([]);
   const [loginAs, setLoginAs] = useState(null); // "agent" or "subagent"
   const [selectedSubAgent, setSelectedSubAgent] = useState("");
-  const [step, setStep] = useState(1); // control login step
+  const [step, setStep] = useState(1); // Step in the flow
 
   const { login, loginError } = useAgent();
   const router = useRouter();
@@ -19,44 +20,48 @@ export default function AgentLogin() {
   async function checkAgentHasSubAgents() {
     if (!agentIdInput) return;
 
-    const res = await fetch(
-      `/api/getAgentById?agentId=${encodeURIComponent(agentIdInput)}`
-    );
+    try {
+      const res = await fetch(
+        `/api/getAgentById?agentId=${encodeURIComponent(agentIdInput)}`
+      );
+      if (!res.ok) {
+        alert("Agent not found");
+        return;
+      }
 
-    if (!res.ok) {
-      alert("Agent not found");
-      return;
-    }
+      const data = await res.json();
+      setHasSubAgents(data.agent.hasSubAgents || false);
+      setSubAgents(data.agent.subAgents || []);
 
-    const data = await res.json();
-
-    setHasSubAgents(data.agent.hasSubAgents);
-    setSubAgents(data.agent.subAgents || []);
-
-    if (data.agent.hasSubAgents) {
-      setStep(2);
-    } else {
-      setLoginAs("agent");
-      setStep(3);
+      if (data.agent.hasSubAgents) {
+        setStep(2); // Choose login type
+      } else {
+        setLoginAs("agent");
+        setStep(3); // Proceed to password
+      }
+    } catch (err) {
+      alert("Network error while checking agent info");
     }
   }
 
   async function handleLogin() {
     if (!agentIdInput || !password) return;
-    if (loginAs === "subagent" && !selectedSubAgent) {
-      alert("Please select a sub-agent");
+
+    if (loginAs === "subagent" && (!selectedSubAgent || !subAgentPassword)) {
+      alert("Please select a sub-agent and enter sub-agent password");
       return;
     }
 
-    // Call your login method with extra params
     const success = await login(
       agentIdInput,
       password,
       loginAs,
-      selectedSubAgent
+      selectedSubAgent,
+      subAgentPassword
     );
+
     if (success) {
-      router.push("/"); // redirect on success
+      router.push("/"); // redirect on login success
     }
   }
 
@@ -114,18 +119,29 @@ export default function AgentLogin() {
         {step === 3 && (
           <>
             {loginAs === "subagent" && (
-              <select
-                value={selectedSubAgent}
-                onChange={(e) => setSelectedSubAgent(e.target.value)}
-                className="w-full p-2 mb-4 rounded bg-gray-800 border border-yellow-300 text-yellow-200 focus:outline-none"
-              >
-                <option value="">Select Sub-Agent</option>
-                {subAgents.map((sa) => (
-                  <option key={sa} value={sa}>
-                    {sa}
-                  </option>
-                ))}
-              </select>
+              <>
+                <select
+                  value={selectedSubAgent}
+                  onChange={(e) => setSelectedSubAgent(e.target.value)}
+                  className="w-full p-2 mb-4 rounded bg-gray-800 border border-yellow-300 text-yellow-200 focus:outline-none"
+                >
+                  <option value="">Select Sub-Agent</option>
+                  {subAgents.map((sa) => (
+                    <option key={sa.id} value={sa.id}>
+                      {sa.id}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="password"
+                  placeholder="Sub-Agent Password"
+                  value={subAgentPassword}
+                  onChange={(e) => setSubAgentPassword(e.target.value)}
+                  className="w-full p-2 mb-4 rounded bg-gray-800 border border-yellow-300 text-yellow-200 focus:outline-none"
+                  autoComplete="new-password"
+                />
+              </>
             )}
 
             <input
@@ -141,11 +157,19 @@ export default function AgentLogin() {
               onClick={handleLogin}
               className="w-full bg-yellow-500 text-black py-2 rounded hover:bg-yellow-600 font-bold disabled:opacity-50"
               disabled={
-                !password || (loginAs === "subagent" && !selectedSubAgent)
+                !password ||
+                (loginAs === "subagent" &&
+                  (!selectedSubAgent || !subAgentPassword))
               }
             >
               Login
             </button>
+
+            {loginError && (
+              <p className="text-red-400 text-sm mt-2 text-center">
+                ❌ {loginError}
+              </p>
+            )}
           </>
         )}
       </div>

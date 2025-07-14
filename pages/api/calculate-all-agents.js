@@ -1,6 +1,5 @@
 import clientPromise from "lib/mongodb";
 
-// Generate all permutations except the original
 function getPermutations(str) {
   if (str.length <= 1) return [str];
   const perms = new Set();
@@ -32,13 +31,11 @@ export default async function handler(req, res) {
     }
 
     const permutations3D = getPermutations(threeUp);
-    console.log(permutations3D);
-
     const reversed2D = downGame.split("").reverse().join("");
     const singleDigits = threeUp.split("");
 
     const client = await clientPromise;
-    const db = client.db("noshib786");
+    const db = client.db("thai-agent-lottery");
 
     const agents = await db
       .collection("agents")
@@ -47,43 +44,43 @@ export default async function handler(req, res) {
     const summaries = [];
 
     for (const agent of agents) {
-      const { agentId, percentages, name } = agent;
-      if (!agentId || !percentages) continue;
+      const { agentId, name } = agent;
+      if (!agentId) continue;
 
       const players = await db
         .collection("playersInput")
         .find({ agentId })
         .toArray();
-
       const wins = [];
 
       for (const player of players) {
+        const pPercent = player.percentages || {};
         for (const entry of player.entries || []) {
-          const input = entry.input || {};
-          const number = input.num;
-          const str = parseInt(input.str || 0);
-          const rumble = parseInt(input.rumble || 0);
+          const { num: number, str = 0, rumble = 0 } = entry.input || {};
+          const winDetails = [];
 
           if (!number) continue;
-
-          const winDetails = [];
 
           if (number === threeUp && str > 0) {
             winDetails.push({ type: "STR3D", amount: str });
           }
+
           if (
             number.length === 3 &&
-            (number === threeUp || permutations3D.includes(number)) &&
+            permutations3D.includes(number) &&
             rumble > 0
           ) {
             winDetails.push({ type: "RUMBLE3D", amount: rumble });
           }
+
           if (number.length === 2 && number === downGame && str > 0) {
             winDetails.push({ type: "STR2D", amount: str });
           }
+
           if (number.length === 2 && number === reversed2D && rumble > 0) {
             winDetails.push({ type: "RUMBLE2D", amount: rumble });
           }
+
           if (number.length === 1 && singleDigits.includes(number) && str > 0) {
             winDetails.push({ type: "SINGLE", amount: str });
           }
@@ -96,6 +93,7 @@ export default async function handler(req, res) {
               number,
               entry,
               winDetails,
+              percentages: pPercent,
             });
           }
         }
@@ -127,27 +125,24 @@ export default async function handler(req, res) {
         },
         { ThreeD: 0, TwoD: 0, OneD: 0 }
       );
+
       let afterThreeD = 0;
       let afterTwoD = 0;
       let afterOneD = 0;
 
       for (const p of recent) {
-        const pPercent = p.percentages || { oneD: 0, twoD: 0, threeD: 0 };
-
-        afterThreeD += Math.floor(
-          (p.amountPlayed?.ThreeD || 0) * (1 - pPercent.threeD / 100)
-        );
-        afterTwoD += Math.floor(
-          (p.amountPlayed?.TwoD || 0) * (1 - pPercent.twoD / 100)
-        );
-        afterOneD += Math.floor(
-          (p.amountPlayed?.OneD || 0) * (1 - pPercent.oneD / 100)
-        );
+        const pPercent = p.percentages || { threeD: 0, twoD: 0, oneD: 0 };
+        afterThreeD +=
+          (p.amountPlayed?.ThreeD || 0) * (1 - pPercent.threeD / 100);
+        afterTwoD += (p.amountPlayed?.TwoD || 0) * (1 - pPercent.twoD / 100);
+        afterOneD += (p.amountPlayed?.OneD || 0) * (1 - pPercent.oneD / 100);
       }
-      const totalSTR = Math.floor(totalWins.STR3D * percentages.str);
-      const totalRUMBLE = Math.floor(totalWins.RUMBLE3D * percentages.rumble);
-      const totalDOWN = Math.floor(totalWins.DOWN * percentages.down);
-      const totalSINGLE = Math.floor(totalWins.SINGLE * percentages.single);
+
+      const examplePercent = players[0]?.percentages || {};
+      const totalSTR = totalWins.STR3D * (examplePercent.str || 0);
+      const totalRUMBLE = totalWins.RUMBLE3D * (examplePercent.rumble || 0);
+      const totalDOWN = totalWins.DOWN * (examplePercent.down || 0);
+      const totalSINGLE = totalWins.SINGLE * (examplePercent.single || 0);
 
       const totalGame = afterThreeD + afterTwoD + afterOneD;
       let totalWin = totalSTR + totalRUMBLE + totalDOWN + totalSINGLE;
@@ -157,11 +152,11 @@ export default async function handler(req, res) {
 
       if (totalWin < totalGame) {
         if (agent.tenPercent) {
-          underPercentage = Math.floor(totalWin * (agent.tenPercentAmt / 100));
+          underPercentage = totalWin * (agent.tenPercentAmt / 100);
           totalWin += underPercentage;
         }
         if (agent.expense) {
-          Expense = Number(agent.expenseAmt) || 0;
+          Expense = Number(agent.expenseAmt || 0);
           totalWin += Expense;
         }
       }
@@ -171,7 +166,7 @@ export default async function handler(req, res) {
       const summary = {
         agentId,
         name,
-        percentages,
+        percentages: examplePercent,
         totalAmounts,
         totalWins,
         afterThreeD,
@@ -194,6 +189,7 @@ export default async function handler(req, res) {
         downGame,
         createdAt: new Date(),
       };
+
       summaries.push(summary);
       await db.collection("summaries").insertOne(summary);
     }

@@ -2,13 +2,26 @@ import clientPromise from "lib/mongodb";
 import { serialize } from "cookie";
 
 export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
   try {
-    const { agentId, password, loginAs = "agent", subAgentId } = req.body;
+    const {
+      agentId,
+      password,
+      loginAs = "agent",
+      subAgentId,
+      subAgentPassword,
+    } = req.body;
+
+    if (!agentId || !password) {
+      return res.status(400).json({ error: "Missing agentId or password" });
+    }
 
     const client = await clientPromise;
-    const db = client.db("noshib786");
+    const db = client.db("thai-agent-lottery");
 
-    // Find the main agent first
     const agent = await db
       .collection("agents")
       .findOne({ agentId, active: true });
@@ -18,24 +31,31 @@ export default async function handler(req, res) {
     }
 
     if (password !== agent.password) {
-      return res.status(401).json({ error: "Invalid password" });
+      return res.status(401).json({ error: "Incorrect agent password" });
     }
 
     if (loginAs === "subagent") {
-      if (!agent.hasSubAgents) {
-        return res.status(403).json({ error: "This agent has no subagents" });
+      if (!agent.hasSubAgents || !Array.isArray(agent.subAgents)) {
+        return res.status(403).json({ error: "Agent has no subagents" });
       }
-      if (!subAgentId || !agent.subAgents.includes(subAgentId)) {
-        return res.status(403).json({ error: "Invalid or missing subAgentId" });
+
+      if (!subAgentId || !subAgentPassword) {
+        return res.status(400).json({ error: "Missing subagent credentials" });
       }
-      // Optionally: fetch subagent info from db if you store more details
+
+      const subagent = agent.subAgents.find((sa) => sa.id === subAgentId);
+
+      if (!subagent || subagent.password !== subAgentPassword) {
+        return res.status(401).json({ error: "Invalid subagent credentials" });
+      }
     }
 
-    // Set cookie as before, you could also add loginAs info if you want
-    const cookie = serialize("agent-auth", agentId, {
+    // Build cookie value (optional enhancement)
+    const authValue = `${loginAs}:${agentId}`;
+    const cookie = serialize("agent-auth", authValue, {
       httpOnly: true,
       path: "/",
-      maxAge: 60 * 60 * 1,
+      maxAge: 60 * 60, // 1 hour
       secure: process.env.NODE_ENV === "production",
     });
 
@@ -48,7 +68,7 @@ export default async function handler(req, res) {
       subAgentId: loginAs === "subagent" ? subAgentId : null,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Login error:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 }

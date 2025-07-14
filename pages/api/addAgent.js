@@ -1,4 +1,3 @@
-// pages/api/addAgent.js or src/app/api/addAgent/route.js
 import clientPromise from "../../lib/mongodb";
 
 export default async function handler(req, res) {
@@ -6,54 +5,79 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const {
-    agentId,
-    password,
-    name,
-    percentages,
-    cPercentages,
-    subAgents,
-    expense,
-    tenPercent,
-    expenseAmt,
-    tenPercentAmt,
-  } = req.body;
-  if (
-    !agentId ||
-    !password ||
-    !name ||
-    !percentages ||
-    !cPercentages ||
-    !subAgents
-  ) {
-    return res.status(400).json({ message: "Missing fields" });
-  }
-
   try {
-    const client = await clientPromise;
-    const db = client.db("noshib786");
-
-    // Check duplicate agentId
-    const existingAgent = await db.collection("agents").findOne({ agentId });
-    if (existingAgent) {
-      return res.status(409).json({ message: "Agent ID already exists" });
-    }
-    const cleanedSubAgents = subAgents.filter((n) => n.trim() !== "");
-    const hasSubAgents = cleanedSubAgents.length > 0;
-    const newAgent = {
+    const {
       agentId,
       password,
       name,
       percentages,
       cPercentages,
       subAgents,
-      expense,
-      tenPercent,
-      expenseAmt,
-      tenPercentAmt,
+      expense = false,
+      tenPercent = false,
+      expenseAmt = 0,
+      tenPercentAmt = 0,
+    } = req.body;
+
+    // Basic validation
+    if (
+      !agentId ||
+      !password ||
+      !name ||
+      typeof percentages !== "object" ||
+      typeof cPercentages !== "object" ||
+      !Array.isArray(subAgents)
+    ) {
+      return res.status(400).json({ message: "Missing or invalid fields" });
+    }
+
+    const client = await clientPromise;
+    const db = client.db("thai-agent-lottery");
+
+    // Check for duplicate agentId
+    const existing = await db.collection("agents").findOne({ agentId });
+    if (existing) {
+      return res.status(409).json({ message: "Agent ID already exists" });
+    }
+
+    // Clean and validate subAgents
+    const cleanedSubAgents = Array.isArray(subAgents)
+      ? subAgents
+          .filter((sa) => {
+            return (
+              sa &&
+              typeof sa === "object" &&
+              typeof sa.id === "string" &&
+              typeof sa.password === "string" &&
+              sa.id.trim().length > 0 &&
+              sa.password.trim().length > 0
+            );
+          })
+          .map((sa) => ({
+            id: sa.id.trim(),
+            password: sa.password.trim(),
+          }))
+      : [];
+    const hasSubAgents = cleanedSubAgents.length > 0;
+    console.log("Cleaned Subagents:", cleanedSubAgents);
+    console.log("hasSubAgents:", hasSubAgents);
+    // Construct agent document
+    const newAgent = {
+      agentId: agentId.trim(),
+      password: password.trim(),
+      name: name.trim(),
+      percentages,
+      cPercentages,
+      subAgents: cleanedSubAgents,
       hasSubAgents,
+      expense,
+      expenseAmt,
+      tenPercent,
+      tenPercentAmt,
       active: true,
+      lastSeen: new Date(),
     };
+
     await db.collection("agents").insertOne(newAgent);
 
     return res.status(201).json({ message: "Agent added", agent: newAgent });

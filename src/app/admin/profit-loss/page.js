@@ -378,7 +378,7 @@ export default function ProfitLossTable() {
                           selectedTwoD.payout) /
                           data?.finalTotals?.total) *
                         100
-                      ).toFixed(2)}%`}
+                      ).toFixed(1)}%`}
                     />
                   </tbody>
                 </table>

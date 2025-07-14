@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
   try {
     const client = await clientPromise;
-    const db = client.db("noshib786");
+    const db = client.db("thai-agent-lottery");
     const summaries = await db.collection("summaries").find({}).toArray();
 
     res.status(200).json({ success: true, summaries });

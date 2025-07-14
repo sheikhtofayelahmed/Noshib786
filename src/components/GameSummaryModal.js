@@ -238,9 +238,9 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
             <tbody>
               <tr>
                 <td class="category-header">Total</td>
-                <td>${(safeMoneyCal.totalAmounts?.ThreeD || 0).toFixed(0)}</td>
-                <td>${(safeMoneyCal.totalAmounts?.TwoD || 0).toFixed(0)}</td>
-                <td>${(safeMoneyCal.totalAmounts?.OneD || 0).toFixed(0)}</td>
+                <td>${(safeMoneyCal.totalAmounts?.ThreeD || 0).toFixed(1)}</td>
+                <td>${(safeMoneyCal.totalAmounts?.TwoD || 0).toFixed(1)}</td>
+                <td>${(safeMoneyCal.totalAmounts?.OneD || 0).toFixed(1)}</td>
                 <td class="highlight">${safeTotalWins.STR3D || 0}</td>
                 <td class="highlight">${safeTotalWins.RUMBLE3D || 0}</td>
                 <td class="highlight">${safeTotalWins.DOWN || 0}</td>
@@ -258,9 +258,9 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
               </tr>
               <tr>
                 <td class="category-header">After Ded.</td>
-                <td>${(safeMoneyCal.afterThreeD || 0).toFixed(0)}</td>
-                <td>${(safeMoneyCal.afterTwoD || 0).toFixed(0)}</td>
-                <td>${(safeMoneyCal.afterOneD || 0).toFixed(0)}</td>
+                <td>${(safeMoneyCal.afterThreeD || 0).toFixed(1)}</td>
+                <td>${(safeMoneyCal.afterTwoD || 0).toFixed(1)}</td>
+                <td>${(safeMoneyCal.afterOneD || 0).toFixed(1)}</td>
                 <td class="highlight">${(safeMoneyCal.afterSTR || 0).toFixed(
                   0
                 )}</td>
@@ -277,13 +277,13 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
               
               <tr class="total-row">
                 <td colSpan="1" class="final-calc">Total Game</td>
-                <td colSpan="1">${(safeMoneyCal.totalGame || 0).toFixed(0)}</td>
+                <td colSpan="1">${(safeMoneyCal.totalGame || 0).toFixed(1)}</td>
                   <td colSpan="2"><td/>
                    <td colSpan="2"><td/>
               </tr>
               <tr class="total-row">
                 <td colSpan="1" class="final-calc">Total Win</td>
-                <td colSpan="1">${(safeMoneyCal.totalWin || 0).toFixed(0)}</td>
+                <td colSpan="1">${(safeMoneyCal.totalWin || 0).toFixed(1)}</td>
                   <td colSpan="2"><td/>
                    <td colSpan="2"><td/>
               </tr>
@@ -292,7 +292,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                 <td colSpan="1">${Math.max(
                   0,
                   safeMoneyCal.totalGame - safeMoneyCal.totalWin
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
                   <td colSpan="2"><td/>
                    <td colSpan="2"><td/>
               </tr>
@@ -301,7 +301,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                 <td colSpan="1">${Math.max(
                   0,
                   safeMoneyCal.totalWin - safeMoneyCal.totalGame
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
                 <td colSpan="2"><td/>
                    <td colSpan="2"><td/>
               </tr>
@@ -450,7 +450,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                 <td>${(
                   player?.amountPlayed?.ThreeD *
                   (1 - player.cPercentages.threeD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>2D Total</td>
@@ -458,14 +458,14 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                 <td>${(
                   player?.amountPlayed?.TwoD *
                   (1 - player.cPercentages.twoD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>1D Total</td>
                 <td>${player.amountPlayed.OneD}</td>
                 <td>${
                   player?.amountPlayed?.OneD *
-                  (1 - player.cPercentages.oneD / 100).toFixed(0)
+                  (1 - player.cPercentages.oneD / 100).toFixed(1)
                 }</td>
               </tr>
               <tr  class="grand-total">
@@ -478,7 +478,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                     (1 - player.cPercentages.twoD / 100) +
                   player?.amountPlayed?.OneD *
                     (1 - player.cPercentages.oneD / 100)
-                ).toFixed(0)}</td>
+                ).toFixed(1)}</td>
               </tr>
 
             </tbody>
@@ -543,7 +543,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
       currentResult = thisGame - exGame;
     }
 
-    return currentResult.toFixed(0);
+    return currentResult.toFixed(1);
   };
   const calculateFinalCalAmt = (currentGameAmt, jomaAmt, operation) => {
     const current = parseFloat(currentGameAmt) || 0;
@@ -556,7 +556,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
       finalResult = current - joma;
     }
 
-    return finalResult.toFixed(0);
+    return finalResult.toFixed(1);
   };
   if (loading)
     return (
@@ -567,10 +567,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center">
-      <div
-        className="relative bg-gradient-to-br from-black via-gray-900 to-black text-white
- font-mono rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6"
-      >
+      <div className="relative bg-gradient-to-br from-black to-red-900 text-white font-mono rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white bg-gray-700 hover:bg-gray-600 rounded-full p-2"
@@ -643,13 +640,13 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                     <tr className="bg-gray-50 text-gray-700">
                       <td className="border px-4 py-2 font-semibold">Total</td>
                       <td className="border text-center text-lg font-bold">
-                        {summaryData?.totalAmounts?.ThreeD.toFixed(0)}
+                        {summaryData?.totalAmounts?.ThreeD.toFixed(1)}
                       </td>
                       <td className="border text-center text-lg font-bold">
-                        {summaryData?.totalAmounts?.TwoD.toFixed(0)}
+                        {summaryData?.totalAmounts?.TwoD.toFixed(1)}
                       </td>
                       <td className="border text-center text-lg font-bold">
-                        {summaryData?.totalAmounts?.OneD.toFixed(0)}
+                        {summaryData?.totalAmounts?.OneD.toFixed(1)}
                       </td>
 
                       <td className="border text-center text-lg font-bold bg-gray-200">
@@ -749,7 +746,7 @@ const GameSummaryModal = ({ item, visible, onClose }) => {
                             <p className="font-bangla">
                               আন্ডার ({summaryData?.tenPercentAmt ?? 0}%) =
                               {summaryData
-                                ? summaryData?.underPercentage.toFixed(0)
+                                ? summaryData?.underPercentage.toFixed(1)
                                 : "0"}
                             </p>
                           )}

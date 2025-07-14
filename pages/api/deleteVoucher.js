@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   try {
     const client = await clientPromise;
-    const db = client.db("noshib786");
+    const db = client.db("thai-agent-lottery");
     const result = await db
       .collection("playersInput")
       .deleteOne({ _id: new ObjectId(_id) });

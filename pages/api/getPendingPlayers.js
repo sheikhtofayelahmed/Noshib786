@@ -3,14 +3,16 @@ import clientPromise from "../../lib/mongodb";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
-    return res.status(405).json({
-      message: "Method Not Allowed. This endpoint only accepts GET requests.",
-    });
+    return res
+      .status(405)
+      .json({
+        message: "Method Not Allowed. This endpoint only accepts GET requests.",
+      });
   }
 
   try {
     const client = await clientPromise;
-    const db = client.db("noshib786");
+    const db = client.db("thai-agent-lottery");
 
     // Find all documents in 'waitingSavePlayer' where status is 'pending'
     const pendingPlayers = await db
