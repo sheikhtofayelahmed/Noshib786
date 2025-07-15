@@ -1,5 +1,4 @@
 "use client";
-import { Info } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 export default function ProfitLossTable() {
@@ -9,6 +8,7 @@ export default function ProfitLossTable() {
   const [selectedThreeD, setSelectedThreeD] = useState(null);
   const [selectedTwoD, setSelectedTwoD] = useState(null);
   const [showAgentsModal, setShowAgentsModal] = useState(false);
+  const [unPlayedModal, setUnPlayedModal] = useState(false);
   const [modalAgents, setModalAgents] = useState([]);
   const [view, setView] = useState("twoD"); // 'twoD' or 'threeD'
 
@@ -45,6 +45,18 @@ export default function ProfitLossTable() {
     (page - 1) * rowsPerPage,
     page * rowsPerPage
   );
+  //unplayed
+
+  const playedTwoD = new Set(data.twoD.map((n) => n.number));
+  const playedThreeD = new Set(data.threeD.map((n) => n.number));
+  const allTwoD = Array.from({ length: 100 }, (_, i) =>
+    i.toString().padStart(2, "0")
+  );
+  const allThreeD = Array.from({ length: 1000 }, (_, i) =>
+    i.toString().padStart(3, "0")
+  );
+  const unplayedTwoD = allTwoD.filter((num) => !playedTwoD.has(num));
+  const unplayedThreeD = allThreeD.filter((num) => !playedThreeD.has(num));
 
   if (loading)
     return (
@@ -285,7 +297,7 @@ export default function ProfitLossTable() {
     twoD: "2 D",
     oneD: "1 D",
   };
-  console.log(selectedThreeD, "hello");
+  console.log(unPlayedModal, "hello");
 
   return (
     <main className="max-w-[7xl] mx-auto p-8 font-sans bg-gradient-to-br from-black via-gray-900 to-black rounded-3xl shadow-[0_0_60px_rgba(255,215,0,0.3)] border-4 border-yellow-500">
@@ -464,6 +476,16 @@ export default function ProfitLossTable() {
         <button
           className={`px-6 py-2 rounded-lg font-bold text-xl transition ${
             view === "threeD"
+              ? "bg-green-500 text-black shadow-lg"
+              : "bg-green-800 text-yellow-200 hover:bg-green-700"
+          }`}
+          onClick={() => setUnPlayedModal(true)}
+        >
+          UnPlayed
+        </button>
+        <button
+          className={`px-6 py-2 rounded-lg font-bold text-xl transition ${
+            view === "threeD"
               ? "bg-yellow-500 text-black shadow-lg"
               : "bg-yellow-800 text-yellow-200 hover:bg-yellow-700"
           }`}
@@ -542,6 +564,52 @@ export default function ProfitLossTable() {
             >
               🎬 Close
             </button>
+          </div>
+        </div>
+      )}
+      {unPlayedModal && (
+        <div className="fixed inset-0 z-50 bg-gradient-to-tr from-black via-[#0b0b0b] to-black bg-opacity-90 backdrop-blur-md flex justify-center items-center">
+          <div className="relative bg-gradient-to-b from-[#0f0f0f] to-[#1a1a1a] text-white font-mono rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-y-auto p-8 ring-4 ring-lime-400 shadow-[0_0_40px_10px_rgba(0,255,0,0.3)]">
+            <button
+              onClick={() => setUnPlayedModal(false)}
+              className="absolute top-4 right-4 text-white bg-red-700 hover:bg-red-600 rounded-full p-2 shadow-md transition-transform hover:scale-105"
+            >
+              ✕
+            </button>
+
+            <div className="mx-auto mt-8 bg-gradient-to-br from-[#142d14] to-[#0c1f0c] rounded-xl ring-2 ring-yellow-500 shadow-[0_0_15px_5px_rgba(255,215,0,0.2)] p-6">
+              <h2 className="text-yellow-300 text-3xl font-extrabold mb-6 text-center tracking-wider drop-shadow-md">
+                🃏 Unplayed Numbers 🃏
+              </h2>
+
+              <p className="text-lime-300 font-bold mb-2 text-lg tracking-wide">
+                2-Digit ({unplayedTwoD.length}):
+              </p>
+              <div className="grid grid-cols-12 gap-2 text-lime-200 text-sm">
+                {unplayedTwoD.map((num) => (
+                  <span
+                    key={num}
+                    className="bg-[#101c10] border border-lime-400 px-2 py-1 rounded text-center shadow-inner shadow-lime-600 hover:scale-105 hover:bg-[#1a2e1a] transition-transform duration-150"
+                  >
+                    {num}
+                  </span>
+                ))}
+              </div>
+
+              <p className="text-red-300 font-bold mt-6 mb-2 text-lg tracking-wide">
+                3-Digit ({unplayedThreeD.length}):
+              </p>
+              <div className="grid grid-cols-12 gap-2 text-yellow-100 text-sm">
+                {unplayedThreeD.map((num) => (
+                  <span
+                    key={num}
+                    className="bg-[#1e1a10] border border-yellow-400 px-2 py-1 rounded text-center shadow-inner shadow-yellow-500 hover:scale-105 hover:bg-[#2c2214] transition-transform duration-150"
+                  >
+                    {num}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
