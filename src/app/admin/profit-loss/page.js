@@ -589,7 +589,7 @@ export default function ProfitLossTable() {
                 {unplayedTwoD.map((num) => (
                   <span
                     key={num}
-                    className="bg-[#101c10] border border-lime-400 px-2 py-1 rounded text-center shadow-inner shadow-lime-600 hover:scale-105 hover:bg-[#1a2e1a] transition-transform duration-150"
+                    className="bg-[#101c10] border border-lime-400 px-1 py-1 rounded text-center shadow-inner shadow-lime-600 hover:scale-105 hover:bg-[#1a2e1a] transition-transform duration-150"
                   >
                     {num}
                   </span>
@@ -603,7 +603,7 @@ export default function ProfitLossTable() {
                 {unplayedThreeD.map((num) => (
                   <span
                     key={num}
-                    className="bg-[#1e1a10] border border-yellow-400 px-2 py-1 rounded text-center shadow-inner shadow-yellow-500 hover:scale-105 hover:bg-[#2c2214] transition-transform duration-150"
+                    className="bg-[#1e1a10] border border-yellow-400 px-1 py-1 rounded text-center shadow-inner shadow-yellow-500 hover:scale-105 hover:bg-[#2c2214] transition-transform duration-150"
                   >
                     {num}
                   </span>
