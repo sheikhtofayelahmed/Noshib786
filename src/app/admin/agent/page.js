@@ -371,7 +371,12 @@ export default function AdminAgentPage() {
           agentId,
           name,
           password,
-          subAgents: subUpdateAgents.filter((n) => n.trim() !== ""),
+          subAgents: subUpdateAgents
+            .filter((n) => n && typeof n === "object" && n.id && n.password)
+            .map((n) => ({
+              id: n.id.trim(),
+              password: n.password.trim(),
+            })),
           percentages: percentages,
           cPercentages: cUpdatePercentages,
           expense: updateExpense,
@@ -550,7 +555,28 @@ export default function AdminAgentPage() {
                       className="odd:bg-gray-800 even:bg-gray-900"
                     >
                       <td className="border border-yellow-400 p-2">{i + 1}</td>
-                      <td className="border border-yellow-400 p-2">{name}</td>
+                      <td
+                        onClick={() =>
+                          router.push(`/admin/agent-games/${agentId}`)
+                        }
+                        className="relative border border-yellow-400 p-2"
+                      >
+                        {name}
+                        {loading && (
+                          <div className="flex justify-center items-center absolute top-2 right-2 ">
+                            <div className="flex space-x-1">
+                              <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce"></div>
+                              <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
+                              <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
+                            </div>
+                          </div>
+                        )}
+                        {entryCounts[agentId] > 0 && (
+                          <span className="absolute top-2 right-2 w-5 h-5 bg-green-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
+                            {entryCounts[agentId]}
+                          </span>
+                        )}
+                      </td>
                       <td className="border border-yellow-400 p-2">
                         {agentId}
                       </td>
@@ -636,7 +662,7 @@ export default function AdminAgentPage() {
                           </div>
                         )}
                       </td>
-                      <td className="border border-yellow-400 p-2 space-x-2">
+                      {/* <td className="border border-yellow-400 p-2 space-x-2">
                         <div className="relative inline-block">
                           <button
                             onClick={() =>
@@ -661,7 +687,7 @@ export default function AdminAgentPage() {
                             </span>
                           )}
                         </div>
-                      </td>
+                      </td> */}
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <button
                           onClick={() =>
