@@ -90,40 +90,43 @@ export default function AgentLayout({ children }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed z-50 top-0 left-0 h-full w-64 bg-black border-r-4 border-yellow-500 p-4 flex flex-col justify-between transform transition-transform md:relative md:translate-x-0 ${
+        className={`fixed z-50 top-0 left-0 h-full w-72 bg-gradient-to-br from-cyan-950 via-gray-900 to-black backdrop-blur-md p-6 flex flex-col justify-between border-r border-cyan-400 shadow-[0_0_25px_rgba(34,211,238,0.3)] transition-transform transform duration-300 md:relative md:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div>
-          <h2 className="text-2xl font-extrabold mb-6 text-yellow-400 hidden md:block">
+          <h2 className="text-2xl font-extrabold mb-6 text-cyan-300 hidden md:block tracking-widest drop-shadow-[0_0_8px_#22d3ee]">
             🎯 Agent Panel
           </h2>
 
-          <div className="bg-yellow-100 shadow-md rounded-xl p-4 mb-4 border border-red-200">
+          {/* Agent Info */}
+          <div className="bg-gradient-to-br from-cyan-200 to-cyan-100 shadow-lg rounded-xl p-4 mb-6 border border-cyan-300">
             <div className="flex items-center space-x-3 mb-2">
-              <span className="text-red-500 text-xl font-semibold">🆔</span>
-              <p className="text-lg font-semibold text-gray-800">
-                <span className="text-red-400">ID:</span> {agentId}
+              <span className="text-cyan-600 text-xl font-semibold">🆔</span>
+              <p className="text-base font-semibold text-gray-800">
+                <span className="text-cyan-700">ID:</span> {agentId}
               </p>
             </div>
             <div className="flex items-center space-x-3">
-              <span className="text-red-500 text-xl font-semibold">👤</span>
-              <p className="text-lg font-semibold text-gray-800">
-                <span className="text-red-400">Name:</span> {agent?.name}
+              <span className="text-cyan-600 text-xl font-semibold">👤</span>
+              <p className="text-base font-semibold text-gray-800">
+                <span className="text-cyan-700">Name:</span> {agent?.name}
               </p>
             </div>
           </div>
-          <nav className="space-y-3 font-bangla          ">
+
+          {/* Navigation */}
+          <nav className="space-y-4 font-bangla">
             {navItems
-              .filter((item) => item && item.path) // ensure item and item.path exist
+              .filter((item) => item && item.path)
               .map((item) => (
                 <Link href={item.path} key={item.path}>
                   <div
                     onClick={() => setSidebarOpen(false)}
-                    className={`block px-4 py-2 rounded border border-yellow-400 hover:bg-yellow-500 hover:text-black transition ${
+                    className={`block px-5 py-3 rounded-xl border transition duration-300 font-medium tracking-wide ${
                       pathname === item.path
-                        ? "bg-yellow-600 text-black font-bold shadow-lg"
-                        : "text-yellow-300"
+                        ? "bg-cyan-300 text-black border-cyan-500 shadow-inner"
+                        : "border-cyan-500 text-cyan-200 hover:bg-cyan-400 hover:text-black"
                     }`}
                   >
                     {item.name}
@@ -132,15 +135,20 @@ export default function AgentLayout({ children }) {
               ))}
           </nav>
         </div>
-        <AllahBhorosha></AllahBhorosha>
 
-        <div className="pt-6 border-t border-yellow-600 mt-6">
+        {/* Trust Section */}
+        <div className="mt-6">
+          <AllahBhorosha />
+        </div>
+
+        {/* Logout Button */}
+        <div className="pt-6 border-t border-cyan-600 mt-6">
           <button
             onClick={() => {
               logout();
               window.location.href = "/agent/login";
             }}
-            className="w-full text-sm bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow transition"
+            className="w-full text-sm font-semibold bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white px-4 py-3 rounded-xl shadow-lg transition-all"
           >
             🚪 Logout
           </button>

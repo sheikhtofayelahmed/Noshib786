@@ -4,8 +4,8 @@ import Image from "next/image";
 export default function AllahBhorosha() {
   return (
     <div className="text-center mt-10">
-      <h1 className="font-bangla text-xl md:text-2xl font-bold mb-4 text-yellow-400 drop-shadow-lg animate-flicker">
-        🔥 আল্লাহ ভরসা 🔥
+      <h1 className="font-bangla text-xl md:text-2xl font-bold mb-4 text-cyan-300 drop-shadow-lg animate-flicker">
+        নসীব ৭৮৬
       </h1>
       <Image
         src="/dowa.png"

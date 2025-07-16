@@ -12,11 +12,11 @@ export default function Breadcrumb() {
   const isAgent = pathname.startsWith("/");
 
   return (
-    <nav className="text-yellow-400 mb-4 text-sm" aria-label="Breadcrumb">
+    <nav className="text-cyan-300 mb-4 text-sm" aria-label="Breadcrumb">
       <ol className="gap-2 list-none p-0 m-0 flex items-center">
         {/* Show Home only for agent routes */}
         {isAgent && (
-          <li className="bg-yellow-400 rounded-md ">
+          <li className="bg-cyan-400 rounded-md ">
             <Link href="/" className="hover:underline text-white text-xl">
               🎮
             </Link>

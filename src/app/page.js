@@ -1,115 +1,77 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAgent } from "@/context/AgentContext";
-import { useRouter } from "next/navigation";
 import AgentLayout from "@/components/AgentLayout";
-import PlayerInput from "@/components/PlayerInput";
-import AllahBhorosha from "@/components/Allah";
-import PlayerInputModal from "@/components/PlayerInputModal";
-import { ReceiptText } from "lucide-react";
+import { useEffect, useState } from "react";
 
-export default function AgentDashboard() {
-  const { agentId, loading } = useAgent();
-  const [inputModal, setInputModal] = useState(false);
-  const [doubleInput, setDoubleInput] = useState(false);
-  const router = useRouter();
-
-  // State for game status
-  const [gameActive, setGameActive] = useState(null); // null = loading, false = inactive, true = active
+export default function Noshib786() {
+  const [threeUp, setThreeUp] = useState(null);
+  const [downGame, setDownGame] = useState(null);
+  const [date, setDate] = useState(null);
+  const [winStatus, setWinStatus] = useState(false);
 
   useEffect(() => {
-    if (!loading && !agentId) {
-      router.push("/agent/login");
-    }
-  }, [agentId, loading, router]);
-
-  useEffect(() => {
-    async function fetchGameStatus() {
+    const fetchData = async () => {
       try {
-        const res = await fetch("/api/game-status");
-        if (!res.ok) throw new Error("Failed to fetch game status");
-
+        const res = await fetch("/api/win-status");
         const data = await res.json();
-
-        const now = new Date();
-        const targetTime = data.targetDateTime
-          ? new Date(data.targetDateTime)
-          : null;
-
-        if (data.isGameOn && targetTime && now <= targetTime) {
-          setGameActive(true);
-        } else {
-          setGameActive(false);
-        }
+        setThreeUp(data.threeUp);
+        setDownGame(data.downGame);
+        setDate(data.gameDate);
+        setWinStatus(data.winStatus);
       } catch (error) {
-        console.error("Error fetching game status:", error);
-        setGameActive(false);
+        console.error("Error fetching winning numbers:", error);
       }
-    }
+    };
 
-    fetchGameStatus();
+    fetchData();
   }, []);
-  // Run after agent logs in
-
-  if (loading || !agentId || gameActive === null) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="flex space-x-2">
-          <div className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce"></div>
-          <div className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
-          <div className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <AgentLayout>
-      <button
-        onClick={() => setInputModal(true)}
-        className="my-2 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold rounded-full shadow-lg transition duration-200 ease-in-out transform hover:scale-105"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 4.5v15m7.5-7.5h-15"
-          />
-        </svg>
-        New Input <ReceiptText />
-      </button>
-      <label
-        className={`my-2 inline-flex items-center gap-2 px-3 py-2  bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold rounded-full shadow-lg transition duration-200 ease-in-out transform hover:scale-105 cursor-pointer ${
-          doubleInput ? "ring-2 ring-black" : ""
-        }`}
-      >
-        <input
-          type="checkbox"
-          checked={doubleInput}
-          onChange={() => setDoubleInput(!doubleInput)}
-          className="form-checkbox h-4 w-4 text-yellow-700 rounded focus:ring-0"
-        />
-        Double Input <ReceiptText />
-      </label>
-      {gameActive ? (
-        <PlayerInput
-          doubleInput={doubleInput}
-          setDoubleInput={setDoubleInput}
-        />
-      ) : (
-        <AllahBhorosha></AllahBhorosha>
-      )}
-      {gameActive && inputModal && (
-        <PlayerInputModal onClose={() => setInputModal(false)} />
-      )}
+      <div className="my-8 mx-auto max-w-4xl bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl shadow-lg ring-1 ring-cyan-700 p-6 text-center text-white">
+        <h2 className="text-2xl font-bold text-cyan-400 mb-6 tracking-wider">
+          🏆 Latest Winning Numbers
+        </h2>
+
+        <div className="flex flex-col sm:flex-row justify-around items-center gap-8">
+          {/* 3UP Game */}
+          <div className="bg-gradient-to-br from-cyan-300 to-teal-400 text-gray-900 rounded-xl px-6 py-5 shadow-md w-64 hover:shadow-xl transition duration-300">
+            <h3 className="text-lg font-semibold mb-1">🎯 3UP Game</h3>
+            <p className="text-4xl font-black tracking-wide">
+              {typeof winStatus === "boolean"
+                ? winStatus
+                  ? threeUp || "XXX"
+                  : "XXX"
+                : "XXX"}
+            </p>
+          </div>
+
+          {/* Date */}
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-cyan-400 text-2xl">🗓️</span>
+            <span className="text-sm text-gray-300">Draw Date</span>
+            <span className="text-base font-bold bg-gradient-to-r from-blue-300 to-cyan-400 text-transparent bg-clip-text">
+              {typeof winStatus === "boolean"
+                ? winStatus
+                  ? date || "---"
+                  : "---"
+                : "---"}
+            </span>
+          </div>
+
+          {/* DOWN Game */}
+          <div className="bg-gradient-to-br from-purple-300 to-blue-400 text-gray-900 rounded-xl px-6 py-5 shadow-md w-64 hover:shadow-xl transition duration-300">
+            <h3 className="text-lg font-semibold mb-1">💥 DOWN Game</h3>
+            <p className="text-4xl font-black tracking-wide">
+              {typeof winStatus === "boolean"
+                ? winStatus
+                  ? downGame || "XX"
+                  : "XX"
+                : "XX"}
+            </p>
+          </div>
+        </div>
+      </div>
     </AgentLayout>
   );
 }

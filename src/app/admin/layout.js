@@ -135,37 +135,45 @@ export default function AdminLayout({ children }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed z-50 top-0 left-0 h-full w-64 bg-black border-r-4 border-yellow-500 p-4 flex flex-col justify-between transform transition-transform md:relative md:translate-x-0 ${
+        className={`fixed z-50 top-0 left-0 h-full w-72 bg-gradient-to-br from-cyan-950 via-gray-900 to-black backdrop-blur-md p-6 flex flex-col justify-between border-r border-cyan-400 shadow-[0_0_25px_rgba(34,211,238,0.4)] transition-transform transform duration-300 md:relative md:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
+        {/* Header / Logo */}
         <div>
-          <h2 className="text-2xl font-extrabold mb-6 text-yellow-400 hidden md:block">
-            🎰 Game Admin
-          </h2>
+          <div className="mb-10 hidden md:flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-cyan-400 text-black flex items-center justify-center text-xl font-bold shadow-inner">
+              🎰
+            </div>
+            <h2 className="text-2xl font-bold text-cyan-300 tracking-widest drop-shadow-[0_0_8px_#22d3ee]">
+              Game Admin
+            </h2>
+          </div>
 
-          <nav className="space-y-3 font-bangla">
+          {/* Navigation */}
+          <nav className="space-y-4 font-bangla">
             {navItems.map((item) => (
               <Link key={item.path} href={item.path}>
                 <div
                   onClick={() => setSidebarOpen(false)}
-                  className={`block px-3 py-1 rounded border border-yellow-400 hover:bg-yellow-500 hover:text-black transition ${
+                  className={`group relative px-5 py-3 rounded-xl border transition-all duration-300 font-medium ${
                     pathname === item.path
-                      ? "bg-yellow-600 text-black font-bold shadow-lg"
-                      : "text-yellow-300"
+                      ? "bg-cyan-300 text-black border-cyan-400 shadow-md"
+                      : "border-cyan-500 text-cyan-200 hover:bg-cyan-400 hover:text-black"
                   }`}
                 >
-                  {item.name}
+                  🎲 {item.name}
                 </div>
               </Link>
             ))}
           </nav>
         </div>
 
-        <div className="pt-6 border-t border-yellow-600 mt-6">
+        {/* Logout */}
+        <div className="pt-8 mt-10 border-t border-cyan-600">
           <button
             onClick={logoutAdmin}
-            className="w-full text-sm bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow transition"
+            className="w-full text-sm font-semibold bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white px-4 py-3 rounded-xl shadow-lg transition-all"
           >
             🚪 Logout
           </button>

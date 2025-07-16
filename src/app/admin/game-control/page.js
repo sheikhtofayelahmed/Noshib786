@@ -1,5 +1,6 @@
 "use client";
 
+import { Eye, EyeOff } from "lucide-react";
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -9,6 +10,7 @@ export default function AdminGameControl() {
   const [threeUp, setThreeUp] = useState("");
   const [downGame, setDownGame] = useState("");
   const [gameDate, setGameDate] = useState(null);
+  const [winStatus, setWinStatus] = useState(false);
   const [targetDateTime, setTargetDateTime] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -39,6 +41,7 @@ export default function AdminGameControl() {
         setThreeUp(gameData.threeUp);
         setDownGame(gameData.downGame);
         setGameDate(gameData.gameDate);
+        setWinStatus(gameData.winStatus);
         setTargetDateTime(new Date(statusData.targetDateTime));
       } catch (err) {
         setError(err.message);
@@ -67,7 +70,33 @@ export default function AdminGameControl() {
       setLoading(false);
     }
   };
+  const toggleWinStatus = async () => {
+    if (!gameDate || typeof winStatus !== "boolean") {
+      alert("Game date and win status are required.");
+      return;
+    }
 
+    try {
+      const res = await fetch("/api/update-winStatus", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gameDate, // should be UTC formatted
+          winStatus: !winStatus,
+        }),
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        alert("Win status updated successfully!");
+        setWinStatus(result.updated.winStatus);
+      } else {
+        alert(result.error || "Failed to update win status.");
+      }
+    } catch (error) {
+      console.error("Win status update error:", error);
+    }
+  };
   const handleCountdown = async () => {
     if (!targetDateTime) {
       setError("Please select a valid date and time.");
@@ -94,7 +123,6 @@ export default function AdminGameControl() {
       setLoading(false);
     }
   };
-  console.log(targetDateTime);
   const handleSubmit = async () => {
     if (
       !threeUp ||
@@ -115,6 +143,7 @@ export default function AdminGameControl() {
           threeUp,
           downGame,
           gameDate, // Store UTC
+          winStatus: true,
         }),
       });
 
@@ -306,17 +335,35 @@ export default function AdminGameControl() {
           />
         </div>
 
-        <div>
-          <label className="font-bangla block mb-1 font-semibold">
-            🗓️ গেমের তারিখ
-          </label>
-          <input
-            type="text"
-            value={gameDate || ""}
-            onChange={(e) => setGameDate(e.target.value)}
-            placeholder="dd/MM/yyyy"
-            className="px-4 py-2 rounded bg-gray-800 border border-gray-500 text-white"
-          />
+        <div className="flex items-start justify-between">
+          <div>
+            <label className="font-bangla block mb-1 font-semibold">
+              🗓️ গেমের তারিখ
+            </label>
+            <input
+              type="text"
+              value={gameDate || ""}
+              onChange={(e) => setGameDate(e.target.value)}
+              placeholder="dd/MM/yyyy"
+              className="px-4 py-2 rounded bg-gray-800 border border-gray-500 text-white"
+            />
+          </div>
+          <button
+            className={`m-6 w-full sm:w-auto px-4 py-2 rounded-lg font-bold shadow-md ${
+              winStatus ? "bg-green-500" : "bg-red-600"
+            }`}
+            onClick={toggleWinStatus}
+          >
+            {winStatus ? <Eye></Eye> : <EyeOff></EyeOff>}
+          </button>
+          <button
+            onClick={handleSubmit}
+            className={
+              "ml-6 mt-6 w-full sm:w-auto px-6 py-2 font-bold rounded shadow transition bg-green-500 hover:bg-lime-500 text-black"
+            }
+          >
+            Save Game
+          </button>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between gap-4 mt-4">

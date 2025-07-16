@@ -21,8 +21,8 @@ export default async function AdminPage() {
     <main className="min-h-screen -mt-32 text-white flex items-center justify-center">
       <div className="text-center">
         <div className="text-center">
-          <h1 className="font-bangla text-2xl md:text-7xl font-bold mb-4 text-yellow-400 drop-shadow-lg animate-flicker">
-            🔥 আল্লাহ ভরসা 🔥
+          <h1 className="font-bangla text-2xl md:text-7xl font-bold mb-4 text-cyan-300 drop-shadow-lg animate-flicker">
+            নসীব ৭৮৬
           </h1>
           <Image
             src="/dowa.png"
