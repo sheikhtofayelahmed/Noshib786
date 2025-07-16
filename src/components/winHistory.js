@@ -42,7 +42,7 @@ const WinHistory = ({ rows, data, title }) => {
   border border-gray-700 transition
   ${
     isMatch
-      ? "bg-gradient-to-br from-green-600 to-yellow-400 text-black scale-[1.05] shadow-md animate-pulse"
+      ? "bg-gradient-to-br from-cyan-300 to-teal-400 text-black scale-[1.05] shadow-md animate-pulse"
       : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
   }
 `;
@@ -77,7 +77,7 @@ const WinHistory = ({ rows, data, title }) => {
       </div>
       {isModalOpen && activeNumber && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
-          <div className="bg-gradient-to-br from-green-600 to-yellow-400 text-black border-4 border-yellow-500 rounded-xl shadow-2xl p-6 w-[90%] max-w-sm text-center animate-fade-in font-mono">
+          <div className="bg-gradient-to-br from-purple-300 to-blue-400  text-black border-4 border-cyan-500 rounded-xl shadow-2xl p-6 w-[90%] max-w-sm text-center animate-fade-in font-mono">
             <h4 className="text-2xl font-bold text-red-700 mb-4">
               🎯 {activeNumber}
             </h4>
@@ -86,7 +86,7 @@ const WinHistory = ({ rows, data, title }) => {
               {matchDates.get(activeNumber).map((date, i) => (
                 <div
                   key={i}
-                  className="bg-yellow-300 rounded-lg p-2 shadow-inner"
+                  className="bg-gradient-to-br from-cyan-300 to-teal-400 rounded-lg p-2 shadow-inner"
                 >
                   🏆 {date}
                 </div>
