@@ -16,23 +16,29 @@ export default async function handler(req, res) {
     const db = client.db("noshib786");
 
     const result = await db.collection("winning_numbers").updateOne(
-      {}, // find the single document
+      { gameDate }, // Look for existing entry with same gameDate
       {
         $set: {
           threeUp,
           downGame,
-          gameDate,
           winStatus,
         },
+        $setOnInsert: {
+          gameDate,
+          createdAt: new Date(),
+        },
       },
-      { upsert: true } // if it doesn't exist, create it
+      { upsert: true } // Insert if not found
     );
 
-    return res
-      .status(200)
-      .json({ message: "Winning numbers updated successfully" });
+    return res.status(200).json({
+      message: result.upsertedCount
+        ? "New winning entry created"
+        : "Winning entry updated",
+      upsertedId: result.upsertedId || null,
+    });
   } catch (error) {
-    console.error("Error updating winning numbers:", error);
+    console.error("Error saving winning data:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 }

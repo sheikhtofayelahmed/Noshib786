@@ -9,22 +9,29 @@ export default async function handler(req, res) {
     const client = await clientPromise;
     const db = client.db("noshib786");
 
-    const win = await db.collection("winning_numbers").findOne({});
+    // Sort by createdAt in descending order
+    const latest = await db
+      .collection("winning_numbers")
+      .find({})
+      .sort({ createdAt: -1 }) // Newest based on timestamp
+      .limit(1)
+      .toArray();
 
-    if (!win) {
+    if (!latest.length) {
       return res.status(404).json({ error: "No winning data found" });
     }
 
-    const { threeUp, downGame, gameDate, winStatus } = win;
+    const { threeUp, downGame, gameDate, winStatus, createdAt } = latest[0];
 
     return res.status(200).json({
       threeUp: threeUp || "",
       downGame: downGame || "",
       gameDate: gameDate || "",
-      winStatus: winStatus || false,
+      winStatus: typeof winStatus === "boolean" ? winStatus : false,
+      createdAt: createdAt || null,
     });
   } catch (error) {
-    console.error("Error fetching win data:", error);
+    console.error("Error fetching latest win data:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 }
