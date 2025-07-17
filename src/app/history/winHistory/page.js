@@ -1,5 +1,4 @@
 "use client";
-import AgentLayout from "@/components/AgentLayout";
 import { useEffect, useState } from "react";
 
 const WinHistoryTable = () => {
@@ -34,7 +33,7 @@ const WinHistoryTable = () => {
   }, []);
 
   return (
-    <AgentLayout>
+    <>
       <div className="glow mt-10 p-4 max-w-4xl mx-auto">
         <h2 className="text-3xl font-extrabold text-center text-transparent bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-violet-500 bg-clip-text mb-6 tracking-wider drop-shadow-md">
           🎰 Noshib Win History ✨
@@ -78,7 +77,7 @@ const WinHistoryTable = () => {
           </div>
         )}
       </div>
-    </AgentLayout>
+    </>
   );
 };
 
