@@ -13,7 +13,7 @@ export default function AgentLayout({ children }) {
   const { loginAs, entryCount, waitingEntryCount, logout } = useAgent();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+console.log(loginAs)
   const { agentId, loading } = useAgent();
   const [agent, setAgent] = useState();
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -42,7 +42,7 @@ export default function AgentLayout({ children }) {
       }`,
       path: "/agent/waitingData",
     },
-    { name: "Noshib History", path: "/agent/history" },
+    { name: "Noshib History", path: "/history" },
   ];
   useEffect(() => {
     if (!agentId) return;

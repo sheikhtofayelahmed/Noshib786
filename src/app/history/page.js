@@ -1,5 +1,6 @@
 "use client";
 
+import AgentLayout from "@/components/AgentLayout";
 import WinHistory from "@/components/winHistory";
 import { useEffect, useState } from "react";
 
@@ -168,7 +169,7 @@ export default function Noshib786() {
   }, []);
 
   return (
-    <>
+    <AgentLayout>
       <div className="my-8 mx-auto max-w-4xl bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl shadow-lg ring-1 ring-cyan-700 p-6 text-center text-white">
         <h2 className="text-2xl font-bold text-cyan-400 mb-6 tracking-wider">
           🏆 Latest Winning Numbers
@@ -213,21 +214,12 @@ export default function Noshib786() {
           </div>
         </div>
       </div>
-      <WinHistory
-        title="3 Digit Unique"
-        rows={threeDigitRows}
-     
-      ></WinHistory>
+      <WinHistory title="3 Digit Unique" rows={threeDigitRows}></WinHistory>
       <WinHistory
         title="Double (3 Digit - 2 Aligned)"
         rows={doubleRows}
-       
       ></WinHistory>
-      <WinHistory
-        title="Down (2 Digit)"
-        rows={downRows}
-      
-      ></WinHistory>
-    </>
+      <WinHistory title="Down (2 Digit)" rows={downRows}></WinHistory>
+    </AgentLayout>
   );
 }
