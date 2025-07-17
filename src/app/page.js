@@ -178,7 +178,7 @@ export default function Noshib786() {
         <div className="flex flex-col sm:flex-row justify-around items-center gap-8">
           {/* 3UP Game */}
           <div className="bg-gradient-to-br from-cyan-300 to-teal-400 text-gray-900 rounded-xl px-6 py-5 shadow-md w-64 hover:shadow-xl transition duration-300">
-            <h3 className="text-lg font-semibold mb-1">🎯 3UP Game</h3>
+            <h3 className="text-lg font-semibold mb-1">🎯Noshib 3UP Game</h3>
             <p className="text-4xl font-black tracking-wide">
               {typeof winStatus === "boolean"
                 ? winStatus
@@ -191,7 +191,7 @@ export default function Noshib786() {
           {/* Date */}
           <div className="flex flex-col items-center gap-1">
             <span className="text-cyan-400 text-2xl">🗓️</span>
-            <span className="text-sm text-gray-300">Draw Date</span>
+            <span className="text-sm text-gray-300">Noshib Draw Date</span>
             <span className="text-base font-bold bg-gradient-to-r from-blue-300 to-cyan-400 text-transparent bg-clip-text">
               {typeof winStatus === "boolean"
                 ? winStatus
@@ -203,7 +203,7 @@ export default function Noshib786() {
 
           {/* DOWN Game */}
           <div className="bg-gradient-to-br from-purple-300 to-blue-400 text-gray-900 rounded-xl px-6 py-5 shadow-md w-64 hover:shadow-xl transition duration-300">
-            <h3 className="text-lg font-semibold mb-1">💥 DOWN Game</h3>
+            <h3 className="text-lg font-semibold mb-1">💥Noshib DOWN Game</h3>
             <p className="text-4xl font-black tracking-wide">
               {typeof winStatus === "boolean"
                 ? winStatus
