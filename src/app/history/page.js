@@ -143,31 +143,7 @@ export default function Noshib786() {
     // ["65", "75", "76", "86", "87", "97", "98", "XX", "54", "64"],
     ["XX", "66", "XX", "77", "XX", "88", "XX", "99", "XX", "55"],
   ];
-  const [winningData, setWinningData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchAllWins = async () => {
-    try {
-      const res = await fetch("/api/win-history");
-      const result = await res.json();
-
-      if (res.ok) {
-        setWinningData(result.data);
-      } else {
-        alert(result.error || "Failed to fetch winning records.");
-      }
-    } catch (error) {
-      console.error("Fetch error:", error);
-      alert("Something went wrong while loading winning history.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAllWins();
-  }, []);
-
+ 
   return (
     <AgentLayout>
       <div className="my-8 mx-auto max-w-4xl bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl shadow-lg ring-1 ring-cyan-700 p-6 text-center text-white">
@@ -177,7 +153,7 @@ export default function Noshib786() {
 
         <div className="flex flex-col sm:flex-row justify-around items-center gap-8">
           {/* 3UP Game */}
-          <div className="bg-gradient-to-br from-cyan-300 to-teal-400 text-gray-900 rounded-xl px-6 py-5 shadow-md w-64 hover:shadow-xl transition duration-300">
+          <div className="bg-gradient-to-br from-cyan-300 to-teal-400 text-gray-900 rounded-xl px-5 py-4 shadow-md w-64 hover:shadow-xl transition duration-300">
             <h3 className="text-lg font-semibold mb-1">🎯Noshib 3UP Game</h3>
             <p className="text-4xl font-black tracking-wide">
               {typeof winStatus === "boolean"
@@ -202,7 +178,7 @@ export default function Noshib786() {
           </div>
 
           {/* DOWN Game */}
-          <div className="bg-gradient-to-br from-purple-300 to-blue-400 text-gray-900 rounded-xl px-6 py-5 shadow-md w-64 hover:shadow-xl transition duration-300">
+          <div className="bg-gradient-to-br from-purple-300 to-blue-400 text-gray-900 rounded-xl px-5 py-4 shadow-md w-64 hover:shadow-xl transition duration-300">
             <h3 className="text-lg font-semibold mb-1">💥Noshib DOWN Game</h3>
             <p className="text-4xl font-black tracking-wide">
               {typeof winStatus === "boolean"
@@ -214,6 +190,18 @@ export default function Noshib786() {
           </div>
         </div>
       </div>
+      <div className="flex flex-col sm:flex-row justify-center gap-6 my-20">
+        {/* Tips Button */}
+        <button className="bg-gradient-to-r from-purple-800 via-pink-600 to-red-500 text-white font-bold px-10 py-6 rounded-full shadow-lg hover:shadow-pink-500/50 hover:scale-105 transition-all duration-300 tracking-widest text-md uppercase glow-animation">
+          🔮 Noshib Tips
+        </button>
+
+        {/* Win History Button */}
+        <button className="bg-gradient-to-r from-black via-gray-800 to-purple-900 text-yellow-300 font-bold px-10 py-6 rounded-full shadow-lg hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 tracking-widest text-md uppercase glow-animation">
+          🧿 Noshib Win
+        </button>
+      </div>
+
       <WinHistory title="3 Digit Unique" rows={threeDigitRows}></WinHistory>
       <WinHistory
         title="Double (3 Digit - 2 Aligned)"

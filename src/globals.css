@@ -60,6 +60,20 @@ th {
 
 /* Your custom CSS here */
 
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.6), 0 0 20px rgba(255, 0, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.9), 0 0 30px rgba(255, 0, 255, 0.6);
+  }
+}
+
+.glow-animation {
+  animation: pulse-glow 2s infinite;
+}
+
 @keyframes pulse-light {
   0%,
   100% {
@@ -92,4 +106,16 @@ th {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #aaa; /* Lighter grey on hover */
+}
+@keyframes neon-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px #ff00ff88, 0 0 16px #00ffff44;
+  }
+  50% {
+    box-shadow: 0 0 16px #ff00ffaa, 0 0 32px #00ffff77;
+  }
+}
+
+.glow {
+  animation: neon-pulse 2.5s infinite alternate;
 }
