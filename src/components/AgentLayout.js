@@ -19,6 +19,7 @@ export default function AgentLayout({ children }) {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const navItems = [
     { name: "Home", path: "/" },
+    { name: "Play", path: "/agent" },
     // Only show Games if loginAs is 'agent'
     ...(loginAs === "agent"
       ? [
