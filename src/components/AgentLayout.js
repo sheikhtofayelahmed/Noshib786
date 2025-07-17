@@ -18,8 +18,7 @@ export default function AgentLayout({ children }) {
   const [agent, setAgent] = useState();
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Play", path: "/agent" },
+    { name: "Play", path: "/" },
     // Only show Games if loginAs is 'agent'
     ...(loginAs === "agent"
       ? [
@@ -43,6 +42,7 @@ export default function AgentLayout({ children }) {
       }`,
       path: "/agent/waitingData",
     },
+    { name: "Noshib History", path: "/agent/history" },
   ];
   useEffect(() => {
     if (!agentId) return;
