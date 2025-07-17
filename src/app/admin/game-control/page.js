@@ -300,10 +300,8 @@ export default function AdminGameControl() {
           >
             {loading ? (
               "..."
-            ) : targetDateTime ? (
-              <span className="text-green-800 font-semibold">On</span>
             ) : (
-              <span className="text-red-700 font-semibold">Off</span>
+              <span className="text-green-800 font-semibold">Save</span>
             )}
           </button>
         </div>
