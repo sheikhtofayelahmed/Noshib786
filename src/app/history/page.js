@@ -145,12 +145,12 @@ export default function Noshib786() {
 
   return (
     <>
-      <div className="my-8 mx-auto max-w-4xl bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl shadow-lg ring-1 ring-cyan-700 p-6 text-center text-white">
+      <div className="my-8 mx-5 md:mx-auto max-w-4xl bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl shadow-lg ring-1 ring-cyan-700 p-6 text-center text-white">
         <h2 className="text-2xl font-bold text-cyan-400 mb-6 tracking-wider">
           🏆 Latest Winning Numbers
         </h2>
 
-        <div className="flex flex-col sm:flex-row justify-around items-center gap-8">
+        <div className=" flex flex-col sm:flex-row justify-around items-center gap-8">
           {/* 3UP Game */}
           <div className="bg-gradient-to-br from-cyan-300 to-teal-400 text-gray-900 rounded-xl px-5 py-4 shadow-md w-64 hover:shadow-xl transition duration-300">
             <h3 className="text-lg font-semibold mb-1">🎯Noshib 3UP Game</h3>
@@ -166,8 +166,8 @@ export default function Noshib786() {
           {/* Date */}
           <div className="flex flex-col items-center gap-1">
             <span className="text-cyan-400 text-2xl">🗓️</span>
-            <span className="text-sm text-gray-300">Noshib Draw Date</span>
-            <span className="text-base font-bold bg-gradient-to-r from-blue-300 to-cyan-400 text-transparent bg-clip-text">
+            <span className="text-xl text-gray-300">Noshib Draw Date</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-300 to-cyan-400 text-transparent bg-clip-text">
               {typeof winStatus === "boolean"
                 ? winStatus
                   ? date || "---"
@@ -189,7 +189,7 @@ export default function Noshib786() {
           </div>
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row justify-center gap-6 my-20">
+      <div className="mx-10 flex flex-col sm:flex-row justify-center gap-6 my-20">
         {/* Tips Button */}
         <button className="bg-gradient-to-r from-purple-800 via-pink-600 to-red-500 text-white font-bold px-10 py-6 rounded-full shadow-lg hover:shadow-pink-500/50 hover:scale-105 transition-all duration-300 tracking-widest text-md uppercase glow-animation">
           🔮 Noshib Tips
