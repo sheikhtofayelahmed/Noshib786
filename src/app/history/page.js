@@ -236,9 +236,9 @@ export default function Noshib786() {
             </div>
           )}
 
-          {showBlinkingZero && (
-            <div className="text-6xl font-extrabold font-mono text-red-500 animate-blink mt-12 drop-shadow-lg">
-              🛑 00m 00s 🛑
+          {showBlinkingZero && !winStatus && (
+            <div className="text-6xl font-extrabold font-mono text-red-500 animate-blink my-12 drop-shadow-lg">
+              00:00:00 
             </div>
           )}
         </div>
