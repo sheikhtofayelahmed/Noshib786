@@ -847,7 +847,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
           </table>
           <div style="margin-top: 24px; text-align: center;">
           <p style="margin-bottom: 12px; font-size: 14px; line-height: 1.5;">
-            ✍️ Authorized Signature
+            ✍️  Agent Signature
           </p>
          <div style="
             display: inline-block;
@@ -859,15 +859,8 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
             box-sizing: border-box;
           "></div>
         </div>
-          <div class="qr-code">
-              <img src="${qrDataUrl}" width="280" height="280" />
-          </div>
-          <p style="text-align:center; font-size:12px; margin-top:8px;">
-            🕒 Printed At: ${printedAt}
-          </p>
-          <p style="text-align:center; font-size:10px; color:#888;">
-            🔐 Encrypted QR Code. Only readable by NOSHIB786 System.
-          </p>
+          
+          
         </div>
       </body>
     </html>
