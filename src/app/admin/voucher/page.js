@@ -304,9 +304,7 @@ export default function VoucherModal() {
 
         // ✅ Auto-calculate totals
         const totals = calculateTotals(entriesData);
-        console.log(totals, "totals");
         setAmountPlayed(totals);
-        console.log(amountPlayed);
         // ✅ Track submission status
         setIsVoucherSubmitted(
           data.voucherData.isSubmittedToActiveGame || false

@@ -207,7 +207,6 @@ export default function Account() {
   //game summary modal
   const handleOpenModal = (agentId, gameDate) => {
     // Pass this info to your modal or state manager
-    console.log("Open modal for:", agentId, gameDate);
     // Example: setModalData({ agentId, gameDate }); setShowModal(true);
     setSummaryModal(true);
   };

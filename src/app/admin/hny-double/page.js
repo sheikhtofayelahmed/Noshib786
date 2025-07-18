@@ -18,7 +18,6 @@ export default function HappyNewYear() {
         return;
       }
       const data = await res.json();
-      console.log(data, "fetch dataa");
       setNumberData(data);
 
       setLoading(false);

@@ -297,7 +297,6 @@ export default function ProfitLossTable() {
     twoD: "2 D",
     oneD: "1 D",
   };
-  console.log(unPlayedModal, "hello");
 
   return (
     <main className="max-w-[7xl] mx-auto p-8 font-sans bg-gradient-to-br from-black via-gray-900 to-black rounded-3xl shadow-[0_0_60px_rgba(255,215,0,0.3)] border-4 border-yellow-500">

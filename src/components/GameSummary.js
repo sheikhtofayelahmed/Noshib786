@@ -636,7 +636,6 @@ const GameSummary = ({ agentId }) => {
       console.error("Content div not found for voucher:", voucher);
     }
   };
-  console.log(summaryData, "summ");
   if (loading)
     return (
       <div className="flex items-center justify-center h-screen">

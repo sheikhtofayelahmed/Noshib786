@@ -217,7 +217,6 @@ export default function AdminAgentPage() {
   };
   // When clicking % button, open modal and load agent percentages
   const handleEditClick = (agent) => {
-    console.log(agent, "handle edit check");
     setEditingAgent(agent);
     setAgentId(agent.agentId);
     setName(agent.name);

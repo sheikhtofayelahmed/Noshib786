@@ -9,7 +9,6 @@ const WinHistoryTable = () => {
     try {
       const res = await fetch("/api/win-history");
       const result = await res.json();
-      console.log(result);
       if (res.ok) {
         // Show most recent first by sorting descending by createdAt
         const sorted = result.data.sort(

@@ -6,7 +6,6 @@ export default async function handler(req, res) {
   }
 
   const { agentId } = req.body;
-  console.log;
   if (!agentId) {
     return res.status(400).json({ message: "Missing agentId" });
   }

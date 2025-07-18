@@ -59,8 +59,6 @@ export default async function handler(req, res) {
           }))
       : [];
     const hasSubAgents = cleanedSubAgents.length > 0;
-    console.log("Cleaned Subagents:", cleanedSubAgents);
-    console.log("hasSubAgents:", hasSubAgents);
     // Construct agent document
     const newAgent = {
       agentId: agentId.trim(),

@@ -5,9 +5,7 @@ import clientPromise from "lib/mongodb"; // your MongoDB connection utility
 
 // Helper to get authenticated user (simplified for 'admin' user based on cookie)
 async function getAuthenticatedAdminFromCookie(req) {
-  console.log(req.cookies, "cookies");
   const authCookieValue = req.cookies["admin-auth"];
-  console.log(authCookieValue, "auth cookie");
   if (!authCookieValue || authCookieValue !== "true") {
     return null; // Not authenticated
   }
