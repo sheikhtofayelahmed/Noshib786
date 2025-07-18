@@ -18,6 +18,10 @@ module.exports = {
         bangla: ["var(--font-bangla)"],
       },
       keyframes: {
+        blink: {
+          "0%, 100%": { opacity: 1 },
+          "50%": { opacity: 0 },
+        },
         marquee: {
           "0%": { transform: "translateX(100%)" },
           "100%": { transform: "translateX(-100%)" },
@@ -47,6 +51,8 @@ module.exports = {
         "pulse-light": "pulse-light 3s infinite alternate",
         flicker: "flicker 2s infinite",
         "spin-slow": "spin 2s linear infinite", // Correct here
+        blink: "blink 1s steps(2, start) infinite",
+        pulseFast: "pulse 0.8s ease-in-out infinite",
       },
     },
   },

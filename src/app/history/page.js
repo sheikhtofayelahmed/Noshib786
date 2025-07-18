@@ -9,6 +9,73 @@ export default function Noshib786() {
   const [date, setDate] = useState(null);
   const [winStatus, setWinStatus] = useState(false);
 
+  const [targetTime, setTargetTime] = useState(null);
+  const [upcomingEndTime, setUpcomingEndTime] = useState(null);
+  const [isUpcomingPhase, setIsUpcomingPhase] = useState(false);
+  const [showBlinkingZero, setShowBlinkingZero] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({ text: "", isWarning: false });
+  const [error, setError] = useState("");
+
+  // ✅ Fetch game status from API
+  useEffect(() => {
+    const fetchGameStatus = async () => {
+      try {
+        const res = await fetch("/api/game-status");
+        const data = await res.json();
+        if (data.targetDateTime) setTargetTime(new Date(data.targetDateTime));
+        if (data.upcomingEndTime)
+          setUpcomingEndTime(new Date(data.upcomingEndTime));
+      } catch (err) {
+        setError("Failed to fetch game status.");
+      }
+    };
+
+    fetchGameStatus();
+  }, []);
+
+  // ⏳ Countdown handler
+  useEffect(() => {
+    if (!targetTime && !upcomingEndTime) return;
+
+    const interval = setInterval(() => {
+      const now = new Date();
+
+      if (targetTime && now < targetTime) {
+        // Phase 1: Main game countdown
+        const diff = targetTime - now;
+        const hrs = Math.floor(diff / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+        const isWarning = diff <= 10 * 60 * 1000;
+
+        setTimeLeft({
+          text: `Time Remaining: ${hrs}h ${mins}m ${secs}s`,
+          isWarning,
+          color: "remain",
+        });
+      } else if (upcomingEndTime && now < upcomingEndTime) {
+        // Phase 2: Upcoming win countdown
+        setIsUpcomingPhase(true);
+        const diff = upcomingEndTime - now;
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+        setTimeLeft({
+          text: `Upcoming Win: ${mins}m ${secs}s`,
+          isWarning: true,
+          color: "upcoming",
+        });
+      } else if (upcomingEndTime && now >= upcomingEndTime) {
+        // Phase 3: Blinking finale
+        clearInterval(interval);
+        setShowBlinkingZero(true);
+        setTimeLeft({ text: "00m 00s", isWarning: true });
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [targetTime, upcomingEndTime]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -146,9 +213,35 @@ export default function Noshib786() {
   return (
     <>
       <div className="my-8 mx-5 md:mx-auto max-w-4xl bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl shadow-lg ring-1 ring-cyan-700 p-6 text-center text-white">
-        <h2 className="text-2xl font-bold text-cyan-400 mb-6 tracking-wider">
+        <h2 className="text-4xl font-bold text-cyan-400 mb-6 tracking-wider uppercase">
           🏆 Latest Winning Numbers
         </h2>
+        <div className="mt-10 text-center">
+          {error && (
+            <div className="text-red-500 font-extrabold drop-shadow-md">
+              {error}
+            </div>
+          )}
+
+          {!showBlinkingZero && (
+            <div
+              className={`mb-10 px-6 py-4 rounded-2xl font-mono text-4xl tracking-widest transition duration-500
+        ${
+          timeLeft.color === "remain"
+            ? "bg-gradient-to-r from-red-700 to-yellow-500 text-white animate-pulse shadow-lg shadow-yellow-400/50"
+            : "bg-gradient-to-r from-purple-800 via-pink-600 to-blue-500 text-yellow-200 shadow-md shadow-pink-400/30"
+        }`}
+            >
+              ⏳ { timeLeft.text}
+            </div>
+          )}
+
+          {showBlinkingZero && (
+            <div className="text-6xl font-extrabold font-mono text-red-500 animate-blink mt-12 drop-shadow-lg">
+              🛑 00m 00s 🛑
+            </div>
+          )}
+        </div>
 
         <div className=" flex flex-col sm:flex-row justify-around items-center gap-8">
           {/* 3UP Game */}

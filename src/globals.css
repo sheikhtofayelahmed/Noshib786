@@ -108,7 +108,8 @@ th {
   background: #aaa; /* Lighter grey on hover */
 }
 @keyframes neon-pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 8px #ff00ff88, 0 0 16px #00ffff44;
   }
   50% {
@@ -118,4 +119,16 @@ th {
 
 .glow {
   animation: neon-pulse 2.5s infinite alternate;
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+.animate-blink {
+  animation: blink 0.8s infinite;
 }

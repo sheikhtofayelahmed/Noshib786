@@ -87,11 +87,12 @@ export default function VoucherModal() {
   };
 
   // Placeholder for handlePrint (replace with actual printing logic)
-  const handlePrint = (player) => {
+  const handlePrint = (player, parsedData, updatedTotals) => {
+    console.log(player,parsedData)
     const win = window.open("", "_blank");
 
     const formatRows = () => {
-      const sortedData = [...player.entries].sort((a, b) => {
+      const sortedData = [...parsedData].sort((a, b) => {
         return b.input.num.length - a.input.num.length;
       });
 
@@ -215,25 +216,25 @@ export default function VoucherModal() {
             <tbody>
               <tr>
                 <td>3D Total</td>
-                <td>${player.amountPlayed.ThreeD}</td>
+                <td>${updatedTotals.ThreeD}</td>
                 <td>${(
-                  player?.amountPlayed?.ThreeD *
+                  updatedTotals.ThreeD *
                   (1 - player.cPercentages.threeD / 100)
                 ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>2D Total</td>
-                <td>${player.amountPlayed.TwoD}</td>
+                <td>${updatedTotals.TwoD}</td>
                 <td>${(
-                  player?.amountPlayed?.TwoD *
+                  updatedTotals.TwoD *
                   (1 - player.cPercentages.twoD / 100)
                 ).toFixed(1)}</td>
               </tr>
               <tr>
                 <td>1D Total</td>
-                <td>${player.amountPlayed.OneD}</td>
+                <td>${updatedTotals.OneD}</td>
                 <td>${
-                  player?.amountPlayed?.OneD *
+                  updatedTotals.OneD *
                   (1 - player.cPercentages.oneD / 100).toFixed(1)
                 }</td>
               </tr>
@@ -241,12 +242,10 @@ export default function VoucherModal() {
                 <td colspan="2">Grand Total</td>
                
                 <td>${(
-                  player?.amountPlayed?.ThreeD *
+                  updatedTotals.ThreeD *
                     (1 - player.cPercentages.threeD / 100) +
-                  player?.amountPlayed?.TwoD *
-                    (1 - player.cPercentages.twoD / 100) +
-                  player?.amountPlayed?.OneD *
-                    (1 - player.cPercentages.oneD / 100)
+                  updatedTotals.TwoD * (1 - player.cPercentages.twoD / 100) +
+                  updatedTotals.OneD * (1 - player.cPercentages.oneD / 100)
                 ).toFixed(1)}</td>
               </tr>
 
@@ -460,7 +459,7 @@ export default function VoucherModal() {
       if (res.ok) {
         setMessage("✅ Voucher data updated!");
         setIsVoucherSubmitted(true);
-        handlePrint(player);
+        handlePrint(player, parsedData, updatedTotals);
       } else {
         const err = await res.json();
         setMessage(`❌ Failed to update: ${err.message || res.status}`);
