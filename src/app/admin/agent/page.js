@@ -982,9 +982,26 @@ export default function AdminAgentPage() {
       {editingModal && editingAgent && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
           <div className="bg-gray-900 p-6 rounded-lg text-white w-[90%] max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4 text-yellow-400">
+            <h2 className="text-xl font-bold mb-4 text-yellow-400 text-center">
               Edit Agent: {editingAgent.name}
             </h2>
+            <div className="flex justify-center space-x-2 mt-4">
+              <button
+                onClick={() => {
+                  setEditingModal(false);
+                  setEditingAgent(null);
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={updateAgent}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
+              >
+                Save
+              </button>
+            </div>{" "}
             {formError && (
               <p className="text-red-400 text-sm mb-3 text-center">
                 {formError}
@@ -1184,23 +1201,6 @@ export default function AdminAgentPage() {
                   </select>
                 </div>
               )}
-            </div>
-            <div className="flex justify-end space-x-2 mt-4">
-              <button
-                onClick={() => {
-                  setEditingModal(false);
-                  setEditingAgent(null);
-                }}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={updateAgent}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
-              >
-                Save
-              </button>
             </div>
           </div>
         </div>
