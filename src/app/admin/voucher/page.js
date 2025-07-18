@@ -442,12 +442,14 @@ export default function VoucherModal() {
       _id: player._id,
       voucher: player.voucher,
       agentId: player.agentId,
+      agentName: currentVoucherData.agentName,
       name: player.name || "",
       SAId: player.SAId || "",
       data: parsedData,
       amountPlayed: updatedTotals,
+      cPercentages: currentVoucherData.cPercentages,
+      percentages: currentVoucherData.percentages,
     };
-
     try {
       const res = await fetch(`/api/updateSavePlayer`, {
         method: "POST",

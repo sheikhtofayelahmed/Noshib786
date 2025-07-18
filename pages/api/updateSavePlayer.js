@@ -4,7 +4,18 @@ import clientPromise from "lib/mongodb"; // adjust if your MongoDB connection is
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const { _id, voucher, agentId, name, SAId, data, amountPlayed } = req.body;
+  const {
+    _id,
+    voucher,
+    agentId,
+    name,
+    SAId,
+    data,
+    amountPlayed,
+    agentName,
+    cPercentages,
+    percentages,
+  } = req.body;
 
   try {
     const client = await clientPromise;
@@ -17,10 +28,13 @@ export default async function handler(req, res) {
         $set: {
           voucher,
           agentId,
+          agentName,
           name,
           SAId,
           entries: data,
           amountPlayed,
+          cPercentages,
+          percentages,
           updatedAt: new Date(),
         },
       }
