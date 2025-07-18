@@ -419,7 +419,7 @@ export default function Account() {
                         : "bg-white "
                     }`}
                   >
-                    {item.totalGame - item.totalWin}
+                    {(item.totalGame - item.totalWin).toFixed(1)}
                   </td>
                   <td className="p-2 bg-white">
                     {item?.lastUpdated
@@ -463,7 +463,7 @@ export default function Account() {
                       : "text-green-400"
                   }`}
                 >
-                  {totalsBD.totalGame - totalsBD.totalWin}
+                  {(totalsBD.totalGame - totalsBD.totalWin).toFixed(1)}
                 </td>
                 <td className="p-2 bg-white">—</td>
                 <td className="p-2 bg-white">—</td>
@@ -553,7 +553,7 @@ export default function Account() {
                         : ""
                     }`}
                   >
-                    {item.totalGame - item.totalWin}
+                    {(item.totalGame - item.totalWin).toFixed(1)}
                   </td>
                   <td className="p-2">
                     {item?.lastUpdated
@@ -607,7 +607,7 @@ export default function Account() {
                       : "text-green-400"
                   }`}
                 >
-                  {totalsBA.totalGame - totalsBA.totalWin}
+                  {(totalsBA.totalGame - totalsBA.totalWin).toFixed(1)}
                 </td>
                 <td className="p-2">—</td>
                 <td className="p-2">—</td>
@@ -684,7 +684,7 @@ export default function Account() {
                       : "text-green-400"
                   }`}
                 >
-                  {totals.totalGame - totals.totalWin}
+                  {(totals.totalGame - totals.totalWin).toFixed(1)}
                 </td>
               </tr>
             ))}
@@ -707,7 +707,7 @@ export default function Account() {
                     : "text-green-400"
                 }`}
               >
-                {yearTotal.totalGame - yearTotal.totalWin}
+                {(yearTotal.totalGame - yearTotal.totalWin).toFixed(1)}
               </td>
             </tr>
 
@@ -729,7 +729,7 @@ export default function Account() {
                     : "text-green-400"
                 }`}
               >
-                {ultimateTotal.totalGame - ultimateTotal.totalWin}
+                {(ultimateTotal.totalGame - ultimateTotal.totalWin).toFixed(1)}
               </td>
             </tr>
           </tbody>
