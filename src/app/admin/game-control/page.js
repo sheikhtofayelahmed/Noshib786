@@ -198,7 +198,7 @@ export default function AdminGameControl() {
 
       if (res.ok) {
         alert("All entries moved to history!");
-        handleDelete();
+        // handleDelete();
       } else {
         const data = await res.json();
         alert(data.error || "Failed to move entries.");
