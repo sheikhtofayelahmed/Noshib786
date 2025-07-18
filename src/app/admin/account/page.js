@@ -261,14 +261,14 @@ export default function Account() {
 
   // 2. Get available years
   const years = Array.from(
-    new Set(uniqueSummaries.map((s) => new Date(s.gameDate).getFullYear()))
+    new Set(uniqueSummaries.map((s) => parseInt(s.gameDate.split("/")[2])))
   ).sort((a, b) => b - a);
 
   // 3. State for selected year (default most recent)
 
   // 4. Filter summaries by selected year
   const summariesInYear = uniqueSummaries.filter(
-    (s) => new Date(s.gameDate).getFullYear() === selectedYear
+    (s) => parseInt(s.gameDate.split("/")[2]) === selectedYear
   );
 
   // 5. Group by gameDate
@@ -293,7 +293,11 @@ export default function Account() {
       groups[dateStr].totalGame += entry.totalGame || 0;
       groups[dateStr].totalWin += entry.totalWin || 0;
     }
-    return Object.entries(groups).sort(([a], [b]) => new Date(a) - new Date(b));
+    return Object.entries(groups).sort(([a], [b]) => {
+      const [da, ma, ya] = a.split("/").map(Number);
+      const [db, mb, yb] = b.split("/").map(Number);
+      return new Date(ya, ma - 1, da) - new Date(yb, mb - 1, db);
+    });
   }, [summariesInYear]);
 
   // 6. Yearly total
