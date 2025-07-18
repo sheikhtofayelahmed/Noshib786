@@ -904,7 +904,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
       <div
         className={`mb-16 p-4 rounded text-yellow-200 font-mono text-3xl text-center transition-colors duration-500 ${
           timeLeft.isWarning
-            ? "bg-red-600 text-white font-extrabold animate-pulse"
+            ? "bg-gradient-to-r from-red-700 to-yellow-500 text-white animate-pulse shadow-lg shadow-yellow-400/50"
             : ""
         }`}
       >
@@ -913,7 +913,6 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
       <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-red-500 shadow-2xl p-6">
         {showInput && (
           <>
-            {" "}
             <h1 className="text-lg lg:text-4xl  font-bold text-center mb-6 text-yellow-400">
               🎰 Player Voucher 🎰
             </h1>
