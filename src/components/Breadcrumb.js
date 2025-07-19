@@ -12,7 +12,7 @@ export default function Breadcrumb() {
   const isAgent = pathname.startsWith("/");
 
   return (
-    <nav className="text-cyan-300 mb-4 text-sm" aria-label="Breadcrumb">
+    <nav className="text-cyan-300 mx-6 mb-4 text-sm" aria-label="Breadcrumb">
       <ol className="gap-2 list-none p-0 m-0 flex items-center">
         {/* Show Home only for agent routes */}
         {isAgent && (

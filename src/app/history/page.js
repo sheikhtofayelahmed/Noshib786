@@ -211,8 +211,8 @@ export default function Noshib786() {
   ];
 
   return (
-    <>
-      <div className="my-8 mx-5 md:mx-auto max-w-4xl bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl shadow-lg ring-1 ring-cyan-700 p-6 text-center text-white">
+    <div className="">
+      <div className="my-8 mx-5 md:mx-auto max-w-4xl  bg-gradient-to-br from-black via-gray-900 to-red-600 rounded-2xl shadow-lg ring-1 ring-cyan-700 p-6 text-center text-white">
         <h2 className="text-4xl font-bold text-cyan-400 mb-6 tracking-wider uppercase">
           🏆 Latest Winning Numbers
         </h2>
@@ -232,13 +232,13 @@ export default function Noshib786() {
             : "bg-gradient-to-r from-purple-800 via-pink-600 to-blue-500 text-yellow-200 shadow-md shadow-pink-400/30"
         }`}
             >
-              ⏳ { timeLeft.text}
+              ⏳ {timeLeft.text}
             </div>
           )}
 
           {showBlinkingZero && !winStatus && (
             <div className="text-6xl font-extrabold font-mono text-red-500 animate-blink my-12 drop-shadow-lg">
-              00:00:00 
+              00:00:00
             </div>
           )}
         </div>
@@ -289,7 +289,10 @@ export default function Noshib786() {
         </button>
 
         {/* Win History Button */}
-        <button className="bg-gradient-to-r from-black via-gray-800 to-purple-900 text-yellow-300 font-bold px-10 py-6 rounded-full shadow-lg hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 tracking-widest text-md uppercase glow-animation">
+        <button
+          onClick={() => (window.location.href = "/history/winHistory")}
+          className="bg-gradient-to-r from-black via-gray-800 to-purple-900 text-yellow-300 font-bold px-10 py-6 rounded-full shadow-lg hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 tracking-widest text-md uppercase glow-animation"
+        >
           🧿 Noshib Win
         </button>
       </div>
@@ -300,6 +303,6 @@ export default function Noshib786() {
         rows={doubleRows}
       ></WinHistory>
       <WinHistory title="Down (2 Digit)" rows={downRows}></WinHistory>
-    </>
+    </div>
   );
 }
