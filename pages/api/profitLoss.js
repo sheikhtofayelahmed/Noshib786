@@ -35,7 +35,7 @@ export default async function handler(req, res) {
 
     const numberStats = {};
     const singleDigitPayouts = {};
-    const numberAgents = {};
+    const numberAgents = {}; // { number: { agentId: { str, rumble, reverseRumble, permutationRumble, name } } }
 
     const totalAmounts = { OneD: 0, TwoD: 0, ThreeD: 0 };
     let afterOneD = 0,
@@ -61,12 +61,21 @@ export default async function handler(req, res) {
         const amount = str + rumble;
         if (!num || typeof amount !== "number") continue;
 
+        const agentId = player.agentId;
+        const agentName = player.agentName || "Unknown";
+
+        // Direct number
         if (!numberAgents[num]) numberAgents[num] = {};
-        if (!numberAgents[num][player.agentId]) {
-          numberAgents[num][player.agentId] = { str: 0, rumble: 0 };
+        if (!numberAgents[num][agentId]) {
+          numberAgents[num][agentId] = {
+            str: 0,
+            rumble: 0,
+
+            name: agentName,
+          };
         }
-        numberAgents[num][player.agentId].str += str;
-        numberAgents[num][player.agentId].rumble += rumble;
+        numberAgents[num][agentId].str += str;
+        numberAgents[num][agentId].rumble += rumble;
 
         if (num.length === 1) {
           singleDigitPayouts[num] = (singleDigitPayouts[num] || 0) + amount;
@@ -77,6 +86,45 @@ export default async function handler(req, res) {
         }
         numberStats[num].str += str;
         numberStats[num].rumble += rumble;
+
+        // Reverse number mapping for 2D
+        if (num.length === 2) {
+          const reversed = num.split("").reverse().join("");
+          if (reversed !== num && rumble > 0) {
+            if (!numberAgents[reversed]) numberAgents[reversed] = {};
+            if (!numberAgents[reversed][agentId]) {
+              numberAgents[reversed][agentId] = {
+                // str: 0,
+                str: "-",
+                rumble: 0,
+                name: agentName,
+              };
+            }
+            // numberAgents[reversed][agentId].str += str;
+            numberAgents[reversed][agentId].rumble += rumble;
+          }
+        }
+
+        // Permutation mapping for 3D
+        if (num.length === 3) {
+          const perms = getPermutations(num);
+          for (const p of perms) {
+            if (p !== num && rumble > 0) {
+              if (!numberAgents[p]) numberAgents[p] = {};
+              if (!numberAgents[p][agentId]) {
+                numberAgents[p][agentId] = {
+                  // str: 0,
+                  str: "-",
+                  rumble: 0,
+
+                  name: agentName,
+                };
+              }
+              // numberAgents[p][agentId].str += str;
+              numberAgents[p][agentId].rumble += rumble;
+            }
+          }
+        }
       }
     }
 
@@ -97,17 +145,16 @@ export default async function handler(req, res) {
     const twoD = [];
 
     for (const [num, data] of Object.entries(numberStats)) {
-      const agents = Object.entries(numberAgents[num] || {}).map(
-        ([id, stats]) => ({
-          id,
-          str: Number(stats.str.toFixed(1)),
-          rumble: Number(stats.rumble.toFixed(1)),
-        })
-      );
+      const agentsRaw = numberAgents[num] || {};
+      const agents = Object.entries(agentsRaw).map(([agentId, a]) => ({
+        agentId,
+        name: a.name,
+        str: a.str,
+        rumble: Number(a.rumble.toFixed(1)),
+      }));
 
       if (data.length === 3) {
         const strPayout = data.str * multipliers.threeD.str;
-
         const perms = getPermutations(num);
         let rumbleSum = 0;
         for (const permNum of perms) {
@@ -156,9 +203,8 @@ export default async function handler(req, res) {
         const reversed = num.split("").reverse().join("");
         const reverseRumble =
           reversed !== num ? numberStats[reversed]?.rumble || 0 : 0;
-        const rumblePayout = reverseRumble * multipliers.twoD;
 
-        const payout = strPayout + rumblePayout;
+        const payout = strPayout + reverseRumble * multipliers.twoD;
         const game = finalTotals.twoD;
         const PL = game - payout;
         const pl = (PL * 100) / game;
@@ -168,7 +214,7 @@ export default async function handler(req, res) {
           str: Number(data.str.toFixed(1)),
           rumble: Number(reverseRumble.toFixed(1)),
           strPayout: Number(strPayout.toFixed(1)),
-          rumblePayout: Number(rumblePayout.toFixed(1)),
+          rumblePayout: Number((reverseRumble * multipliers.twoD).toFixed(1)),
           payout: Number(payout.toFixed(1)),
           total: Number(game.toFixed(1)),
           PL: Number(PL.toFixed(1)),

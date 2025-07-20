@@ -523,22 +523,27 @@ export default function ProfitLossTable() {
               🧑‍💼 Agents
             </h2>
 
-            <ul className="space-y-3 max-h-60 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-transparent">
+            <ul className="space-y-4 max-h-60 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-gray-800">
               {modalAgents.map((agent, idx) => (
                 <li
                   key={idx}
-                  className="bg-white/90 rounded-lg px-4 py-2 shadow-inner border-l-4 border-yellow-500"
+                  className="bg-gray-900 rounded-xl px-6 py-4 shadow-md border-l-4 border-yellow-500 hover:bg-yellow-900 transition duration-300 ease-in-out cursor-pointer"
                 >
-                  <div className="font-bold text-lg text-red-800">
-                    {agent.id}
+                  <div className="flex items-center space-x-4">
+                    <span className="text-lg font-semibold text-yellow-400 select-none">
+                      {agent.agentId}
+                    </span>
+                    <span className="text-xl font-bold text-cyan-400 truncate">
+                      {agent.name}
+                    </span>
                   </div>
-                  <div className="text-sm text-gray-700">
+                  <div className="text-sm text-gray-300 mt-2">
                     🎯 STR:
-                    <span className="font-semibold text-black">
+                    <span className="font-bold text-blue-400 m-2">
                       {agent.str}
                     </span>
                     &nbsp;|&nbsp; 🔄 RUMBLE:
-                    <span className="font-semibold text-black">
+                    <span className="font-bold text-pink-500 m-2">
                       {agent.rumble}
                     </span>
                   </div>
@@ -546,22 +551,17 @@ export default function ProfitLossTable() {
               ))}
             </ul>
 
-            <div className="mt-6 text-center text-sm text-gray-800 font-semibold">
-              💰 Total STR:
-              <span className="text-green-700">
-                {modalAgents.reduce((sum, a) => sum + a.str, 0)}
-              </span>
-              | 🔁 Total RUMBLE:
-              <span className="text-blue-700">
-                {modalAgents.reduce((sum, a) => sum + a.rumble, 0)}
-              </span>
-            </div>
-
             <button
               onClick={() => setShowAgentsModal(false)}
-              className="mt-8 w-full py-2 bg-gradient-to-r from-red-600 via-yellow-500 to-pink-500 text-white font-bold rounded-full shadow-lg hover:brightness-110 transition-all duration-300"
+              className="mt-8 w-full py-3 bg-black bg-opacity-80 text-neon-pink font-extrabold rounded-full shadow-neon-pink
+             hover:shadow-neon-pink-glow hover:animate-pulse transition-all duration-300"
+              style={{
+                color: "#ff00cc",
+                textShadow: "0 0 8px #ff00cc, 0 0 20px #ff00cc",
+                boxShadow: "0 0 10px #ff00cc",
+              }}
             >
-              🎬 Close
+              Close
             </button>
           </div>
         </div>
