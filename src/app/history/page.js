@@ -227,10 +227,10 @@ export default function Noshib786() {
               ✨ নসীব ৭৮৬ ✨
             </span>
 
-            <p class="text-2xl font-semibold text-red-700 shake">
+            <p class=" font-bold text-4xl text-red-700 shake">
               ড্র প্রতি রবিবার
             </p>
-            <p class=" decoration-wavy text-purple-600 font-bold text-4xl">
+            <p class="text-2xl font-semibold decoration-wavy text-purple-600 ">
               উইন নাম্বার জানানো হবে রাত ১০ টা ৩০ মিনিটে
             </p>
 
