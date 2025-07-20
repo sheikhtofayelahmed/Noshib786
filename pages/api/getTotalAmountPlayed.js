@@ -9,43 +9,39 @@ export default async function handler(req, res) {
     const client = await clientPromise;
     const db = client.db("noshib786");
 
-    const players = await db
+    const recent = await db
       .collection("playersInput")
       .find({})
       .sort({ time: -1 })
       .toArray();
 
-    let grandTotals = { OneD: 0, TwoD: 0, ThreeD: 0 };
+    const totalAmounts = recent.reduce(
+      (acc, p) => {
+        acc.ThreeD += p.amountPlayed?.ThreeD || 0;
+        acc.TwoD += p.amountPlayed?.TwoD || 0;
+        acc.OneD += p.amountPlayed?.OneD || 0;
+        return acc;
+      },
+      { ThreeD: 0, TwoD: 0, OneD: 0 }
+    );
 
-    for (const player of players) {
-      const entries = player.entries || [];
-      const cPercent = player.percentages || { oneD: 0, twoD: 0, threeD: 0 };
+    let afterThreeD = 0;
+    let afterTwoD = 0;
+    let afterOneD = 0;
 
-      for (const entry of entries) {
-        const num = entry.input?.num || "";
-        const str = entry.input?.str || 0;
-        const rumble = entry.input?.rumble || 0;
-        const amount = str + rumble;
-
-        if (!num || typeof amount !== "number") continue;
-
-        if (num.length === 1) {
-          grandTotals.OneD += amount * ((100 - cPercent.oneD) / 100);
-        } else if (num.length === 2) {
-          grandTotals.TwoD += amount * ((100 - cPercent.twoD) / 100);
-        } else {
-          grandTotals.ThreeD += amount * ((100 - cPercent.threeD) / 100);
-        }
-      }
+    for (const p of recent) {
+      const pPercent = p.percentages || { threeD: 0, twoD: 0, oneD: 0 };
+      afterThreeD +=
+        (p.amountPlayed?.ThreeD || 0) * (1 - pPercent.threeD / 100);
+      afterTwoD += (p.amountPlayed?.TwoD || 0) * (1 - pPercent.twoD / 100);
+      afterOneD += (p.amountPlayed?.OneD || 0) * (1 - pPercent.oneD / 100);
     }
 
     const finalTotals = {
-      OneD: Math.round(grandTotals.OneD),
-      TwoD: Math.round(grandTotals.TwoD),
-      ThreeD: Math.round(grandTotals.ThreeD),
-      total: Math.round(
-        grandTotals.OneD + grandTotals.TwoD + grandTotals.ThreeD
-      ),
+      OneD: afterOneD.toFixed(1),
+      TwoD: afterTwoD.toFixed(1),
+      ThreeD: afterThreeD.toFixed(1),
+      total: (afterOneD + afterTwoD + afterThreeD).toFixed(1),
     };
 
     return res.status(200).json({ totals: finalTotals });

@@ -65,6 +65,7 @@ export default async function handler(req, res) {
       agentName,
       name,
       entries,
+      time: serverTime,
       amountPlayed,
       cPercentages,
       percentages,

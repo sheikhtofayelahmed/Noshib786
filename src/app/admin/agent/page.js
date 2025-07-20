@@ -477,16 +477,86 @@ export default function AdminAgentPage() {
 
     setPasswordValid(isValid);
   };
+  const [totals, setTotals] = useState(null);
+
+  useEffect(() => {
+    const fetchTotals = async () => {
+      try {
+        const response = await fetch("/api/getTotalAmountPlayed", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch totals");
+        }
+
+        const data = await response.json();
+        setTotals(data.totals);
+      } catch (err) {
+        setError(err.message || "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTotals();
+  }, []);
 
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black via-gray-900 to-black min-h-screen">
-      {/* <h1 className="text-4xl mb-6 text-yellow-400 font-bold">
-        🎰 Admin Agent Management
-      </h1> */}
+      <div className="text-white p-4 bg-gray-900 rounded-lg shadow-lg">
+        {loading && <p>🎰 Loading totals...</p>}
+        {error && <p className="text-red-400">⚠️ {error}</p>}
+        {totals && (
+          <div className="w-full overflow-x-auto">
+            <div className="flex flex-row items-center justify-center gap-8 sm:gap-12 px-6 py-5 min-w-[600px] bg-gradient-to-r from-black via-red-900 to-black rounded-2xl border-4 border-yellow-500 shadow-[0_0_40px_rgba(255,215,0,0.6)] font-mono text-yellow-100 animate-fade-in">
+              {/* 3D */}
+              <div className="text-center px-3">
+                <p className="text-sm text-yellow-400 uppercase tracking-wide">
+                  🎯 3D
+                </p>
+                <p className="text-3xl font-extrabold text-yellow-300 drop-shadow glow">
+                  {totals.ThreeD}
+                </p>
+              </div>
 
-      {/* Add Agent Form */}
+              {/* 2D */}
+              <div className="text-center px-3">
+                <p className="text-sm text-yellow-400 uppercase tracking-wide">
+                  🎯 2D
+                </p>
+                <p className="text-3xl font-extrabold text-yellow-300 drop-shadow glow">
+                  {totals.TwoD}
+                </p>
+              </div>
 
-      {/* Agent List */}
+              {/* 1D */}
+              <div className="text-center px-3">
+                <p className="text-sm text-yellow-400 uppercase tracking-wide">
+                  🎯 1D
+                </p>
+                <p className="text-3xl font-extrabold text-yellow-300 drop-shadow glow">
+                  {totals.OneD}
+                </p>
+              </div>
+
+              {/* Total */}
+              <div className="text-center px-3">
+                <p className="text-sm text-green-300 uppercase tracking-wide">
+                  💰 Total
+                </p>
+                <p className="text-3xl font-extrabold text-green-400 drop-shadow glow">
+                  {totals.total}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       <section className="w-full max-w-full">
         <h2 className="text-2xl font-bold mb-4 text-yellow-400">
           🧑‍💼 Agents List
