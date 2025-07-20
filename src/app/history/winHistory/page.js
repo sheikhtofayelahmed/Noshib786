@@ -44,7 +44,7 @@ const WinHistoryTable = () => {
         ) : (
           <div className="rounded-2xl bg-black/20 backdrop-blur-md shadow-[0_0_30px_rgba(255,0,255,0.2)] ring-2 ring-purple-700/30">
             <table className="min-w-full text-sm text-center text-white border-separate border-spacing-y-2">
-              <thead className="bg-gradient-to-r from-purple-700 via-pink-600 to-indigo-700 text-xs uppercase tracking-widest shadow-md rounded-t-xl">
+              <thead className="text-lg bg-gradient-to-r from-purple-700 via-pink-600 to-indigo-700  uppercase tracking-widest shadow-md rounded-t-xl">
                 <tr>
                   <th className="py-3 px-4">#</th>
                   <th className="py-3 px-4">🎯 Draw Date</th>
@@ -52,7 +52,7 @@ const WinHistoryTable = () => {
                   <th className="py-3 px-4">🧿 DOWN</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-purple-600/40">
+              <tbody className="divide-y divide-purple-600/40 text-lg">
                 {winningData.map((item, index) => (
                   <tr
                     key={index}

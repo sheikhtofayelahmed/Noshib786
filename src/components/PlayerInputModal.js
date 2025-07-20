@@ -572,6 +572,8 @@ export default function PlayerInputModal({ onClose }) {
       <body>
         <div class="container">
           <div class="first-container">
+                      <h1 class="banglaText">নসীব ৭৮৬</h1>
+
             <h2>${new Date(player.time).toLocaleString()}</h2>
             <h1>${player.voucher || ""}</h1>
             <p>Player: ${player.name || ""}</p>
@@ -647,6 +649,9 @@ export default function PlayerInputModal({ onClose }) {
           
           
         </div>
+        <h2 style="
+           margin-top: 10px;
+          ">https://noshib786.vercel.app/history</h2>
       </body>
     </html>
   `;
@@ -696,9 +701,9 @@ export default function PlayerInputModal({ onClose }) {
         <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-red-500 shadow-2xl p-6">
           {showInput && (
             <>
-              <h1 className="text-lg lg:text-4xl  font-bold text-center mb-6 text-yellow-400">
-                🎰 Player Voucher 🎰
-              </h1>
+              <div className="max-w-sm mx-auto mb-5 text-center font-2xl font-bangla  bg-gradient-to-r from-black via-gray-800 to-purple-900 text-yellow-300 font-bold px-10 py-6 rounded-full shadow-lg hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 tracking-widest text-2xl uppercase glow-animation">
+                নসীব ৭৮৬ ভাউচার
+              </div>
               <button
                 onClick={handleSavePlayer}
                 className="block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded mx-auto mb-10"

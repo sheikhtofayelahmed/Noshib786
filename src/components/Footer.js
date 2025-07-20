@@ -10,22 +10,22 @@ export default function Footer() {
           <h2 className="text-3xl font-bold text-yellow-300 font-mono tracking-wider drop-shadow-lg">
             🎲 Noshib 786
           </h2>
-          <p className="mt-2 text-sm text-purple-300">
+          {/* <p className="mt-2 text-sm text-purple-300">
             Premium Thai Lottery Experience — Casino Style!
           </p>
           <p className="text-xs mt-1 text-gray-400 italic">
             Powered by luck & numbers 🎰
-          </p>
+          </p> */}
         </div>
 
         {/* Contact Info */}
         <div className="text-purple-200 text-sm space-y-2">
           <h3 className="text-lg font-bold text-pink-400">📍 Location</h3>
-          <p>Zedda, Saudi Arabia</p>
+          <p>Dhaka, Bangladesh</p>
 
           <h3 className="text-lg font-bold text-pink-400 mt-4">📞 Contact</h3>
           <p>
-            Phone: <span className="text-yellow-300">+966-XXX-XXX-XXXX</span>
+            Phone: <span className="text-yellow-300">+880-XXX-XXX-XXXX</span>
           </p>
           <p>
             Telegram: <span className="text-yellow-300">@noshib786</span>

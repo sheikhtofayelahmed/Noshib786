@@ -96,8 +96,8 @@ export default function AgentLayout({ children }) {
         }`}
       >
         <div>
-          <h2 className="text-2xl font-extrabold mb-6 text-cyan-300 hidden md:block tracking-widest drop-shadow-[0_0_8px_#22d3ee]">
-            🎯 Agent Panel
+          <h2 className="font-bangla text-2xl font-extrabold mb-6 text-cyan-300 hidden md:block tracking-widest drop-shadow-[0_0_8px_#22d3ee]">
+            🎯 নসীব প্যানেল
           </h2>
 
           {/* Agent Info */}

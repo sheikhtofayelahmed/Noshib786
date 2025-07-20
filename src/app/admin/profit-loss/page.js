@@ -304,7 +304,7 @@ export default function ProfitLossTable() {
         🎯 Profit & Loss
       </h1>
       <div className="max-w-[1024px] my-5">
-        <div className="overflow-x-auto  flex flex-row flex-nowrap gap-6 justify-center">
+        <div className="flex flex-col sm:flex-row flex-wrap sm:flex-nowrap gap-6 justify-center overflow-x-auto sm:overflow-visible">
           {/* Selected 2D Box */}
 
           {selectedTwoD && (
@@ -584,11 +584,11 @@ export default function ProfitLossTable() {
               <p className="text-lime-300 font-bold mb-2 text-lg tracking-wide">
                 2-Digit ({unplayedTwoD.length}):
               </p>
-              <div className="grid grid-cols-12 gap-2 text-lime-200 text-sm">
+              <div className="grid grid-cols-12 gap-1 text-lime-200 text-sm">
                 {unplayedTwoD.map((num) => (
                   <span
                     key={num}
-                    className="bg-[#101c10] border border-lime-400 px-1 py-1 rounded text-center shadow-inner shadow-lime-600 hover:scale-105 hover:bg-[#1a2e1a] transition-transform duration-150"
+                    className="sm:text-xs bg-[#101c10] border border-lime-400  rounded text-center shadow-inner shadow-lime-600 hover:scale-105 hover:bg-[#1a2e1a] transition-transform duration-150"
                   >
                     {num}
                   </span>
@@ -598,11 +598,11 @@ export default function ProfitLossTable() {
               <p className="text-red-300 font-bold mt-6 mb-2 text-lg tracking-wide">
                 3-Digit ({unplayedThreeD.length}):
               </p>
-              <div className="grid grid-cols-12 gap-2 text-yellow-100 text-sm">
+              <div className="grid grid-cols-12 gap-1 text-yellow-100 text-sm">
                 {unplayedThreeD.map((num) => (
                   <span
                     key={num}
-                    className="bg-[#1e1a10] border border-yellow-400 px-1 py-1 rounded text-center shadow-inner shadow-yellow-500 hover:scale-105 hover:bg-[#2c2214] transition-transform duration-150"
+                    className="sm:text-xs bg-[#1e1a10] border border-yellow-400 rounded text-center shadow-inner shadow-yellow-500 hover:scale-105 hover:bg-[#2c2214] transition-transform duration-150"
                   >
                     {num}
                   </span>

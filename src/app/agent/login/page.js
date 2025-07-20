@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAgent } from "@/context/AgentContext";
 import { useRouter } from "next/navigation";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function AgentLogin() {
   const [agentIdInput, setAgentIdInput] = useState("");
@@ -13,6 +14,8 @@ export default function AgentLogin() {
   const [loginAs, setLoginAs] = useState(null); // "agent" or "subagent"
   const [selectedSubAgent, setSelectedSubAgent] = useState("");
   const [step, setStep] = useState(1); // Step in the flow
+  const [showPassword, setShowPassword] = useState(false);
+  const [showAgentPassword, setShowAgentPassword] = useState(false);
 
   const { login, loginError } = useAgent();
   const router = useRouter();
@@ -133,25 +136,43 @@ export default function AgentLogin() {
                   ))}
                 </select>
 
-                <input
-                  type="password"
-                  placeholder="Sub-Agent Password"
-                  value={subAgentPassword}
-                  onChange={(e) => setSubAgentPassword(e.target.value)}
-                  className="w-full p-2 mb-4 rounded bg-gray-800 border border-yellow-300 text-yellow-200 focus:outline-none"
-                  autoComplete="new-password"
-                />
+                <div className="flex items-center w-full mb-4 bg-gray-800 border border-yellow-300 rounded px-3 py-2 text-yellow-200">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Sub-Agent Password"
+                    value={subAgentPassword}
+                    onChange={(e) => setSubAgentPassword(e.target.value)}
+                    className="w-full bg-transparent text-yellow-200 placeholder-yellow-500 focus:outline-none font-mono"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="ml-2 text-yellow-300 hover:text-yellow-500 transition"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
               </>
             )}
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 mb-4 rounded bg-gray-800 border border-yellow-300 text-yellow-200 focus:outline-none"
-              autoComplete="current-password"
-            />
+            <div className="flex items-center w-full mb-4 bg-gray-800 border border-yellow-300 rounded px-3 py-2 text-yellow-200">
+              <input
+                type={showAgentPassword ? "text" : "password"}
+                placeholder="Agent Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-transparent text-yellow-200 placeholder-yellow-500 focus:outline-none font-mono"
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowAgentPassword((prev) => !prev)}
+                className="ml-2 text-yellow-300 hover:text-yellow-500 transition"
+              >
+                {showAgentPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
 
             <button
               onClick={handleLogin}

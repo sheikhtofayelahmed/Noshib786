@@ -750,12 +750,21 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
           @page { margin: 0; }
           body {
             width: 80mm;
-            font-family: Arial, sans-serif;
+            font-family: Arial, sans-serif, Hind Siliguri;
+   
+ 
+
+
             font-size: 16px;
             padding: 4px;
             margin: 0;
             color: #000;
           }
+             .banglaText {
+    font-family: var(--font-bangla);
+    font-size: 16pt;
+    font-weight: 700;
+  }
           .container { width: 100%; }
           h2, p { font-size: 16px; text-align: center; margin: 2px 0; }
           h1 { font-size: 20px; text-align: center; margin: 2px 0; }
@@ -787,6 +796,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
       <body>
         <div class="container">
           <div class="first-container">
+            <h1 class="banglaText">নসীব ৭৮৬</h1>
             <h2>${new Date(player.time).toLocaleString()}</h2>
             <h1>${player.voucher || ""}</h1>
             <p>Player: ${player.name || ""}</p>
@@ -862,6 +872,10 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
           
           
         </div>
+<h2 style="
+           margin-top: 10px;
+          ">https://noshib786.vercel.app/history</h2>
+
       </body>
     </html>
   `;
@@ -902,20 +916,21 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
   return (
     <div className="min-h-screen  text-white p-6 ">
       <div
-        className={`mb-16 p-4 rounded text-yellow-200 font-mono text-3xl text-center transition-colors duration-500 ${
+        className={`max-w-xl font-bangla mx-auto mb-10 px-6 py-4 rounded-2xl  text-4xl tracking-widest transition duration-500 bg-gradient-to-r from-purple-800 via-pink-600 to-blue-500 text-yellow-200 shadow-md shadow-pink-400/30 ${
           timeLeft.isWarning
             ? "bg-gradient-to-r from-red-700 to-yellow-500 text-white animate-pulse shadow-lg shadow-yellow-400/50"
             : ""
         }`}
       >
-        ⏳ Time Remaining: <span className="font-bold">{timeLeft.text}</span>
+        ⏳<span className="font-bangla ">সময় বাকি :</span>{" "}
+        <span className="font-bold">{timeLeft.text}</span>
       </div>
       <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-red-500 shadow-2xl p-6">
         {showInput && (
           <>
-            <h1 className="text-lg lg:text-4xl  font-bold text-center mb-6 text-yellow-400">
-              🎰 Player Voucher 🎰
-            </h1>
+            <div className="max-w-sm mx-auto mb-5 text-center font-2xl font-bangla  bg-gradient-to-r from-black via-gray-800 to-purple-900 text-yellow-300 font-bold px-10 py-6 rounded-full shadow-lg hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 tracking-widest text-2xl uppercase glow-animation">
+              নসীব ৭৮৬ ভাউচার
+            </div>
             <button
               onClick={handleSavePlayer}
               className="block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded mx-auto mb-10"
