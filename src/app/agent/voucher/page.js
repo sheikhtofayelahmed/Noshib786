@@ -281,6 +281,8 @@ export default function VoucherModal() {
       <body>
         <div class="container">
              <div class="first-container"> 
+                         <h1 class="banglaText">নসীব ৭৮৬</h1>
+
        <h2>${new Date(player.time).toLocaleString()}</h2>
           <h1>${player.voucher || ""}</h1>
           <p>Player: ${player.name || ""}     </p>
@@ -340,6 +342,26 @@ export default function VoucherModal() {
 
             </tbody>
           </table>
+            <div style="margin-top: 24px; text-align: center;">
+          <p style="margin-bottom: 12px; font-size: 14px; line-height: 1.5;">
+            ✍️  Agent Signature
+          </p>
+         <div style="
+            display: inline-block;
+            width: 200px;
+            height: 60px;
+            vertical-align: top;
+            background-color: #e5e5e5;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+          "></div>
+        </div>
+          
+          
+        </div>
+<h2 style="
+           margin-top: 10px;
+          ">https://noshib786.vercel.app/history</h2>
         </div>
       </body>
     </html>

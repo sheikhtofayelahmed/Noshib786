@@ -870,10 +870,13 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
           "></div>
         </div>
           
-          
+           
         </div>
+        <p style="
+           margin-top: 10px, text-align:center;
+          ">ভিজিট করুন</p>
 <h2 style="
-           margin-top: 10px;
+           margin-top: 6px;
           ">https://noshib786.vercel.app/history</h2>
 
       </body>

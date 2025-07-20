@@ -228,15 +228,15 @@ export default function Noshib786() {
             </span>
 
             <p class="text-2xl font-semibold text-red-700 shake">
-              এর উইন নাম্বার জানানো হবে
+              ড্র প্রতি রবিবার
             </p>
             <p class=" decoration-wavy text-purple-600 font-bold text-4xl">
-              প্রতি রবিবার রাত ১০ টায়
+              উইন নাম্বার জানানো হবে রাত ১০ টা ৩০ মিনিটে
             </p>
 
             <div class="bg-gradient-to-r from-purple-300 via-yellow-100 to-pink-300 p-4 rounded-lg border border-red-400 shadow-md">
               <p class="text-xl font-medium text-gray-900 mt-2">
-                ভাগ্য পরিবর্তন করতে
+                নসীব পরিবর্তন করতে
                 <span class="px-2 font-bold text-pink-800 pulse">আজই</span>
                 চলে আসুন নিকটস্ত এজেন্ট এর কাছে।
               </p>
@@ -317,7 +317,7 @@ export default function Noshib786() {
           onClick={() => (window.location.href = "/history/winHistory")}
           className=" font-bangla bg-gradient-to-r from-black via-gray-800 to-purple-900 text-yellow-300 font-bold px-10 py-6 rounded-full shadow-lg hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 tracking-widest text-2xl uppercase glow-animation"
         >
-          🧿 নসীব উইন 
+          🧿 নসীব উইন
         </button>
       </div>
 
