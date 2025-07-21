@@ -209,6 +209,15 @@ export default function Noshib786() {
     // ["65", "75", "76", "86", "87", "97", "98", "XX", "54", "64"],
     ["XX", "66", "XX", "77", "XX", "88", "XX", "99", "XX", "55"],
   ];
+  // In any page like pages/index.js
+
+  useEffect(() => {
+    fetch("/api/track-visit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pathname: window.location.pathname }),
+    });
+  }, []);
 
   return (
     <div className="">

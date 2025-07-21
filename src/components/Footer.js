@@ -1,7 +1,22 @@
+"use client";
 import React from "react";
 import { FaFacebookSquare, FaYoutube, FaTelegram } from "react-icons/fa";
+import { useEffect, useState } from "react";
 
 export default function Footer() {
+  const [count, setCount] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchVisitorCount() {
+      const res = await fetch("/api/get-visits");
+      const data = await res.json();
+      const uniqueIps = new Set(data.visits.map((v) => v.ip));
+      setCount(uniqueIps.size);
+      setLoading(false);
+    }
+    fetchVisitorCount();
+  }, []);
   return (
     <footer className="bg-gradient-to-r from-black via-purple-900 to-black text-white py-10 mt-20 shadow-inner shadow-purple-700/30">
       <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-10 text-center md:text-left">
@@ -10,12 +25,9 @@ export default function Footer() {
           <h2 className="text-3xl font-bold text-yellow-300 font-mono tracking-wider drop-shadow-lg">
             🎲 Noshib 786
           </h2>
-          {/* <p className="mt-2 text-sm text-purple-300">
-            Premium Thai Lottery Experience — Casino Style!
-          </p>
-          <p className="text-xs mt-1 text-gray-400 italic">
-            Powered by luck & numbers 🎰
-          </p> */}
+          <h2 className="text-3xl font-bold text-yellow-300 font-mono tracking-wider drop-shadow-lg">
+            🎲 Visitors: {count}
+          </h2>
         </div>
 
         {/* Contact Info */}

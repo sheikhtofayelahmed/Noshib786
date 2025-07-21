@@ -393,7 +393,7 @@ export default function AdminGameControl() {
             }}
             className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 rounded shadow w-full sm:w-auto"
           >
-            Delete Game
+            End Game
           </button>
         </div>
       </div>
