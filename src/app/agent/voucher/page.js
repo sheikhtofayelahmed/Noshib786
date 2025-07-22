@@ -46,17 +46,14 @@ export default function VoucherModal() {
           throw new Error("Failed to fetch game or win status");
         }
 
-        const gameStatusData = await gameStatusRes.json();
         const winStatusData = await winStatusRes.json();
-
-        const winDate = winStatusData.date
-          ? new Date(winStatusData.date)
-          : null;
-        const formattedDate = winDate ? format(winDate, "yyyy-MM-dd") : null;
+        if (winStatusData.winStatus) {
+          setThreeUp(winStatusData.threeUp);
+          setDownGame(winStatusData.downGame);
+          setDate(winStatusData.date);
+        }
 
         // setIsGameOn(gameStatusData.isGameOn);
-        setThreeUp(winStatusData.threeUp);
-        setDownGame(winStatusData.downGame);
       } catch (err) {
         if (err.name === "AbortError") {
           console.log("⏹️ Request aborted");

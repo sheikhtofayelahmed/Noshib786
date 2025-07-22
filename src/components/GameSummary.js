@@ -61,9 +61,11 @@ const GameSummary = ({ agentId }) => {
           : null;
 
         setIsGameOn(gameStatusData.isGameOn);
-        setThreeUp(winStatusData.threeUp);
-        setDownGame(winStatusData.downGame);
-        setDate(winStatusData.gameDate);
+        if (winStatusData.winStatus) {
+          setThreeUp(winStatusData.threeUp);
+          setDownGame(winStatusData.downGame);
+          setDate(winStatusData.gameDate);
+        }
 
         // 2. Fetch agent info
         const agentRes = await fetch(`/api/getAgentById?agentId=${agentId}`);
@@ -85,7 +87,9 @@ const GameSummary = ({ agentId }) => {
           } else {
             const res = await summaryRes.json();
             const data = res.summary;
-            setSummaryData(data || {});
+            if (winStatusData.winStatus) {
+              setSummaryData(data || {});
+            }
           }
         } catch (summaryErr) {
           console.error("❌ Error fetching summary:", summaryErr);

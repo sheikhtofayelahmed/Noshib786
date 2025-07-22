@@ -26,13 +26,13 @@ const SubAgentSummary = () => {
         fetch("/api/win-status"),
       ]);
 
-      const gameStatusData = await gameStatusRes.json();
       const winStatusData = await winStatusRes.json();
-      const winDate = winStatusData.date ? new Date(winStatusData.date) : null;
 
-      setThreeUp(winStatusData.threeUp);
-      setDownGame(winStatusData.downGame);
-      setDate(winStatusData.date);
+      if (winStatusData.winStatus) {
+        setThreeUp(winStatusData.threeUp);
+        setDownGame(winStatusData.downGame);
+        setDate(winStatusData.date);
+      }
       const res = await fetch("/api/getPlayersByAgentId", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
