@@ -2,6 +2,7 @@
 import { AgentProvider } from "@/context/AgentContext";
 import "src/globals.css";
 import { Hind_Siliguri } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 
 const banglaFont = Hind_Siliguri({
   subsets: ["bengali"],
@@ -14,7 +15,11 @@ export default function RootLayout({ children }) {
   return (
     <AgentProvider>
       <html lang="bn" className={banglaFont.variable}>
-        <body className="bg-black text-white">{children}</body>
+        <body className="bg-black text-white">
+          {children}
+
+          <Analytics />
+        </body>
       </html>
     </AgentProvider>
   );
