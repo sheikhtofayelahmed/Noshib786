@@ -285,10 +285,10 @@ export default function Account() {
           totalWin: 0,
         };
       }
-      groups[dateStr].STR += entry.afterSTR || 0;
-      groups[dateStr].RUMBLE += entry.afterRUMBLE || 0;
-      groups[dateStr].DOWN += entry.afterDOWN || 0;
-      groups[dateStr].SINGLE += entry.afterSINGLE || 0;
+      groups[dateStr].STR += entry.totalWins?.STR3D || 0;
+      groups[dateStr].RUMBLE += entry.totalWins?.RUMBLE3D || 0;
+      groups[dateStr].DOWN += entry.totalWins?.DOWN || 0;
+      groups[dateStr].SINGLE += entry.totalWins?.SINGLE || 0;
       groups[dateStr].totalGame += entry.totalGame || 0;
       groups[dateStr].totalWin += entry.totalWin || 0;
     }
@@ -322,10 +322,10 @@ export default function Account() {
   // 7. Ultimate (All Years) Total
   const ultimateTotal = uniqueSummaries.reduce(
     (acc, entry) => {
-      acc.STR += entry.afterSTR || 0;
-      acc.RUMBLE += entry.afterRUMBLE || 0;
-      acc.DOWN += entry.afterDOWN || 0;
-      acc.SINGLE += entry.afterSINGLE || 0;
+      acc.STR += entry.totalWins?.STR3D || 0;
+      acc.RUMBLE += entry.totalWins?.RUMBLE3D || 0;
+      acc.DOWN += entry.totalWins?.DOWN || 0;
+      acc.SINGLE += entry.totalWins?.SINGLE || 0;
       acc.totalGame += entry.totalGame || 0;
       acc.totalWin += entry.totalWin || 0;
       return acc;
@@ -339,7 +339,6 @@ export default function Account() {
       totalWin: 0,
     }
   );
-
   return (
     <div className="p-4 min-h-screen text-white font-mono space-y-10">
       {/* Summary Runner */}
@@ -673,7 +672,7 @@ export default function Account() {
             {groupedByDate.map(([date, totals], idx) => (
               <tr key={date} className="hover:bg-gray-800">
                 <td className="p-2">{idx + 1}</td>
-                <td className="p-2">{new Date(date).toDateString()}</td>
+                <td className="p-2">{date}</td>
                 <td className="p-2">{totals.STR}</td>
                 <td className="p-2">{totals.RUMBLE}</td>
                 <td className="p-2">{totals.DOWN}</td>
