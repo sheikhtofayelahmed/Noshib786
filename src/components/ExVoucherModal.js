@@ -12,7 +12,7 @@ const ExVoucher = ({ item, visible, onClose }) => {
   const [agent, setAgent] = useState({});
   const [error, setError] = useState(null);
   const playerRefs = useRef({});
-  const { agentId, gameDate, threeUp, downGame } = item; // replace with actual data source  // Single useEffect to fetch all initial data that depends on agentId
+  const { agentId, gameDate, threeUp, downGame } = item;
   useEffect(() => {
     if (!agentId) return;
 

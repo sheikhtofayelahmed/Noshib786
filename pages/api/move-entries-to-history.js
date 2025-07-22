@@ -15,15 +15,13 @@ export default async function handler(req, res) {
     const db = client.db("noshib786");
 
     // Format the date
-    const gameDate = new Date(date);
-    const day = gameDate.getDate().toString().padStart(2, "0");
-    const month = (gameDate.getMonth() + 1).toString().padStart(2, "0");
-    const year = gameDate.getFullYear();
+    const gameDate = date;
+ 
 
     const threeUpFormatted = threeUp.toString().padStart(3, "0");
     const downGameFormatted = downGame.toString().padStart(2, "0");
 
-    const formattedKey = `${day} ${month} ${year} ${threeUpFormatted} ${downGameFormatted}`;
+    const formattedKey = `${gameDate} ${threeUpFormatted} ${downGameFormatted}`;
 
     // Get all player entries
     const playersInputs = await db
