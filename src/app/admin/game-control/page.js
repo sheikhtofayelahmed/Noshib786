@@ -247,6 +247,37 @@ export default function AdminGameControl() {
     }
   };
 
+  const [nextGame, setNextGame] = useState("");
+
+  useEffect(() => {
+    const fetchNextGame = async () => {
+      const res = await fetch("/api/nextGame");
+      const data = await res.json();
+      setNextGame(data.nextGame);
+    };
+    fetchNextGame();
+  }, []);
+
+  const handleSave = async () => {
+    if (!nextGame.trim()) return;
+
+    const res = await fetch("/api/nextGame", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nextGame }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      setNextGame(data.nextGame);
+
+      setToast({
+        type: "success",
+        message: `✅ Next Game Date generated.`,
+      });
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto mt-6 bg-gray-900 bg-opacity-90 p-6 rounded-lg ring-2 ring-red-500 text-white space-y-6">
       <h2 className="text-2xl font-bold text-yellow-400 text-center mb-2">
@@ -265,7 +296,7 @@ export default function AdminGameControl() {
         </div>
       )}
       {/* Game Controls */}
-      <div className="space-y-4 border border-gray-700 p-4 rounded-lg bg-gray-800 bg-opacity-60">
+      <div className="space-y-4 border border-gray-700 p-4 rounded-lg bg-cyan-600 bg-opacity-60">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <label className="font-semibold mb-1 sm:mb-0">Game Status:</label>
           <button
@@ -308,7 +339,7 @@ export default function AdminGameControl() {
       </div>
 
       {/* Result Controls */}
-      <div className="space-y-4 border border-gray-700 p-4 rounded-lg bg-gray-800 bg-opacity-60">
+      <div className="space-y-4 border border-gray-700 p-4 rounded-lg bg-pink-800 bg-opacity-60">
         <div>
           <label className="block mb-1 font-semibold">
             🎯 3UP Winning Number
@@ -333,7 +364,7 @@ export default function AdminGameControl() {
           />
         </div>
 
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between sm:flex-col">
           <div>
             <label className="font-bangla block mb-1 font-semibold">
               🗓️ গেমের তারিখ
@@ -354,48 +385,70 @@ export default function AdminGameControl() {
           >
             {winStatus ? <Eye></Eye> : <EyeOff></EyeOff>}
           </button>
-          <button
-            onClick={handleSubmit}
-            className={
-              "ml-6 mt-6 w-full sm:w-auto px-6 py-2 font-bold rounded shadow transition bg-green-500 hover:bg-lime-500 text-black"
-            }
-          >
-            Save Game
-          </button>
+        </div>
+        <button
+          onClick={handleSubmit}
+          className={
+            "font-bangla  text-xl mt-6 w-full sm:w-auto px-6 py-2 font-bold rounded shadow transition bg-green-500 hover:bg-lime-500 text-black"
+          }
+        >
+          উইন সেভ করুন
+        </button>
+      </div>
+
+      <div className=" w-full bg-gray-900 p-6 rounded-xl  border border-green-400 text-yellow-200">
+        <h2 className="font-bangla text-2xl mb-4 font-extrabold text-center text-yellow-400 drop-shadow-[0_0_5px_gold]">
+          🎰 পরবর্তী গেমের তারিখ
+        </h2>
+
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Enter next game date"
+            value={nextGame}
+            onChange={(e) => setNextGame(e.target.value)}
+            className="w-full px-4 py-3 text-lg rounded-xl border-2 border-yellow-400 bg-black text-yellow-300 placeholder-yellow-500 shadow-[0_0_10px_rgba(255,215,0,0.3)] focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          />
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-between gap-4 mt-4">
-          <button
-            onClick={handleCalculate}
-            disabled={submitting}
-            className={`mt-6 w-full sm:w-auto px-6 py-2 font-bold rounded shadow transition ${
-              submitting
-                ? "bg-gray-600 cursor-not-allowed"
-                : "bg-green-500 hover:bg-lime-500 text-black"
-            }`}
-          >
-            {submitting ? "Calculating..." : "Calculate All Agents"}
-          </button>
+        <button
+          onClick={handleSave}
+          className="w-full py-3 text-lg font-bold bg-yellow-500 hover:bg-yellow-600 text-black rounded-xl shadow-[0_0_15px_rgba(255,255,0,0.5)] transition duration-300"
+        >
+          💾 Save
+        </button>
+      </div>
 
-          <div />
-          <button
-            onClick={() => {
-              const confirmation = prompt(
-                "⚠️ To confirm deletion, please type 'Delete'"
+      <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-4 mt-6 bg-gradient-to-br from-cyan-800 via-cyan-900 to-black p-4 rounded-xl shadow-[0_0_15px_rgba(0,255,255,0.3)]">
+        <button
+          onClick={handleCalculate}
+          disabled={submitting}
+          className={`w-full sm:w-auto px-6 py-3 text-xl font-bold rounded-lg font-bangla transition-all duration-300 shadow-[0_0_10px_rgba(0,255,0,0.4)] ${
+            submitting
+              ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+              : "bg-green-500 hover:bg-lime-500 text-black"
+          }`}
+        >
+          {submitting ? "হিসেব করা হচ্ছে..." : "হিসাব-নিকাশ করুন"}
+        </button>
+
+        <button
+          onClick={() => {
+            const confirmation = prompt(
+              "⚠️ To confirm deletion, please type 'Delete'"
+            );
+            if (confirmation === "Delete") {
+              handleMoveAll();
+            } else if (confirmation !== null) {
+              alert(
+                "❌ Deletion canceled. You did not type 'Delete' correctly."
               );
-              if (confirmation === "Delete") {
-                handleMoveAll();
-              } else if (confirmation !== null) {
-                alert(
-                  "❌ Deletion canceled. You did not type 'Delete' correctly."
-                );
-              }
-            }}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 rounded shadow w-full sm:w-auto"
-          >
-            End Game
-          </button>
-        </div>
+            }
+          }}
+          className="w-full sm:w-auto px-6 py-3 text-xl font-bold font-bangla bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 shadow-[0_0_10px_rgba(255,0,0,0.4)]"
+        >
+          ভাউচার মুভ
+        </button>
       </div>
     </div>
   );

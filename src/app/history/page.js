@@ -210,6 +210,16 @@ export default function Noshib786() {
     ["XX", "66", "XX", "77", "XX", "88", "XX", "99", "XX", "55"],
   ];
   // In any page like pages/index.js
+  const [nextGame, setNextGame] = useState("");
+
+  useEffect(() => {
+    const fetchNextGame = async () => {
+      const res = await fetch("/api/nextGame");
+      const data = await res.json();
+      setNextGame(data.nextGame);
+    };
+    fetchNextGame();
+  }, []);
 
   useEffect(() => {
     fetch("/api/track-visit", {
@@ -231,26 +241,36 @@ export default function Noshib786() {
               {error}
             </div>
           )}
-          <div class="my-5 py-5 font-bangla px-4 bg-gradient-to-br from-yellow-100 to-pink-100 border-4 border-yellow-400 rounded-lg shadow-lg text-center space-y-4">
-            <span class="block text-4xl font-extrabold glow text-fuchsia-600">
+          <div className="my-6 py-8 px-4 sm:px-10 bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-200 border-[6px] border-yellow-400 rounded-3xl shadow-[0_0_30px_rgba(255,105,180,0.4)] text-center space-y-6 font-bangla">
+            <h1 className="text-5xl font-extrabold text-fuchsia-600 drop-shadow-[0_0_10px_rgba(255,0,255,0.5)] animate-pulse">
               ✨ নসীব ৭৮৬ ✨
-            </span>
+            </h1>
 
-            <p class=" font-bold text-4xl text-red-700 shake">
-              ড্র প্রতি রবিবার
-            </p>
-            <p class="text-2xl font-semibold decoration-wavy text-purple-600 ">
-              উইন নাম্বার জানানো হবে রাত ১০ টা ৩০ মিনিটে
+              <div className="relative overflow-hidden w-full h-20">
+    <div className="absolute whitespace-nowrap animate-marquee text-5xl py-3 font-bold text-red-600">
+      ড্র প্রতি রবিবার • ড্র প্রতি রবিবার • ড্র প্রতি রবিবার • ড্র প্রতি রবিবার • ড্র প্রতি রবিবার
+    </div>
+  </div>
+
+            <p className="text-4xl font-bold text-white bg-gradient-to-r from-green-500 to-green-700 inline-block px-6 py-2 rounded-xl shadow-md border border-green-300 tracking-wide">
+              🎮 পরবর্তী গেম - {nextGame}
             </p>
 
-            <div class="bg-gradient-to-r from-purple-300 via-yellow-100 to-pink-300 p-4 rounded-lg border border-red-400 shadow-md">
-              <p class="text-xl font-medium text-gray-900 mt-2">
+            <p className="text-2xl font-semibold text-purple-800">
+              🕙 উইন নাম্বার জানানো হবে রাত ১০:৩০ মিনিটে
+            </p>
+
+            <div className="bg-gradient-to-r from-purple-200 via-yellow-100 to-pink-200 p-5 rounded-xl border-2 border-red-400 shadow-inner">
+              <p className="text-xl font-semibold text-gray-900">
                 নসীব পরিবর্তন করতে
-                <span class="px-2 font-bold text-pink-800 pulse">আজই</span>
+                <span className="mx-2 font-bold text-pink-800 animate-pulse">
+                  আজই
+                </span>
                 চলে আসুন নিকটস্ত এজেন্ট এর কাছে।
               </p>
             </div>
           </div>
+
           {!showBlinkingZero && (
             <div
               className={`font-bangla mb-10 px-6 py-4 rounded-2xl  text-4xl tracking-widest transition duration-500 bg-gradient-to-r from-purple-800 via-pink-600 to-blue-500 text-yellow-200 shadow-md shadow-pink-400/30`}
