@@ -98,6 +98,8 @@ export default function AdminAgentPage() {
   const [noteId, setNoteId] = useState("");
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMasterAgent, setSelectedMasterAgent] = useState("Admin");
+
   async function notes(agentId) {
     setShowNoteModal(true);
     setNoteId(agentId);

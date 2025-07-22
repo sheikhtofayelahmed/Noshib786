@@ -190,7 +190,7 @@ export default function AdminGameControl() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          date: gameDate?.toISOString(),
+          date: gameDate,
           threeUp,
           downGame,
         }),
