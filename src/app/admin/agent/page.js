@@ -506,9 +506,20 @@ export default function AdminAgentPage() {
 
     fetchTotals();
   }, []);
-const filteredAgents = agents.filter((agent) =>
-  agent.name?.toLowerCase().includes(searchQuery.toLowerCase())
-);
+
+  const filteredAgents = agents.filter((agent) => {
+    const nameMatches = agent.name
+      ?.toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const masterMatches =
+      selectedMasterAgent === "Admin" ||
+      agent.masterAgent === selectedMasterAgent;
+    return nameMatches && masterMatches;
+  });
+  const uniqueMasterAgents = Array.from(
+    new Set(agents.map((agent) => agent.masterAgent).filter(Boolean))
+  );
+
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black via-gray-900 to-black min-h-screen">
       <div className="text-white p-4 bg-gray-900 rounded-lg shadow-lg">
@@ -571,13 +582,28 @@ const filteredAgents = agents.filter((agent) =>
           </div>
         ) : (
           <div className="overflow-x-auto text-center">
-            <input
-              type="text"
-              placeholder="🔎 Search Agent..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="mb-4 w-full sm:w-1/2 px-4 py-2 rounded-lg bg-gray-900 border border-yellow-400 text-yellow-200 placeholder-yellow-500 font-mono shadow-md focus:outline-none"
-            />
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
+              <input
+                type="text"
+                placeholder="🔎 Search Agent..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full sm:w-1/2 px-4 py-2 rounded-lg bg-gray-900 border border-yellow-400 text-yellow-200 placeholder-yellow-500 font-mono shadow-md focus:outline-none"
+              />
+
+              <select
+                value={selectedMasterAgent}
+                onChange={(e) => setSelectedMasterAgent(e.target.value)}
+                className="px-4 py-2 rounded-lg bg-gray-900 border border-yellow-400 text-yellow-200 font-mono shadow-md focus:outline-none"
+              >
+                {uniqueMasterAgents.map((master) => (
+                  <option key={master} value={master}>
+                    {master}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <table className="min-w-full text-yellow-300 border-collapse font-mono">
               <thead>
                 <tr className="bg-yellow-700 text-white">
@@ -612,9 +638,8 @@ const filteredAgents = agents.filter((agent) =>
                     </td>
                   </tr>
                 )}
-                
-                {
-                filteredAgents.map(
+
+                {filteredAgents.map(
                   (
                     {
                       agentId,
