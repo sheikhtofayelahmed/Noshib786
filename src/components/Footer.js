@@ -1,22 +1,19 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FaFacebookSquare, FaYoutube, FaTelegram } from "react-icons/fa";
-import { useEffect, useState } from "react";
 
 export default function Footer() {
-  const [count, setCount] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    async function fetchVisitorCount() {
+    async function fetchStats() {
       const res = await fetch("/api/get-visits");
       const data = await res.json();
-      const uniqueIps = new Set(data.visits.map((v) => v.ip));
-      setCount(uniqueIps.size);
-      setLoading(false);
+      setStats(data);
     }
-    fetchVisitorCount();
+    fetchStats();
   }, []);
+
   return (
     <footer className="bg-gradient-to-r from-black via-purple-900 to-black text-white py-10 mt-20 shadow-inner shadow-purple-700/30">
       <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-10 text-center md:text-left">
@@ -25,9 +22,32 @@ export default function Footer() {
           <h2 className="text-3xl font-bold text-yellow-300 font-mono tracking-wider drop-shadow-lg">
             🎲 Noshib 786
           </h2>
-          <h2 className="text-3xl font-bold text-yellow-300 font-mono tracking-wider drop-shadow-lg">
-            🎲 Visitors: {count}
-          </h2>
+          <div className="mt-4 text-sm text-purple-300 space-y-1 font-mono">
+            <p>
+              📅 Weekly Visits:
+              <span className="text-yellow-300">
+                {stats?.weeklyVisits ?? "..."}
+              </span>
+            </p>
+            <p>
+              🧍 Weekly Visitors:
+              <span className="text-yellow-300">
+                {stats?.weeklyUniqueVisitors ?? "..."}
+              </span>
+            </p>
+            <p>
+              👁 Total Visits:{" "}
+              <span className="text-yellow-300">
+                {stats?.totalVisits ?? "..."}
+              </span>
+            </p>
+            <p>
+              👤 Total Visitors:
+              <span className="text-yellow-300">
+                {stats?.uniqueVisitors ?? "..."}
+              </span>
+            </p>
+          </div>
         </div>
 
         {/* Contact Info */}
@@ -44,7 +64,6 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Social Links */}
         {/* Social Links */}
         <div className="space-y-3">
           <h3 className="text-lg font-bold text-pink-400">

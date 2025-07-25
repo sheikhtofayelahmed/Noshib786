@@ -246,11 +246,12 @@ export default function Noshib786() {
               ✨ নসীব ৭৮৬ ✨
             </h1>
 
-              <div className="relative overflow-hidden w-full h-20">
-    <div className="absolute whitespace-nowrap animate-marquee text-5xl py-3 font-bold text-red-600">
-      ড্র প্রতি রবিবার • ড্র প্রতি রবিবার • ড্র প্রতি রবিবার • ড্র প্রতি রবিবার • ড্র প্রতি রবিবার
-    </div>
-  </div>
+            <div className="relative overflow-hidden w-full h-20">
+              <div className="absolute whitespace-nowrap animate-marquee text-5xl py-3 font-bold text-red-600">
+                ড্র প্রতি রবিবার • ড্র প্রতি রবিবার • ড্র প্রতি রবিবার • ড্র
+                প্রতি রবিবার • ড্র প্রতি রবিবার
+              </div>
+            </div>
 
             <p className="text-4xl font-bold text-white bg-gradient-to-r from-green-500 to-green-700 inline-block px-6 py-2 rounded-xl shadow-md border border-green-300 tracking-wide">
               🎮 পরবর্তী গেম - {nextGame}
