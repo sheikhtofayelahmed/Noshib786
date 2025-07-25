@@ -1,53 +1,54 @@
-// middleware.js
-// This file acts as a gatekeeper for routes, checking authentication before allowing access.
-
 import { NextResponse } from "next/server";
 
-// Define the paths that require authentication.
-const protectedRoutes = ["/admin"]; // All paths under /admin (except login) will be protected.
-const authRoutes = ["/admin/login"]; // Paths that are specifically for authentication (e.g., login, register)
+export function middleware(request) {
+  const url = request.nextUrl.clone();
+  const pathname = url.pathname;
 
-// Middleware function that runs for every incoming request.
-export async function middleware(request) {
-  // Get the 'admin-auth' cookie from the request headers.
-  const authCookie = request.cookies.get("admin-auth");
-  const isAuthenticated = authCookie && authCookie.value === "true";
-  const url = request.nextUrl.clone(); // Clone the URL to modify it if needed
+  const adminCookie = request.cookies.get("admin-auth");
+  const masterAgentCookie = request.cookies.get("masterAgent-auth");
 
-  // Check if the current path starts with any of the protected routes.
-  const isProtectedRoutePath = protectedRoutes.some((route) =>
-    url.pathname.startsWith(route)
-  );
-  // Check if the current path is specifically one of the authentication-related routes.
-  const isAuthRoutePath = authRoutes.includes(url.pathname);
+  // Admin Auth
+  const isAdminProtected = pathname.startsWith("/admin");
+  const isAdminLogin = pathname === "/admin/login";
 
-  // Scenario 1: User is not authenticated.
-  if (!isAuthenticated) {
-    // If they are trying to access a protected route (e.g., /admin, /admin/dashboard)
-    // AND they are NOT already on an authentication route (like /admin/login)
-    if (isProtectedRoutePath && !isAuthRoutePath) {
-      // Redirect them to the login page.
-      url.pathname = "/admin/login";
-      return NextResponse.redirect(url);
-    }
-  }
-  // Scenario 2: User IS authenticated.
-  else {
-    // isAuthenticated is true
-    // If they are trying to access an authentication route (like /admin/login)
-    if (isAuthRoutePath) {
-      // Redirect them to the admin dashboard (e.g., /admin).
-      url.pathname = "/admin";
-      return NextResponse.redirect(url);
-    }
+  // MasterAgent Auth
+  const isMasterAgentProtected = pathname.startsWith("/masterAgent");
+  const isMasterAgentLogin = pathname === "/masterAgent/login";
+
+  // Not authenticated - redirect to login
+  if (
+    isAdminProtected &&
+    !isAdminLogin &&
+    (!adminCookie || adminCookie.value !== "true")
+  ) {
+    url.pathname = "/admin/login";
+    return NextResponse.redirect(url);
   }
 
-  // If none of the above conditions trigger a redirect, allow the request to proceed.
+  if (
+    isMasterAgentProtected &&
+    !isMasterAgentLogin &&
+    (!masterAgentCookie || masterAgentCookie.value !== "true")
+  ) {
+    url.pathname = "/masterAgent/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Already authenticated - prevent access to login pages
+  if (isAdminLogin && adminCookie?.value === "true") {
+    url.pathname = "/admin";
+    return NextResponse.redirect(url);
+  }
+
+  if (isMasterAgentLogin && masterAgentCookie?.value === "true") {
+    url.pathname = "/masterAgent";
+    return NextResponse.redirect(url);
+  }
+
+  // Allow request
   return NextResponse.next();
 }
 
-// Define the matcher to specify which paths the middleware should apply to.
-// This ensures the middleware only runs for relevant routes, optimizing performance.
 export const config = {
-  matcher: ["/admin/:path*"], // Apply to all paths starting with /admin
+  matcher: ["/admin/:path*", "/masterAgent/:path*"], // ✅ Apply to both admin and masterAgent
 };

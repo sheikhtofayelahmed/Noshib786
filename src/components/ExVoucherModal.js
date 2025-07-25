@@ -299,7 +299,6 @@ const ExVoucher = ({ item, visible, onClose }) => {
     }
   };
 
-  if (loading) return <Loading></Loading>;
   if (fetched && players.length === 0)
     return (
       <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center">

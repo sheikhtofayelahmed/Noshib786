@@ -55,7 +55,7 @@ export default async function handler(req, res) {
     const cookie = serialize("agent-auth", authValue, {
       httpOnly: true,
       path: "/",
-      maxAge: 60 * 60, // 1 hour
+      maxAge: 60 * 60 * 24 * 7, // 1 hour
       secure: process.env.NODE_ENV === "production",
     });
 

@@ -4,8 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CircleOff, Eye, EyeOff, LucideDelete } from "lucide-react";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
+import { useMasterAgent } from "@/context/MasterAgentContext";
 export default function AdminAgentPage() {
   const router = useRouter();
+  const { masterAgentId } = useMasterAgent();
+
   const [onlineAgentIds, setOnlineAgentIds] = useState(new Set());
   const [subAgents, setSubAgents] = useState(
     Array(10)
@@ -91,7 +94,6 @@ export default function AdminAgentPage() {
   const [noteId, setNoteId] = useState("");
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMasterAgent, setSelectedMasterAgent] = useState("Admin");
 
   async function notes(agentId) {
     setShowNoteModal(true);
@@ -196,9 +198,18 @@ export default function AdminAgentPage() {
   const fetchAgents = async () => {
     setLoadingAgents(true);
     setError("");
+
     try {
-      const res = await fetch("/api/getAgents");
+      const res = await fetch("/api/getAgentsByMasterAgent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ masterAgent: masterAgentId }), // Replace "t1" with dynamic value if needed
+      });
+
       const data = await res.json();
+
       if (res.ok) {
         setAgents(data.agents);
       } else {
@@ -294,7 +305,7 @@ export default function AdminAgentPage() {
           expenseAmt,
           tenPercent,
           tenPercentAmt,
-          masterAgent: "Admin",
+          masterAgent: masterAgentId,
         }),
       });
 
@@ -318,35 +329,35 @@ export default function AdminAgentPage() {
     }
   };
 
-  const toggleActive = async (agentId, currentActive) => {
-    const confirmed = confirm("Are you sure you want to delete this agent?");
+  // const toggleActive = async (agentId, currentActive) => {
+  //   const confirmed = confirm("Are you sure you want to delete this agent?");
 
-    if (!confirmed) {
-      alert("Deletion cancelled.");
-      return;
-    }
-    setError("");
-    try {
-      const res = await fetch("/api/toggleAgentActive", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId, active: !currentActive }),
-      });
-      const data = await res.json();
+  //   if (!confirmed) {
+  //     alert("Deletion cancelled.");
+  //     return;
+  //   }
+  //   setError("");
+  //   try {
+  //     const res = await fetch("/api/toggleAgentActive", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ agentId, active: !currentActive }),
+  //     });
+  //     const data = await res.json();
 
-      if (res.ok) {
-        if (!currentActive) {
-          await fetchAgents();
-        } else {
-          setAgents((prev) => prev.filter((a) => a.agentId !== agentId));
-        }
-      } else {
-        setError(data.message || "Failed to update agent status");
-      }
-    } catch {
-      setError("Failed to update agent status");
-    }
-  };
+  //     if (res.ok) {
+  //       if (!currentActive) {
+  //         await fetchAgents();
+  //       } else {
+  //         setAgents((prev) => prev.filter((a) => a.agentId !== agentId));
+  //       }
+  //     } else {
+  //       setError(data.message || "Failed to update agent status");
+  //     }
+  //   } catch {
+  //     setError("Failed to update agent status");
+  //   }
+  // };
 
   const updateAgent = async () => {
     setFormError(""); // reset
@@ -378,7 +389,7 @@ export default function AdminAgentPage() {
           tenPercent: updateTenPercent,
           expenseAmt: updateExpenseAmt,
           tenPercentAmt: updateTenPercentAmt,
-          masterAgent: "Admin",
+          masterAgent: masterAgentId,
         }),
       });
 
@@ -474,99 +485,17 @@ export default function AdminAgentPage() {
 
     setPasswordValid(isValid);
   };
-  const [totals, setTotals] = useState(null);
-
-  useEffect(() => {
-    const fetchTotals = async () => {
-      try {
-        const response = await fetch("/api/getTotalAmountPlayed", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch totals");
-        }
-
-        const data = await response.json();
-        setTotals(data.totals);
-      } catch (err) {
-        setError(err.message || "Unknown error");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTotals();
-  }, []);
 
   const filteredAgents = agents.filter((agent) => {
     const nameMatches = agent.name
       ?.toLowerCase()
       .includes(searchQuery.toLowerCase());
-    const masterMatches =
-      selectedMasterAgent === "Admin" ||
-      agent.masterAgent === selectedMasterAgent;
-    return nameMatches && masterMatches;
+
+    return nameMatches;
   });
-  const uniqueMasterAgents = Array.from(
-    new Set(agents.map((agent) => agent.masterAgent).filter(Boolean))
-  );
 
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black via-gray-900 to-black min-h-screen">
-      <div className="text-white p-4 bg-gray-900 rounded-lg shadow-lg">
-        {loading && <p>🎰 Loading totals...</p>}
-        {error && <p className="text-red-400">⚠️ {error}</p>}
-        {totals && (
-          <div className="w-full overflow-x-auto">
-            <div className="flex flex-row items-center justify-center gap-8 sm:gap-12 px-6 py-5 min-w-[600px] bg-gradient-to-r from-black via-red-900 to-black rounded-2xl border-4 border-yellow-500 shadow-[0_0_40px_rgba(255,215,0,0.6)] font-mono text-yellow-100 animate-fade-in">
-              {/* 3D */}
-              <div className="text-center px-3">
-                <p className="text-sm text-yellow-400 uppercase tracking-wide">
-                  🎯 3D
-                </p>
-                <p className="text-3xl font-extrabold text-yellow-300 drop-shadow glow">
-                  {totals.ThreeD}
-                </p>
-              </div>
-
-              {/* 2D */}
-              <div className="text-center px-3">
-                <p className="text-sm text-yellow-400 uppercase tracking-wide">
-                  🎯 2D
-                </p>
-                <p className="text-3xl font-extrabold text-yellow-300 drop-shadow glow">
-                  {totals.TwoD}
-                </p>
-              </div>
-
-              {/* 1D */}
-              <div className="text-center px-3">
-                <p className="text-sm text-yellow-400 uppercase tracking-wide">
-                  🎯 1D
-                </p>
-                <p className="text-3xl font-extrabold text-yellow-300 drop-shadow glow">
-                  {totals.OneD}
-                </p>
-              </div>
-
-              {/* Total */}
-              <div className="text-center px-3">
-                <p className="text-sm text-green-300 uppercase tracking-wide">
-                  💰 Total
-                </p>
-                <p className="text-3xl font-extrabold text-green-400 drop-shadow glow">
-                  {totals.total}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
       <section className="w-full max-w-full">
         <h2 className="text-2xl font-bold mb-4 text-yellow-400">
           🧑‍💼 Agents List
@@ -585,18 +514,6 @@ export default function AdminAgentPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full sm:w-1/2 px-4 py-2 rounded-lg bg-gray-900 border border-yellow-400 text-yellow-200 placeholder-yellow-500 font-mono shadow-md focus:outline-none"
               />
-
-              <select
-                value={selectedMasterAgent}
-                onChange={(e) => setSelectedMasterAgent(e.target.value)}
-                className="px-4 py-2 rounded-lg bg-gray-900 border border-yellow-400 text-yellow-200 font-mono shadow-md focus:outline-none"
-              >
-                {uniqueMasterAgents.map((master) => (
-                  <option key={master} value={master}>
-                    {master}
-                  </option>
-                ))}
-              </select>
             </div>
 
             <table className="min-w-full text-yellow-300 border-collapse font-mono">
@@ -827,7 +744,7 @@ export default function AdminAgentPage() {
                           )}
                         </div>
                       </td>
-                      <td className="border border-yellow-400 p-2 space-x-2">
+                      {/* <td className="border border-yellow-400 p-2 space-x-2">
                         <button
                           onClick={() => toggleActive(agentId, active)}
                           className={`px-3 py-1 rounded  
@@ -835,7 +752,7 @@ export default function AdminAgentPage() {
                         >
                           {active && <CircleOff />}
                         </button>
-                      </td>
+                      </td> */}
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <button
                           onClick={() => deleteVoucher(agentId)}
