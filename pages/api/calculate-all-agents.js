@@ -44,7 +44,7 @@ export default async function handler(req, res) {
     const summaries = [];
 
     for (const agent of agents) {
-      const { agentId, name } = agent;
+      const { agentId,masterAgent, name } = agent;
       if (!agentId) continue;
 
       const players = await db
@@ -165,6 +165,7 @@ export default async function handler(req, res) {
 
       const summary = {
         agentId,
+        masterAgent,
         name,
         percentages: examplePercent,
         totalAmounts,

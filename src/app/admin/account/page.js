@@ -339,6 +339,20 @@ export default function Account() {
       totalWin: 0,
     }
   );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMasterAgent, setSelectedMasterAgent] = useState("Admin");
+  const filteredAgents = latestSummaryData.filter((agent) => {
+    const nameMatches = agent.name
+      ?.toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const masterMatches =
+      selectedMasterAgent === "Admin" ||
+      agent.masterAgent === selectedMasterAgent;
+    return nameMatches && masterMatches;
+  });
+  const uniqueMasterAgents = Array.from(
+    new Set(latestSummaryData.map((agent) => agent.masterAgent).filter(Boolean))
+  );
   return (
     <div className="p-4 min-h-screen text-white font-mono space-y-10">
       {/* Summary Runner */}
@@ -359,7 +373,27 @@ export default function Account() {
           </div>
         )}
       </div>
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
+        <input
+          type="text"
+          placeholder="🔎 Search Agent..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full sm:w-1/2 px-4 py-2 rounded-lg bg-gray-900 border border-yellow-400 text-yellow-200 placeholder-yellow-500 font-mono shadow-md focus:outline-none"
+        />
 
+        <select
+          value={selectedMasterAgent}
+          onChange={(e) => setSelectedMasterAgent(e.target.value)}
+          className="px-4 py-2 rounded-lg bg-gray-900 border border-yellow-400 text-yellow-200 font-mono shadow-md focus:outline-none"
+        >
+          {uniqueMasterAgents.map((master) => (
+            <option key={master} value={master}>
+              {master}
+            </option>
+          ))}
+        </select>
+      </div>
       {/* Summary Table by Date */}
       {loading ? (
         <p className="text-yellow-400">Loading summaries...</p>
@@ -403,7 +437,7 @@ export default function Account() {
               </tr>
             </thead>
             <tbody>
-              {latestSummaryData.map((item, idx) => (
+              {filteredAgents.map((item, idx) => (
                 <tr key={idx} className="hover:bg-gray-700">
                   <td className="p-2 bg-white">{idx + 1}</td>
                   <td className="p-2 bg-white">{item.name}</td>
