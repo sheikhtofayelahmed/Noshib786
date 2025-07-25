@@ -21,7 +21,11 @@ export const MasterAgentProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (!isLoading && !masterAgentId) {
+    if (isLoading) return;
+
+    const onLoginPage = window.location.pathname === "/masterAgent/login";
+
+    if (!masterAgentId && !onLoginPage) {
       window.location.href = "/masterAgent/login";
     }
   }, [isLoading, masterAgentId]);
