@@ -12,7 +12,6 @@ export default async function handler(req, res) {
       name,
       password,
       percentages,
-      subAgents,
       cPercentages,
       expense = false,
       tenPercent = false,
@@ -43,26 +42,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // Clean subagents input
-    const cleanedSubAgents = Array.isArray(subAgents)
-      ? subAgents
-          .filter(
-            (sa) =>
-              sa &&
-              typeof sa === "object" &&
-              typeof sa.id === "string" &&
-              typeof sa.password === "string" &&
-              sa.id.trim().length > 0 &&
-              sa.password.trim().length > 0
-          )
-          .map((sa) => ({
-            id: sa.id.trim(),
-            password: sa.password.trim(),
-          }))
-      : [];
-
-    const hasSubAgents = cleanedSubAgents.length > 0;
-
     // Update agent document
     const result = await db.collection("agents").updateOne(
       { agentId: oldAgentId },
@@ -73,8 +52,6 @@ export default async function handler(req, res) {
           password: password.trim(),
           percentages,
           cPercentages,
-          subAgents: cleanedSubAgents,
-          hasSubAgents,
           expense,
           expenseAmt,
           tenPercent,

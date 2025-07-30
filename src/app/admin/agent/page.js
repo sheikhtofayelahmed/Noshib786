@@ -7,16 +7,7 @@ import ScrollToTopButton from "@/components/ScrollToTopButton";
 export default function AdminAgentPage() {
   const router = useRouter();
   const [onlineAgentIds, setOnlineAgentIds] = useState(new Set());
-  const [subAgents, setSubAgents] = useState(
-    Array(10)
-      .fill()
-      .map(() => ({ id: "", password: "" }))
-  );
-  const [subUpdateAgents, setSubUpdateAgents] = useState(
-    Array(10)
-      .fill()
-      .map(() => ({ id: "", password: "" }))
-  );
+
   const [expense, setExpense] = useState(false);
   const [updateExpense, setUpdateExpense] = useState(false);
   const [tenPercent, setTenPercent] = useState(false);
@@ -238,11 +229,7 @@ export default function AdminAgentPage() {
         single: 0,
       }
     );
-    setSubUpdateAgents(
-      Array(10)
-        .fill("")
-        .map((_, i) => agent.subAgents?.[i] || "")
-    );
+
     setUpdateExpense(agent.expense);
     setUpdateTenPercent(agent.tenPercent);
     setUpdateExpenseAmt(agent.expenseAmt);
@@ -269,13 +256,6 @@ export default function AdminAgentPage() {
       return;
     }
 
-    // Filter out incomplete subagent entries
-    const filteredSubAgents = subAgents
-      .map(({ id = "", password = "" }) => ({
-        id: id.trim(),
-        password: password.trim(),
-      }))
-      .filter((sa) => sa.id && sa.password);
     setAdding(true);
     setError("");
 
@@ -289,7 +269,6 @@ export default function AdminAgentPage() {
           name: name.trim(),
           percentages: iPercentages,
           cPercentages,
-          subAgents: filteredSubAgents,
           expense,
           expenseAmt,
           tenPercent,
@@ -305,7 +284,7 @@ export default function AdminAgentPage() {
         setAgentId("");
         setPassword("");
         setName("");
-        setSubAgents([{ id: "", password: "" }]);
+        // setSubAgents([{ id: "", password: "" }]);
         alert("✅ Agent added successfully");
       } else {
         setError(data.message || "Failed to add agent");
@@ -366,12 +345,6 @@ export default function AdminAgentPage() {
           agentId,
           name,
           password,
-          subAgents: subUpdateAgents
-            .filter((n) => n && typeof n === "object" && n.id && n.password)
-            .map((n) => ({
-              id: n.id.trim(),
-              password: n.password.trim(),
-            })),
           percentages: percentages,
           cPercentages: cUpdatePercentages,
           expense: updateExpense,
@@ -501,19 +474,24 @@ export default function AdminAgentPage() {
 
     fetchTotals();
   }, []);
+  const uniqueMasterAgents = Array.from(
+    new Set(agents.map((agent) => agent.masterAgent).filter(Boolean))
+  );
 
+  // If you want `"Admin"` always on top and in the list:
+  if (!uniqueMasterAgents.includes("Admin")) {
+    uniqueMasterAgents.unshift("Admin");
+  }
   const filteredAgents = agents.filter((agent) => {
     const nameMatches = agent.name
       ?.toLowerCase()
       .includes(searchQuery.toLowerCase());
-    const masterMatches =
-      selectedMasterAgent === "Admin" ||
-      agent.masterAgent === selectedMasterAgent;
+
+    // Only agents with masterAgent matching selectedMasterAgent are shown by default
+    const masterMatches = agent.masterAgent === selectedMasterAgent;
+
     return nameMatches && masterMatches;
   });
-  const uniqueMasterAgents = Array.from(
-    new Set(agents.map((agent) => agent.masterAgent).filter(Boolean))
-  );
 
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black via-gray-900 to-black min-h-screen">
@@ -613,9 +591,9 @@ export default function AdminAgentPage() {
                   <th className="font-bangla border border-yellow-400 p-2">
                     সুবিধা
                   </th>
-                  <th className="font-bangla border border-yellow-400 p-2">
+                  {/* <th className="font-bangla border border-yellow-400 p-2">
                     Sub Agent
-                  </th>
+                  </th> */}
                   <th className="border border-yellow-400 p-2">Status</th>
                   <th colSpan={5} className="border border-yellow-400 p-2">
                     Actions
@@ -643,7 +621,6 @@ export default function AdminAgentPage() {
                       active,
                       percentages,
                       cPercentages,
-                      subAgents,
                       expense,
                       tenPercent,
                       expenseAmt,
@@ -746,13 +723,7 @@ export default function AdminAgentPage() {
                           </span>
                         </label>
                       </td>
-                      <td className="border border-yellow-400 p-2 text-center">
-                        {hasSubAgents ? (
-                          <span className="text-green-400 text-xl">✔️</span>
-                        ) : (
-                          <span className="text-red-500 text-xl">❌</span>
-                        )}
-                      </td>
+
                       <td className="border border-yellow-400 px-3 py-2">
                         {onlineAgentIds.has(agentId) ? (
                           <div className="space-x-1">
@@ -799,7 +770,6 @@ export default function AdminAgentPage() {
                               password,
                               percentages,
                               cPercentages,
-                              subAgents,
                               expense,
                               tenPercent,
                               expenseAmt,
@@ -900,49 +870,7 @@ export default function AdminAgentPage() {
             )}
 
             {/* Subagents Section */}
-            <div className="mb-4">
-              <label className="font-bangla block text-green-400 text-lg mt-5">
-                সাব এজেন্ট
-              </label>
-              {subAgents.map((subAgent, index) => (
-                <div key={index} className="mb-2 grid grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    placeholder={`Sub Agent ID ${index + 1}`}
-                    value={subAgent.id}
-                    onChange={(e) => {
-                      const updated = [...subAgents];
-                      updated[index].id = e.target.value;
-                      setSubAgents(updated);
-                    }}
-                    className="p-3 rounded bg-black border border-green-400 text-green-300 placeholder-green-600"
-                    disabled={adding}
-                  />
-                  <input
-                    type="text"
-                    placeholder={`Password`}
-                    value={subAgent.password}
-                    onChange={(e) => {
-                      const updated = [...subAgents];
-                      updated[index].password = e.target.value;
-                      setSubAgents(updated);
-                    }}
-                    className="p-3 rounded bg-black border border-green-400 text-green-300 placeholder-green-600"
-                    disabled={adding}
-                  />
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() =>
-                  setSubAgents([...subAgents, { id: "", password: "" }])
-                }
-                className="mt-2 bg-green-600 text-black font-bold py-2 px-4 rounded hover:bg-green-700"
-                disabled={adding}
-              >
-                ➕ Add Sub-Agent
-              </button>
-            </div>
+
             <div className="mb-4">
               <label className="font-bangla block text-yellow-400 text-lg mt-5">
                 ব্যাংকার ডিসকাঊন্ট
@@ -1150,50 +1078,6 @@ export default function AdminAgentPage() {
               )}
             </div>
             {/* Percentages */}
-            <div className="mb-3 mt-4">
-              <h3 className="text-green-400 font-semibold mb-2">Sub Agents</h3>
-              {subUpdateAgents.map((subAgent, index) => (
-                <div key={index} className="grid grid-cols-2 gap-2 mb-2">
-                  <input
-                    type="text"
-                    placeholder={`Sub Agent ID ${index + 1}`}
-                    className="p-2 bg-black border border-green-400 rounded text-green-300 placeholder-green-600"
-                    value={subAgent.id}
-                    onChange={(e) => {
-                      const updated = [...subUpdateAgents];
-                      updated[index].id = e.target.value;
-                      setSubUpdateAgents(updated);
-                    }}
-                    disabled={adding}
-                  />
-                  <input
-                    type="text"
-                    placeholder={`Password`}
-                    className="p-2 bg-black border border-green-400 rounded text-green-300 placeholder-green-600"
-                    value={subAgent.password}
-                    onChange={(e) => {
-                      const updated = [...subUpdateAgents];
-                      updated[index].password = e.target.value;
-                      setSubUpdateAgents(updated);
-                    }}
-                    disabled={adding}
-                  />
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() =>
-                  setSubUpdateAgents([
-                    ...subUpdateAgents,
-                    { id: "", password: "" },
-                  ])
-                }
-                className="mt-2 bg-green-600 text-black font-bold py-2 px-4 rounded hover:bg-green-700"
-                disabled={adding}
-              >
-                ➕ Add Sub-Agent
-              </button>
-            </div>
             <div className="mb-3 mt-4">
               <h3 className=" font-bangla text-yellow-400 font-semibold mb-2">
                 ব্যাংকার ডিসকাঊন্ট

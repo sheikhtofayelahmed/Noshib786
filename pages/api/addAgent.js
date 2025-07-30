@@ -11,7 +11,6 @@ export default async function handler(req, res) {
     name,
     percentages,
     cPercentages,
-    subAgents,
     expense,
     expenseAmt,
     tenPercent,
@@ -25,8 +24,7 @@ export default async function handler(req, res) {
     !password ||
     !name ||
     typeof percentages !== "object" ||
-    typeof cPercentages !== "object" ||
-    !Array.isArray(subAgents)
+    typeof cPercentages !== "object"
   ) {
     return res.status(400).json({ message: "Missing or invalid fields" });
   }
@@ -43,24 +41,6 @@ export default async function handler(req, res) {
       return res.status(409).json({ message: "Agent ID already exists" });
     }
 
-    // Clean and validate subAgents
-    const cleanedSubAgents = subAgents
-      .filter(
-        (sa) =>
-          sa &&
-          typeof sa === "object" &&
-          typeof sa.id === "string" &&
-          typeof sa.password === "string" &&
-          sa.id.trim().length > 0 &&
-          sa.password.trim().length > 0
-      )
-      .map((sa) => ({
-        id: sa.id.trim(),
-        password: sa.password.trim(),
-      }));
-
-    const hasSubAgents = cleanedSubAgents.length > 0;
-
     // Construct agent document
     const newAgent = {
       agentId: agentId.trim(),
@@ -68,8 +48,6 @@ export default async function handler(req, res) {
       name: name.trim(),
       percentages,
       cPercentages,
-      subAgents: cleanedSubAgents,
-      hasSubAgents,
       expense,
       expenseAmt,
       tenPercent,

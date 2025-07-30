@@ -1,5 +1,6 @@
 "use client"; // This component runs on the client due to useState, useRouter, etc.
 
+import { useMasterAgent } from "@/context/MasterAgentContext";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [mfaRequired, setMfaRequired] = useState(false); // State to control MFA step visibility
+  const { setMasterAgentId } = useMasterAgent();
 
   const handleLogin = async () => {
     setLoading(true);
@@ -29,6 +31,8 @@ export default function LoginPage() {
       if (res.ok) {
         // HTTP 200: Login successful (no MFA or MFA not enabled)
         console.log("Login successful!");
+        setMasterAgentId(username);
+
         router.push("/masterAgent"); // Redirect to admin dashboard
       } else {
         const data = await res.json();

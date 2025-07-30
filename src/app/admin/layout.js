@@ -20,8 +20,8 @@ export default function AdminLayout({ children }) {
       path: "/admin/voucher",
     },
     {
-      name: `Verify Voucher `,
-      path: "/admin/verify-voucher",
+      name: `Tips`,
+      path: "/admin/tips",
     },
     {
       name: `পেন্ডিং ভাউচার ${

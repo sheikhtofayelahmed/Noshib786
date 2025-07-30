@@ -3,9 +3,11 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useMasterAgent } from "@/context/MasterAgentContext";
 
 export default function MasterAgentPage() {
   const router = useRouter();
+  const { masterAgentId } = useMasterAgent();
 
   useEffect(() => {
     // Check cookie client side
@@ -33,6 +35,9 @@ export default function MasterAgentPage() {
           height={288}
           className="mx-auto drop-shadow-2xl animate-pulse"
         />
+        <h1 className="font-bangla text-xl md:text-4xl font-bold my-10 text-yellow-300 drop-shadow-lg animate-flicker">
+          স্বাগতম মাস্টার এজেন্ট <span className="text-green-600"> {masterAgentId}</span>
+        </h1>
       </div>
     </main>
   );

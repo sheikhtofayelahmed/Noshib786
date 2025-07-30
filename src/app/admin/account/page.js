@@ -341,18 +341,21 @@ export default function Account() {
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMasterAgent, setSelectedMasterAgent] = useState("Admin");
+
   const filteredAgents = latestSummaryData.filter((agent) => {
     const nameMatches = agent.name
       ?.toLowerCase()
       .includes(searchQuery.toLowerCase());
-    const masterMatches =
-      selectedMasterAgent === "Admin" ||
-      agent.masterAgent === selectedMasterAgent;
+
+    const masterMatches = agent.masterAgent === selectedMasterAgent;
+
     return nameMatches && masterMatches;
   });
+
   const uniqueMasterAgents = Array.from(
     new Set(latestSummaryData.map((agent) => agent.masterAgent).filter(Boolean))
   );
+
   return (
     <div className="p-4 min-h-screen text-white font-mono space-y-10">
       {/* Summary Runner */}

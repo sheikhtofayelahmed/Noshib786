@@ -4,37 +4,28 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import Breadcrumb from "./Breadcrumb"; // adjust path if needed
+import Breadcrumb from "./Breadcrumb";
 import { useAgent } from "@/context/AgentContext";
-import Image from "next/image";
 import AllahBhorosha from "./Allah";
 
 export default function AgentLayout({ children }) {
-  const { loginAs, entryCount, waitingEntryCount, logout } = useAgent();
+  const { agentId, entryCount, waitingEntryCount, logout, loading } =
+    useAgent();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const { agentId, loading } = useAgent();
   const [agent, setAgent] = useState();
+
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
   const navItems = [
     { name: "Play", path: "/" },
-    // Only show Games if loginAs is 'agent'
-    ...(loginAs === "agent"
-      ? [
-          {
-            name: `Games${entryCount !== undefined ? ` (${entryCount})` : ""}`,
-            path: "/agent/games",
-          },
-          {
-            name: `Voucher`,
-            path: "/agent/voucher",
-          },
-        ]
-      : []),
-    agent?.hasSubAgents && {
-      name: "Sub Agent Games",
-      path: "/agent/subAgentGames",
+    {
+      name: `Games${entryCount !== undefined ? ` (${entryCount})` : ""}`,
+      path: "/agent/games",
+    },
+    {
+      name: `Voucher`,
+      path: "/agent/voucher",
     },
     {
       name: `Pending-পেন্ডিং ${
@@ -44,14 +35,14 @@ export default function AgentLayout({ children }) {
     },
     { name: "Noshib History", path: "/history" },
   ];
+
+  // Fetch agent info
   useEffect(() => {
     if (!agentId) return;
 
     const fetchAgent = async () => {
       try {
         const res = await fetch(`/api/getAgentById?agentId=${agentId}`);
-
-        // Check status and log for debug
         if (!res.ok) {
           const text = await res.text();
           console.error("Response not OK:", res.status, text);
@@ -67,6 +58,8 @@ export default function AgentLayout({ children }) {
 
     fetchAgent();
   }, [agentId]);
+
+  // Heartbeat ping
   useEffect(() => {
     if (!agentId) return;
 
@@ -76,9 +69,10 @@ export default function AgentLayout({ children }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agentId }),
       });
-    }, 30000); // every 30 seconds
-    return () => clearInterval(interval); // cleanup on unmount
+    }, 30000);
+    return () => clearInterval(interval);
   }, [agentId]);
+
   return (
     <div className="min-h-screen font-mono bg-gradient-to-br from-black via-gray-900 to-black text-white flex flex-col md:flex-row">
       {/* Mobile Header */}
@@ -118,22 +112,20 @@ export default function AgentLayout({ children }) {
 
           {/* Navigation */}
           <nav className="space-y-4 font-bangla">
-            {navItems
-              .filter((item) => item && item.path)
-              .map((item) => (
-                <Link href={item.path} key={item.path}>
-                  <div
-                    onClick={() => setSidebarOpen(false)}
-                    className={`block px-5 py-3 rounded-xl border transition duration-300 font-medium tracking-wide ${
-                      pathname === item.path
-                        ? "bg-cyan-300 text-black border-cyan-500 shadow-inner"
-                        : "border-cyan-500 text-cyan-200 hover:bg-cyan-400 hover:text-black"
-                    }`}
-                  >
-                    {item.name}
-                  </div>
-                </Link>
-              ))}
+            {navItems.map((item) => (
+              <Link href={item.path} key={item.path}>
+                <div
+                  onClick={() => setSidebarOpen(false)}
+                  className={`block px-5 py-3 rounded-xl border transition duration-300 font-medium tracking-wide ${
+                    pathname === item.path
+                      ? "bg-cyan-300 text-black border-cyan-500 shadow-inner"
+                      : "border-cyan-500 text-cyan-200 hover:bg-cyan-400 hover:text-black"
+                  }`}
+                >
+                  {item.name}
+                </div>
+              </Link>
+            ))}
           </nav>
         </div>
 
@@ -142,7 +134,7 @@ export default function AgentLayout({ children }) {
           <AllahBhorosha />
         </div>
 
-        {/* Logout Button */}
+        {/* Logout */}
         <div className="pt-6 border-t border-cyan-600 mt-6">
           <button
             onClick={() => {
@@ -156,7 +148,7 @@ export default function AgentLayout({ children }) {
         </div>
       </aside>
 
-      {/* Overlay for mobile */}
+      {/* Overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"

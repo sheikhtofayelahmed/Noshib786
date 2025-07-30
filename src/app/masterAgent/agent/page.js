@@ -10,16 +10,16 @@ export default function AdminAgentPage() {
   const { masterAgentId } = useMasterAgent();
 
   const [onlineAgentIds, setOnlineAgentIds] = useState(new Set());
-  const [subAgents, setSubAgents] = useState(
-    Array(10)
-      .fill()
-      .map(() => ({ id: "", password: "" }))
-  );
-  const [subUpdateAgents, setSubUpdateAgents] = useState(
-    Array(10)
-      .fill()
-      .map(() => ({ id: "", password: "" }))
-  );
+  // const [subAgents, setSubAgents] = useState(
+  //   Array(10)
+  //     .fill()
+  //     .map(() => ({ id: "", password: "" }))
+  // );
+  // const [subUpdateAgents, setSubUpdateAgents] = useState(
+  //   Array(10)
+  //     .fill()
+  //     .map(() => ({ id: "", password: "" }))
+  // );
   const [expense, setExpense] = useState(false);
   const [updateExpense, setUpdateExpense] = useState(false);
   const [tenPercent, setTenPercent] = useState(false);
@@ -249,11 +249,11 @@ export default function AdminAgentPage() {
         single: 0,
       }
     );
-    setSubUpdateAgents(
-      Array(10)
-        .fill("")
-        .map((_, i) => agent.subAgents?.[i] || "")
-    );
+    // setSubUpdateAgents(
+    //   Array(10)
+    //     .fill("")
+    //     .map((_, i) => agent.subAgents?.[i] || "")
+    // );
     setUpdateExpense(agent.expense);
     setUpdateTenPercent(agent.tenPercent);
     setUpdateExpenseAmt(agent.expenseAmt);
@@ -281,12 +281,12 @@ export default function AdminAgentPage() {
     }
 
     // Filter out incomplete subagent entries
-    const filteredSubAgents = subAgents
-      .map(({ id = "", password = "" }) => ({
-        id: id.trim(),
-        password: password.trim(),
-      }))
-      .filter((sa) => sa.id && sa.password);
+    // const filteredSubAgents = subAgents
+    //   .map(({ id = "", password = "" }) => ({
+    //     id: id.trim(),
+    //     password: password.trim(),
+    //   }))
+    //   .filter((sa) => sa.id && sa.password);
     setAdding(true);
     setError("");
 
@@ -300,7 +300,7 @@ export default function AdminAgentPage() {
           name: name.trim(),
           percentages: iPercentages,
           cPercentages,
-          subAgents: filteredSubAgents,
+          // subAgents: filteredSubAgents,
           expense,
           expenseAmt,
           tenPercent,
@@ -316,7 +316,7 @@ export default function AdminAgentPage() {
         setAgentId("");
         setPassword("");
         setName("");
-        setSubAgents([{ id: "", password: "" }]);
+        // setSubAgents([{ id: "", password: "" }]);
         alert("✅ Agent added successfully");
       } else {
         setError(data.message || "Failed to add agent");
@@ -377,12 +377,12 @@ export default function AdminAgentPage() {
           agentId,
           name,
           password,
-          subAgents: subUpdateAgents
-            .filter((n) => n && typeof n === "object" && n.id && n.password)
-            .map((n) => ({
-              id: n.id.trim(),
-              password: n.password.trim(),
-            })),
+          // subAgents: subUpdateAgents
+          //   .filter((n) => n && typeof n === "object" && n.id && n.password)
+          //   .map((n) => ({
+          //     id: n.id.trim(),
+          //     password: n.password.trim(),
+          //   })),
           percentages: percentages,
           cPercentages: cUpdatePercentages,
           expense: updateExpense,
@@ -493,7 +493,7 @@ export default function AdminAgentPage() {
 
     return nameMatches;
   });
-
+  console.log(masterAgentId);
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black via-gray-900 to-black min-h-screen">
       <section className="w-full max-w-full">
@@ -530,9 +530,9 @@ export default function AdminAgentPage() {
                   <th className="font-bangla border border-yellow-400 p-2">
                     সুবিধা
                   </th>
-                  <th className="font-bangla border border-yellow-400 p-2">
+                  {/* <th className="font-bangla border border-yellow-400 p-2">
                     Sub Agent
-                  </th>
+                  </th> */}
                   <th className="border border-yellow-400 p-2">Status</th>
                   <th colSpan={5} className="border border-yellow-400 p-2">
                     Actions
@@ -560,7 +560,7 @@ export default function AdminAgentPage() {
                       active,
                       percentages,
                       cPercentages,
-                      subAgents,
+                      // subAgents,
                       expense,
                       tenPercent,
                       expenseAmt,
@@ -716,7 +716,7 @@ export default function AdminAgentPage() {
                               password,
                               percentages,
                               cPercentages,
-                              subAgents,
+                              // subAgents,
                               expense,
                               tenPercent,
                               expenseAmt,
@@ -744,7 +744,7 @@ export default function AdminAgentPage() {
                           )}
                         </div>
                       </td>
-                      {/* <td className="border border-yellow-400 p-2 space-x-2">
+                      <td className="border border-yellow-400 p-2 space-x-2">
                         <button
                           onClick={() => toggleActive(agentId, active)}
                           className={`px-3 py-1 rounded  
@@ -752,7 +752,7 @@ export default function AdminAgentPage() {
                         >
                           {active && <CircleOff />}
                         </button>
-                      </td> */}
+                      </td>
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <button
                           onClick={() => deleteVoucher(agentId)}
@@ -817,7 +817,7 @@ export default function AdminAgentPage() {
             )}
 
             {/* Subagents Section */}
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <label className="font-bangla block text-green-400 text-lg mt-5">
                 সাব এজেন্ট
               </label>
@@ -859,7 +859,7 @@ export default function AdminAgentPage() {
               >
                 ➕ Add Sub-Agent
               </button>
-            </div>
+            </div> */}
             <div className="mb-4">
               <label className="font-bangla block text-yellow-400 text-lg mt-5">
                 ব্যাংকার ডিসকাঊন্ট
@@ -1067,7 +1067,7 @@ export default function AdminAgentPage() {
               )}
             </div>
             {/* Percentages */}
-            <div className="mb-3 mt-4">
+            {/* <div className="mb-3 mt-4">
               <h3 className="text-green-400 font-semibold mb-2">Sub Agents</h3>
               {subUpdateAgents.map((subAgent, index) => (
                 <div key={index} className="grid grid-cols-2 gap-2 mb-2">
@@ -1110,7 +1110,7 @@ export default function AdminAgentPage() {
               >
                 ➕ Add Sub-Agent
               </button>
-            </div>
+            </div> */}
             <div className="mb-3 mt-4">
               <h3 className=" font-bangla text-yellow-400 font-semibold mb-2">
                 ব্যাংকার ডিসকাঊন্ট
