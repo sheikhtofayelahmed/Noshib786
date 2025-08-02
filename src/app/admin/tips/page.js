@@ -1,13 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 export default function LuckyNumbersPage() {
-  
+  const [threeUp, setThreeUp] = useState(null);
+  const [downGame, setDownGame] = useState(null);
+  const [date, setDate] = useState(null);
+  const [winStatus, setWinStatus] = useState(false);
   const [tips, setTips] = useState([]);
   const totalInputs = 32; // Change to actual number of input fields
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/win-status");
+        const data = await res.json();
+        setThreeUp(data.threeUp);
+        setDownGame(data.downGame);
+        setDate(data.gameDate);
+        setWinStatus(data.winStatus);
+      } catch (error) {
+        console.error("Error fetching winning numbers:", error);
+      }
+    };
 
+    fetchData();
+  }, []);
   // Fetch tips on mount
   useEffect(() => {
     async function fetchTips() {
@@ -56,264 +74,137 @@ export default function LuckyNumbersPage() {
   function renderInput(index) {
     return (
       <input
+        key={index}
         type="text"
         maxLength={3}
         value={tips[index] || ""}
         onChange={(e) => handleChange(index, e.target.value)}
         onBlur={handleBlur}
-        className="text-3xl font-extrabold px-6 py-3 rounded-2xl text-center w-[100px]
-    bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]
-    text-white shadow-[0_0_20px_rgba(0,255,255,0.6)]
-    border-2 border-cyan-400 tracking-wider animate-flicker"
+        className="w-9 text-center border border-gray-400 rounded px-1 py-0.5 text-sm"
       />
     );
   }
 
+  const data = [
+    { src: "/queen.jpeg", title: "👑 রাণীর আশীর্বাদ", inputs: [0, 1, 2] },
+    { src: "/family.jpeg", title: "🏡 পারিবারিক সৌভাগ্য", inputs: [3, 4, 5] },
+    {
+      src: "/frog.jpeg",
+      title: "🐸 ব্যাঙের লাফ = ভাগ্যর উল্লম্ফন!",
+      inputs: [6, 7, 8],
+    },
+    { src: "/magician.jpeg", title: "🧙 জাদুকরের ইশারা", inputs: [9, 10] },
+    { src: "/star.jpeg", title: "⭐ নক্ষত্রের নসীব", inputs: [11, 12, 13] },
+    { src: "/mohadeb.jpeg", title: "⭐ মহাদেব", inputs: [14, 15, 16] },
+    { src: "/krishna.jpeg", title: "⭐ কাট নাম্বার", inputs: [17, 18] },
+    { src: "/durga.jpeg", title: "⭐ জোকার", inputs: [19, 20, 21, 22, 23] },
+    { src: "/honuman.jpeg", title: "⭐ভি আই পি", inputs: [24, 25, 26, 27, 28] },
+    { src: "/eagle.jpeg", title: "⭐ টাচ", inputs: [29, 30, 31] },
+  ];
+  // const ContentRef = useRef(null);
+  // const handleDownloadPdf = async () => {
+  //   const html2pdf = (await import("html2pdf.js")).default;
+  //   const element = ContentRef.current;
+  //   if (element) {
+  //     const options = {
+  //       margin: 10,
+  //       filename: `tips.pdf`,
+  //       image: { type: "jpeg", quality: 0.98 },
+  //       html2canvas: {
+  //         scale: 2,
+  //         // *** THIS IS THE KEY: Force a white background for the PDF rendering ***
+  //         background: "#ffffff", // Explicitly set white background for the canvas
+  //       },
+  //       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+  //     };
+  //     html2pdf().set(options).from(element).save();
+  //   } else {
+  //     console.error("Content div not found!");
+  //   }
+  // };
+
   return (
-    <main className="min-h-screen bg-gradient-to-b from-black via-[#0d0d0d] to-black text-yellow-300 px-4 py-10 font-bangla">
-      <h1 className="text-5xl md:text-6xl font-extrabold text-center mb-10 text-yellow-300 tracking-widest animate-pulse">
-        সাপ্তাহিক নসীব ✨
+    <main
+      // ref={ContentRef}
+      className="min-h-screen bg-white text-black px-4 py-4 font-bangla"
+    >
+      {/* <button
+        onClick={handleDownloadPdf}
+        className="p-1 mx-4 rounded-xl bg-gray-200 transition duration-300"
+        title="Download Player Info"
+      >
+        <img src="/download.svg" alt="Download" className="w-8 h-8" />
+      </button> */}
+      <h1 className="text-xl font-extrabold text-center mb-1 tracking-widest">
+        সাপ্তাহিক নসীব
       </h1>
-
-      <div className="flex flex-col items-center gap-10 max-w-3xl mx-auto px-2">
-        {/* Image 1 */}
-        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-          <Image
-            src="/queen.jpeg"
-            alt="queen"
-            width={800}
-            height={800}
-            className="w-full h-auto object-cover"
-          />
-          <p className="absolute top-4 left-4 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-pink-300 font-bold drop-shadow-lg">
-            👑 রাণীর আশীর্বাদ
+      {/* Top Cards Section */}
+      <div className="flex flex-col sm:flex-row justify-around items-center gap-4 text-center mb-1 max-w-[21cm] mx-auto px-4">
+        <div className="bg-white border border-gray-300 rounded-2xl px-3 py-2 shadow w-40">
+          <div className="flex items-center justify-center gap-1 mb-1 text-sm font-semibold">
+            🎯
+            <span className="font-extrabold text-base text-black">
+              নসীব 3UP
+            </span>
+          </div>
+          <p className="text-base font-black tracking-wide text-black">
+            {typeof winStatus === "boolean" && winStatus
+              ? threeUp || "XXX"
+              : "XXX"}
           </p>
-
-          <div className="absolute md:top-24 md:left-48 left-10 top-12  flex gap-3">
-            {renderInput(0)}
-          </div>
-          <div className="absolute md:top-48 md:right-24  top-20 right-7  flex gap-3">
-            {renderInput(1)}
-          </div>
-          <div className="absolute md:bottom-72 md:left-44 bottom-32 left-16 flex gap-3">
-            {renderInput(2)}
-          </div>
         </div>
 
-        {/* Image 2 */}
-        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-          <Image
-            src="/family.jpeg"
-            alt="family"
-            width={800}
-            height={800}
-            className="w-full h-auto object-cover"
-          />
-          <p className="absolute top-4 right-4 bg-black bg-opacity-70 px-3 py-1 rounded text-base text-green-300 font-semibold drop-shadow-lg">
-            🏡 পারিবারিক সৌভাগ্য
-          </p>
-
-          <div className="absolute md:top-48 md:right-24 top-20 right-5 flex gap-3">
-            {renderInput(3)}
-          </div>
-          <div className="absolute md:bottom-64 md:left-44 left-20 bottom-32 flex gap-3">
-            {renderInput(4)}
-          </div>
-          <div className="absolute md:bottom-52 md:right-48 bottom-28 right-12 flex gap-3">
-            {renderInput(5)}
-          </div>
+        <div className="flex flex-col items-center gap-0">
+          🗓️
+          <span className="font-extrabold text-base text-black leading-none">
+            নসীব তারিখ
+          </span>
+          <span className="text-base font-bold tracking-wide leading-none">
+            {typeof winStatus === "boolean" && winStatus
+              ? date || "---"
+              : "---"}
+          </span>
         </div>
 
-        {/* Image 3 */}
-        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-          <Image
-            src="/frog.jpeg"
-            alt="frog"
-            width={800}
-            height={800}
-            className="w-full h-auto object-cover"
-          />
-          <p className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black bg-opacity-70 px-4 py-1 rounded text-sm text-lime-300 font-medium drop-shadow-lg">
-            🐸 ব্যাঙের লাফ = ভাগ্যর উল্লম্ফন!
+        <div className="bg-white border border-gray-300 rounded-2xl px-3 py-2 shadow w-40">
+          <div className="flex items-center justify-center gap-1 mb-1 text-sm font-semibold">
+            💥
+            <span className="font-extrabold text-base text-black">
+              নসীব DOWN
+            </span>
+          </div>
+          <p className="text-base font-black tracking-wide text-black">
+            {typeof winStatus === "boolean" && winStatus
+              ? downGame || "XX"
+              : "XX"}
           </p>
-
-          <div className="absolute md:top-80 md:right-24 top-40 right-1 flex gap-3">
-            {renderInput(6)}
-          </div>
-          <div className="absolute md:bottom-96 md:left-32 bottom-44 left-10 flex gap-3">
-            {renderInput(7)}
-          </div>
-          <div className="absolute md:bottom-52 md:left-80 bottom-20 left-28 flex gap-3">
-            {renderInput(8)}
-          </div>
         </div>
+      </div>
+      {/* Grid of Images */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-[21cm] mx-auto px-4 py-1 print:bg-white print:text-black">
+        {data.map((item, idx) => (
+          <div
+            key={idx}
+            className="border border-gray-300 rounded-xl shadow overflow-hidden bg-white"
+          >
+            <div className="relative w-full">
+              <Image
+                src={item.src}
+                alt={item.title}
+                width={800}
+                height={800}
+                className="w-full h-auto object-cover filter grayscale"
+              />
+              <p className="absolute top-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded font-semibold shadow">
+                {item.title}
+              </p>
+            </div>
 
-        {/* Image 4 */}
-        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-          <Image
-            src="/magician.jpeg"
-            alt="magician"
-            width={800}
-            height={800}
-            className="w-full h-auto object-cover"
-          />
-          <p className="absolute top-4 left-4 text-purple-300 text-lg font-bold bg-black bg-opacity-70 px-3 py-1 rounded drop-shadow-lg">
-            🧙 জাদুকরের ইশারা
-          </p>
-
-          <div className="absolute md:top-56 md:left-44 top-20 left-12 flex gap-3">
-            {renderInput(9)}
+            <div className="flex justify-center gap-2 flex-wrap p-2 bg-gray-50">
+              {item.inputs.map((i) => renderInput(i))}
+            </div>
           </div>
-          <div className="absolute md:bottom-56 md:right-24 bottom-24 right-1 flex gap-3">
-            {renderInput(10)}
-          </div>
-        </div>
-
-        {/* Image 5 */}
-        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-          <Image
-            src="/star.jpeg"
-            alt="star"
-            width={800}
-            height={800}
-            className="w-full h-auto object-cover"
-          />
-          <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
-            ⭐ নক্ষত্রের নসীব
-          </p>
-
-          <div className="absolute md:top-52 md:right-52 top-20 right-20 flex gap-3">
-            {renderInput(11)}
-          </div>
-          <div className="absolute md:top-52 md:left-52 top-20 left-20 flex gap-3">
-            {renderInput(12)}
-          </div>
-          <div className="absolute md:bottom-44 md:left-80 bottom-16 left-32 flex gap-3">
-            {renderInput(13)}
-          </div>
-        </div>
-
-        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-          <Image
-            src="/mohadeb.jpeg"
-            alt="mohadeb"
-            width={800}
-            height={800}
-            className="w-full h-auto object-cover"
-          />
-          <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
-            ⭐ মহাদেব
-          </p>
-
-          <div className="absolute md:top-32 md:right-60 top-20 right-20 flex gap-3">
-            {renderInput(14)}
-          </div>
-          <div className="absolute md:top-44 md:left-60 top-20 left-20 flex gap-3">
-            {renderInput(15)}
-          </div>
-          <div className="absolute md:bottom-72 md:left-80 bottom-32 left-40 flex gap-3">
-            {renderInput(16)}
-          </div>
-        </div>
-        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-          <Image
-            src="/krishna.jpeg"
-            alt="krishna"
-            width={800}
-            height={800}
-            className="w-full h-auto object-cover"
-          />
-          <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
-            ⭐ কাট নাম্বার
-          </p>
-
-          <div className="absolute md:top-96 md:right-52 top-40 left-20 flex gap-3">
-            {renderInput(17)}
-          </div>
-          <div className="absolute md:top-80 md:left-52 top-20 left-12 flex gap-3">
-            {renderInput(18)}
-          </div>
-        </div>
-        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-          <Image
-            src="/durga.jpeg"
-            alt="durga"
-            width={800}
-            height={800}
-            className="w-full h-auto object-cover"
-          />
-          <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
-            ⭐ জোকার
-          </p>
-
-          <div className="absolute md:top-52 md:right-52 top-20 right-20 flex gap-3">
-            {renderInput(19)}
-          </div>
-          <div className="absolute md:top-52 md:left-52 top-20 left-20 flex gap-3">
-            {renderInput(20)}
-          </div>
-          <div className="absolute md:bottom-44 md:left-40 bottom-16 left-10 flex gap-3">
-            {renderInput(21)}
-          </div>
-          <div className="absolute md:bottom-44 md:left-80 bottom-16 left-36 flex gap-3">
-            {renderInput(22)}
-          </div>
-          <div className="absolute md:bottom-44 md:right-40 bottom-16 right-10 flex gap-3">
-            {renderInput(23)}
-          </div>
-        </div>
-        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-          <Image
-            src="/honuman.jpeg"
-            alt="honuman"
-            width={800}
-            height={800}
-            className="w-full h-auto object-cover"
-          />
-          <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
-            ⭐ভি আই পি
-          </p>
-
-          <div className="absolute md:top-52 md:left-32 top-10 right-0 flex gap-3">
-            {renderInput(24)}
-          </div>
-          <div className="absolute md:top-72 md:left-72 top-12 left-12 flex gap-3">
-            {renderInput(25)}
-          </div>
-          <div className="absolute md:bottom-44 md:left-40 bottom-16 left-10 flex gap-3">
-            {renderInput(26)}
-          </div>
-          <div className="absolute md:bottom-44 md:left-80 bottom-16 left-36 flex gap-3">
-            {renderInput(27)}
-          </div>
-          <div className="absolute md:bottom-44 md:right-40 bottom-16 right-10 flex gap-3">
-            {renderInput(28)}
-          </div>
-        </div>
-        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-          <Image
-            src="/eagle.jpeg"
-            alt="eagle"
-            width={800}
-            height={800}
-            className="w-full h-auto object-cover"
-          />
-          <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
-            ⭐ টাচ
-          </p>
-
-          <div className="absolute md:top-52 md:right-52 top-20 right-12 flex gap-3">
-            {renderInput(29)}
-          </div>
-          <div className="absolute md:top-52 md:left-52 top-20 left-16 flex gap-3">
-            {renderInput(30)}
-          </div>
-          <div className="absolute md:bottom-44 md:left-80 bottom-16 left-40 flex gap-3">
-            {renderInput(31)}
-          </div>
-        </div>
-
-        {/* Image 6 */}
+        ))}
       </div>
     </main>
   );
