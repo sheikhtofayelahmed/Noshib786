@@ -20,11 +20,11 @@ export default function AgentLayout({ children }) {
   const navItems = [
     { name: "Play", path: "/" },
     {
-      name: `Games${entryCount !== undefined ? ` (${entryCount})` : ""}`,
+      name: `Voucher${entryCount !== undefined ? ` (${entryCount})` : ""}`,
       path: "/agent/games",
     },
     {
-      name: `Voucher`,
+      name: `Search Voucher`,
       path: "/agent/voucher",
     },
     {
