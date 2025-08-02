@@ -1,12 +1,15 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{html,js,jsx,ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        "casino-dark": "#1a0000",
-        "casino-red": "#cc0000",
-        "casino-gold": "#ffd700",
-        "casino-green": "#008000",
+        casino: {
+          dark: "#1a0000",
+          red: "#cc0000",
+          gold: "#ffd700",
+          green: "#008000",
+        },
         fire: {
           100: "#fff7e6",
           300: "#ffc266",
@@ -28,11 +31,17 @@ module.exports = {
         },
         flicker: {
           "0%, 100%": { opacity: 1 },
-          "50%": { opacity: 0.5 },
+          "50%": { opacity: 0.4 },
         },
         fire: {
-          "0%, 100%": { color: "#ff6600", transform: "scale(1)" },
-          "50%": { color: "#ffc266", transform: "scale(1.05)" },
+          "0%, 100%": {
+            color: "#ff6600",
+            transform: "scale(1)",
+          },
+          "50%": {
+            color: "#ffc266",
+            transform: "scale(1.05)",
+          },
         },
         "pulse-light": {
           "0%, 100%": {
@@ -49,8 +58,8 @@ module.exports = {
         fire: "fire 1.5s ease-in-out infinite",
         marquee: "marquee 20s linear infinite",
         "pulse-light": "pulse-light 3s infinite alternate",
-        flicker: "flicker 2s infinite",
-        "spin-slow": "spin 2s linear infinite", // Correct here
+        flicker: "flicker 1.5s infinite",
+        "spin-slow": "spin 2s linear infinite",
         blink: "blink 1s steps(2, start) infinite",
         pulseFast: "pulse 0.8s ease-in-out infinite",
       },

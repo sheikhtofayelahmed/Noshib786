@@ -338,7 +338,10 @@ export default function Noshib786() {
       </div>
       <div className="mx-10 flex flex-col sm:flex-row justify-center gap-6 my-20">
         {/* Tips Button */}
-        <button    onClick={() => (window.location.href = "/history/tips")} className="font-bangla bg-gradient-to-r from-purple-800 via-pink-600 to-red-500 text-white font-bold px-10 py-6 rounded-full shadow-lg hover:shadow-pink-500/50 hover:scale-105 transition-all duration-300 tracking-widest text-2xl uppercase glow-animation">
+        <button
+          onClick={() => (window.location.href = "/history/tips")}
+          className="font-bangla bg-gradient-to-r from-purple-800 via-pink-600 to-red-500 text-white font-bold px-10 py-6 rounded-full shadow-lg hover:shadow-pink-500/50 hover:scale-105 transition-all duration-300 tracking-widest text-2xl uppercase glow-animation"
+        >
           🔮 নসীব টিপস
         </button>
 

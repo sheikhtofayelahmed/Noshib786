@@ -4,10 +4,9 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export default function LuckyNumbersPage() {
-  // We'll store tips as array of strings — one input per each 11 you had.
-  // Count how many "11" you had (e.g. 16 in your code) - you must have same length
+  
   const [tips, setTips] = useState([]);
-  const totalInputs = 16; // Change to actual number of input fields
+  const totalInputs = 32; // Change to actual number of input fields
 
   // Fetch tips on mount
   useEffect(() => {
@@ -58,11 +57,14 @@ export default function LuckyNumbersPage() {
     return (
       <input
         type="text"
-        maxLength={2}
+        maxLength={3}
         value={tips[index] || ""}
         onChange={(e) => handleChange(index, e.target.value)}
         onBlur={handleBlur}
-        className="text-3xl text-cyan-300 font-extrabold px-4 py-2 rounded-xl bg-black bg-opacity-50 shadow-[0_0_15px_rgba(0,255,255,0.8)] tracking-widest animate-pulse w-[80px] text-center"
+        className="text-3xl font-extrabold px-6 py-3 rounded-2xl text-center w-[100px]
+    bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]
+    text-white shadow-[0_0_20px_rgba(0,255,255,0.6)]
+    border-2 border-cyan-400 tracking-wider animate-flicker"
       />
     );
   }
@@ -188,6 +190,126 @@ export default function LuckyNumbersPage() {
           </div>
           <div className="absolute md:bottom-44 md:left-80 bottom-16 left-32 flex gap-3">
             {renderInput(13)}
+          </div>
+        </div>
+
+        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
+          <Image
+            src="/mohadeb.jpeg"
+            alt="mohadeb"
+            width={800}
+            height={800}
+            className="w-full h-auto object-cover"
+          />
+          <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
+            ⭐ মহাদেব
+          </p>
+
+          <div className="absolute md:top-32 md:right-60 top-20 right-20 flex gap-3">
+            {renderInput(14)}
+          </div>
+          <div className="absolute md:top-44 md:left-60 top-20 left-20 flex gap-3">
+            {renderInput(15)}
+          </div>
+          <div className="absolute md:bottom-72 md:left-80 bottom-32 left-40 flex gap-3">
+            {renderInput(16)}
+          </div>
+        </div>
+        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
+          <Image
+            src="/krishna.jpeg"
+            alt="krishna"
+            width={800}
+            height={800}
+            className="w-full h-auto object-cover"
+          />
+          <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
+            ⭐ কাট নাম্বার
+          </p>
+
+          <div className="absolute md:top-96 md:right-52 top-40 left-20 flex gap-3">
+            {renderInput(17)}
+          </div>
+          <div className="absolute md:top-80 md:left-52 top-20 left-12 flex gap-3">
+            {renderInput(18)}
+          </div>
+        </div>
+        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
+          <Image
+            src="/durga.jpeg"
+            alt="durga"
+            width={800}
+            height={800}
+            className="w-full h-auto object-cover"
+          />
+          <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
+            ⭐ জোকার
+          </p>
+
+          <div className="absolute md:top-52 md:right-52 top-20 right-20 flex gap-3">
+            {renderInput(19)}
+          </div>
+          <div className="absolute md:top-52 md:left-52 top-20 left-20 flex gap-3">
+            {renderInput(20)}
+          </div>
+          <div className="absolute md:bottom-44 md:left-40 bottom-16 left-10 flex gap-3">
+            {renderInput(21)}
+          </div>
+          <div className="absolute md:bottom-44 md:left-80 bottom-16 left-36 flex gap-3">
+            {renderInput(22)}
+          </div>
+          <div className="absolute md:bottom-44 md:right-40 bottom-16 right-10 flex gap-3">
+            {renderInput(23)}
+          </div>
+        </div>
+        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
+          <Image
+            src="/honuman.jpeg"
+            alt="honuman"
+            width={800}
+            height={800}
+            className="w-full h-auto object-cover"
+          />
+          <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
+            ⭐ভি আই পি
+          </p>
+
+          <div className="absolute md:top-52 md:left-32 top-10 right-0 flex gap-3">
+            {renderInput(24)}
+          </div>
+          <div className="absolute md:top-72 md:left-72 top-12 left-12 flex gap-3">
+            {renderInput(25)}
+          </div>
+          <div className="absolute md:bottom-44 md:left-40 bottom-16 left-10 flex gap-3">
+            {renderInput(26)}
+          </div>
+          <div className="absolute md:bottom-44 md:left-80 bottom-16 left-36 flex gap-3">
+            {renderInput(27)}
+          </div>
+          <div className="absolute md:bottom-44 md:right-40 bottom-16 right-10 flex gap-3">
+            {renderInput(28)}
+          </div>
+        </div>
+        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
+          <Image
+            src="/eagle.jpeg"
+            alt="eagle"
+            width={800}
+            height={800}
+            className="w-full h-auto object-cover"
+          />
+          <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
+            ⭐ টাচ
+          </p>
+
+          <div className="absolute md:top-52 md:right-52 top-20 right-12 flex gap-3">
+            {renderInput(29)}
+          </div>
+          <div className="absolute md:top-52 md:left-52 top-20 left-16 flex gap-3">
+            {renderInput(30)}
+          </div>
+          <div className="absolute md:bottom-44 md:left-80 bottom-16 left-40 flex gap-3">
+            {renderInput(31)}
           </div>
         </div>
 
