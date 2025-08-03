@@ -7,12 +7,12 @@ export default function HomeNavigator() {
   const router = useRouter();
 
   const navItems = [
-    // {
-    //   label: "Gamer",
-    //   path: "/gamer",
-    //   icon: <User className="w-5 h-5" />,
-    //   color: "from-rose-500 via-pink-500 to-red-600",
-    // },
+    {
+      label: "Gamer",
+      path: "/gamer",
+      icon: <User className="w-5 h-5" />,
+      color: "from-rose-500 via-pink-500 to-red-600",
+    },
     {
       label: "Agent",
       path: "/agent",

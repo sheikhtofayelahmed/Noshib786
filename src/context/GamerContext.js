@@ -67,11 +67,11 @@ export function GamerProvider({ children }) {
   };
 
 
-  useEffect(() => {
-    if (!gamerId) return;
-    fetchEntryCount(gamerId);
-    fetchWaitingPlayers(gamerId);
-  }, [gamerId]);
+  // useEffect(() => {
+  //   if (!gamerId) return;
+  //   fetchEntryCount(gamerId);
+  //   // fetchWaitingPlayers(gamerId);
+  // }, [gamerId]);
 
   return (
     <GamerContext.Provider
