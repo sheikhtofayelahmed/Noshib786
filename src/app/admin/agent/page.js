@@ -492,7 +492,7 @@ export default function AdminAgentPage() {
 
     return nameMatches && masterMatches;
   });
-
+ 
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black via-gray-900 to-black min-h-screen">
       <div className="text-white p-4 bg-gray-900 rounded-lg shadow-lg">
