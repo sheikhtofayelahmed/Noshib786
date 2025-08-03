@@ -27,7 +27,7 @@ export default function HomeNavigator() {
     },
     {
       label: "Explore",
-      path: "/explore",
+      path: "/history",
       icon: <History className="w-5 h-5" />,
       color: "from-orange-400 via-rose-500 to-pink-600",
     },
