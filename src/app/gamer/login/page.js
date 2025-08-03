@@ -26,12 +26,12 @@ export default function GamerLogin() {
     <div className="min-h-screen flex items-center justify-center bg-black text-white p-6">
       <div className="bg-gray-900 p-6 rounded shadow-lg border border-yellow-500 w-full max-w-sm">
         <h1 className="text-2xl font-bold text-yellow-400 mb-4 font-mono">
-          🎯 gamer Login
+          🎯 Gamer Login
         </h1>
 
         <input
           type="text"
-          placeholder="gamer ID"
+          placeholder="Gamer ID"
           value={gamerIdInput}
           onChange={(e) => setGamerIdInput(e.target.value)}
           className="w-full p-2 mb-4 rounded bg-gray-800 border border-yellow-300 text-yellow-200 focus:outline-none"
@@ -41,7 +41,7 @@ export default function GamerLogin() {
         <div className="flex items-center w-full mb-4 bg-gray-800 border border-yellow-300 rounded px-3 py-2 text-yellow-200">
           <input
             type={showPassword ? "text" : "password"}
-            placeholder="gamer Password"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full bg-transparent text-yellow-200 placeholder-yellow-500 focus:outline-none font-mono"
