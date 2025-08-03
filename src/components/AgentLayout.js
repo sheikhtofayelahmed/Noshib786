@@ -24,6 +24,10 @@ export default function AgentLayout({ children }) {
       path: "/agent/games",
     },
     {
+      name: `Customer`,
+      path: "/agent/gamer",
+    },
+    {
       name: `Search Voucher`,
       path: "/agent/voucher",
     },
@@ -33,7 +37,7 @@ export default function AgentLayout({ children }) {
       }`,
       path: "/agent/waitingData",
     },
-    { name: "Noshib History", path: "/history" },
+    { name: "Noshib Explore", path: "/explore" },
   ];
 
   // Fetch agent info

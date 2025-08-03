@@ -3,7 +3,22 @@ import { NextResponse } from "next/server";
 export function middleware(request) {
   const url = request.nextUrl.clone();
   const pathname = url.pathname;
+  const hostname = request.headers.get("host") || "";
 
+  // ✅ Step 1: Subdomain Redirect (e.g., redirect abc.example.com to example.com)
+  const baseDomain = "noshib786.com"; // Change this to your main domain
+  const validSubdomains = ["www", "admin", "masteragent"];
+
+  // Extract subdomain only if not running locally (localhost:3000)
+  if (!hostname.includes("localhost")) {
+    const parts = hostname.split(".");
+    if (parts.length > 2) {
+      const subdomain = parts[0].toLowerCase();
+      if (!validSubdomains.includes(subdomain)) {
+        return NextResponse.redirect(`https://${baseDomain}`);
+      }
+    }
+  }
   const adminCookie = request.cookies.get("admin-auth");
   const masterAgentCookie = request.cookies.get("masterAgent-auth");
 

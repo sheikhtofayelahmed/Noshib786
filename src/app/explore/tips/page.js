@@ -24,14 +24,8 @@ export default function LuckyNumbersPage() {
     }
     fetchTips();
   }, []);
-  console.log(tips);
   const renderTip = (index) => (
-    <p
-      className="text-3xl font-extrabold px-6 py-3 rounded-2xl text-center w-[100px]
-    bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]
-    text-white shadow-[0_0_20px_rgba(0,255,255,0.6)]
-    border-2 border-cyan-400 tracking-wider animate-flicker"
-    >
+    <p className=" py-1    w-[100px] text-4xl font-extrabold text-center    bg-gradient-to-tr from-red-900 via-black to-red-900    border-4 border-yellow-400 rounded-3xl    shadow-[0_0_20px_4px_rgba(255,215,0,0.8)]    font-mono tracking-widest text-yellow-400    uppercase    select-none    transform transition-transform duration-300 hover:scale-110 hover:shadow-[0_0_40px_8px_rgba(255,215,0,1)]    animate-pulse  ">
       {tips[index] || "--"}
     </p>
   );

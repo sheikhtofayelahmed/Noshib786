@@ -33,7 +33,7 @@ const WinHistoryTable = () => {
   }, []);
 
   return (
-    <div className=" w-full mb-">
+    <div className=" w-full ">
       <div className="glow mt-10 p-4 max-w-4xl mx-auto  bg-gradient-to-br from-black via-gray-900 to-black">
         <h2 className="text-3xl font-extrabold text-center text-transparent bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-violet-500 bg-clip-text mb-6 tracking-wider drop-shadow-md">
           🎰 Noshib Win History ✨

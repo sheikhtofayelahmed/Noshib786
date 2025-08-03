@@ -1,15 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { User, Users, ShieldCheck } from "lucide-react";
+import { User, Users, ShieldCheck, History } from "lucide-react";
 
 export default function HomeNavigator() {
   const router = useRouter();
 
   const navItems = [
     {
-      label: "Player",
-      path: "/player",
+      label: "Gamer",
+      path: "/gamer",
       icon: <User className="w-5 h-5" />,
       color: "from-rose-500 via-pink-500 to-red-600",
     },
@@ -24,6 +24,12 @@ export default function HomeNavigator() {
       path: "/masterAgent",
       icon: <ShieldCheck className="w-5 h-5" />,
       color: "from-indigo-500 via-violet-600 to-purple-700",
+    },
+    {
+      label: "Explore",
+      path: "/explore",
+      icon: <History className="w-5 h-5" />,
+      color: "from-orange-400 via-rose-500 to-pink-600",
     },
   ];
 
@@ -42,7 +48,7 @@ export default function HomeNavigator() {
       </h1>
 
       {/* Navigation buttons */}
-      <div className="z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+      <div className="z-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12">
         {navItems.map((item) => (
           <button
             key={item.path}

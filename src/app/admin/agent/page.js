@@ -638,7 +638,7 @@ export default function AdminAgentPage() {
                         onClick={() =>
                           router.push(`/admin/agent-games/${agentId}`)
                         }
-                        className="relative border border-yellow-400 p-2"
+                        className="relative border border-yellow-400 p-2 cursor-pointer hover:bg-yellow-400/10 transition"
                       >
                         {name}
                         {loading && (
@@ -656,6 +656,7 @@ export default function AdminAgentPage() {
                           </span>
                         )}
                       </td>
+
                       <td className="border border-yellow-400 p-2">
                         {agentId}
                       </td>

@@ -18,7 +18,7 @@ export default function AgentLogin() {
     const success = await login(agentIdInput, password);
 
     if (success) {
-      router.push("/"); // redirect on login success
+      router.push("/agent"); // redirect on login success
     }
   }
 

@@ -232,71 +232,88 @@ export default function Noshib786() {
   return (
     <div className="">
       <div className="my-8 mx-5 md:mx-auto max-w-4xl  bg-gradient-to-br from-black via-gray-900 to-red-600 rounded-2xl shadow-lg ring-1 ring-cyan-700 p-6 text-center text-white">
-        <h2 className="font-bangla text-4xl font-bold text-cyan-400 mb-6 tracking-wider uppercase">
+        <h2 className="font-bangla text-4xl font-extrabold text-cyan-400 mb-6 tracking-widest uppercase drop-shadow-lg">
           🏆 সর্বশেষ বিজয়ী নাম্বার
         </h2>
-        <div className="mt-10 text-center">
+
+        <div className="mx-6 sm:mx-10 flex flex-col sm:flex-row justify-center gap-8 my-5">
+          {/* Tips Button */}
+          <button
+            onClick={() => (window.location.href = "/explore/tips")}
+            className="font-bangla bg-gradient-to-r from-purple-700 via-pink-500 to-red-500 text-white font-extrabold px-12 py-5 rounded-full shadow-xl hover:shadow-pink-600/60 hover:scale-105 transition-transform duration-300 tracking-widest text-2xl uppercase glow-animation"
+          >
+            🔮 নসীব টিপস
+          </button>
+
+          {/* Win History Button */}
+          <button
+            onClick={() => (window.location.href = "/explore/winHistory")}
+            className="font-bangla bg-gradient-to-r from-gray-900 via-gray-700 to-purple-900 text-yellow-400 font-extrabold px-12 py-5 rounded-full shadow-xl hover:shadow-purple-600/60 hover:scale-105 transition-transform duration-300 tracking-widest text-2xl uppercase glow-animation"
+          >
+            🧿 নসীব উইন
+          </button>
+        </div>
+
+        <div className="mt-12 text-center font-bangla">
           {error && (
-            <div className="text-red-500 font-extrabold drop-shadow-md">
+            <div className="text-red-600 font-bold text-lg mb-6 animate-pulse">
               {error}
             </div>
           )}
-          <div className="my-6 py-8 px-4 sm:px-10 bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-200 border-[6px] border-yellow-400 rounded-3xl shadow-[0_0_30px_rgba(255,105,180,0.4)] text-center space-y-6 font-bangla">
-            <h1 className="text-5xl font-extrabold text-fuchsia-600 drop-shadow-[0_0_10px_rgba(255,0,255,0.5)] animate-pulse">
+
+          <div className="py-10 px-6 sm:px-12 bg-gradient-to-br from-yellow-50 via-pink-100 to-purple-100 border-4 border-yellow-300 rounded-3xl shadow-xl space-y-6">
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-fuchsia-700 drop-shadow animate-pulse">
               ✨ নসীব ৭৮৬ ✨
             </h1>
 
-            <div className="relative overflow-hidden w-full h-20">
-              <div className="absolute whitespace-nowrap animate-marquee text-5xl py-3 font-bold text-red-600">
+            <div className="relative overflow-hidden h-14 bg-white rounded-xl border border-dashed border-pink-300 shadow-sm">
+              <div className="absolute whitespace-nowrap animate-marquee text-2xl sm:text-3xl font-semibold text-rose-600 py-2">
                 ড্র প্রতি রবিবার • ড্র প্রতি রবিবার • ড্র প্রতি রবিবার • ড্র
-                প্রতি রবিবার • ড্র প্রতি রবিবার
+                প্রতি রবিবার •
               </div>
             </div>
 
-            <p className="text-4xl font-bold text-white bg-gradient-to-r from-green-500 to-green-700 inline-block px-6 py-2 rounded-xl shadow-md border border-green-300 tracking-wide">
+            <p className="inline-block text-3xl sm:text-4xl font-bold text-white bg-gradient-to-r from-emerald-500 to-lime-600 px-8 py-3 rounded-2xl shadow-lg border border-green-200 tracking-wide">
               🎮 পরবর্তী গেম - {nextGame}
             </p>
 
-            <p className="text-2xl font-semibold text-purple-800">
+            <p className="text-xl sm:text-2xl font-semibold text-purple-700">
               🕙 উইন নাম্বার জানানো হবে রাত ১০:৩০ মিনিটে
             </p>
 
-            <div className="bg-gradient-to-r from-purple-200 via-yellow-100 to-pink-200 p-5 rounded-xl border-2 border-red-400 shadow-inner">
-              <p className="text-xl font-semibold text-gray-900">
+            <div className="bg-gradient-to-r from-fuchsia-50 via-yellow-50 to-pink-100 p-5 sm:p-6 rounded-xl border border-red-300 shadow-md">
+              <p className="text-lg sm:text-xl font-medium text-gray-800">
                 নসীব পরিবর্তন করতে
-                <span className="mx-2 font-bold text-pink-800 animate-pulse">
+                <span className="mx-2 font-bold text-pink-700 animate-pulse">
                   আজই
                 </span>
-                চলে আসুন নিকটস্ত এজেন্ট এর কাছে।
+                চলে আসুন নিকটস্থ এজেন্ট এর কাছে।
               </p>
             </div>
           </div>
 
+          {/* Countdown Timer */}
           {!showBlinkingZero && (
-            <div
-              className={`font-bangla mb-10 px-6 py-4 rounded-2xl  text-4xl tracking-widest transition duration-500 bg-gradient-to-r from-purple-800 via-pink-600 to-blue-500 text-yellow-200 shadow-md shadow-pink-400/30`}
-            >
+            <div className="mt-10 text-3xl sm:text-4xl font-bold tracking-widest bg-gradient-to-r from-indigo-700 via-pink-500 to-purple-600 text-white px-8 py-4 rounded-2xl shadow-md">
               {timeLeft.text}
             </div>
           )}
 
+          {/* Blinking Zero */}
           {showBlinkingZero && !winStatus && (
-            <div className="text-6xl font-extrabold font-mono text-red-500 animate-blink my-12 drop-shadow-lg">
+            <div className="text-6xl font-extrabold font-mono text-red-600 animate-blink my-12 drop-shadow-lg">
               00:00:00
             </div>
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-around items-center gap-8 text-center">
+        <div className="flex flex-col sm:flex-row justify-center sm:justify-around items-center gap-8 text-center mt-8">
           {/* 3UP Game */}
-          <div className="bg-gradient-to-br from-sky-100 to-blue-200 text-gray-900 rounded-2xl px-6 py-5 shadow-lg w-64 hover:shadow-blue-300 transition duration-300 border border-blue-200 glow-animation">
-            <div className="text-lg font-semibold mb-2">
-              🎯
-              <span className="font-bangla block text-4xl font-extrabold glow text-blue-700 tracking-wide">
-                নসীব 3UP
-              </span>
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 text-gray-900 rounded-2xl px-6 py-6 w-64 shadow-md hover:shadow-blue-300 transition duration-300 border border-blue-200">
+            <div className="font-bangla text-xl font-semibold mb-3 text-blue-600">
+              🎯 নসীব 3UP
             </div>
-            <p className="text-5xl font-black tracking-wider text-blue-900 drop-shadow-sm">
+            <p className="text-5xl font-black tracking-wider text-blue-800 drop-shadow-sm font-mono">
               {typeof winStatus === "boolean" && winStatus
                 ? threeUp || "XXX"
                 : "XXX"}
@@ -304,16 +321,12 @@ export default function Noshib786() {
           </div>
 
           {/* Date */}
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-blue-400 text-3xl animate-pulse drop-shadow">
-              🗓️
-            </span>
-            <span className="font-bangla text-xl text-gray-700">
-              <span className="font-bangla block text-5xl font-extrabold glow text-white tracking-wide">
-                নসীব তারিখ
-              </span>
-            </span>
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-indigo-600 text-transparent bg-clip-text tracking-wide">
+          <div className="flex flex-col items-center gap-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl px-6 py-6 shadow-md border border-gray-200 w-64">
+            <span className="text-blue-500 text-3xl animate-pulse">🗓️</span>
+            <div className="font-bangla text-xl font-semibold text-gray-600">
+              নসীব তারিখ
+            </div>
+            <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text tracking-wide font-mono">
               {typeof winStatus === "boolean" && winStatus
                 ? date || "---"
                 : "---"}
@@ -321,37 +334,17 @@ export default function Noshib786() {
           </div>
 
           {/* DOWN Game */}
-          <div className="bg-gradient-to-br from-indigo-100 to-purple-200 text-gray-900 rounded-2xl px-6 py-5 shadow-lg w-64 hover:shadow-indigo-300 transition duration-300 border border-indigo-200 glow-animation">
-            <h3 className="text-lg font-semibold mb-2">
-              💥
-              <span className="font-bangla block text-4xl font-extrabold glow text-indigo-700 tracking-wide">
-                নসীব DOWN
-              </span>
-            </h3>
-            <p className="text-5xl font-black tracking-wider text-indigo-900 drop-shadow-sm">
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 text-gray-900 rounded-2xl px-6 py-6 w-64 shadow-md hover:shadow-purple-300 transition duration-300 border border-purple-200">
+            <div className="font-bangla text-xl font-semibold mb-3 text-purple-600">
+              💥 নসীব DOWN
+            </div>
+            <p className="text-5xl font-black tracking-wider text-purple-800 drop-shadow-sm font-mono">
               {typeof winStatus === "boolean" && winStatus
                 ? downGame || "XX"
                 : "XX"}
             </p>
           </div>
         </div>
-      </div>
-      <div className="mx-10 flex flex-col sm:flex-row justify-center gap-6 my-20">
-        {/* Tips Button */}
-        <button
-          onClick={() => (window.location.href = "/history/tips")}
-          className="font-bangla bg-gradient-to-r from-purple-800 via-pink-600 to-red-500 text-white font-bold px-10 py-6 rounded-full shadow-lg hover:shadow-pink-500/50 hover:scale-105 transition-all duration-300 tracking-widest text-2xl uppercase glow-animation"
-        >
-          🔮 নসীব টিপস
-        </button>
-
-        {/* Win History Button */}
-        <button
-          onClick={() => (window.location.href = "/history/winHistory")}
-          className=" font-bangla bg-gradient-to-r from-black via-gray-800 to-purple-900 text-yellow-300 font-bold px-10 py-6 rounded-full shadow-lg hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 tracking-widest text-2xl uppercase glow-animation"
-        >
-          🧿 নসীব উইন
-        </button>
       </div>
 
       <WinHistory title="3 Digit Unique" rows={threeDigitRows}></WinHistory>

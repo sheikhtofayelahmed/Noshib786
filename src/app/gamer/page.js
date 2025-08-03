@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAgent } from "@/context/AgentContext";
 import { useRouter } from "next/navigation";
 import PlayerInput from "@/components/PlayerInput";
 import AllahBhorosha from "@/components/Allah";
 import PlayerInputModal from "@/components/PlayerInputModal";
 import { ReceiptText } from "lucide-react";
+import { useGamer } from "@/context/GamerContext";
 
-export default function AgentDashboard() {
-  const { agentId, loading } = useAgent();
+export default function GamerDashboard() {
+  const { gamerId, loading } = useGamer();
   const [inputModal, setInputModal] = useState(false);
   const [doubleInput, setDoubleInput] = useState(false);
   const router = useRouter();
@@ -18,10 +18,10 @@ export default function AgentDashboard() {
   const [gameActive, setGameActive] = useState(null); // null = loading, false = inactive, true = active
 
   useEffect(() => {
-    if (!loading && !agentId) {
-      router.push("/player/login");
+    if (!loading && !gamerId) {
+      router.push("/gamer/login");
     }
-  }, [agentId, loading, router]);
+  }, [gamerId, loading, router]);
 
   useEffect(() => {
     async function fetchGameStatus() {
@@ -49,9 +49,9 @@ export default function AgentDashboard() {
 
     fetchGameStatus();
   }, []);
-  // Run after agent logs in
+  // Run after gamer logs in
 
-  if (loading || !agentId || gameActive === null) {
+  if (loading || !gamerId || gameActive === null) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="flex space-x-2">

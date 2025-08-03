@@ -10,6 +10,34 @@ export default function LuckyNumbersPage() {
   const [winStatus, setWinStatus] = useState(false);
   const [tips, setTips] = useState([]);
   const totalInputs = 32; // Change to actual number of input fields
+  const [winningData, setWinningData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAllWins = async () => {
+    try {
+      const res = await fetch("/api/win-history");
+      const result = await res.json();
+      if (res.ok) {
+        // Sort descending by date and take only the latest 12
+        const sorted = result.data
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 12); // 👈 Limit to 12 entries
+
+        setWinningData(sorted);
+      } else {
+        alert(result.error || "Failed to fetch winning records.");
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      alert("Something went wrong while loading winning history.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllWins();
+  }, []);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -76,7 +104,7 @@ export default function LuckyNumbersPage() {
       <input
         key={index}
         type="text"
-        maxLength={3}
+        maxLength={2}
         value={tips[index] || ""}
         onChange={(e) => handleChange(index, e.target.value)}
         onBlur={handleBlur}
@@ -205,6 +233,49 @@ export default function LuckyNumbersPage() {
             </div>
           </div>
         ))}
+      </div>
+      <div className="glow mt-10 p-4 max-w-[21cm] mx-auto px-4 py-1  bg-white">
+        <h2 className="text-3xl font-extrabold text-center  bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-violet-500 bg-clip-text mb-6 tracking-wider drop-shadow-md">
+          🎰 Noshib Win History ✨
+        </h2>
+
+        {loading ? (
+          <p className="text-center text-gray-300">Loading...</p>
+        ) : (
+          <div className="rounded-xl bg-white shadow ring-1 ring-gray-300">
+            <table className="min-w-full text-sm text-center text-gray-800 border-separate border-spacing-y-2">
+              <thead className="text-base bg-gray-100 uppercase tracking-wider rounded-t-xl">
+                <tr className="bg-gray-100 transition-colors duration-200">
+                  <th className="py-3 px-4">#</th>
+                  <th className="py-3 px-4">🎯 Draw Date</th>
+                  <th className="py-3 px-4">🔮 3UP</th>
+                  <th className="py-3 px-4">🧿 DOWN</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-300 text-base">
+                {winningData.map((item, index) => (
+                  <tr
+                    key={index}
+                    className="bg-gray-100 transition-colors duration-200"
+                  >
+                    <td className="py-2 px-4 font-semibold text-gray-700">
+                      {index + 1}
+                    </td>
+                    <td className="py-2 px-4 font-medium text-gray-600">
+                      {item.gameDate}
+                    </td>
+                    <td className="py-2 px-4 font-bold text-gray-900">
+                      {item.threeUp || "—"}
+                    </td>
+                    <td className="py-2 px-4 font-bold text-gray-900">
+                      {item.downGame || "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </main>
   );
