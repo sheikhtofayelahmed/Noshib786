@@ -239,7 +239,7 @@ export default function Noshib786() {
         <div className="mx-6 sm:mx-10 flex flex-col sm:flex-row justify-center gap-8 my-5">
           {/* Tips Button */}
           <button
-            onClick={() => (window.location.href = "/explore/tips")}
+            onClick={() => (window.location.href = "/history/tips")}
             className="font-bangla bg-gradient-to-r from-purple-700 via-pink-500 to-red-500 text-white font-extrabold px-12 py-5 rounded-full shadow-xl hover:shadow-pink-600/60 hover:scale-105 transition-transform duration-300 tracking-widest text-2xl uppercase glow-animation"
           >
             🔮 নসীব টিপস
@@ -247,7 +247,7 @@ export default function Noshib786() {
 
           {/* Win History Button */}
           <button
-            onClick={() => (window.location.href = "/explore/winHistory")}
+            onClick={() => (window.location.href = "/history/winHistory")}
             className="font-bangla bg-gradient-to-r from-gray-900 via-gray-700 to-purple-900 text-yellow-400 font-extrabold px-12 py-5 rounded-full shadow-xl hover:shadow-purple-600/60 hover:scale-105 transition-transform duration-300 tracking-widest text-2xl uppercase glow-animation"
           >
             🧿 নসীব উইন
