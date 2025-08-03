@@ -246,6 +246,7 @@ export default function AgentGamerPage() {
           gamerId: gamerId.trim(),
           password,
           name: name.trim(),
+          agentId:agentId
           // percentages: iPercentages,
           // cPercentages,
           // expense,
