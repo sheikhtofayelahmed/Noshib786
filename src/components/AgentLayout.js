@@ -18,7 +18,7 @@ export default function AgentLayout({ children }) {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   const navItems = [
-    { name: "Play", path: "/" },
+    { name: "Play", path: "/agent" },
     {
       name: `Voucher${entryCount !== undefined ? ` (${entryCount})` : ""}`,
       path: "/agent/games",
@@ -37,7 +37,7 @@ export default function AgentLayout({ children }) {
       }`,
       path: "/agent/waitingData",
     },
-    { name: "Noshib Explore", path: "/explore" },
+    { name: "Noshib Explore", path: "/history" },
   ];
 
   // Fetch agent info
