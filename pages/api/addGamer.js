@@ -8,7 +8,8 @@ export default async function handler(req, res) {
   const {
     gamerId,
     password,
-    name,
+    agentId,
+    // name,
     // percentages,
     // cPercentages,
     // expense,
@@ -21,7 +22,8 @@ export default async function handler(req, res) {
   if (
     !gamerId ||
     !password ||
-    !name 
+    !agentId
+    // !name
   ) {
     return res.status(400).json({ message: "Missing or invalid fields" });
   }
@@ -42,7 +44,8 @@ export default async function handler(req, res) {
     const newGamer = {
       gamerId: gamerId.trim(),
       password: password.trim(),
-      name: name.trim(),
+      agentId: agentId.trim(),
+      // name: name.trim(),
       // percentages,
       // cPercentages,
       // expense,

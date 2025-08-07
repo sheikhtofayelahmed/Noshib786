@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CircleOff, Eye, EyeOff, LucideDelete } from "lucide-react";
+import {
+  CircleOff,
+  Eye,
+  EyeOff,
+  LucideDelete,
+  LucideEdit,
+  LucideTrash2,
+} from "lucide-react";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 export default function AdminAgentPage() {
   const router = useRouter();
@@ -33,6 +40,7 @@ export default function AdminAgentPage() {
 
   const [name, setName] = useState("");
   const [adding, setAdding] = useState(false);
+  const [entryTotalCounts, setEntryTotalCounts] = useState({});
   const [entryCounts, setEntryCounts] = useState({});
   const [entryCountsNotes, setEntryCountsNotes] = useState({});
   const [loading, setLoading] = useState(true);
@@ -374,6 +382,7 @@ export default function AdminAgentPage() {
     const fetchCountsForAgents = async () => {
       setLoading(true);
       const counts = {};
+      const played = {};
 
       for (const agent of agents) {
         try {
@@ -386,16 +395,20 @@ export default function AdminAgentPage() {
           const data = await res.json();
           if (res.ok) {
             counts[agent.agentId] = data.count;
+            played[agent.agentId] = data.totals?.total;
           } else {
             counts[agent.agentId] = "Error";
+            played[agent.agentId] = "Error";
           }
         } catch (err) {
           counts[agent.agentId] = "Error";
+          played[agent.agentId] = "Error";
         }
       }
 
       setLoading(false);
       setEntryCounts(counts);
+      setEntryTotalCounts(played);
     };
 
     if (agents.length > 0) {
@@ -492,7 +505,7 @@ export default function AdminAgentPage() {
 
     return nameMatches && masterMatches;
   });
- 
+
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black via-gray-900 to-black min-h-screen">
       <div className="text-white p-4 bg-gray-900 rounded-lg shadow-lg">
@@ -595,9 +608,10 @@ export default function AdminAgentPage() {
                     Sub Agent
                   </th> */}
                   <th className="border border-yellow-400 p-2">Status</th>
-                  <th colSpan={5} className="border border-yellow-400 p-2">
+                  <th colSpan={3} className="border border-yellow-400 p-2">
                     Actions
                   </th>
+                  <th className="border border-yellow-400 p-2">Notes</th>
                 </tr>
               </thead>
               <tbody>
@@ -638,7 +652,7 @@ export default function AdminAgentPage() {
                         onClick={() =>
                           router.push(`/admin/agent-games/${agentId}`)
                         }
-                        className="relative border border-yellow-400 p-2 cursor-pointer hover:bg-yellow-400/10 transition"
+                        className="relative border border-yellow-400 py-2 pr-10 cursor-pointer hover:bg-yellow-400/10 transition text-left"
                       >
                         {name}
                         {loading && (
@@ -655,8 +669,12 @@ export default function AdminAgentPage() {
                             {entryCounts[agentId]}
                           </span>
                         )}
+                        {entryTotalCounts[agentId] > 0 && (
+                          <span className="absolute bottom-2 right-2 w-auto p-1 h-5 bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
+                            {entryTotalCounts[agentId]}
+                          </span>
+                        )}
                       </td>
-
                       <td className="border border-yellow-400 p-2">
                         {agentId}
                       </td>
@@ -672,7 +690,6 @@ export default function AdminAgentPage() {
                           )}
                         </button>
                       </td>
-
                       <td className="border border-yellow-400 p-2 sm:min-w-[10rem] max-w-full">
                         <div className="text-green-400 truncate">
                           {Object.values(percentages ?? {}).length > 0
@@ -724,7 +741,6 @@ export default function AdminAgentPage() {
                           </span>
                         </label>
                       </td>
-
                       <td className="border border-yellow-400 px-3 py-2">
                         {onlineAgentIds.has(agentId) ? (
                           <div className="space-x-1">
@@ -777,16 +793,36 @@ export default function AdminAgentPage() {
                               tenPercentAmt,
                             })
                           }
-                          className="px-3 py-1 rounded  text-yellow-400 font-semibold"
+                          className="px-1 py-1 rounded  text-yellow-400 font-semibold"
                         >
+                          <LucideEdit className="w-4 h-4"></LucideEdit>
                           Edit
+                        </button>
+                      </td>
+                      <td className="border border-yellow-400 p-2 space-x-2">
+                        <button
+                          onClick={() => toggleActive(agentId, active)}
+                          className={`px-1 py-1 rounded  
+                          } text-red-500 font-semibold`}
+                        >
+                          {active && <CircleOff className="w-4 h-4" />}
+                          <span>agent</span>
+                        </button>
+                      </td>
+                      <td className="border border-yellow-400 p-2 space-x-2">
+                        <button
+                          onClick={() => deleteVoucher(agentId)}
+                          className="px-1 py-1 rounded  text-red-500 font-semibold"
+                        >
+                          <LucideTrash2 className="w-4 h-4" />
+                          <span>voucher</span>
                         </button>
                       </td>
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <div className="relative inline-block">
                           <button
                             onClick={() => notes(agentId)}
-                            className="px-4 py-1 hover:bg-yellow-500 text-black font-bold rounded-full shadow-md transition"
+                            className="px-1 py-1 hover:bg-yellow-500 text-black font-bold rounded-full shadow-md transition"
                           >
                             📝
                           </button>
@@ -797,24 +833,6 @@ export default function AdminAgentPage() {
                             </span>
                           )}
                         </div>
-                      </td>
-                      <td className="border border-yellow-400 p-2 space-x-2">
-                        <button
-                          onClick={() => toggleActive(agentId, active)}
-                          className={`px-3 py-1 rounded  
-                          } text-red-500 font-semibold`}
-                        >
-                          {active && <CircleOff />}
-                        </button>
-                      </td>
-                      <td className="border border-yellow-400 p-2 space-x-2">
-                        <button
-                          onClick={() => deleteVoucher(agentId)}
-                          className="px-3 py-1 rounded bg-red-100 hover:bg-red-200 text-red-600 font-semibold flex items-center space-x-1"
-                        >
-                          <LucideDelete className="w-4 h-4" />
-                          <span>Delete</span>
-                        </button>
                       </td>
                     </tr>
                   )
@@ -1038,7 +1056,6 @@ export default function AdminAgentPage() {
                 {formError}
               </p>
             )}
-            {/* Agent ID */}{" "}
             <div className="mb-3">
               <label className="block text-sm">Name</label>
               <input
@@ -1055,6 +1072,7 @@ export default function AdminAgentPage() {
                 className="w-full p-2 bg-black border border-yellow-400 rounded text-yellow-300"
                 value={agentId}
                 onChange={(e) => setAgentId(e.target.value.replace(/\s/g, ""))}
+                disabled
               />
             </div>
             {/* Name */}

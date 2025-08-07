@@ -13,10 +13,13 @@ export default function AdminLayout({ children }) {
   const navItems = [
     { name: "Home", path: "/admin" },
     { name: "গেম কন্ট্রোল", path: "/admin/game-control" },
-    { name: "মাস্টার এজেন্ট", path: "/admin/master-agent" },
-    { name: "এজেন্ট", path: "/admin/agent" },
     {
-      name: `ভাউচার ${entryCounts !== undefined ? ` (${entryCounts})` : ""}`,
+      name: `এজেন্ট ${entryCounts !== undefined ? ` (${entryCounts})` : ""}`,
+      path: "/admin/agent",
+    },
+    { name: "মাস্টার এজেন্ট", path: "/admin/master-agent" },
+    {
+      name: `সার্চ ভাউচার `,
       path: "/admin/voucher",
     },
     {

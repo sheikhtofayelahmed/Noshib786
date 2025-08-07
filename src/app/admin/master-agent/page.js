@@ -125,7 +125,6 @@ export default function AdminMasterAgentPage() {
       const res = await fetch("/api/getMasterAgents");
       const data = await res.json();
       if (res.ok) {
-        console.log(data);
         setMasterAgents(data.masterAgents);
       } else {
         setError(data.message || "Failed to fetch Master agents");
@@ -473,6 +472,7 @@ export default function AdminMasterAgentPage() {
                 onChange={(e) =>
                   setMasterAgentId(e.target.value.replace(/\s/g, ""))
                 }
+                disabled
               />
             </div>
             {/* Name */}

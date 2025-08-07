@@ -88,7 +88,6 @@ export default function VoucherModal() {
 
   // Placeholder for handlePrint (replace with actual printing logic)
   const handlePrint = (player, parsedData, updatedTotals) => {
-    console.log(player,parsedData)
     const win = window.open("", "_blank");
 
     const formatRows = () => {

@@ -4,33 +4,23 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
-
+  const { gamerId } = req.body;
   try {
     const client = await clientPromise;
     const db = client.db("noshib786");
 
     const recent = await db
       .collection("playersInput")
-      .find({})
+      .find({ gamerId })
       .sort({ time: -1 })
       .toArray();
-
-    // const totalAmounts = recent.reduce(
-    //   (acc, p) => {
-    //     acc.ThreeD += p.amountPlayed?.ThreeD || 0;
-    //     acc.TwoD += p.amountPlayed?.TwoD || 0;
-    //     acc.OneD += p.amountPlayed?.OneD || 0;
-    //     return acc;
-    //   },
-    //   { ThreeD: 0, TwoD: 0, OneD: 0 }
-    // );
 
     let afterThreeD = 0;
     let afterTwoD = 0;
     let afterOneD = 0;
 
     for (const p of recent) {
-      const pPercent = p.percentages || { threeD: 0, twoD: 0, oneD: 0 };
+      const pPercent = p.cPercentages || { threeD: 0, twoD: 0, oneD: 0 };
       afterThreeD +=
         (p.amountPlayed?.ThreeD || 0) * (1 - pPercent.threeD / 100);
       afterTwoD += (p.amountPlayed?.TwoD || 0) * (1 - pPercent.twoD / 100);
@@ -44,7 +34,7 @@ export default async function handler(req, res) {
       total: (afterOneD + afterTwoD + afterThreeD).toFixed(1),
     };
 
-    return res.status(200).json({ totals: finalTotals });
+    return res.status(200).json({ totals: finalTotals, count: recent.length });
   } catch (error) {
     console.error("Fetch error:", error);
     return res.status(500).json({ message: "Internal server error" });

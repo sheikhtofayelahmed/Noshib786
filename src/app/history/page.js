@@ -1,6 +1,7 @@
 "use client";
 
 import WinHistory from "@/components/winHistory";
+import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function Noshib786() {
@@ -236,24 +237,6 @@ export default function Noshib786() {
           🏆 সর্বশেষ বিজয়ী নাম্বার
         </h2>
 
-        <div className="mx-6 sm:mx-10 flex flex-col sm:flex-row justify-center gap-8 my-5">
-          {/* Tips Button */}
-          <button
-            onClick={() => (window.location.href = "/history/tips")}
-            className="font-bangla bg-gradient-to-r from-purple-700 via-pink-500 to-red-500 text-white font-extrabold px-12 py-5 rounded-full shadow-xl hover:shadow-pink-600/60 hover:scale-105 transition-transform duration-300 tracking-widest text-2xl uppercase glow-animation"
-          >
-            🔮 নসীব টিপস
-          </button>
-
-          {/* Win History Button */}
-          <button
-            onClick={() => (window.location.href = "/history/winHistory")}
-            className="font-bangla bg-gradient-to-r from-gray-900 via-gray-700 to-purple-900 text-yellow-400 font-extrabold px-12 py-5 rounded-full shadow-xl hover:shadow-purple-600/60 hover:scale-105 transition-transform duration-300 tracking-widest text-2xl uppercase glow-animation"
-          >
-            🧿 নসীব উইন
-          </button>
-        </div>
-
         <div className="mt-12 text-center font-bangla">
           {error && (
             <div className="text-red-600 font-bold text-lg mb-6 animate-pulse">
@@ -307,13 +290,16 @@ export default function Noshib786() {
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-center sm:justify-around items-center gap-8 text-center mt-8">
+     <div className="flex flex-col sm:flex-row justify-around items-center gap-8 text-center mt-10">
           {/* 3UP Game */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 text-gray-900 rounded-2xl px-6 py-6 w-64 shadow-md hover:shadow-blue-300 transition duration-300 border border-blue-200">
-            <div className="font-bangla text-xl font-semibold mb-3 text-blue-600">
-              🎯 নসীব 3UP
+          <div className="bg-gradient-to-br from-sky-100 to-blue-200 text-gray-900 rounded-2xl px-6 py-5 shadow-lg w-64 hover:shadow-blue-300 transition duration-300 border border-blue-200 glow-animation">
+            <div className="text-lg font-semibold mb-2">
+              🎯
+              <span className="font-bangla block text-4xl font-extrabold glow text-blue-700 tracking-wide">
+                নসীব 3UP
+              </span>
             </div>
-            <p className="text-5xl font-black tracking-wider text-blue-800 drop-shadow-sm font-mono">
+            <p className="text-5xl font-black tracking-wider text-blue-900 drop-shadow-sm">
               {typeof winStatus === "boolean" && winStatus
                 ? threeUp || "XXX"
                 : "XXX"}
@@ -321,12 +307,16 @@ export default function Noshib786() {
           </div>
 
           {/* Date */}
-          <div className="flex flex-col items-center gap-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl px-6 py-6 shadow-md border border-gray-200 w-64">
-            <span className="text-blue-500 text-3xl animate-pulse">🗓️</span>
-            <div className="font-bangla text-xl font-semibold text-gray-600">
-              নসীব তারিখ
-            </div>
-            <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text tracking-wide font-mono">
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-blue-400 text-3xl animate-pulse drop-shadow">
+              🗓️
+            </span>
+            <span className="font-bangla text-xl text-gray-700">
+              <span className="font-bangla block text-5xl font-extrabold glow text-white tracking-wide">
+                নসীব তারিখ
+              </span>
+            </span>
+            <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-indigo-600 text-transparent bg-clip-text tracking-wide">
               {typeof winStatus === "boolean" && winStatus
                 ? date || "---"
                 : "---"}
@@ -334,19 +324,39 @@ export default function Noshib786() {
           </div>
 
           {/* DOWN Game */}
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 text-gray-900 rounded-2xl px-6 py-6 w-64 shadow-md hover:shadow-purple-300 transition duration-300 border border-purple-200">
-            <div className="font-bangla text-xl font-semibold mb-3 text-purple-600">
-              💥 নসীব DOWN
-            </div>
-            <p className="text-5xl font-black tracking-wider text-purple-800 drop-shadow-sm font-mono">
+          <div className="bg-gradient-to-br from-indigo-100 to-purple-200 text-gray-900 rounded-2xl px-6 py-5 shadow-lg w-64 hover:shadow-indigo-300 transition duration-300 border border-indigo-200 glow-animation">
+            <h3 className="text-lg font-semibold mb-2">
+              💥
+              <span className="font-bangla block text-4xl font-extrabold glow text-indigo-700 tracking-wide">
+                নসীব DOWN
+              </span>
+            </h3>
+            <p className="text-5xl font-black tracking-wider text-indigo-900 drop-shadow-sm">
               {typeof winStatus === "boolean" && winStatus
                 ? downGame || "XX"
                 : "XX"}
             </p>
           </div>
         </div>
+    
       </div>
+      <div className="mx-6 sm:mx-10 flex flex-col sm:flex-row justify-center gap-8 my-20">
+        {/* Tips Button */}
+        <button
+          onClick={() => (window.location.href = "/history/tips")}
+          className="font-bangla bg-gradient-to-r from-purple-700 via-pink-500 to-red-500 text-white font-extrabold px-12 py-5 rounded-full shadow-xl hover:shadow-pink-600/60 hover:scale-105 transition-transform duration-300 tracking-widest text-2xl uppercase glow-animation"
+        >
+          🔮 নসীব টিপস 
+        </button>
 
+        {/* Win History Button */}
+        <button
+          onClick={() => (window.location.href = "/history/winHistory")}
+          className="font-bangla bg-gradient-to-r from-gray-900 via-gray-700 to-purple-900 text-yellow-400 font-extrabold px-12 py-5 rounded-full shadow-xl hover:shadow-purple-600/60 hover:scale-105 transition-transform duration-300 tracking-widest text-2xl uppercase glow-animation"
+        >
+          🧿 নসীব উইন
+        </button>
+      </div>
       <WinHistory title="3 Digit Unique" rows={threeDigitRows}></WinHistory>
       <WinHistory
         title="Double (3 Digit - 2 Aligned)"

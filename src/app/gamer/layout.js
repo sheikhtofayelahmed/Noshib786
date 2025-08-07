@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import Breadcrumb from "./Breadcrumb";
 import { useAgent } from "@/context/AgentContext";
-import AllahBhorosha from "./Allah";
+import Breadcrumb from "@/components/Breadcrumb";
+import AllahBhorosha from "@/components/Allah";
+import { useGamer } from "@/context/GamerContext";
 
 export default function AgentLayout({ children }) {
-  const { agentId, entryCount, waitingEntryCount, logout, loading } =
-    useAgent();
+  const { gamerId, loading, entryCount, waitingEntryCount } = useGamer();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [agent, setAgent] = useState();
@@ -18,64 +18,25 @@ export default function AgentLayout({ children }) {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   const navItems = [
-    { name: "Play", path: "/agent" },
+    { name: "Play", path: "/gamer" },
     {
       name: `Voucher${entryCount !== undefined ? ` (${entryCount})` : ""}`,
-      path: "/agent/games",
+      path: "/gamer/games",
     },
-    {
-      name: `Customer`,
-      path: "/agent/gamer",
-    },
+
     {
       name: `Search Voucher`,
-      path: "/agent/voucher",
+      path: "/gamer/voucher",
     },
     {
       name: `Pending-পেন্ডিং ${
-        waitingEntryCount !== undefined ? ` (${waitingEntryCount})` : ""
+        waitingEntryCount !== undefined ? ` (${waitingEntryCount || "0"})` : ""
       }`,
-      path: "/agent/waitingData",
+      path: "/gamer/waitingData",
     },
+    { name: "Transaction", path: "/gamer/trxn" },
     { name: "Noshib Explore", path: "/history" },
   ];
-
-  // Fetch agent info
-  useEffect(() => {
-    if (!agentId) return;
-
-    const fetchAgent = async () => {
-      try {
-        const res = await fetch(`/api/getAgentById?agentId=${agentId}`);
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Response not OK:", res.status, text);
-          throw new Error("Failed to fetch agent data");
-        }
-
-        const data = await res.json();
-        setAgent(data.agent);
-      } catch (error) {
-        console.error("Error fetching agent:", error.message);
-      }
-    };
-
-    fetchAgent();
-  }, [agentId]);
-
-  // Heartbeat ping
-  useEffect(() => {
-    if (!agentId) return;
-
-    const interval = setInterval(() => {
-      fetch("/api/heartbeat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId }),
-      });
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [agentId]);
 
   return (
     <div className="min-h-screen font-mono bg-gradient-to-br from-black via-gray-900 to-black text-white flex flex-col md:flex-row">
@@ -89,29 +50,26 @@ export default function AgentLayout({ children }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed z-50 top-0 left-0 h-full w-72 bg-gradient-to-br from-cyan-950 via-gray-900 to-black backdrop-blur-md p-6 flex flex-col justify-between border-r border-cyan-400 shadow-[0_0_25px_rgba(34,211,238,0.3)] transition-transform transform duration-300 md:relative md:translate-x-0 ${
+        className={`fixed z-50 top-0 left-0 h-full w-72 bg-gradient-to-br from-pink-950 via-gray-900 to-black backdrop-blur-md p-6 flex flex-col justify-between border-r border-pink-400 shadow-[0_0_25px_rgba(34,211,238,0.3)] transition-transform transform duration-300 md:relative md:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div>
-          <h2 className="font-bangla text-xl font-extrabold mb-6 text-cyan-300 hidden md:block tracking-widest drop-shadow-[0_0_8px_#22d3ee]">
-            🎯 এজেন্ট প্যানেল
+          <h2 className="font-bangla text-xl font-extrabold mb-6 text-pink-300 hidden md:block tracking-widest drop-shadow-[0_0_8px_#22d3ee]">
+            🎯 কাস্টমার প্যানেল
           </h2>
 
           {/* Agent Info */}
-          <div className="bg-gradient-to-br from-cyan-200 to-cyan-100 shadow-lg rounded-xl p-4 mb-6 border border-cyan-300">
+          <div className="bg-gradient-to-br from-pink-200 to-pink-100 shadow-lg rounded-xl p-4 mb-6 border border-pink-300">
             <div className="flex items-center space-x-3 mb-2">
-              <span className="text-cyan-600 text-xl font-semibold">🆔</span>
+              <span className="text-pink-600 text-xl font-semibold">🆔</span>
               <p className="text-base font-semibold text-gray-800">
-                <span className="text-cyan-700">ID:</span> {agentId}
+                <span className="text-pink-700">ID:</span> {gamerId}
               </p>
             </div>
-            <div className="flex items-center space-x-3">
-              <span className="text-cyan-600 text-xl font-semibold">👤</span>
-              <p className="text-base font-semibold text-gray-800">
-                <span className="text-cyan-700">Name:</span> {agent?.name}
-              </p>
-            </div>
+            {/* <div className="flex items-center space-x-3">
+              <span className="text-pink-600 text-xl font-semibold">👤</span>
+            </div> */}
           </div>
 
           {/* Navigation */}
@@ -122,8 +80,8 @@ export default function AgentLayout({ children }) {
                   onClick={() => setSidebarOpen(false)}
                   className={`block px-5 py-3 rounded-xl border transition duration-300 font-medium tracking-wide ${
                     pathname === item.path
-                      ? "bg-cyan-300 text-black border-cyan-500 shadow-inner"
-                      : "border-cyan-500 text-cyan-200 hover:bg-cyan-400 hover:text-black"
+                      ? "bg-pink-300 text-black border-pink-500 shadow-inner"
+                      : "border-pink-500 text-pink-200 hover:bg-pink-400 hover:text-black"
                   }`}
                 >
                   {item.name}
@@ -139,7 +97,7 @@ export default function AgentLayout({ children }) {
         </div>
 
         {/* Logout */}
-        <div className="pt-6 border-t border-cyan-600 mt-6">
+        <div className="pt-6 border-t border-pink-600 mt-6">
           <button
             onClick={() => {
               logout();

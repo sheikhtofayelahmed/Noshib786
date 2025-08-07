@@ -2,11 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CircleOff, Eye, EyeOff, LucideDelete } from "lucide-react";
+import {
+  CircleOff,
+  Eye,
+  EyeOff,
+  LucideBadgeCheck,
+  LucideDelete,
+  LucideTrash2,
+} from "lucide-react";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
+import { useAgent } from "@/context/AgentContext";
 export default function AgentGamerPage() {
   const router = useRouter();
-
+  const { agentId } = useAgent();
   const [gamers, setGamers] = useState([]);
   const [loadingGamers, setLoadingGamers] = useState(false);
   const [error, setError] = useState("");
@@ -21,9 +29,10 @@ export default function AgentGamerPage() {
   const [password, setPassword] = useState("");
   const [passwordValid, setPasswordValid] = useState(true);
 
-  const [name, setName] = useState("");
   const [adding, setAdding] = useState(false);
   const [entryCounts, setEntryCounts] = useState({});
+  const [waitingEntryCount, setWaitingEntryCount] = useState(0);
+  const [transactions, setTransactions] = useState();
   const [entryCountsNotes, setEntryCountsNotes] = useState({});
   const [loading, setLoading] = useState(true);
   // const [iPercentages, setIPercentages] = useState({
@@ -90,7 +99,7 @@ export default function AgentGamerPage() {
       await fetch("/api/notes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId  :gamerId, note: noteInput }),
+        body: JSON.stringify({ agentId: gamerId, note: noteInput }),
       });
 
       // Refresh notes after upload
@@ -121,6 +130,8 @@ export default function AgentGamerPage() {
       const result = await res.json();
 
       if (res.ok) {
+        fetchCountsForGamers();
+
         alert("Vouchers deleted successfully");
         // Optional: reload or refetch data
       } else {
@@ -190,48 +201,13 @@ export default function AgentGamerPage() {
       setLoadingGamers(false);
     }
   };
-  // When clicking % button, open modal and load gamer percentages
-  const handleEditClick = (gamer) => {
-    setEditingGamer(gamer);
-    setGamerId(gamer.gamerId);
-    setName(gamer.name);
-    setPassword(gamer.password);
-    // setPercentages(
-    //   gamer.percentages || {
-    //     threeD: 0,
-    //     twoD: 0,
-    //     oneD: 0,
-    //     str: 0,
-    //     rumble: 0,
-    //     down: 0,
-    //     single: 0,
-    //   }
-    // );
-    // setCUpdatePercentages(
-    //   gamer.cPercentages || {
-    //     threeD: 0,
-    //     twoD: 0,
-    //     oneD: 0,
-    //     str: 0,
-    //     rumble: 0,
-    //     down: 0,
-    //     single: 0,
-    //   }
-    // );
-
-    // setUpdateExpense(gamer.expense);
-    // setUpdateTenPercent(gamer.tenPercent);
-    // setUpdateExpenseAmt(gamer.expenseAmt);
-    // setUpdateTenPercentAmt(gamer.tenPercentAmt);
-    setEditingModal(true);
-  };
 
   const handleAddGamer = async (e) => {
     e.preventDefault();
 
     // Basic validation
-    if (!gamerId || !password || !name) {
-      setError("Please fill in Customer ID, password, and name");
+    if (!gamerId || !password) {
+      setError("Please fill in Customer ID, password");
       return;
     }
 
@@ -245,8 +221,8 @@ export default function AgentGamerPage() {
         body: JSON.stringify({
           gamerId: gamerId.trim(),
           password,
-          name: name.trim(),
-          agentId:agentId
+          // name: name.trim(),
+          agentId: agentId,
           // percentages: iPercentages,
           // cPercentages,
           // expense,
@@ -262,7 +238,7 @@ export default function AgentGamerPage() {
         await fetchGamers();
         setGamerId("");
         setPassword("");
-        setName("");
+        // setName("");
         alert("✅ gamer added successfully");
       } else {
         setError(data.message || "Failed to add gamer");
@@ -309,7 +285,7 @@ export default function AgentGamerPage() {
     setFormError(""); // reset
 
     // Basic frontend validation
-    if (!gamerId || !name || !password) {
+    if (!gamerId || !password) {
       setFormError("Customer ID, Name, and Password are required.");
       return;
     }
@@ -321,7 +297,7 @@ export default function AgentGamerPage() {
         body: JSON.stringify({
           oldGamerId: editingGamer.gamerId,
           gamerId,
-          name,
+          // name,
           password,
           // percentages: percentages,
           // cPercentages: cUpdatePercentages,
@@ -351,6 +327,7 @@ export default function AgentGamerPage() {
     const fetchCountsForGamers = async () => {
       setLoading(true);
       const counts = {};
+      const waitingCounts = {};
 
       for (const gamer of gamers) {
         try {
@@ -369,10 +346,24 @@ export default function AgentGamerPage() {
         } catch (err) {
           counts[gamer.gamerId] = "Error";
         }
+        try {
+          const res = await fetch("/api/getWaitingPlayersByGamerId", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ gamerId: gamer.gamerId }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            waitingCounts[gamer.gamerId] = data.players.length;
+          }
+        } catch (err) {
+          console.error("Waiting players error:", err);
+        }
       }
 
       setLoading(false);
       setEntryCounts(counts);
+      setWaitingEntryCount(waitingCounts);
     };
 
     if (gamers.length > 0) {
@@ -451,9 +442,20 @@ export default function AgentGamerPage() {
 
   //   fetchTotals();
   // }, []);
+  async function approveVoucher(gamerId) {
+    const res = await fetch("/api/saveApproveInput", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gamerId }),
+    });
+    const data = await res.json();
+    fetchCountsForGamers();
+
+    alert(data.message);
+  }
 
   const filteredGamers = gamers.filter((gamer) => {
-    const nameMatches = gamer.name
+    const nameMatches = gamer.gamerId
       ?.toLowerCase()
       .includes(searchQuery.toLowerCase());
 
@@ -461,6 +463,32 @@ export default function AgentGamerPage() {
 
     return nameMatches;
   });
+  const [histories, setHistories] = useState({}); // { gamerId: [transactions] }
+
+  useEffect(() => {
+    if (gamers.length === 0) return;
+
+    async function fetchAllHistories() {
+      const results = await Promise.all(
+        gamers.map(async (g) => {
+          const res = await fetch(`/api/trxnAgent?gamerId=${g.gamerId}`);
+          if (!res.ok) return { gamerId: g.gamerId, transaction: null };
+          const data = await res.json();
+          return { gamerId: g.gamerId, transaction: data || null };
+        })
+      );
+
+      // Convert array of { gamerId, transaction } to a lookup object
+      const historiesObj = results.reduce((acc, curr) => {
+        acc[curr.gamerId] = curr.transaction;
+        return acc;
+      }, {});
+
+      setHistories(historiesObj);
+    }
+
+    fetchAllHistories();
+  }, [gamers]);
 
   return (
     <div className="p-6 text-white font-mono bg-gradient-to-br from-black via-gray-900 to-black min-h-screen">
@@ -534,9 +562,13 @@ export default function AgentGamerPage() {
               <thead>
                 <tr className="bg-yellow-700 text-white">
                   <th className="border border-yellow-400 p-2">#</th>
-                  <th className="border border-yellow-400 p-2">Name</th>
+                  {/* <th className="border border-yellow-400 p-2">Name</th> */}
                   <th className="border border-yellow-400 p-2">Customer ID</th>
                   <th className="border border-yellow-400 p-2">Password</th>
+                  <th className="border border-yellow-400 p-2">transaction</th>
+                  <th className="border border-yellow-400 p-2">
+                    Waiting Voucher
+                  </th>
 
                   {/* <th className="font-bangla border border-yellow-400 p-2">
                     <span> ডিসকাঊন্ট</span>
@@ -546,9 +578,10 @@ export default function AgentGamerPage() {
                   </th> */}
 
                   {/* <th className="border border-yellow-400 p-2">Status</th> */}
-                  <th colSpan={5} className="border border-yellow-400 p-2">
+                  <th colSpan={2} className="border border-yellow-400 p-2">
                     Actions
                   </th>
+                  <th className="border border-yellow-400 p-2">Notes</th>
                 </tr>
               </thead>
               <tbody>
@@ -567,7 +600,7 @@ export default function AgentGamerPage() {
                   (
                     {
                       gamerId,
-                      name,
+                      // name,
                       password,
                       // active,
                       // percentages,
@@ -586,11 +619,12 @@ export default function AgentGamerPage() {
                       <td className="border border-yellow-400 p-2">{i + 1}</td>
                       <td
                         onClick={() =>
-                          router.push(`/admin/gamer-games/${gamerId}`)
+                          router.push(`/agent/gamer-games/${gamerId}`)
                         }
                         className="relative border border-yellow-400 p-2 cursor-pointer hover:bg-yellow-400/10 transition"
                       >
-                        {name}
+                        {gamerId}
+
                         {loading && (
                           <div className="flex justify-center items-center absolute top-2 right-2 ">
                             <div className="flex space-x-1">
@@ -607,9 +641,6 @@ export default function AgentGamerPage() {
                         )}
                       </td>
 
-                      <td className="border border-yellow-400 p-2">
-                        {gamerId}
-                      </td>
                       <td className="border border-yellow-400 p-2 ">
                         <span className="text-white px-4">
                           {visiblePasswords[gamerId] ? password : "********"}
@@ -623,81 +654,64 @@ export default function AgentGamerPage() {
                         </button>
                       </td>
 
-                      {/* <td className="border border-yellow-400 p-2 sm:min-w-[10rem] max-w-full">
-                        <div className="text-green-400 truncate">
-                          {Object.values(percentages ?? {}).length > 0
-                            ? Object.values(percentages).join(", ")
-                            : "—"}
-                        </div>
-                        <div className="text-red-400 truncate">
-                          {Object.values(cPercentages ?? {}).length > 0
-                            ? Object.values(cPercentages).join(", ")
-                            : "—"}
-                        </div>
-                      </td> */}
-                      {/* <td className="border border-yellow-400 p-2 space-x-2 ">
-                        <span className="text-red-400">
-                          {Object.values(cPercentages ?? {}).length > 0
-                            ? Object.values(cPercentages).join(", ")
-                            : "—"}
-                        </span>
-                      </td> */}
-
-                      {/* <td className="border border-yellow-400 px-3 py-2">
-                        {onlineGamerIds.has(gamerId) ? (
-                          <div className="space-x-1">
-                            <span className="inline-block align-middle w-4 h-4 rounded-full bg-green-500 animate-pulse"></span>
-                          </div>
-                        ) : (
-                          <div className="space-x-1">
-                            <span className="inline-block align-middle w-4 h-4 rounded-full bg-gray-400"></span>
+                      <td className="border border-yellow-400 p-2">
+                        {loading && (
+                          <div className="flex justify-center items-center absolute top-2 right-2 ">
+                            <div className="flex space-x-1">
+                              <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce"></div>
+                              <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
+                              <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
+                            </div>
                           </div>
                         )}
-                      </td> */}
-                      {/* <td className="border border-yellow-400 p-2 space-x-2">
-                        <div className="relative inline-block">
-                          <button
-                            onClick={() =>
-                              router.push(`/admin/gamer-games/${gamerId}`)
-                            }
-                            className="px-4 py-1 hover:bg-yellow-500 text-black font-bold rounded-full shadow-md transition"
-                          >
-                            🎰
-                          </button>
-                          {loading && (
-                            <div className="flex justify-center items-center absolute -top-2 -right-2 ">
-                              <div className="flex space-x-1">
-                                <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce"></div>
-                                <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
-                                <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
-                              </div>
+
+                        {histories[gamerId] ? (
+                          <div className="text-sm text-white text-center">
+                            # {histories[gamerId].trxnNumber} | 💰{" "}
+                            {histories[gamerId].amount} | 💳{" "}
+                            {histories[gamerId].method}
+                          </div>
+                        ) : (
+                          <em className="text-gray-400">No transaction</em>
+                        )}
+                      </td>
+
+                      <td className="border border-yellow-400 p-2">
+                        {loading && (
+                          <div className="flex justify-center items-center absolute top-2 right-2 ">
+                            <div className="flex space-x-1">
+                              <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce"></div>
+                              <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
+                              <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
                             </div>
-                          )}
-                          {entryCounts[gamerId] > 0 && (
-                            <span className="absolute -top-2 -right-2 w-5 h-5 bg-green-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
-                              {entryCounts[gamerId]}
-                            </span>
-                          )}
-                        </div>
-                      </td> */}
+                          </div>
+                        )}
+                        {waitingEntryCount[gamerId] > 0 && (
+                          <span className=" bg-green-600 text-white text-xs font-bold rounded-full px-3 py-1 shadow-md">
+                            {waitingEntryCount[gamerId]}
+                          </span>
+                        )}
+                        {waitingEntryCount[gamerId] === 0 && (
+                          <span className=" bg-green-600 text-white text-xs font-bold rounded-full px-3 py-1 shadow-md">
+                            {0}
+                          </span>
+                        )}
+                      </td>
+
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <button
-                          onClick={() =>
-                            handleEditClick({
-                              gamerId,
-                              name,
-                              password,
-                              // percentages,
-                              // cPercentages,
-                              // expense,
-                              // tenPercent,
-                              // expenseAmt,
-                              // tenPercentAmt,
-                            })
-                          }
-                          className="px-3 py-1 rounded  text-yellow-400 font-semibold"
+                          onClick={() => approveVoucher(gamerId)}
+                          className="px-3 py-1 rounded  text-green-600 font-semibold flex items-center space-x-1"
                         >
-                          Edit
+                          <LucideBadgeCheck className="w-6 h-6" />
+                        </button>
+                      </td>
+                      <td className="border border-yellow-400 p-2 space-x-2">
+                        <button
+                          onClick={() => deleteVoucher(gamerId)}
+                          className="px-3 py-1 rounded   text-red-600 font-semibold flex items-center space-x-1"
+                        >
+                          <LucideTrash2 className="w-6 h-6" />
                         </button>
                       </td>
                       <td className="border border-yellow-400 p-2 space-x-2">
@@ -715,24 +729,6 @@ export default function AgentGamerPage() {
                             </span>
                           )}
                         </div>
-                      </td>
-                      {/* <td className="border border-yellow-400 p-2 space-x-2">
-                        <button
-                          onClick={() => toggleActive(gamerId, active)}
-                          className={`px-3 py-1 rounded  
-                          } text-red-500 font-semibold`}
-                        >
-                          {active && <CircleOff />}
-                        </button>
-                      </td> */}
-                      <td className="border border-yellow-400 p-2 space-x-2">
-                        <button
-                          onClick={() => deleteVoucher(gamerId)}
-                          className="px-3 py-1 rounded bg-red-100 hover:bg-red-200 text-red-600 font-semibold flex items-center space-x-1"
-                        >
-                          <LucideDelete className="w-4 h-4" />
-                          <span>Delete</span>
-                        </button>
                       </td>
                     </tr>
                   )
@@ -755,14 +751,7 @@ export default function AgentGamerPage() {
             className="bg-black bg-opacity-70 p-6 rounded-lg shadow-lg max-w-md mb-10"
           >
             {/* gamer Info */}
-            <input
-              type="text"
-              placeholder="Customer Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full mb-3 p-3 rounded bg-black border border-yellow-400 text-yellow-300"
-              disabled={adding}
-            />
+
             <input
               type="text"
               placeholder="Customer ID"
@@ -776,17 +765,9 @@ export default function AgentGamerPage() {
               placeholder="Customer Password"
               value={password}
               onChange={handlePasswordChange}
-              className={`w-full mb-3 p-3 rounded bg-black border ${
-                passwordValid ? "border-yellow-400" : "border-red-500"
-              } text-yellow-300`}
+              className={`w-full mb-3 p-3 rounded bg-black border `}
               disabled={adding}
             />
-            {!passwordValid && password.length > 0 && (
-              <p className="text-red-500 text-sm mt-[-10px] mb-2">
-                Must be at least 6 characters and include uppercase, lowercase,
-                and a number
-              </p>
-            )}
 
             <button
               type="submit"
@@ -830,15 +811,6 @@ export default function AgentGamerPage() {
               </p>
             )}
             <div className="mb-3">
-              <label className="block text-sm">Customer Name</label>
-              <input
-                type="text"
-                className="w-full p-2 bg-black border border-yellow-400 rounded text-yellow-300"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <div className="mb-3">
               <label className="block text-sm">Customer ID</label>
               <input
                 type="text"
@@ -856,17 +828,9 @@ export default function AgentGamerPage() {
                 placeholder="Password"
                 value={password}
                 onChange={handlePasswordChange}
-                className={`w-full mb-3 p-3 rounded bg-black border ${
-                  passwordValid ? "border-yellow-400" : "border-red-500"
-                } text-yellow-300`}
+                className={`w-full mb-3 p-3 rounded bg-black border `}
                 disabled={adding}
               />{" "}
-              {!passwordValid && password.length > 0 && (
-                <p className="text-red-500 text-sm mt-[-10px] mb-2">
-                  Must be at least 6 characters and include uppercase,
-                  lowercase, and a number
-                </p>
-              )}
             </div>
           </div>
         </div>

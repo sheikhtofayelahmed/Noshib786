@@ -7,6 +7,7 @@ import AllahBhorosha from "@/components/Allah";
 import PlayerInputModal from "@/components/PlayerInputModal";
 import { ReceiptText } from "lucide-react";
 import { useGamer } from "@/context/GamerContext";
+import GamerInput from "@/components/GamerInput";
 
 export default function GamerDashboard() {
   const { gamerId, loading } = useGamer();
@@ -49,70 +50,18 @@ export default function GamerDashboard() {
 
     fetchGameStatus();
   }, []);
-  // Run after gamer logs in
 
-  // if (loading || !gamerId || gameActive === null) {
-  //   return (
-  //     <div className="flex justify-center items-center min-h-screen">
-  //       <div className="flex space-x-2">
-  //         <div className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce"></div>
-  //         <div className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
-  //         <div className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (loading || !gamerId || gameActive === null) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="flex space-x-2">
+          <div className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce"></div>
+          <div className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
+          <div className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
+        </div>
+      </div>
+    );
+  }
 
-  // return (
-  // <>
-  //   <button
-  //     onClick={() => setInputModal(true)}
-  //     className="my-2 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold rounded-full shadow-lg transition duration-200 ease-in-out transform hover:scale-105"
-  //   >
-  //     <svg
-  //       xmlns="http://www.w3.org/2000/svg"
-  //       fill="none"
-  //       viewBox="0 0 24 24"
-  //       strokeWidth={1.5}
-  //       stroke="currentColor"
-  //       className="w-5 h-5"
-  //     >
-  //       <path
-  //         strokeLinecap="round"
-  //         strokeLinejoin="round"
-  //         d="M12 4.5v15m7.5-7.5h-15"
-  //       />
-  //     </svg>
-  //     New Input <ReceiptText />
-  //   </button>
-  //   <label
-  //     className={`my-2 inline-flex items-center gap-2 px-3 py-2  bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold rounded-full shadow-lg transition duration-200 ease-in-out transform hover:scale-105 cursor-pointer ${
-  //       doubleInput ? "ring-2 ring-black" : ""
-  //     }`}
-  //   >
-  //     <input
-  //       type="checkbox"
-  //       checked={doubleInput}
-  //       onChange={() => setDoubleInput(!doubleInput)}
-  //       className="form-checkbox h-4 w-4 text-yellow-700 rounded focus:ring-0"
-  //     />
-  //     Double Input <ReceiptText />
-  //   </label>
-  //   {gameActive ? (
-  //     <PlayerInput
-  //       doubleInput={doubleInput}
-  //       setDoubleInput={setDoubleInput}
-  //     />
-  //   ) : (
-  //     <AllahBhorosha></AllahBhorosha>
-  //   )}
-  //   {gameActive && inputModal && (
-  //     <PlayerInputModal onClose={() => setInputModal(false)} />
-  //   )}
-  // </>
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <h1 className="text-4xl text-black font-bold">Under Construction</h1>
-    </div>
-  );
+  return <>{gameActive ? <GamerInput /> : <AllahBhorosha></AllahBhorosha>}</>;
 }

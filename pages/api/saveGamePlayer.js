@@ -8,6 +8,7 @@ export default async function handler(req, res) {
   const {
     voucher,
     agentId,
+    gamerId,
     agentName,
     name,
     data, // Array of { input: { num, str, rumble } }
@@ -22,6 +23,7 @@ export default async function handler(req, res) {
   if (
     !voucher ||
     !agentId ||
+    !gamerId ||
     !Array.isArray(data) ||
     data.length === 0 ||
     !amountPlayed
@@ -66,9 +68,10 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: "No valid entries to save" });
     }
 
-    const savedPlayer = await db.collection("playersInput").insertOne({
+    const savedPlayer = await db.collection("gamersInput").insertOne({
       voucher,
       agentId,
+      gamerId,
       agentName,
       name,
       time: serverTime,
