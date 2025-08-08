@@ -81,7 +81,6 @@ export default function AgentGamerPage() {
   const [noteId, setNoteId] = useState("");
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
   async function notes(gamerId) {
     setShowNoteModal(true);
     setNoteId(gamerId);
@@ -182,13 +181,20 @@ export default function AgentGamerPage() {
 
   useEffect(() => {
     fetchGamers();
-  }, []);
+  }, [agentId]);
 
   const fetchGamers = async () => {
     setLoadingGamers(true);
     setError("");
+
     try {
-      const res = await fetch("/api/getGamers");
+      const res = await fetch("/api/getGamers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ agentId }),
+      });
       const data = await res.json();
       if (res.ok) {
         setGamers(data.gamers);
