@@ -1,5 +1,6 @@
 "use client";
 
+import { LucideHome } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -12,27 +13,31 @@ export default function Breadcrumb() {
   const isAgent = pathname.startsWith("/");
 
   return (
-    <nav className="text-cyan-300 mx-6 mb-4 text-sm" aria-label="Breadcrumb">
-      <ol className="gap-2 list-none p-0 m-0 flex items-center">
-        {/* Show Home only for agent routes */}
+    <nav className="mx-6 mb-4 text-sm font-mono" aria-label="Breadcrumb">
+      <ol className="flex items-center gap-2 p-0 m-0 list-none">
+        {/* Home icon for agent routes */}
         {isAgent && (
-          <li className="bg-cyan-400 rounded-md ">
-            <Link href="/" className="hover:underline text-white text-xl">
-              🎮
+          <li className=" shadow-lg hover:scale-105 transition-transform">
+            <Link
+              href="/"
+              className="flex items-center justify-center w-8 h-8 text-lg"
+              title="Home"
+            >
+              <LucideHome></LucideHome>
             </Link>
           </li>
         )}
 
-        {/* Show Admin only for admin routes */}
+        {/* Admin link */}
         {isAdmin && (
-          <li>
-            <Link href="/admin" className="hover:text-pink-400 font-bold">
-              Admin
+          <li className="bg-gradient-to-br from-pink-500 to-pink-700 px-3 py-1 rounded-full shadow hover:shadow-lg hover:scale-105 transition-transform">
+            <Link href="/admin" className="text-white font-bold tracking-wide">
+              👑 Admin
             </Link>
           </li>
         )}
 
-        {/* Render other parts after the base */}
+        {/* Remaining breadcrumb parts */}
         {parts.length > 0 &&
           parts.slice(isAdmin || isAgent ? 1 : 0).map((part, idx) => {
             const href =
@@ -42,14 +47,18 @@ export default function Breadcrumb() {
 
             return (
               <li key={href} className="flex items-center">
-                <span className="mx-2">/</span>
+                {/* Divider */}
+                <span className="mx-1 text-yellow-300">🎲</span>
 
                 {!isLast ? (
-                  <Link href={href} className="hover:underline capitalize">
+                  <Link
+                    href={href}
+                    className="px-3 py-1 rounded-full bg-gradient-to-br from-purple-700 to-indigo-900 text-yellow-300 hover:from-purple-500 hover:to-indigo-700 hover:text-white capitalize transition-colors shadow-md hover:shadow-lg"
+                  >
                     {part.replace(/-/g, " ")}
                   </Link>
                 ) : (
-                  <span className="capitalize font-bold">
+                  <span className="px-3 py-1 rounded-full bg-gradient-to-br from-green-500 to-green-700 text-white font-bold capitalize shadow-inner">
                     {part.replace(/-/g, " ")}
                   </span>
                 )}
