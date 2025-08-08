@@ -82,8 +82,14 @@ export default function AgentLayout({ children }) {
       {/* Mobile Header */}
       <div className="flex justify-between items-center p-4 bg-black md:hidden border-b border-yellow-500">
         <h2 className="text-xl font-bold text-yellow-400">🎯 Agent Panel</h2>
-        <button onClick={toggleSidebar} className="text-yellow-400">
+        <button
+          onClick={toggleSidebar}
+          className="text-yellow-400 bg-gradient-to-r from-red-600 via-pink-500 to-purple-600 
+             px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-transform 
+             border-2 border-yellow-300 font-bold text-lg flex items-center gap-2"
+        >
           {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          <span className="animate-pulse">🎲</span>
         </button>
       </div>
 
