@@ -20,21 +20,21 @@ export default function AgentLayout({ children }) {
 
   const navItems = [
     { name: "Play", path: "/gamer" },
+
     {
-      name: `Voucher${entryCount !== undefined ? ` (${entryCount})` : ""}`,
+      name: "Voucher",
       path: "/gamer/games",
+      count: entryCount,
+      suffix: "OK",
     },
 
     {
-      name: `Search Voucher`,
-      path: "/gamer/voucher",
-    },
-    {
-      name: `Pending-পেন্ডিং ${
-        waitingEntryCount !== undefined ? ` (${waitingEntryCount || "0"})` : ""
-      }`,
+      name: "ওয়েটিং ভাউচার",
       path: "/gamer/waitingData",
+      count: waitingEntryCount,
+      redBackground: true,
     },
+
     { name: "Transaction", path: "/gamer/trxn" },
     { name: "Noshib Explore", path: "/history" },
   ];
@@ -52,8 +52,8 @@ export default function AgentLayout({ children }) {
              px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-transform 
              border-2 border-yellow-300 font-bold text-lg flex items-center gap-2"
         >
-          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-          <span className="animate-pulse">🎲</span>
+          {sidebarOpen && <X size={24} />}
+          <span className="text-white  animate-pulse text-lg">Menu 🎲</span>
         </button>
       </div>
 
@@ -87,13 +87,40 @@ export default function AgentLayout({ children }) {
               <Link href={item.path} key={item.path}>
                 <div
                   onClick={() => setSidebarOpen(false)}
-                  className={`block px-5 py-3 rounded-xl border transition duration-300 font-medium tracking-wide ${
-                    pathname === item.path
-                      ? "bg-pink-300 text-black border-pink-500 shadow-inner"
-                      : "border-pink-500 text-pink-200 hover:bg-pink-400 hover:text-black"
-                  }`}
+                  className={`px-5 py-3 rounded-xl border transition duration-300 font-medium tracking-wide flex items-center justify-between
+          ${
+            item.name === "ওয়েটিং ভাউচার"
+              ? "bg-red-600 text-white border-red-700 shadow-inner"
+              : pathname === item.path
+              ? "bg-pink-300 text-black border-pink-500 shadow-inner"
+              : "border-pink-500 text-pink-200 hover:bg-pink-400 hover:text-black"
+          }
+        `}
                 >
-                  {item.name}
+                  <span>{item.name}</span>
+
+                  {(item.count !== undefined || item.suffix) && (
+                    <div className="flex items-center space-x-2">
+                      {item.count !== undefined && (
+                        <span
+                          className={`text-xs font-bold px-3 py-1 rounded-full ${
+                            item.name === "ওয়েটিং ভাউচার"
+                              ? "bg-white text-red-600"
+                              : "bg-pink-500 text-white"
+                          }`}
+                        >
+                          {item.count || "0"}
+                        </span>
+                      )}
+
+                      {item.suffix && (
+                        <span className="text-green-600 font-bold flex items-center space-x-1">
+                          <span>✓</span>
+                          <span>{item.suffix}</span>
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </Link>
             ))}

@@ -60,14 +60,14 @@ export default function MasterAgentLayout({ children }) {
         <div className="flex justify-between items-center p-4 bg-black md:hidden border-b cyan-yellow-500">
           <h2 className="text-xl font-bold text-cyan-400">🎰 Master Agent</h2>
           <button
-          onClick={toggleSidebar}
-          className="text-yellow-400 bg-gradient-to-r from-red-600 via-pink-500 to-purple-600 
+            onClick={toggleSidebar}
+            className="text-yellow-400 bg-gradient-to-r from-red-600 via-pink-500 to-purple-600 
              px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-transform 
              border-2 border-yellow-300 font-bold text-lg flex items-center gap-2"
-        >
-          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-          <span className="animate-pulse">🎲</span>
-        </button>
+          >
+            {sidebarOpen && <X size={24} />}
+            <span className="text-white  animate-pulse text-lg">Menu 🎲</span>
+          </button>
         </div>
 
         {/* Sidebar */}
@@ -83,7 +83,7 @@ export default function MasterAgentLayout({ children }) {
                 🎰
               </div>
               <h2 className="text-2xl font-bold text-cyan-300 tracking-widest drop-shadow-[0_0_8px_#22d3ee]">
-                Master Agent 
+                Master Agent
               </h2>
             </div>
 

@@ -123,11 +123,21 @@ export default function LuckyNumbersPage() {
     },
     { src: "/magician.jpeg", title: "🧙 জাদুকরের ইশারা", inputs: [9, 10] },
     { src: "/star.jpeg", title: "⭐ নক্ষত্রের নসীব", inputs: [11, 12, 13] },
-    { src: "/mohadeb.jpeg", title: "⭐ মহাদেব", inputs: [14, 15, 16] },
-    { src: "/krishna.jpeg", title: "⭐ কাট নাম্বার", inputs: [17, 18] },
-    { src: "/durga.jpeg", title: "⭐ জোকার", inputs: [19, 20, 21, 22, 23] },
-    { src: "/honuman.jpeg", title: "⭐ভি আই পি", inputs: [24, 25, 26, 27, 28] },
-    { src: "/eagle.jpeg", title: "⭐ টাচ", inputs: [29, 30, 31] },
+    { src: "/horse.jpg", title: "⭐বেহেস্তি ঘোড়া", inputs: [14, 15, 16] },
+    { src: "/lion.jpg", title: "⭐ কাট নাম্বার", inputs: [17, 18] },
+    { src: "/elephant.jpg", title: "⭐ জোকার", inputs: [19, 20, 21, 22, 23] },
+    {
+      src: "/thaiGirl.jpg",
+      title: "⭐ভি আই পি",
+      inputs: [24, 25, 26, 27, 28],
+    },
+    { src: "/tiger.jpg", title: "⭐ টাচ", inputs: [29, 30, 31] },
+    { src: "/eagle.jpeg", title: "⭐ টাচ", inputs: [32, 33, 34] },
+    { src: "/fox.jpg", title: "⭐ টাচ", inputs: [35, 36, 37, 38, 39] },
+    { src: "/poorGuy.jpg", title: "⭐ টাচ", inputs: [40, 41, 42] },
+    { src: "/dragon.jpg", title: "⭐ টাচ", inputs: [43, 44, 45, 46, 47] },
+    { src: "/snake.jpg", title: "⭐ টাচ", inputs: [32, 33, 34] },
+    { src: "/richGuy.jpg", title: "⭐ টাচ", inputs: [32, 33, 34] },
   ];
   // const ContentRef = useRef(null);
   // const handleDownloadPdf = async () => {
@@ -150,7 +160,14 @@ export default function LuckyNumbersPage() {
   //     console.error("Content div not found!");
   //   }
   // };
-
+  const hexPositions = [
+    { top: 90, left: 50 },
+    { top: 90, left: 110 },
+    { top: 40, left: 80 },
+    { top: 130, left: 30 },
+    { top: 130, left: 130 },
+    // Add more positions as needed
+  ];
   return (
     <main
       // ref={ContentRef}
@@ -167,7 +184,7 @@ export default function LuckyNumbersPage() {
         সাপ্তাহিক নসীব
       </h1>
       {/* Top Cards Section */}
-      <div className="flex flex-col sm:flex-row justify-around items-center gap-4 text-center mb-1 max-w-[21cm] mx-auto px-4">
+      <div className="flex flex-col sm:flex-row justify-around items-center gap-4 text-center mb-10 max-w-[22cm] mx-auto px-4">
         <div className="bg-white border border-gray-300 rounded-2xl px-3 py-2 shadow w-40">
           <div className="flex items-center justify-center gap-1 mb-1 text-sm font-semibold">
             🎯
@@ -209,13 +226,13 @@ export default function LuckyNumbersPage() {
         </div>
       </div>
       {/* Grid of Images */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-[21cm] mx-auto px-4 py-1 print:bg-white print:text-black">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4 max-w-[21cm] mx-auto px-4  print:bg-white print:text-black ">
         {data.map((item, idx) => (
           <div
             key={idx}
-            className="border border-gray-300 rounded-xl shadow overflow-hidden bg-white"
+            className="border relative border-gray-300 rounded-xl shadow overflow-hidden bg-white  mb-5"
           >
-            <div className="relative w-full">
+            <div className=" w-full">
               <Image
                 src={item.src}
                 alt={item.title}
@@ -228,9 +245,18 @@ export default function LuckyNumbersPage() {
               </p>
             </div>
 
-            <div className="flex justify-center gap-2 flex-wrap p-2 bg-gray-50">
-              {item.inputs.map((i) => renderInput(i))}
-            </div>
+            {item.inputs.map((input, index) => (
+              <div
+                key={index}
+                className="absolute"
+                style={{
+                  top: `${hexPositions[index]?.top || 0}px`,
+                  left: `${hexPositions[index]?.left || 0}px`,
+                }}
+              >
+                {renderInput(input)}
+              </div>
+            ))}
           </div>
         ))}
       </div>

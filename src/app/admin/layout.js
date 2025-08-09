@@ -138,8 +138,8 @@ export default function AdminLayout({ children }) {
              px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-transform 
              border-2 border-yellow-300 font-bold text-lg flex items-center gap-2"
         >
-          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-          <span className="animate-pulse">🎲</span>
+          {sidebarOpen && <X size={24} />}
+          <span className="text-white  animate-pulse text-lg">Menu 🎲</span>
         </button>
       </div>
 

@@ -26,7 +26,7 @@ export default function VoucherModal() {
   // Effect for countdown timer logic
 
   useEffect(() => {
-    if (!gamerId) return;
+    if (!gamerId) return; 
 
     const controller = new AbortController();
     const signal = controller.signal;

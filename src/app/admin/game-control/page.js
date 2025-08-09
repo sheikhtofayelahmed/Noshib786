@@ -277,6 +277,35 @@ export default function AdminGameControl() {
       });
     }
   };
+  const handleGamersWaitingDelete = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete ALL gamersInput data? This action cannot be undone."
+    );
+
+    if (!confirmed) return;
+
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/deleteAllGamersInput", {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage(data.message);
+      } else {
+        setMessage(`Error: ${data.message}`);
+      }
+    } catch (err) {
+      setMessage("Something went wrong.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto mt-6 bg-gray-900 bg-opacity-90 p-6 rounded-lg ring-2 ring-red-500 text-white space-y-6">
@@ -431,7 +460,6 @@ export default function AdminGameControl() {
         >
           {submitting ? "হিসেব করা হচ্ছে..." : "হিসাব-নিকাশ করুন"}
         </button>
-
         <button
           onClick={() => {
             const confirmation = prompt(
@@ -449,6 +477,21 @@ export default function AdminGameControl() {
         >
           ভাউচার মুভ
         </button>
+        <button
+          onClick={handleGamersWaitingDelete}
+          disabled={loading}
+          className={`
+    px-6 py-3 rounded-lg font-bold text-white
+    bg-gradient-to-r from-red-700 via-red-600 to-red-500
+    hover:from-yellow-400 hover:via-yellow-300 hover:to-yellow-400
+    shadow-lg shadow-red-900/80
+    transition duration-300 ease-in-out
+    disabled:opacity-50 disabled:cursor-not-allowed
+    focus:outline-none focus:ring-4 focus:ring-yellow-300
+  `}
+        >
+          {loading ? "Deleting..." : "ওয়েটিং ভাউচার ডিলিট"}
+        </button>{" "}
       </div>
     </div>
   );
