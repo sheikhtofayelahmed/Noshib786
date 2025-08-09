@@ -10,7 +10,8 @@ import AllahBhorosha from "@/components/Allah";
 import { useGamer } from "@/context/GamerContext";
 
 export default function AgentLayout({ children }) {
-  const { gamerId, loading, entryCount, waitingEntryCount } = useGamer();
+  const { gamerId, loading, entryCount, waitingEntryCount, logout } =
+    useGamer();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [agent, setAgent] = useState();
@@ -42,8 +43,10 @@ export default function AgentLayout({ children }) {
     <div className="min-h-screen font-mono bg-gradient-to-br from-black via-gray-900 to-black text-white flex flex-col md:flex-row">
       {/* Mobile Header */}
       <div className="flex justify-between items-center p-4 bg-black md:hidden border-b border-yellow-500">
-        <h2 className="text-lg font-bold text-yellow-400">🎯 কাস্টমার প্যানেল</h2>
-      <button
+        <h2 className="text-lg font-bold text-yellow-400">
+          🎯 কাস্টমার প্যানেল
+        </h2>
+        <button
           onClick={toggleSidebar}
           className="text-yellow-400 bg-gradient-to-r from-red-600 via-pink-500 to-purple-600 
              px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-transform 
@@ -107,7 +110,7 @@ export default function AgentLayout({ children }) {
           <button
             onClick={() => {
               logout();
-              window.location.href = "/agent/login";
+              window.location.href = "/gamer/login";
             }}
             className="w-full text-sm font-semibold bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white px-4 py-3 rounded-xl shadow-lg transition-all"
           >
