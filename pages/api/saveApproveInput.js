@@ -7,39 +7,35 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { gamerId } = req.body;
+  const { gamerId, voucher } = req.body;
 
-  if (!gamerId) {
-    return res.status(400).json({ message: "gamerId is required" });
+  if (!gamerId || !voucher) {
+    return res
+      .status(400)
+      .json({ message: "gamerId and voucher are required" });
   }
 
   try {
     const client = await clientPromise;
     const db = client.db("noshib786");
 
-    // Find all documents in gamersInput with this gamerId
-    const docs = await db.collection("gamersInput").find({ gamerId }).toArray();
+    // Find the specific document to move
+    const doc = await db
+      .collection("gamersInput")
+      .findOne({ gamerId, voucher });
 
-    if (docs.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No documents found for this gamerId" });
+    if (!doc) {
+      return res.status(404).json({ message: "Document not found" });
     }
 
-    // Insert all docs into playersInput
-    // Optionally remove _id so MongoDB generates new ones
-    const docsToInsert = docs.map(({ _id, ...rest }) => rest);
+    // Insert into playersInput (omit _id to avoid conflict)
+    const { _id, ...docToInsert } = doc;
+    await db.collection("playersInput").insertOne(docToInsert);
 
-    const insertResult = await db
-      .collection("playersInput")
-      .insertMany(docsToInsert);
+    // Delete the same document from gamersInput
+    await db.collection("gamersInput").deleteOne({ _id });
 
-    // Remove from gamersInput (to "move" not just copy)
-    await db.collection("gamersInput").deleteMany({ gamerId });
-
-    return res.status(200).json({
-      message: `Successfully moved ${insertResult.insertedCount} documents`,
-    });
+    return res.status(200).json({ message: "Successfully moved 1 document" });
   } catch (err) {
     console.error("Error moving gamer data:", err);
     return res.status(500).json({ message: "Internal server error" });

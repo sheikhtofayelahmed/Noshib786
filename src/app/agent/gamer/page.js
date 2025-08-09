@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { useAgent } from "@/context/AgentContext";
+import GamerDetailsModal from "@/components/VoucherApproveModal";
 export default function AgentGamerPage() {
   const router = useRouter();
   const { agentId } = useAgent();
@@ -329,53 +330,77 @@ export default function AgentGamerPage() {
     }
   };
 
-  useEffect(() => {
-    const fetchCountsForGamers = async () => {
-      setLoading(true);
-      const counts = {};
-      const waitingCounts = {};
+  const [entryTotalCounts, setEntryTotalCounts] = useState({});
+  const [waitingPlayersGamer, setWaitingPlayersGamer] = useState({});
 
-      for (const gamer of gamers) {
-        try {
-          const res = await fetch("/api/getVoucherQntByGamerId", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ gamerId: gamer.gamerId }),
-          });
+  const fetchCountsForGamers = async () => {
+    setLoading(true);
+    const counts = {};
+    const waitingCounts = {};
+    const waitingPlayersMap = {};
+    const played = {};
 
-          const data = await res.json();
-          if (res.ok) {
-            counts[gamer.gamerId] = data.count;
-          } else {
-            counts[gamer.gamerId] = "Error";
-          }
-        } catch (err) {
+    for (const gamer of gamers) {
+      try {
+        const res = await fetch("/api/getVoucherQntByGamerId", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ gamerId: gamer.gamerId }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          counts[gamer.gamerId] = data.count;
+          played[gamer.gamerId] = data.totals?.total;
+        } else {
           counts[gamer.gamerId] = "Error";
         }
-        try {
-          const res = await fetch("/api/getWaitingPlayersByGamerId", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ gamerId: gamer.gamerId }),
-          });
-          if (res.ok) {
-            const data = await res.json();
-            waitingCounts[gamer.gamerId] = data.players.length;
-          }
-        } catch (err) {
-          console.error("Waiting players error:", err);
-        }
+      } catch (err) {
+        counts[gamer.gamerId] = "Error";
       }
 
-      setLoading(false);
-      setEntryCounts(counts);
-      setWaitingEntryCount(waitingCounts);
-    };
+      try {
+        const res = await fetch("/api/getWaitingPlayersByGamerId", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ gamerId: gamer.gamerId }),
+        });
 
+        if (res.ok) {
+          const data = await res.json();
+          waitingCounts[gamer.gamerId] = data.players.length;
+          waitingPlayersMap[gamer.gamerId] = data.players; // 👈 Store full array of player objects
+        }
+      } catch (err) {
+        console.error("Waiting players error:", err);
+      }
+    }
+
+    setLoading(false);
+    setEntryCounts(counts);
+    setWaitingEntryCount(waitingCounts);
+    setEntryTotalCounts(played);
+    setWaitingPlayersGamer(waitingPlayersMap); // 👈 Set the full map here
+  };
+  useEffect(() => {
     if (gamers.length > 0) {
       fetchCountsForGamers();
     }
   }, [gamers]);
+
+  const [selectedGamerId, setSelectedGamerId] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const openModal = (gamerId) => {
+    setSelectedGamerId(gamerId);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedGamerId(null);
+  };
+
   // Send heartbeat for current logged-in gamer
 
   // const fetchOnlineGamers = async () => {
@@ -448,17 +473,6 @@ export default function AgentGamerPage() {
 
   //   fetchTotals();
   // }, []);
-  async function approveVoucher(gamerId) {
-    const res = await fetch("/api/saveApproveInput", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ gamerId }),
-    });
-    const data = await res.json();
-    fetchCountsForGamers();
-
-    alert(data.message);
-  }
 
   const filteredGamers = gamers.filter((gamer) => {
     const nameMatches = gamer.gamerId
@@ -543,7 +557,6 @@ export default function AgentGamerPage() {
           </div>
         )}
       </div> */}
-
       <section className="w-full max-w-full">
         <h2 className="text-2xl font-bold mb-4 text-yellow-400">
           🧑‍💼 Customer List
@@ -584,9 +597,7 @@ export default function AgentGamerPage() {
                   </th> */}
 
                   {/* <th className="border border-yellow-400 p-2">Status</th> */}
-                  <th colSpan={2} className="border border-yellow-400 p-2">
-                    Actions
-                  </th>
+
                   <th className="border border-yellow-400 p-2">Notes</th>
                 </tr>
               </thead>
@@ -627,7 +638,7 @@ export default function AgentGamerPage() {
                         onClick={() =>
                           router.push(`/agent/gamer-games/${gamerId}`)
                         }
-                        className="relative border border-yellow-400 p-2 cursor-pointer hover:bg-yellow-400/10 transition"
+                        className="relative border border-yellow-400 px-10 py-5 cursor-pointer hover:bg-yellow-400/10 transition"
                       >
                         {gamerId}
 
@@ -643,6 +654,12 @@ export default function AgentGamerPage() {
                         {entryCounts[gamerId] > 0 && (
                           <span className="absolute top-2 right-2 w-5 h-5 bg-green-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
                             {entryCounts[gamerId]}
+                          </span>
+                        )}
+
+                        {entryTotalCounts[gamerId] > 0 && (
+                          <span className="absolute bottom-2 right-2 w-auto p-1 h-5 bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
+                            {entryTotalCounts[gamerId]}
                           </span>
                         )}
                       </td>
@@ -681,45 +698,34 @@ export default function AgentGamerPage() {
                           <em className="text-gray-400">No transaction</em>
                         )}
                       </td>
-
-                      <td className="border border-yellow-400 p-2">
-                        {loading && (
-                          <div className="flex justify-center items-center absolute top-2 right-2 ">
-                            <div className="flex space-x-1">
-                              <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce"></div>
-                              <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
-                              <div className="w-1 h-1 bg-yellow-400 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
+                      <td className="p-2 border border-yellow-400 align-middle">
+                        <div className="flex justify-center items-center space-x-3">
+                          {/* Action buttons container */}
+                          <div className="flex space-x-2 items-center ">
+                            {/* BadgeCheck button with notification badge */}
+                            <div className="relative inline-block">
+                              <button
+                                onClick={() => openModal(gamerId)}
+                                className="px-3 py-1 rounded text-green-600 font-semibold flex items-center"
+                              >
+                                <LucideBadgeCheck className="w-6 h-6" />
+                              </button>
+                              <span className=" absolute -top-1 -right-1  bg-green-600  text-white  text-xs  font-bold  rounded-full  px-2  py-[2px]  min-w-[20px]  text-center shadow-md pointer-events-none         ">
+                                {waitingEntryCount[gamerId] || 0}
+                              </span>
                             </div>
+
+                            {/* Delete button */}
+                            <button
+                              onClick={() => deleteVoucher(gamerId)}
+                              className="px-3 py-1 rounded text-red-600 font-semibold flex items-center"
+                            >
+                              <LucideTrash2 className="w-6 h-6" />
+                            </button>
                           </div>
-                        )}
-                        {waitingEntryCount[gamerId] > 0 && (
-                          <span className=" bg-green-600 text-white text-xs font-bold rounded-full px-3 py-1 shadow-md">
-                            {waitingEntryCount[gamerId]}
-                          </span>
-                        )}
-                        {waitingEntryCount[gamerId] === 0 && (
-                          <span className=" bg-green-600 text-white text-xs font-bold rounded-full px-3 py-1 shadow-md">
-                            {0}
-                          </span>
-                        )}
+                        </div>
                       </td>
 
-                      <td className="border border-yellow-400 p-2 space-x-2">
-                        <button
-                          onClick={() => approveVoucher(gamerId)}
-                          className="px-3 py-1 rounded  text-green-600 font-semibold flex items-center space-x-1"
-                        >
-                          <LucideBadgeCheck className="w-6 h-6" />
-                        </button>
-                      </td>
-                      <td className="border border-yellow-400 p-2 space-x-2">
-                        <button
-                          onClick={() => deleteVoucher(gamerId)}
-                          className="px-3 py-1 rounded   text-red-600 font-semibold flex items-center space-x-1"
-                        >
-                          <LucideTrash2 className="w-6 h-6" />
-                        </button>
-                      </td>
                       <td className="border border-yellow-400 p-2 space-x-2">
                         <div className="relative inline-block">
                           <button
@@ -787,7 +793,6 @@ export default function AgentGamerPage() {
           </form>
         )}
       </section>
-
       {editingModal && editingGamer && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
           <div className="bg-gray-900 p-6 rounded-lg text-white w-[90%] max-w-md max-h-[90vh] overflow-y-auto">
@@ -895,7 +900,14 @@ export default function AgentGamerPage() {
             </button>
           </div>
         </div>
-      )}
+      )}{" "}
+      <GamerDetailsModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        gamerId={selectedGamerId}
+        players={waitingPlayersGamer[selectedGamerId]}
+        fetchCountsForGamers={fetchCountsForGamers}
+      />
       <ScrollToTopButton />
     </div>
   );
