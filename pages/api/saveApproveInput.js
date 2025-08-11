@@ -18,7 +18,20 @@ export default async function handler(req, res) {
   try {
     const client = await clientPromise;
     const db = client.db("noshib786");
+    const gameStatus = await db
+      .collection("gameStatus")
+      .findOne({}, { sort: { updatedAt: -1 } });
 
+    if (
+      !gameStatus ||
+      !gameStatus.isGameOn ||
+      (gameStatus.targetDateTime &&
+        serverTime > new Date(gameStatus.targetDateTime))
+    ) {
+      return res.status(403).json({
+        message: "⛔ Game is not active or time is up. Submission blocked.",
+      });
+    }
     // Find the specific document to move
     const doc = await db
       .collection("gamersInput")
