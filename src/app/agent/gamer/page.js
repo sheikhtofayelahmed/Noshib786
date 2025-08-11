@@ -332,11 +332,13 @@ export default function AgentGamerPage() {
 
   const [entryTotalCounts, setEntryTotalCounts] = useState({});
   const [waitingPlayersGamer, setWaitingPlayersGamer] = useState({});
+  const [waitingPlayed, setWaitingPlayed] = useState({});
 
   const fetchCountsForGamers = async () => {
     setLoading(true);
     const counts = {};
     const waitingCounts = {};
+    const waitingPlayed = {};
     const waitingPlayersMap = {};
     const played = {};
 
@@ -360,7 +362,7 @@ export default function AgentGamerPage() {
       }
 
       try {
-        const res = await fetch("/api/getWaitingPlayersByGamerId", {
+        const res = await fetch("/api/getVoucherQntByGamerIdWaiting", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ gamerId: gamer.gamerId }),
@@ -368,7 +370,8 @@ export default function AgentGamerPage() {
 
         if (res.ok) {
           const data = await res.json();
-          waitingCounts[gamer.gamerId] = data.players.length;
+          waitingCounts[gamer.gamerId] = data.count;
+          waitingPlayed[gamer.gamerId] = data.totals?.total;
           waitingPlayersMap[gamer.gamerId] = data.players; // 👈 Store full array of player objects
         }
       } catch (err) {
@@ -379,6 +382,7 @@ export default function AgentGamerPage() {
     setLoading(false);
     setEntryCounts(counts);
     setWaitingEntryCount(waitingCounts);
+    setWaitingPlayed(waitingPlayed);
     setEntryTotalCounts(played);
     setWaitingPlayersGamer(waitingPlayersMap); // 👈 Set the full map here
   };
@@ -703,6 +707,14 @@ export default function AgentGamerPage() {
                           {/* Action buttons container */}
                           <div className="flex space-x-2 items-center ">
                             {/* BadgeCheck button with notification badge */}
+                            <div className=" inline-block">
+                              <span className=" absolute top-1 right-1  bg-green-600  text-white  text-xs  font-bold  rounded-full  px-2  py-[2px]  min-w-[20px]  text-center shadow-md pointer-events-none         ">
+                                {waitingEntryCount[gamerId] || 0}
+                              </span>
+                              <span className=" absolute bottom-1 right-1  bg-red-600  text-white  text-xs  font-bold  rounded-full  px-2  py-[2px]  min-w-[20px]  text-center shadow-md pointer-events-none         ">
+                                {waitingPlayed[gamerId] || 0}
+                              </span>
+                            </div>
                             <div className="relative inline-block">
                               <button
                                 onClick={() => openModal(gamerId)}
@@ -710,9 +722,6 @@ export default function AgentGamerPage() {
                               >
                                 <LucideBadgeCheck className="w-6 h-6" />
                               </button>
-                              <span className=" absolute -top-1 -right-1  bg-green-600  text-white  text-xs  font-bold  rounded-full  px-2  py-[2px]  min-w-[20px]  text-center shadow-md pointer-events-none         ">
-                                {waitingEntryCount[gamerId] || 0}
-                              </span>
                             </div>
 
                             {/* Delete button */}

@@ -9,7 +9,7 @@ export default function LuckyNumbersPage() {
   const [date, setDate] = useState(null);
   const [winStatus, setWinStatus] = useState(false);
   const [tips, setTips] = useState([]);
-  const totalInputs = 32; // Change to actual number of input fields
+  const totalInputs = 65; // Change to actual number of input fields
   const [winningData, setWinningData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +21,7 @@ export default function LuckyNumbersPage() {
         // Sort descending by date and take only the latest 12
         const sorted = result.data
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-          .slice(0, 12); // 👈 Limit to 12 entries
+          .slice(0, 10); // 👈 Limit to 12 entries
 
         setWinningData(sorted);
       } else {
@@ -104,40 +104,56 @@ export default function LuckyNumbersPage() {
       <input
         key={index}
         type="text"
-        maxLength={2}
         value={tips[index] || ""}
         onChange={(e) => handleChange(index, e.target.value)}
         onBlur={handleBlur}
-        className="w-9 text-center border border-gray-400 rounded px-1 py-0.5 text-sm"
+        className={`${
+          index >= 51 && index <= 65 ? "w-full" : "w-9"
+        } text-center border border-gray-400 rounded px-1 py-0.5 text-sm`}
       />
     );
   }
 
   const data = [
-    { src: "/queen.jpeg", title: "👑 রাণীর আশীর্বাদ", inputs: [0, 1, 2] },
-    { src: "/family.jpeg", title: "🏡 পারিবারিক সৌভাগ্য", inputs: [3, 4, 5] },
+    { src: "/queen.jpeg", title: "👑 রাণীর আশীর্বাদ", inputs: [0, 1, 2, 51] },
+    {
+      src: "/family.jpeg",
+      title: "🏡 পারিবারিক সৌভাগ্য",
+      inputs: [3, 4, 5, 52],
+    },
     {
       src: "/frog.jpeg",
-      title: "🐸 ব্যাঙের লাফ = ভাগ্যর উল্লম্ফন!",
-      inputs: [6, 7, 8],
+      title: "🐸 ব্যাঙের লাফ!",
+      inputs: [6, 7, 8, 53],
     },
-    { src: "/magician.jpeg", title: "🧙 জাদুকরের ইশারা", inputs: [9, 10] },
-    { src: "/star.jpeg", title: "⭐ নক্ষত্রের নসীব", inputs: [11, 12, 13] },
-    { src: "/horse.jpg", title: "⭐বেহেস্তি ঘোড়া", inputs: [14, 15, 16] },
-    { src: "/lion.jpg", title: "⭐ কাট নাম্বার", inputs: [17, 18] },
-    { src: "/elephant.jpg", title: "⭐ জোকার", inputs: [19, 20, 21, 22, 23] },
+    { src: "/magician.jpeg", title: "🧙 জাদুকরের ইশারা", inputs: [9, 10, 54] },
+    { src: "/star.jpeg", title: "⭐ নক্ষত্রের নসীব", inputs: [11, 12, 13, 55] },
+    { src: "/horse.jpg", title: "⭐বেহেস্তি ঘোড়া", inputs: [14, 15, 16, 56] },
+    { src: "/lion.jpg", title: "⭐ কাট নাম্বার", inputs: [17, 18, 57] },
+    {
+      src: "/richGuy.jpg",
+      title: "⭐ জোকার",
+      inputs: [19, 20, 21, 22, 23, 58],
+    },
     {
       src: "/thaiGirl.jpg",
       title: "⭐ভি আই পি",
-      inputs: [24, 25, 26, 27, 28],
+      inputs: [24, 25, 26, 27, 28, 59],
     },
-    { src: "/tiger.jpg", title: "⭐ টাচ", inputs: [29, 30, 31] },
-    { src: "/eagle.jpeg", title: "⭐ টাচ", inputs: [32, 33, 34] },
-    { src: "/fox.jpg", title: "⭐ টাচ", inputs: [35, 36, 37, 38, 39] },
-    { src: "/poorGuy.jpg", title: "⭐ টাচ", inputs: [40, 41, 42] },
-    { src: "/dragon.jpg", title: "⭐ টাচ", inputs: [43, 44, 45, 46, 47] },
-    { src: "/snake.jpg", title: "⭐ টাচ", inputs: [32, 33, 34] },
-    { src: "/richGuy.jpg", title: "⭐ টাচ", inputs: [32, 33, 34] },
+    { src: "/tiger.jpg", title: "⭐ নসীব ", inputs: [29, 30, 31, 60] },
+    { src: "/eagle.jpeg", title: "⭐ টাচ", inputs: [32, 33, 34, 61] },
+    {
+      src: "/fox.jpg",
+      title: "🦊 ধূর্ত ভাগ্য",
+      inputs: [35, 36, 37, 38, 39, 62],
+    },
+    { src: "/poorGuy.jpg", title: "💸 দরিদ্রের আশা", inputs: [40, 41, 42, 63] },
+    {
+      src: "/dragon.jpg",
+      title: "🐉 ড্রাগনের শক্তি",
+      inputs: [43, 44, 45, 46, 64],
+    },
+    { src: "/snake.jpg", title: "🐍 সাপের ছোবল", inputs: [48, 49, 50, 65] },
   ];
   // const ContentRef = useRef(null);
   // const handleDownloadPdf = async () => {
@@ -161,11 +177,11 @@ export default function LuckyNumbersPage() {
   //   }
   // };
   const hexPositions = [
-    { top: 90, left: 50 },
-    { top: 90, left: 110 },
-    { top: 40, left: 80 },
-    { top: 130, left: 30 },
-    { top: 130, left: 130 },
+    { top: 75, left: 30 },
+    { top: 75, left: 130 },
+    { top: 35, left: 50 },
+    { top: 120, left: 30 },
+    { top: 120, left: 130 },
     // Add more positions as needed
   ];
   return (
@@ -245,18 +261,22 @@ export default function LuckyNumbersPage() {
               </p>
             </div>
 
-            {item.inputs.map((input, index) => (
-              <div
-                key={index}
-                className="absolute"
-                style={{
-                  top: `${hexPositions[index]?.top || 0}px`,
-                  left: `${hexPositions[index]?.left || 0}px`,
-                }}
-              >
-                {renderInput(input)}
-              </div>
-            ))}
+            {item.inputs.map((input, index) => {
+              const isLast = index === item.inputs.length - 1;
+              const positionStyle = isLast
+                ? { bottom: 0, left: 0, position: "absolute" }
+                : {
+                    top: `${hexPositions[index]?.top || 0}px`,
+                    left: `${hexPositions[index]?.left || 0}px`,
+                    position: "absolute",
+                  };
+
+              return (
+                <div key={index} style={positionStyle}>
+                  {renderInput(input)}
+                </div>
+              );
+            })}
           </div>
         ))}
       </div>
@@ -272,28 +292,28 @@ export default function LuckyNumbersPage() {
             <table className="min-w-full text-sm text-center text-gray-800 border-separate border-spacing-y-2">
               <thead className="text-base bg-gray-100 uppercase tracking-wider rounded-t-xl">
                 <tr className="bg-gray-100 transition-colors duration-200">
-                  <th className="py-3 px-4">#</th>
-                  <th className="py-3 px-4">🎯 Draw Date</th>
-                  <th className="py-3 px-4">🔮 3UP</th>
-                  <th className="py-3 px-4">🧿 DOWN</th>
+                  <th className="py-1 px-4">#</th>
+                  <th className="py-1 px-4">🎯 Draw Date</th>
+                  <th className="py-1 px-4">🔮 3UP</th>
+                  <th className="py-1 px-4">🧿 DOWN</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-300 text-base">
+              <tbody className="divide-y divide-gray-300 text-xl">
                 {winningData.map((item, index) => (
                   <tr
                     key={index}
                     className="bg-gray-100 transition-colors duration-200"
                   >
-                    <td className="py-2 px-4 font-semibold text-gray-700">
+                    <td className="py-0 px-4 font-semibold text-gray-700">
                       {index + 1}
                     </td>
-                    <td className="py-2 px-4 font-medium text-gray-600">
+                    <td className="py-0 px-4 font-medium text-gray-600">
                       {item.gameDate}
                     </td>
-                    <td className="py-2 px-4 font-bold text-gray-900">
+                    <td className="py-0 px-4 font-bold text-gray-900">
                       {item.threeUp || "—"}
                     </td>
-                    <td className="py-2 px-4 font-bold text-gray-900">
+                    <td className="py-0 px-4 font-bold text-gray-900">
                       {item.downGame || "—"}
                     </td>
                   </tr>

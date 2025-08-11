@@ -29,7 +29,7 @@ export default function AgentLayout({ children }) {
     },
 
     {
-      name: "ওয়েটিং ভাউচার",
+      name: "ওয়েটিং ভাউচার - waiting Voucher",
       path: "/gamer/waitingData",
       count: waitingEntryCount,
       redBackground: true,
@@ -73,7 +73,7 @@ export default function AgentLayout({ children }) {
             <div className="flex items-center space-x-3 mb-2">
               <span className="text-pink-600 text-xl font-semibold">🆔</span>
               <p className="text-base font-semibold text-gray-800">
-                <span className="text-pink-700">ID:</span> {gamerId}
+                <span className="text-pink-700 text-xl">ID: {gamerId}</span>
               </p>
             </div>
             {/* <div className="flex items-center space-x-3">
@@ -89,7 +89,7 @@ export default function AgentLayout({ children }) {
                   onClick={() => setSidebarOpen(false)}
                   className={`px-5 py-3 rounded-xl border transition duration-300 font-medium tracking-wide flex items-center justify-between
           ${
-            item.name === "ওয়েটিং ভাউচার"
+            item.name === "ওয়েটিং ভাউচার - waiting Voucher"
               ? "bg-red-600 text-white border-red-700 shadow-inner"
               : pathname === item.path
               ? "bg-pink-300 text-black border-pink-500 shadow-inner"
@@ -103,8 +103,8 @@ export default function AgentLayout({ children }) {
                     <div className="flex items-center space-x-2">
                       {item.count !== undefined && (
                         <span
-                          className={`text-xs font-bold px-3 py-1 rounded-full ${
-                            item.name === "ওয়েটিং ভাউচার"
+                          className={`text-xl font-bold px-3 py-1 rounded-full ${
+                            item.name === "ওয়েটিং ভাউচার - waiting Voucher"
                               ? "bg-white text-red-600"
                               : "bg-pink-500 text-white"
                           }`}

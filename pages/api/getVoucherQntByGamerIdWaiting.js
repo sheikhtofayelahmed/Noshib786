@@ -34,7 +34,9 @@ export default async function handler(req, res) {
       total: (afterOneD + afterTwoD + afterThreeD).toFixed(1),
     };
 
-    return res.status(200).json({ totals: finalTotals, count: recent.length });
+    return res
+      .status(200)
+      .json({ totals: finalTotals, count: recent.length, players: recent });
   } catch (error) {
     console.error("Fetch error:", error);
     return res.status(500).json({ message: "Internal server error" });

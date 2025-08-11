@@ -707,12 +707,12 @@ export default function PlayerInputModal({ onClose }) {
               <div className="max-w-sm mx-auto mb-5 text-center font-2xl font-bangla  bg-gradient-to-r from-black via-gray-800 to-purple-900 text-yellow-300 font-bold px-10 py-6 rounded-full shadow-lg hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 tracking-widest text-2xl uppercase glow-animation">
                 নসীব ৭৮৬ ভাউচার
               </div>
-              <button
+              {/* <button
                 onClick={handleSavePlayer}
                 className="block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded mx-auto mb-10"
               >
                 🎲 COMPLETE
-              </button>
+              </button> */}
               <label className="block mb-2 text-yellow-300 ">
                 Player Name:
               </label>
@@ -773,12 +773,26 @@ export default function PlayerInputModal({ onClose }) {
               {errors.some((err) => Object.values(err).some((v) => v)) && (
                 <p className="text-red-400">Please correct the errors.</p>
               )}
-              <div className="flex flex-wrap gap-2 mt-4">
+              <div
+                className="fixed right-6 bottom-6 z-50 flex flex-col items-center gap-3"
+                style={{ pointerEvents: "auto" }}
+              >
+                <button
+                  onClick={handleSavePlayer}
+                  title="Complete"
+                  aria-label="Complete"
+                  className="w-16 h-16 rounded-full text-3xl bg-pink-300 hover:bg-pink-500 text-black font-bold flex items-center justify-center shadow-lg transform transition-transform hover:scale-105"
+                >
+                  🎲
+                </button>
+
                 <button
                   onClick={handleAddInputs}
-                  className="bg-green-500 hover:bg-green-600 text-black font-bold py-2 px-4 rounded"
+                  title="Add more plays"
+                  aria-label="Add more plays"
+                  className="w-12 h-12 rounded-full bg-green-500 hover:bg-green-600 text-black font-bold flex items-center justify-center shadow-lg transform transition-transform hover:scale-105"
                 >
-                  ➕ Add More
+                  ➕
                 </button>
               </div>
             </>
@@ -802,6 +816,50 @@ export default function PlayerInputModal({ onClose }) {
                     ref={playerRefs.current[player.voucher]}
                     className="my-16 bg-gray-800 p-5 rounded-xl border border-yellow-500 shadow hover:shadow-yellow-500 transition-shadow"
                   >
+                    {" "}
+                    <div className="fixed right-6 bottom-6 z-50 flex flex-col items-center gap-3">
+                      {player.submitted ? (
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={() =>
+                              handlePlayerDownloadPdf(player.voucher)
+                            }
+                            className="bg-white w-14 h-14 flex items-center justify-center rounded shadow"
+                          >
+                            <img
+                              src="/download.svg"
+                              alt="Download"
+                              className="w-8 h-8"
+                            />
+                          </button>
+
+                          <button
+                            onClick={() => handlePrint(player, amountPlayed)}
+                            className="w-12 h-12 rounded-full bg-pink-500 hover:bg-pink-600 text-black font-bold flex items-center justify-center shadow-lg transform transition-transform hover:scale-105"
+                          >
+                            🖨️
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleSubmitAndPrint(player)}
+                          disabled={submittingVoucher === player.voucher}
+                          className="w-12 h-12 rounded-full text-3xl bg-green-500 hover:bg-green-600 text-black font-bold flex items-center justify-center shadow-lg transform transition-transform hover:scale-105"
+                          aria-label={
+                            submittingVoucher === player.voucher
+                              ? "Submitting"
+                              : "Submit"
+                          }
+                        >
+                          {submittingVoucher === player.voucher ? "⏳" : "✅"}
+                          <span className="sr-only">
+                            {submittingVoucher === player.voucher
+                              ? "Submitting..."
+                              : "Submit"}
+                          </span>
+                        </button>
+                      )}
+                    </div>
                     <p className="text-yellow-300 font-bold sm:text-2xl  text-center my-5">
                       Voucher:{" "}
                       <span className="font-mono">
@@ -1042,7 +1100,7 @@ export default function PlayerInputModal({ onClose }) {
                       </table>
                     </div>{" "}
                     <div className=" w-max sm:w-2/3 mx-auto mt-5 border-collapse flex justify-between items-start">
-                      {player.submitted ? (
+                      {/* {player.submitted ? (
                         <div className="w-full flex flex-col justify-center items-center mt-5">
                           <div className="w-full mb-4 flex items-center justify-around ">
                             <button
@@ -1077,7 +1135,7 @@ export default function PlayerInputModal({ onClose }) {
                               : "Submit"}
                           </button>
                         </div>
-                      )}
+                      )} */}
                     </div>
                   </div>
 

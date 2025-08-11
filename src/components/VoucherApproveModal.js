@@ -9,10 +9,13 @@ const GamerDetailsModal = ({
 }) => {
   if (!isOpen || players.length === 0) return null;
 
-  const totalAmountPlayed = players.reduce((sum, player) => {
-    const oneD = player.amountPlayed?.OneD || 0;
-    const twoD = player.amountPlayed?.TwoD || 0;
-    const threeD = player.amountPlayed?.ThreeD || 0;
+  const totalAmountPlayed = players.reduce((sum, p) => {
+    const pPercent = p.cPercentages || { threeD: 0, twoD: 0, oneD: 0 };
+
+    const oneD = (p.amountPlayed?.OneD || 0) * (1 - pPercent.oneD / 100) || 0;
+    const twoD = (p.amountPlayed?.TwoD || 0) * (1 - pPercent.twoD / 100) || 0;
+    const threeD =
+      (p.amountPlayed?.ThreeD || 0) * (1 - pPercent.threeD / 100) || 0;
     return sum + oneD + twoD + threeD;
   }, 0);
 
@@ -64,7 +67,13 @@ const GamerDetailsModal = ({
             const oneD = player.amountPlayed?.OneD || 0;
             const twoD = player.amountPlayed?.TwoD || 0;
             const threeD = player.amountPlayed?.ThreeD || 0;
-            const total = oneD + twoD + threeD;
+            const total =
+              (player.amountPlayed?.OneD || 0) *
+                (1 - player.cPercentages.oneD / 100) +
+              (player.amountPlayed?.TwoD || 0) *
+                (1 - player.cPercentages.twoD / 100) +
+              (player.amountPlayed?.ThreeD || 0) *
+                (1 - player.cPercentages.threeD / 100);
 
             return (
               <div
