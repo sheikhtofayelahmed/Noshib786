@@ -351,7 +351,7 @@ const GameSummary = ({ agentId }) => {
         </div>
 <h2 style="
            margin-top: 10px;
-          ">https://noshib786.vercel.app/history</h2>
+          ">https://noshib786.com/history</h2>
         </div>
       </body>
     </html>

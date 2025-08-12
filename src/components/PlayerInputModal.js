@@ -653,7 +653,7 @@ export default function PlayerInputModal({ onClose }) {
   <p style=" margin-top: 10px, text-align:center;
           ">ভিজিট করুন</p>
 <h2 style=" margin-top: 6px;
-          ">https://noshib786.vercel.app/history</h2>
+          ">https://noshib786.com/history</h2>
 
       </body>
     </html>
