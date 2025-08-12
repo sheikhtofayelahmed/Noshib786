@@ -285,22 +285,25 @@ export default function AdminGameControl() {
     if (!confirmed) return;
 
     setLoading(true);
-    setMessage("");
+    setError("");
 
     try {
-      const res = await fetch("/api/deleteAllGamersInput", {
+      const res = await fetch("/api/deleteAllGamersInputWaiting", {
         method: "DELETE",
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        setMessage(data.message);
+        alert(data.message);
+        setLoading(false);
       } else {
-        setMessage(`Error: ${data.message}`);
+        setError(`Error: ${data.message}`);
+        setLoading(false);
       }
     } catch (err) {
-      setMessage("Something went wrong.");
+      setError("Something went wrong.");
+      setLoading(false);
       console.error(err);
     } finally {
       setLoading(false);

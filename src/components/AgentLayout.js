@@ -82,6 +82,7 @@ export default function AgentLayout({ children }) {
     gamersInputCount: 0,
   });
   useEffect(() => {
+    if (!agentId) return;
     const fetchCounts = async () => {
       try {
         const [playersRes, gamersRes] = await Promise.all([
@@ -117,7 +118,7 @@ export default function AgentLayout({ children }) {
     };
 
     fetchCounts();
-  }, []);
+  }, [agentId]);
   const { playersInputCount, gamersInputCount } = entryCounts;
 
   return (

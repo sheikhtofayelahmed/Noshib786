@@ -147,7 +147,7 @@ const GameSummary = ({ agentId }) => {
   }, [players]);
 
   const getPermutations = (str) => {
-    if (!str || str.length <= 1) return [str || ""];
+    if (!str || str.length <= 1) return [];
     const perms = [];
     for (let i = 0; i < str.length; i++) {
       const char = str[i];
@@ -156,14 +156,15 @@ const GameSummary = ({ agentId }) => {
         perms.push(char + perm);
       }
     }
-    return [...new Set(perms)];
+    return [...new Set(perms)].filter((p) => p !== str);
   };
 
   const getMatchType = (input, threeUp, downGame) => {
     if (!input || !threeUp || !downGame) return { match: false, type: null };
-
+    // console.log("rumble value:", rumble, "field:", field);
     const number = input.num;
     const permutations = getPermutations(threeUp);
+    console.log(permutations);
     const reversedDown = downGame.split("").reverse().join("");
 
     if (number.length === 3) {

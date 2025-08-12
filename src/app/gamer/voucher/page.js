@@ -26,7 +26,7 @@ export default function VoucherModal() {
   // Effect for countdown timer logic
 
   useEffect(() => {
-    if (!gamerId) return; 
+    if (!gamerId) return;
 
     const controller = new AbortController();
     const signal = controller.signal;
@@ -137,7 +137,7 @@ export default function VoucherModal() {
     }
   };
   const getPermutations = (str) => {
-    if (!str || str.length <= 1) return [str || ""];
+    if (!str || str.length <= 1) return [];
     const perms = [];
     for (let i = 0; i < str.length; i++) {
       const char = str[i];
@@ -146,7 +146,7 @@ export default function VoucherModal() {
         perms.push(char + perm);
       }
     }
-    return [...new Set(perms)];
+    return [...new Set(perms)].filter((p) => p !== str);
   };
 
   const getMatchType = (input, threeUp, downGame) => {

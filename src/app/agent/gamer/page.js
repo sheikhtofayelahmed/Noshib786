@@ -181,6 +181,7 @@ export default function AgentGamerPage() {
   }
 
   useEffect(() => {
+    if (!agentId) return; // Wait until we have agentId
     fetchGamers();
   }, [agentId]);
 

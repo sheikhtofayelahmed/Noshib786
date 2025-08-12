@@ -138,7 +138,7 @@ const GameSummary = () => {
   }, [players]);
 
   const getPermutations = (str) => {
-    if (!str || str.length <= 1) return [str || ""];
+    if (!str || str.length <= 1) return [];
     const perms = [];
     for (let i = 0; i < str.length; i++) {
       const char = str[i];
@@ -147,7 +147,7 @@ const GameSummary = () => {
         perms.push(char + perm);
       }
     }
-    return [...new Set(perms)];
+    return [...new Set(perms)].filter((p) => p !== str);
   };
 
   const getMatchType = (input, threeUp, downGame) => {
