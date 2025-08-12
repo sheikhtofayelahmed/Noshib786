@@ -996,7 +996,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
               <p className="text-red-400">Please correct the errors.</p>
             )}
             <div
-              className="fixed right-6 bottom-6 z-50 flex flex-col items-center gap-3"
+              className="fixed right-6 bottom-8 z-50 flex flex-col items-center gap-3"
               style={{ pointerEvents: "auto" }}
             >
               <button
@@ -1036,7 +1036,8 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
                 <div
                   ref={playerRefs.current[player.voucher]}
                   className="my-16 bg-gray-800 p-5 rounded-xl border border-yellow-500 shadow hover:shadow-yellow-500 transition-shadow"
-                >      <div className="fixed right-6 bottom-6 z-50 flex flex-col items-center gap-3">
+                >
+                  <div className="fixed right-6 bottom-8 z-50 flex flex-col items-center gap-3">
                     {player.submitted ? (
                       <div className="flex items-center space-x-3">
                         <button
@@ -1104,7 +1105,6 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
                       </p>
                     </div>
                   </div>
-
                   <div className="mt-6 overflow-x-auto w-full">
                     <table className=" w-max sm:w-2/3 mx-auto  border-collapse font-mono text-sm text-yellow-300">
                       <thead>

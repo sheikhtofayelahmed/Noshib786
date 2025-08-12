@@ -774,7 +774,7 @@ export default function PlayerInputModal({ onClose }) {
                 <p className="text-red-400">Please correct the errors.</p>
               )}
               <div
-                className="fixed right-6 bottom-6 z-50 flex flex-col items-center gap-3"
+                className="fixed right-6 bottom-8 z-50 flex flex-col items-center gap-3"
                 style={{ pointerEvents: "auto" }}
               >
                 <button
@@ -817,7 +817,7 @@ export default function PlayerInputModal({ onClose }) {
                     className="my-16 bg-gray-800 p-5 rounded-xl border border-yellow-500 shadow hover:shadow-yellow-500 transition-shadow"
                   >
                     {" "}
-                    <div className="fixed right-6 bottom-6 z-50 flex flex-col items-center gap-3">
+                    <div className="fixed right-6 bottom-8 z-50 flex flex-col items-center gap-3">
                       {player.submitted ? (
                         <div className="flex items-center space-x-3">
                           <button
