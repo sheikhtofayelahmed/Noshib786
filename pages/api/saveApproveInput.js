@@ -8,6 +8,8 @@ export default async function handler(req, res) {
   }
 
   const { gamerId, voucher } = req.body;
+  const serverTime = new Date();
+
 
   if (!gamerId || !voucher) {
     return res
