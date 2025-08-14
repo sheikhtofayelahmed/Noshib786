@@ -15,7 +15,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
   const [errors, setErrors] = useState(Array(20).fill(false));
   const [players, setPlayers] = useState([]);
   const [amountPlayed, setAmountPlayed] = useState({});
-  const { agentId, subAgentId, fetchEntryCount, fetchWaitingPlayers } =
+  const { agentId,  fetchEntryCount, fetchWaitingPlayers } =
     useAgent();
   const [agent, setAgent] = useState();
   const playerRefs = useRef({});
@@ -236,7 +236,6 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
 
     const newPlayer = {
       name,
-      subAgentId,
       time: new Date().toLocaleString(),
       voucher,
       data: newEntries,
@@ -395,7 +394,6 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
         agentId,
         agentName: agent.name,
         name: player.name || "",
-        SAId: subAgentId || "",
         data: parsedData,
         amountPlayed: totals,
         cPercentages: agent.cPercentages,
@@ -480,7 +478,6 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
         agentId,
         agentName: agent.name,
         name: player.name || "",
-        SAId: subAgentId || "",
         data: parsedData,
         amountPlayed: totals,
         cPercentages: agent.cPercentages,
@@ -575,7 +572,6 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
       agentId: agentId,
       agentName: agent.name,
       name: player.name || "",
-      SAId: subAgentId || "",
       data: parsedData,
       amountPlayed: totals,
       cPercentages: agent.cPercentages,
@@ -645,7 +641,6 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
       agentId: agentId,
       agentName: agent.name,
       name: player.name || "",
-      SAId: subAgentId || "",
       data: parsedData,
       amountPlayed: totals,
       cPercentages: agent.cPercentages,
@@ -800,7 +795,6 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
             <h2>${new Date(player.time).toLocaleString()}</h2>
             <h1>${player.voucher || ""}</h1>
             <p>Player: ${player.name || ""}</p>
-            <p>Sub Agent: ${subAgentId || ""}</p>
           </div>
 
           <table class="input-table">
@@ -1090,9 +1084,7 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
                   </div>
                   <div className=" w-max sm:w-2/3 mx-auto border-collapse flex justify-between items-start">
                     <div>
-                      <h4 className="text-xl font-bold mb-1">
-                        Sub Agent: {subAgentId}
-                      </h4>
+                   
                       <h4 className="text-xl font-bold mb-1">
                         Player name: {player.name}
                       </h4>

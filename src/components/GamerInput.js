@@ -366,7 +366,6 @@ export default function GamerInput({}) {
         gamerId,
         agentName: agent.name,
         name: player.name || "",
-        // SAId: subAgentId || "",
         data: parsedData,
         amountPlayed: totals,
         cPercentages: agent.cPercentages,
@@ -815,9 +814,7 @@ export default function GamerInput({}) {
                   </div>
                   <div className=" w-max sm:w-2/3 mx-auto border-collapse flex justify-between items-start">
                     <div>
-                      {/* <h4 className="text-xl font-bold mb-1">
-                        Sub Agent: {subAgentId}
-                      </h4> */}
+               
                       <h4 className="text-xl font-bold mb-1">
                         Player name: {player.name}
                       </h4>
