@@ -9,13 +9,19 @@ export default function HomeNavigator() {
   const router = useRouter();
   const [number, setNumber] = useState("000");
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const randomNum = Math.floor(100 + Math.random() * 900);
-      setNumber(randomNum.toString());
-    }, 600);
-    return () => clearInterval(interval);
-  }, []);
+useEffect(() => {
+  const interval = setInterval(() => {
+    const digits = Math.floor(Math.random() * 3) + 1; // 1, 2, or 3
+    let randomNum;
+    if (digits === 1) randomNum = Math.floor(Math.random() * 10);
+    else if (digits === 2) randomNum = Math.floor(Math.random() * 90) + 10;
+    else randomNum = Math.floor(Math.random() * 900) + 100;
+    setNumber(randomNum.toString());
+  }, 600);
+
+  return () => clearInterval(interval);
+}, []);
+
 
   const navItems = [
     {
