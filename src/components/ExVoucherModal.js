@@ -66,18 +66,24 @@ const ExVoucher = ({ item, visible, onClose }) => {
     fetchAllData();
   }, [agentId]);
 
-  const getPermutations = (str) => {
-    if (!str || str.length <= 1) return [];
-    const perms = [];
-    for (let i = 0; i < str.length; i++) {
-      const char = str[i];
-      const rest = str.slice(0, i) + str.slice(i + 1);
-      for (const perm of getPermutations(rest)) {
-        perms.push(char + perm);
+  function getPermutations(numStr) {
+    if (numStr.length !== 3) return [];
+
+    const perms = new Set();
+
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (i === j) continue;
+        for (let k = 0; k < 3; k++) {
+          if (i === k || j === k) continue;
+          const perm = numStr[i] + numStr[j] + numStr[k];
+          if (perm !== numStr) perms.add(perm);
+        }
       }
     }
-    return [...new Set(perms)].filter((p) => p !== str);
-  };
+
+    return [...perms];
+  }
 
   const getMatchType = (input, threeUp, downGame) => {
     if (!input || !threeUp || !downGame) return { match: false, type: null };

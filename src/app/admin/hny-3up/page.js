@@ -125,25 +125,25 @@ export default function HappyNewYear() {
       columnData[columnKey].push({ number: numStr, str, rumble });
     }
   });
-  // Utility to get all 6 permutations of a unique 3-digit number
-  const getPermutations = (number) => {
-    const digits = number.split("");
+  function getPermutations(numStr) {
+    if (numStr.length !== 3) return [];
+
     const perms = new Set();
 
-    const permute = (arr, m = "") => {
-      if (arr.length === 0) perms.add(m);
-      else {
-        for (let i = 0; i < arr.length; i++) {
-          let copy = arr.slice();
-          let next = copy.splice(i, 1);
-          permute(copy, m + next);
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (i === j) continue;
+        for (let k = 0; k < 3; k++) {
+          if (i === k || j === k) continue;
+          const perm = numStr[i] + numStr[j] + numStr[k];
+          if (perm !== numStr) perms.add(perm);
         }
       }
-    };
+    }
 
-    permute(digits);
-    return Array.from(perms);
-  };
+    return [...perms];
+  }
+
   const getTotalRumble = (numStr) => {
     const permutations = getPermutations(numStr);
     return permutations.reduce((total, perm) => {

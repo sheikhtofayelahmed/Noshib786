@@ -1,22 +1,22 @@
 import clientPromise from "lib/mongodb";
 
-function getPermutations(num) {
-  const digits = num.split("");
-  const results = new Set();
+function getPermutations(numStr) {
+  if (numStr.length !== 3) return [];
 
-  function permute(arr, l, r) {
-    if (l === r) results.add(arr.join(""));
-    else {
-      for (let i = l; i <= r; i++) {
-        [arr[l], arr[i]] = [arr[i], arr[l]];
-        permute(arr, l + 1, r);
-        [arr[l], arr[i]] = [arr[i], arr[l]];
+  const perms = new Set();
+
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      if (i === j) continue;
+      for (let k = 0; k < 3; k++) {
+        if (i === k || j === k) continue;
+        const perm = numStr[i] + numStr[j] + numStr[k];
+        if (perm !== numStr) perms.add(perm);
       }
     }
   }
 
-  permute(digits, 0, digits.length - 1);
-  return Array.from(results);
+  return [...perms];
 }
 
 export default async function handler(req, res) {
