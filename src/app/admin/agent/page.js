@@ -189,26 +189,62 @@ export default function AdminAgentPage() {
   }
 
   useEffect(() => {
-    fetchAgents();
-  }, []);
+    const fetchAllData = async () => {
+      setLoadingAgents(true);
+      setLoading(true); // for counts
+      setError("");
 
-  const fetchAgents = async () => {
-    setLoadingAgents(true);
-    setError("");
-    try {
-      const res = await fetch("/api/getAgents");
-      const data = await res.json();
-      if (res.ok) {
+      try {
+        // Step 1: Fetch agents
+        const res = await fetch("/api/getAgents");
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to fetch agents");
+        }
+
         setAgents(data.agents);
-      } else {
-        setError(data.message || "Failed to fetch agents");
+
+        // Step 2: Fetch counts for each agent in parallel
+        const counts = {};
+        const played = {};
+
+        const promises = data.agents.map(async (agent) => {
+          try {
+            const res = await fetch("/api/getVoucherQntByAgentId", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ agentId: agent.agentId }),
+            });
+
+            const result = await res.json();
+            if (res.ok) {
+              counts[agent.agentId] = result.count;
+              played[agent.agentId] = result.totals?.total;
+            } else {
+              counts[agent.agentId] = "Error";
+              played[agent.agentId] = "Error";
+            }
+          } catch {
+            counts[agent.agentId] = "Error";
+            played[agent.agentId] = "Error";
+          }
+        });
+
+        await Promise.all(promises);
+
+        setEntryCounts(counts);
+        setEntryTotalCounts(played);
+      } catch (err) {
+        setError(err.message || "Something went wrong");
+      } finally {
+        setLoadingAgents(false);
+        setLoading(false);
       }
-    } catch {
-      setError("Failed to fetch agents");
-    } finally {
-      setLoadingAgents(false);
-    }
-  };
+    };
+
+    fetchAllData();
+  }, []);
   // When clicking % button, open modal and load agent percentages
   const handleEditClick = (agent) => {
     setEditingAgent(agent);
@@ -378,45 +414,45 @@ export default function AdminAgentPage() {
     }
   };
 
-  useEffect(() => {
-    const fetchCountsForAgents = async () => {
-      setLoading(true);
-      const counts = {};
-      const played = {};
+  // useEffect(() => {
+  //   const fetchCountsForAgents = async () => {
+  //     setLoading(true);
+  //     const counts = {};
+  //     const played = {};
 
-      for (const agent of agents) {
-        try {
-          const res = await fetch("/api/getVoucherQntByAgentId", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ agentId: agent.agentId }),
-          });
+  //     const promises = agents.map(async (agent) => {
+  //       try {
+  //         const res = await fetch("/api/getVoucherQntByAgentId", {
+  //           method: "POST",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify({ agentId: agent.agentId }),
+  //         });
 
-          const data = await res.json();
-          if (res.ok) {
-            counts[agent.agentId] = data.count;
-            played[agent.agentId] = data.totals?.total;
-          } else {
-            counts[agent.agentId] = "Error";
-            played[agent.agentId] = "Error";
-          }
-        } catch (err) {
-          counts[agent.agentId] = "Error";
-          played[agent.agentId] = "Error";
-        }
-      }
+  //         const data = await res.json();
+  //         if (res.ok) {
+  //           counts[agent.agentId] = data.count;
+  //           played[agent.agentId] = data.totals?.total;
+  //         } else {
+  //           counts[agent.agentId] = "Error";
+  //           played[agent.agentId] = "Error";
+  //         }
+  //       } catch (err) {
+  //         counts[agent.agentId] = "Error";
+  //         played[agent.agentId] = "Error";
+  //       }
+  //     });
 
-      setLoading(false);
-      setEntryCounts(counts);
-      setEntryTotalCounts(played);
-    };
+  //     await Promise.all(promises);
 
-    if (agents.length > 0) {
-      fetchCountsForAgents();
-    }
-  }, [agents]);
-  // Send heartbeat for current logged-in agent
+  //     setLoading(false);
+  //     setEntryCounts(counts);
+  //     setEntryTotalCounts(played);
+  //   };
 
+  //   if (agents.length > 0) {
+  //     fetchCountsForAgents();
+  //   }
+  // }, [agents]);
   const fetchOnlineAgents = async () => {
     setLoading(true);
     setError("");

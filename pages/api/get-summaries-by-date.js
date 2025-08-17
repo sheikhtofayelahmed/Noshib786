@@ -18,6 +18,7 @@ export default async function handler(req, res) {
     const summaries = await db
       .collection("summaries")
       .find({ gameDate })
+      .sort({ createdAt: -1 }) // Sort by newest first
       .toArray();
 
     if (!summaries.length) {
