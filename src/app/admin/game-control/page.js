@@ -494,7 +494,7 @@ export default function AdminGameControl() {
   `}
         >
           {loading ? "Deleting..." : "ওয়েটিং ভাউচার ডিলিট"}
-        </button>{" "}
+        </button>
       </div>
     </div>
   );

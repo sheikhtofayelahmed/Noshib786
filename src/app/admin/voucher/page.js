@@ -552,7 +552,7 @@ export default function VoucherModal() {
         {targetTime && (
           <div className="text-center bg-gray-800 p-3 rounded-lg mb-4 border border-blue-500">
             <p className="text-blue-300 text-lg">
-              Game ends in:{" "}
+              Game ends in:
               <span className="font-bold text-xl text-blue-400">
                 {timeLeft}
               </span>

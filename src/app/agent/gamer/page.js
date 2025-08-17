@@ -695,8 +695,8 @@ export default function AgentGamerPage() {
 
                         {histories[gamerId] ? (
                           <div className="text-sm text-white text-center">
-                            # {histories[gamerId].trxnNumber} | 💰{" "}
-                            {histories[gamerId].amount} | 💳{" "}
+                            # {histories[gamerId].trxnNumber} | 💰
+                            {histories[gamerId].amount} | 💳
                             {histories[gamerId].method}
                           </div>
                         ) : (
@@ -825,7 +825,7 @@ export default function AgentGamerPage() {
               >
                 Save
               </button>
-            </div>{" "}
+            </div>
             {formError && (
               <p className="text-red-400 text-sm mb-3 text-center">
                 {formError}
@@ -851,7 +851,7 @@ export default function AgentGamerPage() {
                 onChange={handlePasswordChange}
                 className={`w-full mb-3 p-3 rounded bg-black border `}
                 disabled={adding}
-              />{" "}
+              />
             </div>
           </div>
         </div>
@@ -910,7 +910,7 @@ export default function AgentGamerPage() {
             </button>
           </div>
         </div>
-      )}{" "}
+      )}
       <GamerDetailsModal
         isOpen={modalOpen}
         onClose={closeModal}

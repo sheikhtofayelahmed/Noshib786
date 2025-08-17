@@ -57,7 +57,7 @@ const GamerDetailsModal = ({
 
         {/* Total amount played */}
         <p className="mb-6 text-lg font-semibold text-gray-700 text-center">
-          Total Amount Played:{" "}
+          Total Amount Played:
           <span className="text-indigo-600">{totalAmountPlayed}</span>
         </p>
 
@@ -82,13 +82,13 @@ const GamerDetailsModal = ({
               >
                 <div>
                   <p className="font-semibold text-gray-900 mb-1">
-                    Voucher:{" "}
+                    Voucher:
                     <span className="text-indigo-600">{player.voucher}</span>
                   </p>
                   <p className="text-sm text-gray-600">
-                    1D: <span className="font-medium">{oneD}</span>, 2D:{" "}
-                    <span className="font-medium">{twoD}</span>, 3D:{" "}
-                    <span className="font-medium">{threeD}</span> | Total:{" "}
+                    1D: <span className="font-medium">{oneD}</span>, 2D:
+                    <span className="font-medium">{twoD}</span>, 3D:
+                    <span className="font-medium">{threeD}</span> | Total:
                     <span className="font-bold text-indigo-600">{total}</span>
                   </p>
                 </div>

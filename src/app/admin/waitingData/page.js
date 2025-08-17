@@ -171,26 +171,26 @@ const AdminApprovalDashboard = () => {
                       {player.name || "Unnamed Player"}
                     </h4>
                     <p className="text-gray-400 text-sm">
-                      Submitted:{" "}
+                      Submitted:
                       {player.submissionTime
                         ? new Date(player.submissionTime).toLocaleString()
                         : "Unknown"}
                     </p>
                     <p className="text-gray-400 text-sm">
-                      Entries:{" "}
+                      Entries:
                       {Array.isArray(player.entries)
                         ? player.entries.length
                         : 0}
                     </p>
                     <p className="text-gray-400 text-sm">
-                      Status:{" "}
+                      Status:
                       <span className="capitalize font-semibold text-blue-400">
                         {player.status || "unknown"}
                       </span>
                     </p>
                     {player.gameStatusAtSubmission && (
                       <p className="text-gray-400 text-xs mt-1">
-                        Game state at submission:{" "}
+                        Game state at submission:
                         <span
                           className={
                             player.gameStatusAtSubmission.isGameOn

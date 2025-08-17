@@ -715,7 +715,7 @@ const GameSummary = ({ agentId }) => {
                     </button>
                     <h2 className="text-lg font-bold text-center ">
                       {player.voucher || ""}
-                    </h2>{" "}
+                    </h2>
                     <button
                       onClick={() => handlePrint(player)}
                       className="w-14 h-14 flex items-center justify-center rounded text-white text-2xl"
@@ -724,7 +724,7 @@ const GameSummary = ({ agentId }) => {
                     </button>
                   </div>
                   <h2 className="text-lg font-bangla font-semibold text-center mb-1 ">
-                    Player: {player.name || ""} || Sub Agent:{" "}
+                    Player: {player.name || ""} || Sub Agent:
                     {player.SAId || ""}
                   </h2>
                   <p className="text-center text-sm mb-2">

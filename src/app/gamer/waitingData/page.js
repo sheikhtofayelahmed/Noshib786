@@ -429,7 +429,7 @@ const GamerSummary = () => {
       <h2 className="text-3xl text-yellow-400 font-extrabold text-center mb-2">
         🎯{waitingPlayers.length}
         <br />
-        💰Total:{" "}
+        💰Total:
         <span className="text-green-400 font-mono text-3xl">{total}</span>
         <br />
         <div className="text-center text-white font-mono text-lg mt-2">
@@ -475,7 +475,7 @@ const GamerSummary = () => {
                 </button>
                 <h2 className="text-lg font-bold text-center ">
                   {player.voucher || ""}
-                </h2>{" "}
+                </h2>
                 <button
                   onClick={() => handlePrint(player)}
                   className="w-14 h-14 flex items-center justify-center rounded text-white text-2xl"

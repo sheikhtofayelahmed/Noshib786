@@ -680,7 +680,7 @@ export default function AdminAgentPage() {
                           </span>
                         </label>
                       </td>
-                 
+
                       <td className="border border-yellow-400 px-3 py-2">
                         {onlineAgentIds.has(agentId) ? (
                           <div className="space-x-1">
@@ -990,7 +990,7 @@ export default function AdminAgentPage() {
                     ))}
                   </select>
                 </div>
-              )}{" "}
+              )}
             </div>
 
             {/* Discounts and Settings */}
@@ -1032,7 +1032,7 @@ export default function AdminAgentPage() {
               >
                 Save
               </button>
-            </div>{" "}
+            </div>
             {formError && (
               <p className="text-red-400 text-sm mb-3 text-center">
                 {formError}
@@ -1070,7 +1070,7 @@ export default function AdminAgentPage() {
                   passwordValid ? "border-yellow-400" : "border-red-500"
                 } text-yellow-300`}
                 disabled={adding}
-              />{" "}
+              />
               {!passwordValid && password.length > 0 && (
                 <p className="text-red-500 text-sm mt-[-10px] mb-2">
                   Must be at least 6 characters and include uppercase,

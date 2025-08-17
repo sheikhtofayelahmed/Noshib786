@@ -447,7 +447,7 @@ export default function VoucherModal() {
               </button>
               <h2 className="text-lg font-bold text-center ">
                 {currentVoucherData.voucher || ""}
-              </h2>{" "}
+              </h2>
               <button
                 onClick={() => handlePrint(currentVoucherData)}
                 className="w-14 h-14 flex items-center justify-center rounded text-white text-2xl"
@@ -456,7 +456,7 @@ export default function VoucherModal() {
               </button>
             </div>
             <h2 className="text-lg font-bangla font-semibold text-center mb-1 ">
-              Name: {currentVoucherData.name || ""} || Sub Agent:{" "}
+              Name: {currentVoucherData.name || ""} || Sub Agent:
               {currentVoucherData.SAId || ""}
             </h2>
             <p className="text-center text-sm mb-2">

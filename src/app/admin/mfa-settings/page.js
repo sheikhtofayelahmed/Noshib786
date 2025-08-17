@@ -184,7 +184,7 @@ export default function MfaSettingsPage() {
           {!mfaEnabled ? (
             <div className="mt-4">
               <p className="text-lg mb-4 text-center">
-                MFA is currently{" "}
+                MFA is currently
                 <span className="text-red-400 font-bold">DISABLED</span>.
               </p>
               {!showSetup ? (
@@ -222,7 +222,7 @@ export default function MfaSettingsPage() {
                     </div>
                   )}
                   <p className="font-mono text-sm break-all mb-4 text-center">
-                    Secret:{" "}
+                    Secret:
                     <span className="font-bold select-all">{mfaSecret}</span>
                   </p>
 
@@ -258,7 +258,7 @@ export default function MfaSettingsPage() {
           ) : (
             <div className="mt-4">
               <p className="text-lg mb-4 text-center">
-                MFA is currently{" "}
+                MFA is currently
                 <span className="text-green-400 font-bold">ENABLED</span>.
               </p>
               <button

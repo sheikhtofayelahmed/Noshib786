@@ -811,7 +811,6 @@ export default function PlayerInputModal({ onClose }) {
                     ref={playerRefs.current[player.voucher]}
                     className="my-16 bg-gray-800 p-5 rounded-xl border border-yellow-500 shadow hover:shadow-yellow-500 transition-shadow"
                   >
-                    {" "}
                     <div className="fixed right-6 bottom-8 z-50 flex flex-col items-center gap-3">
                       {player.submitted ? (
                         <div className="flex items-center space-x-3">
@@ -856,7 +855,7 @@ export default function PlayerInputModal({ onClose }) {
                       )}
                     </div>
                     <p className="text-yellow-300 font-bold sm:text-2xl  text-center my-5">
-                      Voucher:{" "}
+                      Voucher:
                       <span className="font-mono">
                         {player.voucher || "N/A"}
                       </span>
@@ -1090,7 +1089,7 @@ export default function PlayerInputModal({ onClose }) {
                           </tr>
                         </tbody>
                       </table>
-                    </div>{" "}
+                    </div>
                     <div className=" w-max sm:w-2/3 mx-auto mt-5 border-collapse flex justify-between items-start">
                       {/* {player.submitted ? (
                         <div className="w-full flex flex-col justify-center items-center mt-5">

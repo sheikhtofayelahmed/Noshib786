@@ -96,7 +96,6 @@ const WaitingPlayerInput = () => {
       <div className="space-y-6 max-w-4xl mx-auto max-h-[60vh] overflow-y-auto pr-2">
         {waitingPlayers.map((player, idx) => (
           <React.Fragment key={player._id || idx}>
-            {" "}
             {/* Use _id for better keying if available */}
             <div className="bg-gray-800 rounded-lg border border-gray-600 shadow p-5">
               <p className="text-yellow-300 font-bold text-xl text-center mb-4">
@@ -109,23 +108,23 @@ const WaitingPlayerInput = () => {
                     {player.name || "Unnamed Player"}
                   </h4>
                   <p className="text-gray-400 text-sm">
-                    Submitted:{" "}
-                    {new Date(player.submissionTime).toLocaleString()}{" "}
+                    Submitted:
+                    {new Date(player.submissionTime).toLocaleString()}
                     {/* Using 'submissionTime' */}
                   </p>
                   <p className="text-gray-400 text-sm">
                     Entries: {player.entries ? player.entries.length : 0}
                   </p>
                   <p className="text-gray-400 text-sm">
-                    Status:{" "}
+                    Status:
                     <span className="capitalize">
                       {player.status || "unknown"}
-                    </span>{" "}
+                    </span>
                     {/* Display status */}
                   </p>
                   {player.gameStatusAtSubmission && (
                     <p className="text-gray-400 text-xs">
-                      Game state at submission:{" "}
+                      Game state at submission:
                       {player.gameStatusAtSubmission.isGameOn ? "On" : "Off"}
                       {player.gameStatusAtSubmission.targetDateTime &&
                         ` (Cutoff: ${new Date(

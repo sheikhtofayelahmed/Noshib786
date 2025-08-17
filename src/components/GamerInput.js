@@ -641,7 +641,7 @@ export default function GamerInput({}) {
             : ""
         }`}
       >
-        ⏳<span className="font-bangla ">সময় বাকি :</span>{" "}
+        ⏳<span className="font-bangla ">সময় বাকি :</span>
         <span className="font-bold">{timeLeft.text}</span>
       </div>
       <div className="max-w-3xl mx-auto bg-gray-900 bg-opacity-90 rounded-lg ring-2 ring-pink-500 shadow-2xl p-6">
@@ -806,7 +806,7 @@ export default function GamerInput({}) {
                   </div>
                   <div className=" w-max sm:w-2/3 mx-auto border-collapse flex justify-between items-start">
                     <p className="text-yellow-300 font-bold sm:text-2xl  text-center my-5">
-                      Voucher:{" "}
+                      Voucher:
                       <span className="font-mono">
                         {player.voucher || "N/A"}
                       </span>
@@ -814,7 +814,6 @@ export default function GamerInput({}) {
                   </div>
                   <div className=" w-max sm:w-2/3 mx-auto border-collapse flex justify-between items-start">
                     <div>
-               
                       <h4 className="text-xl font-bold mb-1">
                         Player name: {player.name}
                       </h4>

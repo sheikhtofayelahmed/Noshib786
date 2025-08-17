@@ -98,6 +98,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          1
+        </p>
         <p className="absolute top-4 left-4 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-pink-300 font-bold drop-shadow-lg">
           {data[0].title}
         </p>
@@ -124,7 +127,10 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
-        <p className="absolute top-4 right-4 bg-black bg-opacity-70 px-3 py-1 rounded text-base text-green-300 font-semibold drop-shadow-lg">
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          2
+        </p>
+        <p className="absolute top-4 left-4 bg-black bg-opacity-70 px-3 py-1 rounded text-base text-green-300 font-semibold drop-shadow-lg">
           {data[1].title}
         </p>
         <div className="absolute md:top-48 md:right-24 top-20 right-5 flex gap-3">
@@ -150,6 +156,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          3
+        </p>
         <p className="absolute top-4 left-4 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-pink-300 font-bold drop-shadow-lg">
           {data[2].title}
         </p>
@@ -176,6 +185,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          4
+        </p>
         <p className="absolute top-4 left-4 text-purple-300 text-lg font-bold bg-black bg-opacity-70 px-3 py-1 rounded drop-shadow-lg">
           {data[3].title}
         </p>
@@ -199,6 +211,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          5
+        </p>
         <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
           {data[4].title}
         </p>
@@ -225,6 +240,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          6
+        </p>
         <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
           {data[5].title}
         </p>
@@ -251,6 +269,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          7
+        </p>
         <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
           {data[6].title}
         </p>
@@ -274,6 +295,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          8
+        </p>
         <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
           {data[7].title}
         </p>
@@ -306,6 +330,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          9
+        </p>
         <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
           {data[8].title}
         </p>
@@ -338,6 +365,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          10
+        </p>
         <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
           {data[9].title}
         </p>
@@ -364,6 +394,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          11
+        </p>
         <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
           {data[10].title}
         </p>
@@ -390,6 +423,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          12
+        </p>
         <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
           {data[11].title}
         </p>
@@ -422,6 +458,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          13
+        </p>
         <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
           {data[12].title}
         </p>
@@ -448,6 +487,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          14
+        </p>
         <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
           {data[13].title}
         </p>
@@ -477,6 +519,9 @@ export default function LuckyNumbersPage() {
           height={800}
           className="w-full h-auto object-cover"
         />
+        <p className="absolute top-1 right-1 bg-black bg-opacity-70 px-3 py-1 rounded text-lg text-green-300 font-bold drop-shadow-lg">
+          15
+        </p>
         <p className="absolute top-4 left-1/2 -translate-x-1/2 text-yellow-100 bg-black bg-opacity-70 px-4 py-1 rounded text-base drop-shadow-lg">
           {data[14].title}
         </p>

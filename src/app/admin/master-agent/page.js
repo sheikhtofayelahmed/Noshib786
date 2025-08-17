@@ -488,7 +488,7 @@ export default function AdminMasterAgentPage() {
                   passwordValid ? "border-cyan-400" : "border-red-500"
                 } text-cyan-300`}
                 disabled={adding}
-              />{" "}
+              />
               {!passwordValid && password.length > 0 && (
                 <p className="text-red-500 text-sm mt-[-10px] mb-2">
                   Must be at least 6 characters and include uppercase,

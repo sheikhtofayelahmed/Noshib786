@@ -36,7 +36,7 @@ export default function Footer() {
               </span>
             </p>
             <p>
-              👁 Total Visits:{" "}
+              👁 Total Visits:
               <span className="text-yellow-300">
                 {stats?.totalVisits ?? "..."}
               </span>
