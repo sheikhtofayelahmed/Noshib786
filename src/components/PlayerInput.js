@@ -422,9 +422,13 @@ export default function PlayerInput({ doubleInput, setDoubleInput }) {
     } catch (err) {
       console.error("Submit error:", err);
       alert("❌ Network or server error.");
-    } finally {
-      setSubmittingVoucher(null); // ✅ allow next submit
-    }
+   } finally {
+  // Only unlock if submission was actually to active list
+  if (statusData?.isGameOn && (!targetTime || now <= targetTime)) {
+    setSubmittingVoucher(null);
+  }
+}
+
   };
 
   const handleDoubleSubmitAndPrint = async (player) => {
