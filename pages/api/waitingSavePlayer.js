@@ -59,7 +59,10 @@ export default async function handler(req, res) {
         .json({ message: "No valid entries after sanitization." });
     }
 
-    const waitingResult = await db.collection("waitingSavePlayer").insertOne({
+   const waitingResult = await db.collection("waitingSavePlayer").updateOne(
+  { voucher }, // unique key for each voucher
+  {
+    $setOnInsert: {
       voucher,
       agentId,
       agentName,
@@ -75,7 +78,11 @@ export default async function handler(req, res) {
         targetDateTime: targetDateTime ? targetDateTime.toISOString() : null,
       },
       status: "pending",
-    });
+    },
+  },
+  { upsert: true }
+);
+
 
     return res.status(202).json({
       message: "✅ Player data submitted to 'waiting' list.",
