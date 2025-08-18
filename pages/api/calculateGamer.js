@@ -58,17 +58,21 @@ export default async function handler(req, res) {
 
         if (!number) continue;
 
-        if (number === threeUp && str > 0) {
-          winDetails.push({ type: "STR3D", amount: str });
-        }
+      // Case 1: Exact match → STR + RUMBLE
+if (number === threeUp) {
+  if (str > 0) {
+    winDetails.push({ type: "STR3D", amount: str });
+  }
+  if (rumble > 0) {
+    winDetails.push({ type: "RUMBLE3D", amount: rumble });
+  }
+}
 
-        if (
-          number.length === 3 &&
-          permutations3D.includes(number) &&
-          rumble > 0
-        ) {
-          winDetails.push({ type: "RUMBLE3D", amount: rumble });
-        }
+// Case 2: Permutations (excluding original) → only RUMBLE
+if (number.length === 3 && permutations3D.includes(number) && rumble > 0) {
+  winDetails.push({ type: "RUMBLE3D", amount: rumble });
+}
+
 
         if (number.length === 2 && number === downGame && str > 0) {
           winDetails.push({ type: "STR2D", amount: str });
