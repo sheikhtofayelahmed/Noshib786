@@ -395,8 +395,12 @@ export default function PlayerInputModal({ onClose }) {
       console.error("Submit error:", err);
       alert("❌ Network or server error.");
     } finally {
-      setSubmittingVoucher(null); // ✅ allow next submit
-    }
+  // Only unlock if submission was actually to active list
+  if (statusData?.isGameOn && (!targetTime || now <= targetTime)) {
+    setSubmittingVoucher(null);
+  }
+}
+
   };
 
   /**
