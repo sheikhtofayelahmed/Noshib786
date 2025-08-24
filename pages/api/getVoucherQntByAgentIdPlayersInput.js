@@ -15,9 +15,10 @@ export default async function handler(req, res) {
     const client = await clientPromise;
     const db = client.db("noshib786");
 
-    const count = await db
-      .collection("playersInput")
-      .countDocuments({ agentId });
+     const count = await db.collection("playersInput").countDocuments({
+      agentId,
+      gamerId: { $nin: [null, undefined, ""] } // filter condition
+    });
 
     return res.status(200).json({ count });
   } catch (error) {
