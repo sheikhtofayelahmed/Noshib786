@@ -180,35 +180,92 @@ export default function AgentGamerPage() {
     }
   }
 
-  useEffect(() => {
-    if (!agentId) return; // Wait until we have agentId
-    fetchGamers();
-  }, [agentId]);
 
-  const fetchGamers = async () => {
+ useEffect(() => {
+  if (!agentId) return;
+
+  const fetchGamersAndCounts = async () => {
     setLoadingGamers(true);
     setError("");
 
     try {
+      // Step 1: get gamers
       const res = await fetch("/api/getGamers", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agentId }),
       });
+
       const data = await res.json();
-      if (res.ok) {
-        setGamers(data.gamers);
-      } else {
+      if (!res.ok) {
         setError(data.message || "Failed to fetch gamers");
+        setLoadingGamers(false);
+        return;
       }
-    } catch {
-      setError("Failed to fetch gamers");
+
+      const gamersList = data.gamers;
+      setGamers(gamersList);
+
+      // Step 2: get counts for all gamers (parallel fetches)
+      const results = await Promise.all(
+        gamersList.map(async (gamer) => {
+          const [playedRes, waitingRes] = await Promise.all([
+            fetch("/api/getVoucherQntByGamerId", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ gamerId: gamer.gamerId }),
+            }),
+            fetch("/api/getVoucherQntByGamerIdWaiting", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ gamerId: gamer.gamerId }),
+            }),
+          ]);
+
+          const playedData = playedRes.ok ? await playedRes.json() : {};
+          const waitingData = waitingRes.ok ? await waitingRes.json() : {};
+
+          return {
+            gamerId: gamer.gamerId,
+            count: playedData.count ?? "Error",
+            playedTotal: playedData.totals?.total ?? 0,
+            waitingCount: waitingData.count ?? 0,
+            waitingTotal: waitingData.totals?.total ?? 0,
+            waitingPlayers: waitingData.players ?? [],
+          };
+        })
+      );
+
+      // Step 3: convert results into maps
+      const counts = {};
+      const played = {};
+      const waitingCounts = {};
+      const waitingPlayedMap = {};
+      const waitingPlayersMap = {};
+
+      results.forEach((r) => {
+        counts[r.gamerId] = r.count;
+        played[r.gamerId] = r.playedTotal;
+        waitingCounts[r.gamerId] = r.waitingCount;
+        waitingPlayedMap[r.gamerId] = r.waitingTotal;
+        waitingPlayersMap[r.gamerId] = r.waitingPlayers;
+      });
+
+      setEntryCounts(counts);
+      setEntryTotalCounts(played);
+      setWaitingEntryCount(waitingCounts);
+      setWaitingPlayed(waitingPlayedMap);
+      setWaitingPlayersGamer(waitingPlayersMap);
+    } catch (err) {
+      setError("Failed to fetch gamers & counts");
     } finally {
       setLoadingGamers(false);
     }
   };
+
+  fetchGamersAndCounts();
+}, [agentId]);
+
 
   const handleAddGamer = async (e) => {
     e.preventDefault();
@@ -331,68 +388,7 @@ export default function AgentGamerPage() {
     }
   };
 
-  const [entryTotalCounts, setEntryTotalCounts] = useState({});
-  const [waitingPlayersGamer, setWaitingPlayersGamer] = useState({});
-  const [waitingPlayed, setWaitingPlayed] = useState({});
-
-  const fetchCountsForGamers = async () => {
-    setLoading(true);
-    const counts = {};
-    const waitingCounts = {};
-    const waitingPlayed = {};
-    const waitingPlayersMap = {};
-    const played = {};
-
-    for (const gamer of gamers) {
-      try {
-        const res = await fetch("/api/getVoucherQntByGamerId", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ gamerId: gamer.gamerId }),
-        });
-
-        const data = await res.json();
-        if (res.ok) {
-          counts[gamer.gamerId] = data.count;
-          played[gamer.gamerId] = data.totals?.total;
-        } else {
-          counts[gamer.gamerId] = "Error";
-        }
-      } catch (err) {
-        counts[gamer.gamerId] = "Error";
-      }
-
-      try {
-        const res = await fetch("/api/getVoucherQntByGamerIdWaiting", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ gamerId: gamer.gamerId }),
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          waitingCounts[gamer.gamerId] = data.count;
-          waitingPlayed[gamer.gamerId] = data.totals?.total;
-          waitingPlayersMap[gamer.gamerId] = data.players; // 👈 Store full array of player objects
-        }
-      } catch (err) {
-        console.error("Waiting players error:", err);
-      }
-    }
-
-    setLoading(false);
-    setEntryCounts(counts);
-    setWaitingEntryCount(waitingCounts);
-    setWaitingPlayed(waitingPlayed);
-    setEntryTotalCounts(played);
-    setWaitingPlayersGamer(waitingPlayersMap); // 👈 Set the full map here
-  };
-  useEffect(() => {
-    if (gamers.length > 0) {
-      fetchCountsForGamers();
-    }
-  }, [gamers]);
-
+  
   const [selectedGamerId, setSelectedGamerId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
