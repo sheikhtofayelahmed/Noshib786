@@ -6,7 +6,7 @@ import {
   CircleOff,
   Eye,
   EyeOff,
-  LucideBadgeCheck,
+  CheckCircle,
   LucideDelete,
   LucideTrash2,
 } from "lucide-react";
@@ -717,12 +717,12 @@ export default function AgentGamerPage() {
                               </span>
                             </div>
                             <div className="relative inline-block">
-                              <button
-                                onClick={() => openModal(gamerId)}
-                                className="px-3 py-1 rounded text-green-600 font-semibold flex items-center"
-                              >
-                                <LucideBadgeCheck className="w-6 h-6" />
-                              </button>
+                             <button
+  onClick={() => openModal(gamerId)}
+  className="p-2 rounded text-green-600 hover:bg-green-100 transition"
+>
+  <CheckCircle className="w-8 h-8" />
+</button>
                             </div>
 
                             {/* Delete button */}
