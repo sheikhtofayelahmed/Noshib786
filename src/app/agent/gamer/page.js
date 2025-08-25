@@ -179,12 +179,9 @@ export default function AgentGamerPage() {
       console.error("Failed to delete note:", err);
     }
   }
+  const [waitingPlayersGamer, setWaitingPlayersGamer] = useState({});
 
-
- useEffect(() => {
-  if (!agentId) return;
-
-  const fetchGamersAndCounts = async () => {
+  const fetchCountsForGamers = async () => {
     setLoadingGamers(true);
     setError("");
 
@@ -262,8 +259,12 @@ export default function AgentGamerPage() {
       setLoadingGamers(false);
     }
   };
+ useEffect(() => {
+  if (!agentId) return;
 
-  fetchGamersAndCounts();
+
+
+  fetchCountsForGamers();
 }, [agentId]);
 
 
